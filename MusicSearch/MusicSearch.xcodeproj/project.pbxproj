@@ -6,7 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
 		4F0B6F452EE2F11A00AE0FD5 /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */; };
+		4F0B6F882EE320D900AE0FD5 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4F0B6ECD2EE2ED0800AE0FD5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -28,6 +32,7 @@
 		4F0B6EB62EE2ED0600AE0FD5 /* MusicSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F0B6ECC2EE2ED0800AE0FD5 /* MusicSearchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MusicSearchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F0B6ED62EE2ED0800AE0FD5 /* MusicSearchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MusicSearchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -90,6 +95,7 @@
 		4F0B6EAD2EE2ED0600AE0FD5 = {
 			isa = PBXGroup;
 			children = (
+				4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */,
 				4F0B6EB82EE2ED0600AE0FD5 /* MusicSearch */,
 				4F0B6ECF2EE2ED0800AE0FD5 /* MusicSearchTests */,
 				4F0B6ED92EE2ED0800AE0FD5 /* MusicSearchUITests */,
@@ -239,6 +245,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F0B6F882EE320D900AE0FD5 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
