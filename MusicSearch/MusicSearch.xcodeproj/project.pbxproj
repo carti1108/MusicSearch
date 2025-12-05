@@ -33,7 +33,7 @@
 		4F0B6EDE2EE2ED0800AE0FD5 /* Exceptions for "MusicSearch" folder in "MusicSearch" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				App/Resources/Info.plist,
 			);
 			target = 4F0B6EB52EE2ED0600AE0FD5 /* MusicSearch */;
 		};
@@ -291,7 +291,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L8DVKD4NCR;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MusicSearch/Info.plist;
+				INFOPLIST_FILE = MusicSearch/App/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -318,7 +318,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L8DVKD4NCR;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MusicSearch/Info.plist;
+				INFOPLIST_FILE = MusicSearch/App/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
