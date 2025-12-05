@@ -1,0 +1,15 @@
+{
+  "originHash" : "8763d59f20ca0377d280a3863b28258c8640a0b5c7973cd93be9ef516039637b",
+  "pins" : [
+    {
+      "identity" : "networklayer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/carti1108/NetworkLayer.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "610b38a099fa4538e6674f4132ac34bcdf5a903e"
+      }
+    }
+  ],
+  "version" : 3
+}
