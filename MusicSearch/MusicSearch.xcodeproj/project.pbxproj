@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4F0B6F452EE2F11A00AE0FD5 /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */; };
 		4F0B6F882EE320D900AE0FD5 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */; };
+		4F8D8F802EE4875100D4246D /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F8D8F7F2EE4875100D4246D /* NetworkLayer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F8D8F802EE4875100D4246D /* NetworkLayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +167,7 @@
 			);
 			name = MusicSearchTests;
 			packageProductDependencies = (
+				4F8D8F7F2EE4875100D4246D /* NetworkLayer */,
 			);
 			productName = MusicSearchTests;
 			productReference = 4F0B6ECC2EE2ED0800AE0FD5 /* MusicSearchTests.xctest */;
@@ -602,6 +605,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */;
+			productName = NetworkLayer;
+		};
+		4F8D8F7F2EE4875100D4246D /* NetworkLayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */;
 			productName = NetworkLayer;
