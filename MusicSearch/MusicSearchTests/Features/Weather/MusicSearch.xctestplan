@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "108C6847-6F3B-48BC-A8C8-333FD19BD62E",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:MusicSearch.xcodeproj",
+      "identifier" : "4F0B6EB52EE2ED0600AE0FD5",
+      "name" : "MusicSearch"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:MusicSearch.xcodeproj",
+        "identifier" : "4F0B6ECB2EE2ED0800AE0FD5",
+        "name" : "MusicSearchTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:MusicSearch.xcodeproj",
+        "identifier" : "4F0B6ED52EE2ED0800AE0FD5",
+        "name" : "MusicSearchUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
