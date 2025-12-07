@@ -1,0 +1,207 @@
+//
+//  MusicRepositoryTests.swift
+//  MusicSearchTests
+//
+//  Created by Kiseok on 12/7/25.
+//
+
+import Testing
+import Foundation
+import NetworkLayer
+@testable import MusicSearch
+
+struct MusicRepositoryTests {
+	
+	var mockNetwork: MockNetworkManager
+	
+	init() {
+		self.mockNetwork = MockNetworkManager()
+	}
+	
+	// MARK: - searchTracks Tests
+	
+	@Test("트랙 검색이 정상적으로 동작하는가")
+	func searchTracksSuccess() async throws {
+		// Given
+		let dummyDTO = TrackSearchResponseDTO(
+			results: TrackMatchesContainerDTO(
+				trackmatches: TrackListDTO(
+					track: [
+						LastFMTrackDTO(
+							name: "Test Track",
+							artist: "Test Artist",
+							url: "https://test.com",
+							mbid: "test-mbid",
+							image: [LastFMImageDTO(size: "extralarge", text: "https://image.com/test.jpg")]
+						)
+					]
+				)
+			)
+		)
+		mockNetwork.resultDTO = dummyDTO
+		
+		let repository = MusicRepositoryImpl(networkManager: mockNetwork)
+		
+		// When
+		let tracks = try await repository.searchTracks(query: "test")
+		
+		// Then
+		#expect(tracks.count == 1)
+		#expect(tracks.first?.title == "Test Track")
+		#expect(tracks.first?.artist == "Test Artist")
+	}
+	
+	@Test("네트워크 에러 발생 시 에러를 던지는가")
+	func searchTracksNetworkError() async {
+		// Given
+		mockNetwork.errorToThrow = NetworkError.transportError(URLError(.notConnectedToInternet))
+		let repository = MusicRepositoryImpl(networkManager: mockNetwork)
+		
+		// When & Then
+		await #expect(throws: NetworkError.self) {
+			try await repository.searchTracks(query: "test")
+		}
+	}
+	
+	// MARK: - fetchTopTracks Tests
+	
+	@Test("태그 기반 Top 트랙 조회가 정상적으로 동작하는가")
+	func fetchTopTracksSuccess() async throws {
+		// Given
+		let dummyDTO = TagTopTracksResponseDTO(
+			tracks: TagTrackListDTO(
+				track: [
+					LastFMTrackDTO(
+						name: "Chill Track 1",
+						artist: "Chill Artist",
+						url: "https://test.com",
+						mbid: nil,
+						image: nil
+					),
+					LastFMTrackDTO(
+						name: "Chill Track 2",
+						artist: "Chill Artist 2",
+						url: "https://test.com",
+						mbid: nil,
+						image: nil
+					)
+				]
+			)
+		)
+		mockNetwork.resultDTO = dummyDTO
+		
+		let repository = MusicRepositoryImpl(networkManager: mockNetwork)
+		
+		// When
+		let tracks = try await repository.fetchTopTracks(by: "chill")
+		
+		// Then
+		#expect(tracks.count == 2)
+		#expect(tracks.first?.title == "Chill Track 1")
+	}
+	
+	// MARK: - fetchSimilarTracks Tests
+	
+	@Test("유사 트랙 조회가 정상적으로 동작하는가")
+	func fetchSimilarTracksSuccess() async throws {
+		// Given
+		let targetTrack = Track(title: "Original", artist: "Artist", imageURL: nil)
+		
+		let dummyDTO = TrackSimilarResponseDTO(
+			similartracks: SimilarTrackListDTO(
+				track: [
+					LastFMTrackDTO(
+						name: "Similar Track 1",
+						artist: "Similar Artist 1",
+						url: "https://test.com",
+						mbid: nil,
+						image: nil
+					)
+				]
+			)
+		)
+		mockNetwork.resultDTO = dummyDTO
+		
+		let repository = MusicRepositoryImpl(networkManager: mockNetwork)
+		
+		// When
+		let tracks = try await repository.fetchSimilarTracks(to: targetTrack)
+		
+		// Then
+		#expect(tracks.count == 1)
+		#expect(tracks.first?.title == "Similar Track 1")
+	}
+	
+	// MARK: - searchArtists Tests
+	
+	@Test("아티스트 검색이 정상적으로 동작하는가")
+	func searchArtistsSuccess() async throws {
+		// Given
+		let dummyDTO = ArtistSearchResponseDTO(
+			results: ArtistMatchesContainerDTO(
+				artistmatches: ArtistListDTO(
+					artist: [
+						LastFMArtistDTO(
+							name: "Test Artist",
+							mbid: "artist-mbid",
+							url: "https://test.com",
+							image: nil,
+							listeners: "1000",
+							tags: nil,
+							bio: nil
+						)
+					]
+				)
+			)
+		)
+		mockNetwork.resultDTO = dummyDTO
+		
+		let repository = MusicRepositoryImpl(networkManager: mockNetwork)
+		
+		// When
+		let artists = try await repository.searchArtists(query: "test")
+		
+		// Then
+		#expect(artists.count == 1)
+		#expect(artists.first?.name == "Test Artist")
+		#expect(artists.first?.listeners == "1000")
+	}
+	
+	// MARK: - fetchAlbums Tests
+	
+	@Test("아티스트의 앨범 목록 조회가 정상적으로 동작하는가")
+	func fetchAlbumsSuccess() async throws {
+		// Given
+		let artist = Artist(name: "Test Artist", imageURL: nil)
+		
+		let dummyDTO = ArtistTopAlbumsResponseDTO(
+			topalbums: AlbumListDTO(
+				album: [
+					LastFMAlbumDTO(
+						name: "Album 1",
+						artist: LastFMArtistSimpleDTO(name: "Test Artist", mbid: nil, url: ""),
+						mbid: "album-mbid",
+						url: "https://test.com",
+						image: nil,
+						playcount: 5000,
+						wiki: LastFMWikiDTO(published: "1 Jan 2020, 00:00", summary: "Test summary")
+					)
+				]
+			)
+		)
+		mockNetwork.resultDTO = dummyDTO
+		
+		let repository = MusicRepositoryImpl(networkManager: mockNetwork)
+		
+		// When
+		let albums = try await repository.fetchAlbums(for: artist)
+		
+		// Then
+		#expect(albums.count == 1)
+		#expect(albums.first?.title == "Album 1")
+		#expect(albums.first?.artist == "Test Artist")
+		#expect(albums.first?.playCount == 5000)
+		#expect(albums.first?.releaseDate != nil)
+	}
+}
+
