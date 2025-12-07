@@ -26,11 +26,11 @@ struct DefaultWeatherAPIConfiguration: WeatherAPIConfiguration {
 
 final class WeatherRepositoryImpl: WeatherRepository {
 
-	private let networkManager: NetworkManager
+	private let networkManager: NetworkRequesting
 	private let configuration: WeatherAPIConfiguration
 
 	init(
-		networkManager: NetworkManager = .shared,
+		networkManager: NetworkRequesting,
 		configuration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration()
 	) {
 		self.networkManager = networkManager
@@ -40,7 +40,10 @@ final class WeatherRepositoryImpl: WeatherRepository {
 	func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> Weather {
 		do {
 			let endpoint: Endpoint = try makeEndpoint(latitude: latitude, longitude: longitude)
-			let response: WeatherResponseDTO = try await self.networkManager.request(with: endpoint)
+			let response: WeatherResponseDTO = try await self.networkManager.request(
+				with: endpoint,
+				as: WeatherResponseDTO.self
+			)
 
 			return response.toDomain()
 		} catch let error as WeatherError {
