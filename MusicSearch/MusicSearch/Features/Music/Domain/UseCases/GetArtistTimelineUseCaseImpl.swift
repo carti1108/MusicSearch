@@ -16,7 +16,7 @@ final class GetArtistTimelineUseCaseImpl: GetArtistTimelineUseCase {
 	}
 	
 	public func execute(artist: Artist) async throws -> [Album] {
-		let albums = try await musicRepository.fetchAlbums(for: artist)
+		let albums = try await self.musicRepository.fetchAlbums(for: artist)
 		
 		return albums.sorted { lhs, rhs in
 			guard let lhsDate = lhs.releaseDate else { return false }

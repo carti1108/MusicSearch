@@ -41,14 +41,14 @@ final class LocationRepositoryImpl: LocationRepository {
 	}
 	
 	func fetchCurrentLocation() async throws -> (latitude: Double, longitude: Double) {
-		let status = locationManager.authorizationStatus
+		let status = self.locationManager.authorizationStatus
 		
 		switch status {
 		case .denied, .restricted:
 			throw WeatherError.locationPermissionDenied
 			
 		case .notDetermined:
-			locationManager.requestWhenInUseAuthorization()
+			self.locationManager.requestWhenInUseAuthorization()
 			
 		case .authorizedWhenInUse, .authorizedAlways:
 			break
@@ -57,7 +57,7 @@ final class LocationRepositoryImpl: LocationRepository {
 			throw WeatherError.locationPermissionDenied
 		}
 		
-		let location = try await withTimeout(timeout) { [weak self] in
+		let location = try await self.withTimeout(self.timeout) { [weak self] in
 			guard let self = self else { throw WeatherError.unknown }
 			return try await self.locationManager.requestLocation()
 		}

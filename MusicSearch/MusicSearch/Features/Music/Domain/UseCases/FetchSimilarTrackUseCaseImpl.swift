@@ -16,6 +16,6 @@ final class FetchSimilarTrackUseCaseImpl: FetchSimilarTracksUseCase {
 	}
 	
 	public func execute(targetTrack: Track) async throws -> [Track] {
-		return try await musicRepository.fetchSimilarTracks(to: targetTrack)
+		return try await self.musicRepository.fetchSimilarTracks(to: targetTrack)
 	}
 }

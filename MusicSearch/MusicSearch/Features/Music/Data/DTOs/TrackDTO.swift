@@ -34,13 +34,13 @@ struct LastFMTrackDTO: Decodable {
 	let image: [LastFMImageDTO]?
 
 	func toDomain() -> Track {
-		let imageString = image?.first { $0.size == "extralarge" }?.text
-					   ?? image?.last?.text
+		let imageString = self.image?.first { $0.size == "extralarge" }?.text
+					   ?? self.image?.last?.text
 
 		return Track(
-			id: (mbid?.isEmpty == false) ? mbid! : UUID().uuidString,
-			title: name,
-			artist: artist,
+			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			title: self.name,
+			artist: self.artist,
 			imageURL: URL(string: imageString ?? "")
 		)
 	}

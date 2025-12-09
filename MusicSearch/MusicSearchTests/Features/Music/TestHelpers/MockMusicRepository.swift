@@ -29,10 +29,10 @@ final class MockMusicRepository: MusicRepository {
 	var lastFetchAlbumsArtist: Artist?
 	
 	func searchTracks(query: String) async throws -> [Track] {
-		searchTracksCallCount += 1
-		lastSearchTracksQuery = query
+		self.searchTracksCallCount += 1
+		self.lastSearchTracksQuery = query
 		
-		switch searchTracksResult {
+		switch self.searchTracksResult {
 		case .success(let tracks):
 			return tracks
 		case .failure(let error):
@@ -41,10 +41,10 @@ final class MockMusicRepository: MusicRepository {
 	}
 	
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
-		fetchTopTracksCallCount += 1
-		lastFetchTopTracksTag = tag
+		self.fetchTopTracksCallCount += 1
+		self.lastFetchTopTracksTag = tag
 		
-		switch fetchTopTracksResult {
+		switch self.fetchTopTracksResult {
 		case .success(let tracks):
 			return tracks
 		case .failure(let error):
@@ -53,10 +53,10 @@ final class MockMusicRepository: MusicRepository {
 	}
 	
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
-		fetchSimilarTracksCallCount += 1
-		lastFetchSimilarTracksTrack = track
+		self.fetchSimilarTracksCallCount += 1
+		self.lastFetchSimilarTracksTrack = track
 		
-		switch fetchSimilarTracksResult {
+		switch self.fetchSimilarTracksResult {
 		case .success(let tracks):
 			return tracks
 		case .failure(let error):
@@ -65,10 +65,10 @@ final class MockMusicRepository: MusicRepository {
 	}
 	
 	func searchArtists(query: String) async throws -> [Artist] {
-		searchArtistsCallCount += 1
-		lastSearchArtistsQuery = query
+		self.searchArtistsCallCount += 1
+		self.lastSearchArtistsQuery = query
 		
-		switch searchArtistsResult {
+		switch self.searchArtistsResult {
 		case .success(let artists):
 			return artists
 		case .failure(let error):
@@ -77,10 +77,10 @@ final class MockMusicRepository: MusicRepository {
 	}
 	
 	func fetchAlbums(for artist: Artist) async throws -> [Album] {
-		fetchAlbumsCallCount += 1
-		lastFetchAlbumsArtist = artist
+		self.fetchAlbumsCallCount += 1
+		self.lastFetchAlbumsArtist = artist
 		
-		switch fetchAlbumsResult {
+		switch self.fetchAlbumsResult {
 		case .success(let albums):
 			return albums
 		case .failure(let error):

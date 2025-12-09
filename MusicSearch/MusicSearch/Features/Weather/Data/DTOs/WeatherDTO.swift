@@ -13,14 +13,14 @@ struct WeatherResponseDTO: Decodable {
 	let name: String
 	
 	func toDomain() -> Weather {
-		let primaryWeather = weather.first
+		let primaryWeather = self.weather.first
 		
 		return Weather(
-			temperature: main.temp,
-			condition: convertToWeatherCondition(id: primaryWeather?.id ?? 800),
+			temperature: self.main.temp,
+			condition: self.convertToWeatherCondition(id: primaryWeather?.id ?? 800),
 			description: primaryWeather?.description ?? "",
 			iconCode: primaryWeather?.icon ?? "",
-			cityName: name
+			cityName: self.name
 		)
 	}
 	

@@ -20,6 +20,6 @@ final class SearchTrackUseCaseImpl: SearchTracksUseCase {
 			return []
 		}
 		
-		return try await musicRepository.searchTracks(query: query)
+		return try await self.musicRepository.searchTracks(query: query)
 	}
 }

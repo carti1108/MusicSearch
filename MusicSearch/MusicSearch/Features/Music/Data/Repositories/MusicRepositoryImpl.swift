@@ -17,7 +17,7 @@ final class MusicRepositoryImpl: MusicRepository {
 	}
 
 	func searchTracks(query: String) async throws -> [Track] {
-		let response = try await networkManager.request(
+		let response = try await self.networkManager.request(
 			with: LastFMAPI.searchTracks(keyword: query),
 			as: TrackSearchResponseDTO.self
 		)
@@ -26,7 +26,7 @@ final class MusicRepositoryImpl: MusicRepository {
 	}
 
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
-		let response = try await networkManager.request(
+		let response = try await self.networkManager.request(
 			with: LastFMAPI.fetchTopTracks(tag: tag),
 			as: TagTopTracksResponseDTO.self
 		)
@@ -34,7 +34,7 @@ final class MusicRepositoryImpl: MusicRepository {
 	}
 
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
-		let response = try await networkManager.request(
+		let response = try await self.networkManager.request(
 			with: LastFMAPI.fetchSimilarTracks(track: track),
 			as: TrackSimilarResponseDTO.self
 		)
@@ -42,7 +42,7 @@ final class MusicRepositoryImpl: MusicRepository {
 	}
 
 	func searchArtists(query: String) async throws -> [Artist] {
-		let response = try await networkManager.request(
+		let response = try await self.networkManager.request(
 			with: LastFMAPI.searchArtists(keyword: query),
 			as: ArtistSearchResponseDTO.self
 		)
@@ -50,7 +50,7 @@ final class MusicRepositoryImpl: MusicRepository {
 	}
 
 	func fetchAlbums(for artist: Artist) async throws -> [Album] {
-		let response = try await networkManager.request(
+		let response = try await self.networkManager.request(
 			with: LastFMAPI.fetchArtistAlbums(artist: artist),
 			as: ArtistTopAlbumsResponseDTO.self
 		)

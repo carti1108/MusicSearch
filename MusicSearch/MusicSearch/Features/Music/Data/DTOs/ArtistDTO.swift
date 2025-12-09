@@ -33,18 +33,18 @@ struct LastFMArtistDTO: Decodable {
 	let bio: LastFMBioDTO?
 
 	func toDomain() -> Artist {
-		let targetImage = image?.first { $0.size == "mega" }
-					   ?? image?.first { $0.size == "extralarge" }
-					   ?? image?.last
-		let tagList = tags?.tag.map { $0.name } ?? []
+		let targetImage = self.image?.first { $0.size == "mega" }
+					   ?? self.image?.first { $0.size == "extralarge" }
+					   ?? self.image?.last
+		let tagList = self.tags?.tag.map { $0.name } ?? []
 
 		return Artist(
-			id: (mbid?.isEmpty == false) ? mbid! : UUID().uuidString,
-			name: name,
+			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			name: self.name,
 			imageURL: URL(string: targetImage?.text ?? ""),
-			listeners: listeners,
+			listeners: self.listeners,
 			tags: tagList,
-			bio: bio?.summary
+			bio: self.bio?.summary
 		)
 	}
 }

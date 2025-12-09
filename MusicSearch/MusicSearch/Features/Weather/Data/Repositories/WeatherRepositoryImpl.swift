@@ -39,7 +39,7 @@ final class WeatherRepositoryImpl: WeatherRepository {
 
 	func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> Weather {
 		do {
-			let endpoint: Endpoint = try makeEndpoint(latitude: latitude, longitude: longitude)
+			let endpoint: Endpoint = try self.makeEndpoint(latitude: latitude, longitude: longitude)
 			let response: WeatherResponseDTO = try await self.networkManager.request(
 				with: endpoint,
 				as: WeatherResponseDTO.self
@@ -54,25 +54,25 @@ final class WeatherRepositoryImpl: WeatherRepository {
 	}
 
 	private func makeEndpoint(latitude: Double, longitude: Double) throws -> Endpoint {
-		guard let baseURL = URL(string: configuration.baseURL) else {
+		guard let baseURL = URL(string: self.configuration.baseURL) else {
 			print("🚨 Weather Data Layer Error: Invalid base URL for OpenWeatherMap.")
 			throw WeatherError.configurationError
 		}
 
-		guard !configuration.apiKey.isEmpty else {
+		guard !self.configuration.apiKey.isEmpty else {
 			print("🚨 Weather Data Layer Error: API Key is missing or empty.")
 			throw WeatherError.configurationError
 		}
 
 		return Endpoint(
 			baseURL: baseURL,
-			path: configuration.apiPath,
+			path: self.configuration.apiPath,
 			method: .get,
 			queryParameters: [
 				"lat": latitude,
 				"lon": longitude,
-				"appid": configuration.apiKey,
-				"units": configuration.units
+				"appid": self.configuration.apiKey,
+				"units": self.configuration.units
 			]
 		)
 	}

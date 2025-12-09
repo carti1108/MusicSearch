@@ -20,6 +20,6 @@ final class SearchArtistUseCaseImpl: SearchArtistsUseCase {
 			return []
 		}
 		
-		return try await musicRepository.searchArtists(query: query)
+		return try await self.musicRepository.searchArtists(query: query)
 	}
 }

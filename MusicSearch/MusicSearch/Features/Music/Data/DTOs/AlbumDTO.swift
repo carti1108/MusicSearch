@@ -29,20 +29,20 @@ struct LastFMAlbumDTO: Decodable {
 	let wiki: LastFMWikiDTO?
 
 	func toDomain() -> Album {
-		let imageString = image?.first { $0.size == "extralarge" }?.text
-					   ?? image?.last?.text
+		let imageString = self.image?.first { $0.size == "extralarge" }?.text
+					   ?? self.image?.last?.text
 		var date: Date? = nil
-		if let dateString = wiki?.published {
+		if let dateString = self.wiki?.published {
 			date = DateFormatter.lastFMDateFormatter.date(from: dateString)
 		}
 
 		return Album(
-			id: (mbid?.isEmpty == false) ? mbid! : UUID().uuidString,
-			title: name,
-			artist: artist.name,
+			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			title: self.name,
+			artist: self.artist.name,
 			imageURL: URL(string: imageString ?? ""),
 			releaseDate: date,
-			playCount: playcount
+			playCount: self.playcount
 		)
 	}
 }

@@ -20,6 +20,6 @@ final class FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 			return []
 		}
 		
-		return try await musicRepository.fetchTopTracks(by: tag)
+		return try await self.musicRepository.fetchTopTracks(by: tag)
 	}
 }
