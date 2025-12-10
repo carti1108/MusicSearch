@@ -230,7 +230,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */,
-				4FB9887A2EE8551500D8E4CF /* XCRemoteSwiftPackageReference "DI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F0B6EB72EE2ED0600AE0FD5 /* Products */;
@@ -597,14 +596,6 @@
 		4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/carti1108/NetworkLayer.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		4FB9887A2EE8551500D8E4CF /* XCRemoteSwiftPackageReference "DI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/carti1108/DI.git";
 			requirement = {
 				branch = main;
 				kind = branch;

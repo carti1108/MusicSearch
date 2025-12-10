@@ -1,15 +1,6 @@
 {
-  "originHash" : "41d29248594c70c2e52eb22e613a669f326a1fa06175994e1ea0aa8eaabe6e2d",
+  "originHash" : "8763d59f20ca0377d280a3863b28258c8640a0b5c7973cd93be9ef516039637b",
   "pins" : [
-    {
-      "identity" : "di",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/carti1108/DI.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "40b400fe5bb82b063494670edd084b7422663ccb"
-      }
-    },
     {
       "identity" : "networklayer",
       "kind" : "remoteSourceControl",
