@@ -12,7 +12,7 @@ final class MusicRepositoryImpl: MusicRepository {
 
 	private let networkManager: NetworkRequesting
 
-	init(networkManager: NetworkRequesting = NetworkManager.shared) {
+	init(networkManager: NetworkRequesting) {
 		self.networkManager = networkManager
 	}
 
