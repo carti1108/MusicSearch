@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		self.appRoot = AppRoot()
 
 		let window = UIWindow(windowScene: windowScene)
-		window.rootViewController = appRoot?.makeWeatherRecommendationViewController()
+		window.rootViewController = appRoot?.makeRootTabBarController()
 		window.makeKeyAndVisible()
 
 		self.window = window
