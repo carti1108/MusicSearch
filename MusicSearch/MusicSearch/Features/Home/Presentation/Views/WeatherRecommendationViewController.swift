@@ -6,38 +6,13 @@
 //
 
 import UIKit
-
-struct MockTrack {
-	let title: String
-	let artist: String
-	let color: UIColor
-}
-
-struct MockWeather {
-	let temp: String
-	let description: String
-	let location: String
-	let iconName: String
-	let backgroundColor: UIColor
-}
+import Combine
 
 final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable {
 
-	private let weatherData = MockWeather(
-		temp: "22°",
-		description: "비가 주륵주륵",
-		location: "Seoul, KR",
-		iconName: "cloud.rain.fill",
-		backgroundColor: UIColor(red: 0.15, green: 0.2, blue: 0.35, alpha: 1.0)
-	)
-
-	private let trackList: [MockTrack] = [
-		MockTrack(title: "Rainy Day", artist: "Pateko", color: .systemBlue),
-		MockTrack(title: "Umbrella", artist: "Epik High", color: .systemTeal),
-		MockTrack(title: "비도 오고 그래서", artist: "Heize", color: .systemIndigo),
-		MockTrack(title: "November Rain", artist: "Guns N' Roses", color: .darkGray),
-		MockTrack(title: "Blue Grey", artist: "BTS", color: .systemGray)
-	]
+	enum Section {
+		case main
+	}
 
 	private let weatherContainerView: UIView = {
 		let view = UIView()
@@ -99,29 +74,155 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		return label
 	}()
 
+	private let activityIndicator: UIActivityIndicatorView = {
+		let indicator = UIActivityIndicatorView()
+		indicator.style = .large
+		return indicator
+	}()
+
+	private lazy var scrollView: UIScrollView = {
+		let scrollView = UIScrollView()
+		scrollView.translatesAutoresizingMaskIntoConstraints = false
+		scrollView.showsVerticalScrollIndicator = false
+		return scrollView
+	}()
+
+	private let contentView: UIView = {
+		let view = UIView()
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
 	private lazy var collectionView: UICollectionView = {
 		let layout = self.createCarouselLayout()
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
 		cv.backgroundColor = .clear
 		cv.showsHorizontalScrollIndicator = false
 		cv.register(TrackCardCell.self, forCellWithReuseIdentifier: TrackCardCell.reuseIdentifier)
-		cv.dataSource = self
 		cv.delegate = self
 		cv.translatesAutoresizingMaskIntoConstraints = false
 		return cv
 	}()
 
+	private lazy var refreshControl: UIRefreshControl = {
+		let control = UIRefreshControl()
+		control.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+		return control
+	}()
+
+	private let viewModel: WeatherRecommendationViewModel
+	private var cancellables: Set<AnyCancellable> = .init()
+
+	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>?
+
+	init(viewModel: WeatherRecommendationViewModel) {
+		self.viewModel = viewModel
+
+		super.init(nibName: nil, bundle: nil)
+
+	}
+	
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
+
 		self.setupView()
 		self.setupConstraints()
-		self.configureData()
+		self.configureDataSource()
+		self.bindViewModel()
+		self.viewModel.process(action: .viewWillAppear)
+	}
+
+	private func bindViewModel() {
+		self.viewModel.$state
+			.receive(on: DispatchQueue.main)
+			.sink { [weak self] state in
+				self?.updateUI(with: state)
+			}
+			.store(in: &self.cancellables)
+	}
+
+	private func updateUI(with state: WeatherRecommendationState) {
+		if state.isLoading {
+			if !self.activityIndicator.isAnimating {
+				self.activityIndicator.startAnimating()
+			}
+		} else {
+			self.activityIndicator.stopAnimating()
+			self.refreshControl.endRefreshing()
+		}
+
+		if let error = state.errorMessage {
+			print("WeatherRecommendationViewController Error: \(error)")
+		}
+
+		self.tempLabel.text = "\(Int(state.weather.temperature))°"
+		self.descriptionLabel.text = state.weather.description
+		self.locationLabel.text = state.weather.cityName
+		self.weatherIconImageView.image = UIImage(systemName: self.iconName(for: state.weather.condition))
+		
+		self.view.backgroundColor = self.backgroundColor(for: state.weather.condition)
+		self.weatherContainerView.backgroundColor = UIColor.white.withAlphaComponent(0.15)
+
+		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
+		snapshot.appendSections([.main])
+		snapshot.appendItems(state.tracks)
+		self.dataSource?.apply(snapshot, animatingDifferences: true)
+	}
+	
+	private func iconName(for condition: WeatherCondition) -> String {
+		switch condition {
+		case .thunderstorm:
+			return "cloud.bolt.fill"
+		case .drizzle:
+			return "cloud.drizzle.fill"
+		case .rain:
+			return "cloud.rain.fill"
+		case .snow:
+			return "cloud.snow.fill"
+		case .atmosphere:
+			return "cloud.fog.fill"
+		case .clear:
+			return "sun.max.fill"
+		case .clouds:
+			return "cloud.fill"
+		case .unknown:
+			return "questionmark.circle.fill"
+		}
+	}
+	
+	private func backgroundColor(for condition: WeatherCondition) -> UIColor {
+		switch condition {
+		case .thunderstorm:
+			return UIColor(red: 0.2, green: 0.2, blue: 0.3, alpha: 1.0)
+		case .drizzle, .rain:
+			return UIColor(red: 0.15, green: 0.2, blue: 0.35, alpha: 1.0)
+		case .snow:
+			return UIColor(red: 0.4, green: 0.5, blue: 0.6, alpha: 1.0)
+		case .atmosphere:
+			return UIColor(red: 0.3, green: 0.3, blue: 0.4, alpha: 1.0)
+		case .clear:
+			return UIColor(red: 0.2, green: 0.5, blue: 0.8, alpha: 1.0)
+		case .clouds:
+			return UIColor(red: 0.4, green: 0.4, blue: 0.5, alpha: 1.0)
+		case .unknown:
+			return UIColor(red: 0.3, green: 0.3, blue: 0.4, alpha: 1.0)
+		}
 	}
 
 	private func setupView() {
-		self.view.backgroundColor = self.weatherData.backgroundColor
+		self.view.backgroundColor = .systemBackground
 
-		self.view.addSubview(self.weatherContainerView)
+		// ScrollView 설정
+		self.scrollView.refreshControl = self.refreshControl
+		self.view.addSubview(self.scrollView)
+		self.scrollView.addSubview(self.contentView)
+
+		// ContentView에 모든 서브뷰 추가
+		self.contentView.addSubview(self.weatherContainerView)
 		self.weatherContainerView.addSubview(self.weatherInfoStack)
 
 		self.weatherInfoStack.addArrangedSubview(self.weatherIconImageView)
@@ -131,39 +232,65 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 		self.weatherInfoStack.setCustomSpacing(10, after: self.weatherIconImageView)
 
-		self.view.addSubview(self.sectionTitleLabel)
-		self.view.addSubview(self.collectionView)
+		self.contentView.addSubview(self.sectionTitleLabel)
+		self.contentView.addSubview(self.collectionView)
+	}
+
+	@objc private func handleRefresh() {
+		self.viewModel.process(action: .refresh)
 	}
 
 	private func setupConstraints() {
 		NSLayoutConstraint.activate([
-			self.weatherContainerView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
-			self.weatherContainerView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 20),
-			self.weatherContainerView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20),
+			// ScrollView
+			self.scrollView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+			self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+			self.scrollView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+
+			// ContentView
+			self.contentView.topAnchor.constraint(equalTo: self.scrollView.topAnchor),
+			self.contentView.leadingAnchor.constraint(equalTo: self.scrollView.leadingAnchor),
+			self.contentView.trailingAnchor.constraint(equalTo: self.scrollView.trailingAnchor),
+			self.contentView.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor),
+			self.contentView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor),
+
+			// Weather Container
+			self.weatherContainerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 20),
+			self.weatherContainerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 20),
+			self.weatherContainerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -20),
 			self.weatherContainerView.heightAnchor.constraint(equalToConstant: 240),
 
+			// Weather Info Stack
 			self.weatherInfoStack.centerXAnchor.constraint(equalTo: self.weatherContainerView.centerXAnchor),
 			self.weatherInfoStack.centerYAnchor.constraint(equalTo: self.weatherContainerView.centerYAnchor),
 
+			// Weather Icon
 			self.weatherIconImageView.widthAnchor.constraint(equalToConstant: 70),
 			self.weatherIconImageView.heightAnchor.constraint(equalToConstant: 70),
 
+			// Section Title
 			self.sectionTitleLabel.topAnchor.constraint(equalTo: self.weatherContainerView.bottomAnchor, constant: 40),
-			self.sectionTitleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 24),
+			self.sectionTitleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
 
+			// Collection View
 			self.collectionView.topAnchor.constraint(equalTo: self.sectionTitleLabel.bottomAnchor, constant: 20),
-			self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-			self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+			self.collectionView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+			self.collectionView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
 			self.collectionView.heightAnchor.constraint(equalToConstant: 380),
-			self.collectionView.bottomAnchor.constraint(lessThanOrEqualTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
+			self.collectionView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -20)
 		])
 	}
 
-	private func configureData() {
-		self.tempLabel.text = self.weatherData.temp
-		self.descriptionLabel.text = self.weatherData.description
-		self.locationLabel.text = self.weatherData.location
-		self.weatherIconImageView.image = UIImage(systemName: self.weatherData.iconName)
+	private func configureDataSource() {
+		self.dataSource = UICollectionViewDiffableDataSource<Section,Track>(collectionView: self.collectionView) { (collectionView, indexPath, track) -> UICollectionViewCell? in
+			guard let cell: TrackCardCell = self.collectionView.dequeueReusableCell(withReuseIdentifier: TrackCardCell.reuseIdentifier, for: indexPath) as? TrackCardCell else {
+				return UICollectionViewCell()
+			}
+			cell.configure(with: track)
+
+			return cell
+		}
 	}
 
 	private func createCarouselLayout() -> UICollectionViewLayout {
@@ -199,17 +326,8 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 }
 
-// MARK: - DataSource
-extension WeatherRecommendationViewController: UICollectionViewDataSource, UICollectionViewDelegate {
-	func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-		return self.trackList.count
-	}
-
-	func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-		guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackCardCell.reuseIdentifier, for: indexPath) as? TrackCardCell else {
-			return UICollectionViewCell()
-		}
-		cell.configure(with: self.trackList[indexPath.item])
-		return cell
+extension WeatherRecommendationViewController: UICollectionViewDelegate {
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		self.viewModel.process(action: .trackCardSelected(index: indexPath.item))
 	}
 }
