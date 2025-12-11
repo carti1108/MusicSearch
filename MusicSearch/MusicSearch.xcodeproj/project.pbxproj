@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4F0B6F452EE2F11A00AE0FD5 /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */; };
 		4F0B6F882EE320D900AE0FD5 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */; };
+		4F1737E12EEA73D00003260F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4F1737E02EEA73D00003260F /* Kingfisher */; };
 		4F8D8F802EE4875100D4246D /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F8D8F7F2EE4875100D4246D /* NetworkLayer */; };
 /* End PBXBuildFile section */
 
@@ -72,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F1737E12EEA73D00003260F /* Kingfisher in Frameworks */,
 				4F0B6F452EE2F11A00AE0FD5 /* NetworkLayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,6 +146,7 @@
 			name = MusicSearch;
 			packageProductDependencies = (
 				4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */,
+				4F1737E02EEA73D00003260F /* Kingfisher */,
 			);
 			productName = MusicSearch;
 			productReference = 4F0B6EB62EE2ED0600AE0FD5 /* MusicSearch.app */;
@@ -230,6 +233,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */,
+				4F1737DF2EEA73C60003260F /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F0B6EB72EE2ED0600AE0FD5 /* Products */;
@@ -362,6 +366,7 @@
 		};
 		4F0B6EE22EE2ED0800AE0FD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -425,6 +430,7 @@
 		};
 		4F0B6EE32EE2ED0800AE0FD5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -601,6 +607,14 @@
 				kind = branch;
 			};
 		};
+		4F1737DF2EEA73C60003260F /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.6.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -608,6 +622,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */;
 			productName = NetworkLayer;
+		};
+		4F1737E02EEA73D00003260F /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F1737DF2EEA73C60003260F /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		4F8D8F7F2EE4875100D4246D /* NetworkLayer */ = {
 			isa = XCSwiftPackageProductDependency;
