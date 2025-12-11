@@ -30,7 +30,63 @@ final class MusicRepositoryImpl: MusicRepository {
 			with: LastFMAPI.fetchTopTracks(tag: tag),
 			as: TagTopTracksResponseDTO.self
 		)
-		return response.tracks.track.map { $0.toDomain() }
+		
+		var tracks = response.tracks.track.map { $0.toDomain() }
+		tracks = await self.updateTracksWithAlbumArt(tracks)
+		
+		return tracks
+	}
+	
+	private func updateTracksWithAlbumArt(_ tracks: [Track]) async -> [Track] {
+		var updatedTracks = tracks
+		
+		await withTaskGroup(of: (Int, Track?).self) { group in
+			for (index, track) in tracks.enumerated() {
+				group.addTask { [weak self] in
+					guard let self = self else { return (index, nil) }
+					return (index, await self.fetchAlbumArtForTrack(track))
+				}
+			}
+			
+			for await (index, trackWithAlbumArt) in group {
+				if let trackWithAlbumArt = trackWithAlbumArt {
+					updatedTracks[index] = trackWithAlbumArt
+				}
+			}
+		}
+		
+		return updatedTracks
+	}
+	
+	private func fetchAlbumArtForTrack(_ track: Track) async -> Track? {
+		do {
+			let trackInfoResponse = try await self.networkManager.request(
+				with: LastFMAPI.getTrackInfo(track: track),
+				as: TrackInfoResponseDTO.self
+			)
+			
+			guard let album = trackInfoResponse.track.album,
+				  let images = album.image else {
+				return nil
+			}
+			
+			let imageString = images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
+						   ?? images.first { !$0.text.isEmpty }?.text
+			
+			guard let imageString = imageString,
+				  let imageURL = URL(string: imageString) else {
+				return nil
+			}
+			
+			return Track(
+				id: track.id,
+				title: track.title,
+				artist: track.artist,
+				imageURL: imageURL
+			)
+		} catch {
+			return nil
+		}
 	}
 
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {

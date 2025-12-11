@@ -14,6 +14,7 @@ enum LastFMAPI {
 	case fetchSimilarTracks(track: Track)
 	case searchArtists(keyword: String)
 	case fetchArtistAlbums(artist: Artist)
+	case getTrackInfo(track: Track)
 }
 
 extension LastFMAPI: Requestable {
@@ -66,6 +67,11 @@ extension LastFMAPI: Requestable {
 		case .fetchArtistAlbums(let artist):
 			params["method"] = "artist.gettopalbums"
 			params["artist"] = artist.name
+
+		case .getTrackInfo(let track):
+			params["method"] = "track.getInfo"
+			params["track"] = track.title
+			params["artist"] = track.artist
 		}
 
 		return params

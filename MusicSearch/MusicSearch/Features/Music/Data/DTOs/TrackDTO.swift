@@ -16,7 +16,7 @@ struct TrackMatchesContainerDTO: Decodable {
 }
 
 struct TrackListDTO: Decodable {
-	let track: [LastFMTrackDTO]
+	let track: [LastFMTrackSearchDTO]
 }
 
 struct TagTopTracksResponseDTO: Decodable {
@@ -24,26 +24,7 @@ struct TagTopTracksResponseDTO: Decodable {
 }
 
 struct TagTrackListDTO: Decodable {
-	let track: [LastFMTrackDTO]
-}
-struct LastFMTrackDTO: Decodable {
-	let name: String
-	let artist: String
-	let url: String
-	let mbid: String?
-	let image: [LastFMImageDTO]?
-
-	func toDomain() -> Track {
-		let imageString = self.image?.first { $0.size == "extralarge" }?.text
-					   ?? self.image?.last?.text
-
-		return Track(
-			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
-			title: self.name,
-			artist: self.artist,
-			imageURL: URL(string: imageString ?? "")
-		)
-	}
+	let track: [LastFMTrackTagDTO]
 }
 
 struct TrackSimilarResponseDTO: Decodable {
@@ -51,7 +32,88 @@ struct TrackSimilarResponseDTO: Decodable {
 }
 
 struct SimilarTrackListDTO: Decodable {
-	let track: [LastFMTrackDTO]
+	let track: [LastFMTrackSimilarDTO]
+}
+
+struct LastFMTrackSearchDTO: Decodable {
+	let name: String
+	let artist: String
+	let url: String
+	let mbid: String?
+	let image: [LastFMImageDTO]?
+
+	func toDomain() -> Track {
+		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
+					   ?? self.image?.first { !$0.text.isEmpty }?.text
+
+		let imageURL = imageString.flatMap { URL(string: $0) }
+
+		return Track(
+			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			title: self.name,
+			artist: self.artist,
+			imageURL: imageURL
+		)
+	}
+}
+
+struct LastFMTrackTagDTO: Decodable {
+	let name: String
+	let artist: LastFMArtistDTO
+	let url: String
+	let mbid: String?
+	let image: [LastFMImageDTO]?
+
+	func toDomain() -> Track {
+		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
+					   ?? self.image?.first { !$0.text.isEmpty }?.text
+
+		let imageURL = imageString.flatMap { URL(string: $0) }
+
+		return Track(
+			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			title: self.name,
+			artist: self.artist.name,
+			imageURL: imageURL
+		)
+	}
+}
+
+struct LastFMTrackSimilarDTO: Decodable {
+	let name: String
+	let artist: LastFMArtistDTO
+	let url: String
+	let mbid: String?
+	let image: [LastFMImageDTO]?
+
+	func toDomain() -> Track {
+		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
+					   ?? self.image?.first { !$0.text.isEmpty }?.text
+
+		let imageURL = imageString.flatMap { URL(string: $0) }
+
+		return Track(
+			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			title: self.name,
+			artist: self.artist.name,
+			imageURL: imageURL
+		)
+	}
+}
+
+struct TrackInfoResponseDTO: Decodable {
+	let track: LastFMTrackInfoDTO
+}
+
+struct LastFMTrackInfoDTO: Decodable {
+	let name: String
+	let artist: LastFMArtistDTO
+	let album: LastFMAlbumInfoDTO?
+}
+
+struct LastFMAlbumInfoDTO: Decodable {
+	let title: String
+	let image: [LastFMImageDTO]?
 }
 
 struct LastFMImageDTO: Decodable {

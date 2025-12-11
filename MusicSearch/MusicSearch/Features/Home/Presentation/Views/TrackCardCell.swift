@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 
@@ -37,6 +38,7 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		iv.layer.cornerRadius = 16
 		iv.layer.masksToBounds = true
 		iv.backgroundColor = .systemGray5
+		iv.clipsToBounds = true
 		iv.translatesAutoresizingMaskIntoConstraints = false
 		return iv
 	}()
@@ -106,9 +108,33 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		])
 	}
 
-	func configure(with track: MockTrack) {
+	override func prepareForReuse() {
+		super.prepareForReuse()
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.image = nil
+		self.titleLabel.text = nil
+		self.artistLabel.text = nil
+	}
+
+	func configure(with track: Track) {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
-		self.albumImageView.backgroundColor = track.color
+
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.image = nil
+
+		if let url = track.imageURL {
+			let placeholder = UIImage(systemName: "music.note")
+			self.albumImageView.kf.setImage(
+				with: url,
+				placeholder: placeholder,
+				options: [
+					.transition(.fade(0.2)),
+					.cacheOriginalImage
+				]
+			)
+		} else {
+			self.albumImageView.image = UIImage(systemName: "music.note")
+		}
 	}
 }
