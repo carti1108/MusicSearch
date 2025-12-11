@@ -12,17 +12,17 @@ final class AppRoot {
 	private let appComponent: AppComponent
 
 	private lazy var weatherComponent: WeatherComponent = {
-		WeatherComponent(dependency: appComponent)
+		WeatherComponent(dependency: self.appComponent)
 	}()
 
 	private lazy var musicComponent: MusicComponent = {
-		MusicComponent(dependency: appComponent)
+		MusicComponent(dependency: self.appComponent)
 	}()
 
 	private lazy var homeComponent: HomeComponent = {
 		let dependency = CombinedHomeDependency(
-			weatherComponent: weatherComponent,
-			musicComponent: musicComponent
+			weatherComponent: self.weatherComponent,
+			musicComponent: self.musicComponent
 		)
 		return HomeComponent(dependency: dependency)
 	}()

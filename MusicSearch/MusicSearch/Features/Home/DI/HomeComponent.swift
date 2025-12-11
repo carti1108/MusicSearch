@@ -18,11 +18,10 @@ final class HomeComponent<T: HomeDependency>: Component {
 	
 	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
 		FetchMusicForWeatherUseCaseImpl(
-			fetchCurrentWeatherUseCase: dependency.fetchCurrentWeatherUseCase,
-			fetchTracksByTagUseCase: dependency.fetchTracksByTagUseCase
+			fetchCurrentWeatherUseCase: self.dependency.fetchCurrentWeatherUseCase,
+			fetchTracksByTagUseCase: self.dependency.fetchTracksByTagUseCase
 		)
 	}
-	
 
 	@MainActor
 	var weatherRecommendationViewModel: WeatherRecommendationViewModel {
