@@ -23,8 +23,17 @@ final class HomeComponent<T: HomeDependency>: Component {
 		)
 	}
 	
+
+	@MainActor
+	var weatherRecommendationViewModel: WeatherRecommendationViewModel {
+		WeatherRecommendationViewModel(
+			fetchMusicForWeatherUseCase: self.fetchMusicForWeatherUseCase
+		)
+	}
+
+	@MainActor
 	func makeWeatherRecommendationViewController() -> WeatherRecommendationViewController {
-		WeatherRecommendationViewController()
+		WeatherRecommendationViewController(viewModel: self.weatherRecommendationViewModel)
 	}
 }
 
