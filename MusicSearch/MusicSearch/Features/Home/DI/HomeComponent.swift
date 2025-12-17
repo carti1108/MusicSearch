@@ -5,7 +5,7 @@
 //  Created by Kiseok on 12/9/25.
 //
 
-import Foundation
+import UIKit
 
 final class HomeComponent<T: HomeDependency>: Component {
 	typealias DependencyType = T
@@ -15,19 +15,17 @@ final class HomeComponent<T: HomeDependency>: Component {
 	init(dependency: T) {
 		self.dependency = dependency
 	}
-	
-	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
-		FetchMusicForWeatherUseCaseImpl(
-			fetchCurrentWeatherUseCase: self.dependency.fetchCurrentWeatherUseCase,
-			fetchTracksByTagUseCase: self.dependency.fetchTracksByTagUseCase
-		)
-	}
 
 	@MainActor
 	var weatherRecommendationViewModel: WeatherRecommendationViewModel {
 		WeatherRecommendationViewModel(
-			fetchMusicForWeatherUseCase: self.fetchMusicForWeatherUseCase
+			fetchMusicForWeatherUseCase: self.dependency.fetchMusicForWeatherUseCase
 		)
+	}
+
+	@MainActor
+	func makeHomeViewCoordinator(navigationController: UINavigationController) -> HomeViewCoordinator<T> {
+		HomeViewCoordinator(navigationController: navigationController, component: self)
 	}
 
 	@MainActor

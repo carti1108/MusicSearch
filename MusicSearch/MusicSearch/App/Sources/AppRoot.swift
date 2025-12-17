@@ -11,63 +11,72 @@ final class AppRoot {
 
 	private let appComponent: AppComponent
 
-	private lazy var weatherComponent: WeatherComponent = {
-		WeatherComponent(dependency: self.appComponent)
-	}()
-
-	private lazy var musicComponent: MusicComponent = {
-		MusicComponent(dependency: self.appComponent)
+	private lazy var diggingComponent: DiggingComponent = {
+		DiggingComponent(dependency: self.appComponent)
 	}()
 
 	private lazy var homeComponent: HomeComponent = {
-		let dependency = CombinedHomeDependency(
-			weatherComponent: self.weatherComponent,
-			musicComponent: self.musicComponent
-		)
-		return HomeComponent(dependency: dependency)
+		return HomeComponent(dependency: self.appComponent)
 	}()
+
+	private lazy var trendComponent: TrendComponent = {
+		return TrendComponent(dependency: self.appComponent)
+	}()
+
+	private var homeCoordinator: HomeViewCoordinator<AppComponent>?
+	private var trackSearchCoordinator: TrackSearchViewCoordinator<AppComponent>?
+	private var chartCoordinator: ChartViewCoordinator<AppComponent>?
 
 	init(appComponent: AppComponent = AppComponent()) {
 		self.appComponent = appComponent
 	}
 
 	@MainActor
-	func makeWeatherRecommendationViewController() -> UIViewController {
-		self.homeComponent.makeWeatherRecommendationViewController()
-	}
-
-	@MainActor
 	func makeRootTabBarController() -> UITabBarController {
 		let tabBarController = UITabBarController()
 
-		let weatherVC = self.makeWeatherRecommendationViewController()
-		weatherVC.tabBarItem = UITabBarItem(title: "Weather", image: UIImage(systemName: "cloud.sun.fill"), selectedImage: nil)
+		// Home (Weather + 추천 음악)
+		let homeNavigationController = UINavigationController()
+		let homeViewCoordinator = self.homeComponent.makeHomeViewCoordinator(navigationController: homeNavigationController)
+		self.homeCoordinator = homeViewCoordinator
+		homeViewCoordinator.start()
+		homeNavigationController.tabBarItem = UITabBarItem(
+			title: "Home",
+			image: UIImage(systemName: "house.fill"),
+			selectedImage: nil
+		)
 
-		let musicVC = Self.makePlaceholderViewController(title: "Music", systemImage: "music.note.list")
-		let settingsVC = Self.makePlaceholderViewController(title: "Settings", systemImage: "gearshape")
+		// Track 검색
+		let musicNavigationController = UINavigationController()
+		let musicCoordinator = self.diggingComponent.makeTrackSearchCoordinator(
+			navigationController: musicNavigationController
+		)
+		self.trackSearchCoordinator = musicCoordinator
+		musicCoordinator.start()
+		musicNavigationController.tabBarItem = UITabBarItem(
+			title: "Search",
+			image: UIImage(systemName: "magnifyingglass"),
+			selectedImage: nil
+		)
 
-		tabBarController.viewControllers = [weatherVC, musicVC, settingsVC]
+		// Chart
+		let chartNavigationController = UINavigationController()
+		let chartViewCoordinator = self.trendComponent.makeChartViewCoordinator(navigationController: chartNavigationController)
+		self.chartCoordinator = chartViewCoordinator
+		chartViewCoordinator.start()
+		chartNavigationController.tabBarItem = UITabBarItem(
+			title: "Chart",
+			image: UIImage(systemName: "chart.bar.fill"),
+			selectedImage: nil
+		)
+
+		tabBarController.viewControllers = [
+			homeNavigationController,
+			musicNavigationController,
+			chartNavigationController
+		]
+
 		return tabBarController
-	}
-
-	private static func makePlaceholderViewController(title: String, systemImage: String) -> UIViewController {
-		let vc = UIViewController()
-		vc.view.backgroundColor = .systemBackground
-		vc.tabBarItem = UITabBarItem(title: title, image: UIImage(systemName: systemImage), selectedImage: nil)
-		return vc
-	}
-}
-
-private struct CombinedHomeDependency: HomeDependency {
-	let weatherComponent: WeatherComponent<AppComponent>
-	let musicComponent: MusicComponent<AppComponent>
-
-	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
-		self.weatherComponent.fetchCurrentWeatherUseCase
-	}
-
-	var fetchTracksByTagUseCase: FetchTracksByTagUseCase {
-		self.musicComponent.fetchTracksByTagUseCase
 	}
 }
 

@@ -8,7 +8,6 @@
 import Foundation
 
 protocol HomeDependency: Dependency {
-	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase { get }
-	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
+	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase { get }
 }
 
