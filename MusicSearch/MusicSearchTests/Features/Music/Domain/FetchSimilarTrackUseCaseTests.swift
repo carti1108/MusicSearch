@@ -26,6 +26,7 @@ struct FetchSimilarTrackUseCaseTests {
 			Track(title: "Similar 2", artist: "Artist 2", imageURL: nil)
 		]
 		mockRepository.fetchSimilarTracksResult = .success(similarTracks)
+		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 		
 		let useCase = FetchSimilarTrackUseCaseImpl(musicRepository: mockRepository)
 		
@@ -35,6 +36,7 @@ struct FetchSimilarTrackUseCaseTests {
 		// Then
 		#expect(result.count == 2)
 		#expect(mockRepository.fetchSimilarTracksCallCount == 1)
+		#expect(mockRepository.fetchTrackInfoCallCount == 2)
 		#expect(mockRepository.lastFetchSimilarTracksTrack?.title == "Original Track")
 	}
 	

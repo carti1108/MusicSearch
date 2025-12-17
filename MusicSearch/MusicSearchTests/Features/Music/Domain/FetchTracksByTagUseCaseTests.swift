@@ -25,6 +25,7 @@ struct FetchTracksByTagUseCaseTests {
 			Track(title: "Chill Track 2", artist: "Artist 2", imageURL: nil)
 		]
 		mockRepository.fetchTopTracksResult = .success(expectedTracks)
+		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 		
 		let useCase = FetchTracksByTagUseCaseImpl(musicRepository: mockRepository)
 		
@@ -34,6 +35,7 @@ struct FetchTracksByTagUseCaseTests {
 		// Then
 		#expect(tracks.count == 2)
 		#expect(mockRepository.fetchTopTracksCallCount == 1)
+		#expect(mockRepository.fetchTrackInfoCallCount == 2)
 		#expect(mockRepository.lastFetchTopTracksTag == "chill")
 	}
 	

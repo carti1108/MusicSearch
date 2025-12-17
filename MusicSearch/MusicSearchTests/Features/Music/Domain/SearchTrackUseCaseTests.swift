@@ -25,6 +25,7 @@ struct SearchTrackUseCaseTests {
 			Track(title: "Track 2", artist: "Artist 2", imageURL: nil)
 		]
 		mockRepository.searchTracksResult = .success(expectedTracks)
+		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 		
 		let useCase = SearchTrackUseCaseImpl(musicRepository: mockRepository)
 		
@@ -34,6 +35,7 @@ struct SearchTrackUseCaseTests {
 		// Then
 		#expect(tracks.count == 2)
 		#expect(mockRepository.searchTracksCallCount == 1)
+		#expect(mockRepository.fetchTrackInfoCallCount == 2)
 		#expect(mockRepository.lastSearchTracksQuery == "test query")
 	}
 	
