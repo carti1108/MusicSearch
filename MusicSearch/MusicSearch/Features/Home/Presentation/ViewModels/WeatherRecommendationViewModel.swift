@@ -73,8 +73,11 @@ extension WeatherRecommendationViewModel {
 				state.weather = result.weather
 				state.tracks = result.tracks
 			} catch {
-				print("🚨 ViewModel Error: \(error.localizedDescription)")
-				state.errorMessage = error.localizedDescription
+				if let localized = error as? LocalizedError, let message = localized.errorDescription {
+					state.errorMessage = message
+				} else {
+					state.errorMessage = "날씨 추천을 불러오지 못했습니다."
+				}
 			}
 
 			state.isLoading = false

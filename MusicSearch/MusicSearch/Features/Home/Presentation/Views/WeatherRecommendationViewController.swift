@@ -74,9 +74,12 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		return label
 	}()
 
+	private var lastPresentedErrorMessage: String?
+	
 	private let activityIndicator: UIActivityIndicatorView = {
-		let indicator = UIActivityIndicatorView()
-		indicator.style = .large
+		let indicator = UIActivityIndicatorView(style: .large)
+		indicator.hidesWhenStopped = true
+		indicator.translatesAutoresizingMaskIntoConstraints = false
 		return indicator
 	}()
 
@@ -97,7 +100,9 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		let layout = self.createCarouselLayout()
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
 		cv.backgroundColor = .clear
+		cv.showsVerticalScrollIndicator = false
 		cv.showsHorizontalScrollIndicator = false
+		cv.isScrollEnabled = false
 		cv.register(TrackCardCell.self, forCellWithReuseIdentifier: TrackCardCell.reuseIdentifier)
 		cv.delegate = self
 		cv.translatesAutoresizingMaskIntoConstraints = false
@@ -146,18 +151,11 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	private func updateUI(with state: WeatherRecommendationState) {
-		if state.isLoading {
-			if !self.activityIndicator.isAnimating {
-				self.activityIndicator.startAnimating()
-			}
-		} else {
-			self.activityIndicator.stopAnimating()
+		self.setLoading(state.isLoading)
+		if !state.isLoading {
 			self.refreshControl.endRefreshing()
 		}
-
-		if let error = state.errorMessage {
-			print("WeatherRecommendationViewController Error: \(error)")
-		}
+		self.presentErrorIfNeeded(state.errorMessage)
 
 		self.tempLabel.text = "\(Int(state.weather.temperature))°"
 		self.descriptionLabel.text = state.weather.description
@@ -171,6 +169,25 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		snapshot.appendSections([.main])
 		snapshot.appendItems(state.tracks)
 		self.dataSource?.apply(snapshot, animatingDifferences: true)
+	}
+	
+	private func setLoading(_ isLoading: Bool) {
+		if isLoading {
+			self.activityIndicator.startAnimating()
+		} else {
+			self.activityIndicator.stopAnimating()
+		}
+	}
+	
+	private func presentErrorIfNeeded(_ message: String?) {
+		guard let message, !message.isEmpty else { return }
+		guard self.lastPresentedErrorMessage != message else { return }
+		guard self.presentedViewController == nil else { return }
+		self.lastPresentedErrorMessage = message
+		
+		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
+		alert.addAction(UIAlertAction(title: "확인", style: .default))
+		self.present(alert, animated: true)
 	}
 	
 	private func iconName(for condition: WeatherCondition) -> String {
@@ -216,12 +233,16 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	private func setupView() {
 		self.view.backgroundColor = .systemBackground
 
-		// ScrollView 설정
+		let appearance = UINavigationBarAppearance()
+		appearance.configureWithTransparentBackground()
+		self.navigationController?.navigationBar.standardAppearance = appearance
+		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+
 		self.scrollView.refreshControl = self.refreshControl
 		self.view.addSubview(self.scrollView)
 		self.scrollView.addSubview(self.contentView)
+		self.view.addSubview(self.activityIndicator)
 
-		// ContentView에 모든 서브뷰 추가
 		self.contentView.addSubview(self.weatherContainerView)
 		self.weatherContainerView.addSubview(self.weatherInfoStack)
 
@@ -243,10 +264,13 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	private func setupConstraints() {
 		NSLayoutConstraint.activate([
 			// ScrollView
-			self.scrollView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+			self.scrollView.topAnchor.constraint(equalTo: self.view.topAnchor),
 			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
 			self.scrollView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+			
+			self.activityIndicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+			self.activityIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
 
 			// ContentView
 			self.contentView.topAnchor.constraint(equalTo: self.scrollView.topAnchor),
@@ -283,8 +307,8 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	private func configureDataSource() {
-		self.dataSource = UICollectionViewDiffableDataSource<Section,Track>(collectionView: self.collectionView) { (collectionView, indexPath, track) -> UICollectionViewCell? in
-			guard let cell: TrackCardCell = self.collectionView.dequeueReusableCell(withReuseIdentifier: TrackCardCell.reuseIdentifier, for: indexPath) as? TrackCardCell else {
+		self.dataSource = UICollectionViewDiffableDataSource<Section,Track>(collectionView: self.collectionView) { [weak self] (collectionView, indexPath, track) -> UICollectionViewCell? in
+			guard let cell: TrackCardCell = self?.collectionView.dequeueReusableCell(withReuseIdentifier: TrackCardCell.reuseIdentifier, for: indexPath) as? TrackCardCell else {
 				return UICollectionViewCell()
 			}
 			cell.configure(with: track)
