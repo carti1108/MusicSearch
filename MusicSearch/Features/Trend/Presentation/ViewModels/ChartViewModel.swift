@@ -20,11 +20,18 @@ enum ChartViewAction {
 	case viewDidLoad
 	case changeType(ChartType)
 	case refresh
+	case selectItem(at: IndexPath)
+}
+
+protocol ChartViewCoordinatorAction: AnyObject {
+	func didSelect(item: ChartItem)
 }
 
 @MainActor
 final class ChartViewModel {
 	@Published private(set) var state: ChartViewState = .init()
+	
+	weak var coordinator: ChartViewCoordinatorAction?
 
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
@@ -55,6 +62,9 @@ final class ChartViewModel {
 
 		case .refresh:
 			self.loadIfNeeded(for: self.state.type, force: true)
+			
+		case .selectItem(let indexPath):
+			self.handleSelection(at: indexPath)
 		}
 	}
 
@@ -99,6 +109,25 @@ final class ChartViewModel {
 			}
 
 			self.state.isLoading = false
+		}
+	}
+	
+	private func handleSelection(at indexPath: IndexPath) {
+		let section = indexPath.section
+		let index = indexPath.item
+		
+		let item: ChartItem?
+		
+		if section == 0 { // Podium
+			guard index < self.state.podiumItems.count else { return }
+			item = self.state.podiumItems[index]
+		} else { // List
+			guard index < self.state.listItems.count else { return }
+			item = self.state.listItems[index]
+		}
+		
+		if let item {
+			self.coordinator?.didSelect(item: item)
 		}
 	}
 

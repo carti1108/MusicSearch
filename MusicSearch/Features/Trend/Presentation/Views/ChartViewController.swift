@@ -216,4 +216,8 @@ extension ChartViewController: UICollectionViewDelegate {
 			cell.transform = transform
 		}
 	}
+	
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		self.viewModel.process(action: .selectItem(at: indexPath))
+	}
 }

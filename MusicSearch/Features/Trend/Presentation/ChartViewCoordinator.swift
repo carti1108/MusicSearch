@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ChartViewCoordinator<T: TrendDependency>: Coordinator {
+final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoordinatorAction {
 	var navigationController: UINavigationController
 	var childCoordinators: [Coordinator] = .init()
 
@@ -19,7 +19,16 @@ final class ChartViewCoordinator<T: TrendDependency>: Coordinator {
 	}
 
 	func start() {
-		let vc = self.component.makeChartViewController()
+		let vc = self.component.makeChartViewController(coordinator: self)
 		self.navigationController.setViewControllers([vc], animated: false)
+	}
+	
+	func didSelect(item: ChartItem) {
+		if item.type == .tracks {
+			let track = Track(title: item.title, artist: item.subtitle, imageURL: item.imageURL)
+			self.component.spotifyService.openSpotify(for: track)
+		} else {
+			self.component.spotifyService.openSpotify(for: item.title)
+		}
 	}
 }

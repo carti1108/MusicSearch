@@ -16,9 +16,13 @@ final class TrendComponent<T: TrendDependency>: Component {
 	init(dependency: T) {
 		self.dependency = dependency
 	}
+	
+	var spotifyService: SpotifyServiceProtocol {
+		self.dependency.spotifyService
+	}
 
 	@MainActor
-	var chartViewModel: ChartViewModel {
+	func makeChartViewModel() -> ChartViewModel {
 		ChartViewModel(
 			fetchChartTopTracksUseCase: self.dependency.fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: self.dependency.fetchChartTopArtistsUseCase
@@ -31,7 +35,9 @@ final class TrendComponent<T: TrendDependency>: Component {
 	}
 
 	@MainActor
-	func makeChartViewController() -> ChartViewController {
-		ChartViewController(viewModel: self.chartViewModel)
+	func makeChartViewController(coordinator: ChartViewCoordinatorAction) -> ChartViewController {
+		let vm = self.makeChartViewModel()
+		vm.coordinator = coordinator
+		return ChartViewController(viewModel: vm)
 	}
 }
