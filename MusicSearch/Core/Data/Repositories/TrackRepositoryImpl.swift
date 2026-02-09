@@ -17,7 +17,7 @@ final class TrackRepositoryImpl: TrackRepository {
 	}
 
 	func searchTracks(query: String) async throws -> [Track] {
-		let response = try await self.networkManager.request(
+		let response = try await self.networkManager.perform(
 			with: LastFMAPI.searchTracks(keyword: query),
 			as: TrackSearchResponseDTO.self
 		)
@@ -26,7 +26,7 @@ final class TrackRepositoryImpl: TrackRepository {
 	}
 	
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
-		let response = try await self.networkManager.request(
+		let response = try await self.networkManager.perform(
 			with: LastFMAPI.fetchTopTracks(tag: tag),
 			as: TagTopTracksResponseDTO.self
 		)
@@ -35,7 +35,7 @@ final class TrackRepositoryImpl: TrackRepository {
 	}
 	
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
-		let response = try await self.networkManager.request(
+		let response = try await self.networkManager.perform(
 			with: LastFMAPI.fetchSimilarTracks(track: track),
 			as: TrackSimilarResponseDTO.self
 		)
@@ -44,7 +44,7 @@ final class TrackRepositoryImpl: TrackRepository {
 	}
 	
 	func fetchTrackInfo(for track: Track) async throws -> Track {
-		let trackInfoResponse = try await self.networkManager.request(
+		let trackInfoResponse = try await self.networkManager.perform(
 			with: LastFMAPI.getTrackInfo(track: track),
 			as: TrackInfoResponseDTO.self
 		)

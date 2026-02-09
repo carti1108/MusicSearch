@@ -13,13 +13,11 @@ import NetworkLayer
 final class MockNetworkManager: NetworkRequesting {
 
 	var resultDTO: Decodable?
-	/// Last.fm 처럼 같은 매니저로 여러 endpoint를 호출하는 케이스 대응용
-	/// (queryParameters["method"] 기준)
 	var resultDTOByMethod: [String: Decodable] = [:]
 	var errorToThrow: Error?
 
-	func request<Response: Decodable>(
-		with requestable: any Requestable,
+	func perform<Response: Decodable>(
+		with requestable: some Requestable,
 		as type: Response.Type
 	) async throws -> Response {
 
@@ -28,7 +26,12 @@ final class MockNetworkManager: NetworkRequesting {
 		}
 
 		let result: Decodable? = {
-			if let method = requestable.queryParameters?["method"] as? String,
+			var queryParameters: [String: Any]?
+			if case let .requestParameters(parameters, _) = requestable.task {
+				queryParameters = parameters
+			}
+
+			if let method = queryParameters?["method"] as? String,
 			   let dto = self.resultDTOByMethod[method] {
 				return dto
 			}

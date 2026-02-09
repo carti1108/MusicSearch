@@ -39,7 +39,11 @@ extension LastFMAPI: Requestable {
 		return .get
 	}
 
-	var queryParameters: [String: Any]? {
+	var headers: [HTTPHeader.Field: String]? {
+		return nil
+	}
+
+	var task: RequestTask {
 		var params: [String: Any] = [
 			"api_key": apiKey,
 			"format": "json"
@@ -56,8 +60,13 @@ extension LastFMAPI: Requestable {
 
 		case .fetchSimilarTracks(let track):
 			params["method"] = "track.getsimilar"
-			params["track"] = track.title
-			params["artist"] = track.artist
+			
+			if !track.id.isEmpty && track.id.count > 10 {
+				params["mbid"] = track.id
+			} else {
+				params["track"] = track.title
+				params["artist"] = track.artist
+			}
 
 		case .getTrackInfo(let track):
 			params["method"] = "track.getInfo"
@@ -71,6 +80,6 @@ extension LastFMAPI: Requestable {
 			params["method"] = "chart.gettopartists"
 		}
 
-		return params
+		return .requestParameters(parameters: params, encoding: URLQueryEncoder())
 	}
 }
