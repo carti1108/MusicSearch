@@ -92,6 +92,7 @@ final class ChartViewModel {
 					self.apply(allItems: items, type: type)
 				}
 			} catch {
+				print("ChartViewModel Error: \(error)")
 				self.state.errorMessage = "차트 정보를 불러오지 못했습니다."
 				self.state.podiumItems = []
 				self.state.listItems = []

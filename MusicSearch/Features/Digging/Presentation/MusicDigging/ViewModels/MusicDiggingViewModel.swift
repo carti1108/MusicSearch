@@ -18,6 +18,7 @@ struct MusicDiggingState {
 enum MusicDiggingAction {
 	case viewWillAppear
 	case selectTrack(track: Track)
+	case retry
 }
 
 @MainActor
@@ -44,6 +45,9 @@ final class MusicDiggingViewModel {
 		case .selectTrack(let track):
 			self.state.seedTrack = track
 			self.loadRecommendations(basedOn: track)
+
+		case .retry:
+			self.loadRecommendations(basedOn: self.state.seedTrack)
 		}
 	}
 
@@ -54,8 +58,12 @@ final class MusicDiggingViewModel {
 
 			do {
 				let tracks = try await self.fetchSimilarTracksUseCase.execute(targetTrack: track)
+				if tracks.isEmpty {
+					state.errorMessage = "추천 곡을 불러오지 못했습니다."
+				}
 				self.state.recommendations = tracks
 			} catch {
+				print("MusicDiggingViewModel Error: \(error)")
 				state.errorMessage = "추천 곡을 불러오지 못했습니다."
 				state.recommendations = []
 			}

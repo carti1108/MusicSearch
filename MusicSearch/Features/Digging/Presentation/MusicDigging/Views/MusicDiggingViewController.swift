@@ -80,7 +80,10 @@ final class MusicDiggingViewController: UIViewController {
 		self.setupConstraints()
 		self.configureDataSource()
 		self.bindViewModel()
+	}
 
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
 		self.viewModel.process(action: .viewWillAppear)
 	}
 
@@ -211,7 +214,10 @@ final class MusicDiggingViewController: UIViewController {
 		self.lastPresentedErrorMessage = message
 		
 		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "확인", style: .default))
+		alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+		alert.addAction(UIAlertAction(title: "재시도", style: .default, handler: { [weak self] _ in
+			self?.viewModel.process(action: .retry)
+		}))
 		self.present(alert, animated: true)
 	}
 }
