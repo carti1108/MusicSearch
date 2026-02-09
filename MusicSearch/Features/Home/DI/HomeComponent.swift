@@ -15,9 +15,13 @@ final class HomeComponent<T: HomeDependency>: Component {
 	init(dependency: T) {
 		self.dependency = dependency
 	}
+	
+	var spotifyService: SpotifyServiceProtocol {
+		self.dependency.spotifyService
+	}
 
 	@MainActor
-	var weatherRecommendationViewModel: WeatherRecommendationViewModel {
+	func makeWeatherRecommendationViewModel() -> WeatherRecommendationViewModel {
 		WeatherRecommendationViewModel(
 			fetchMusicForWeatherUseCase: self.dependency.fetchMusicForWeatherUseCase
 		)
@@ -29,8 +33,10 @@ final class HomeComponent<T: HomeDependency>: Component {
 	}
 
 	@MainActor
-	func makeWeatherRecommendationViewController() -> WeatherRecommendationViewController {
-		WeatherRecommendationViewController(viewModel: self.weatherRecommendationViewModel)
+	func makeWeatherRecommendationViewController(coordinator: WeatherRecommendationCoordinatorAction) -> WeatherRecommendationViewController {
+		let vm = self.makeWeatherRecommendationViewModel()
+		vm.coordinator = coordinator
+		return WeatherRecommendationViewController(viewModel: vm)
 	}
 }
 

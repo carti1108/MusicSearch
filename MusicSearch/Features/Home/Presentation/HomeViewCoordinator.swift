@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class HomeViewCoordinator<T: HomeDependency>: Coordinator {
+final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommendationCoordinatorAction {
 	var navigationController: UINavigationController
 	var childCoordinators: [Coordinator] = .init()
 
@@ -19,7 +19,11 @@ final class HomeViewCoordinator<T: HomeDependency>: Coordinator {
 	}
 
 	func start() {
-		let vc = self.component.makeWeatherRecommendationViewController()
+		let vc = self.component.makeWeatherRecommendationViewController(coordinator: self)
 		self.navigationController.setViewControllers([vc], animated: false)
+	}
+	
+	func didSelect(track: Track) {
+		self.component.spotifyService.openSpotify(for: track)
 	}
 }

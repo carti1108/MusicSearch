@@ -36,8 +36,14 @@ enum WeatherRecommendationAction {
 	case trackCardSelected(index: Int)
 }
 
+protocol WeatherRecommendationCoordinatorAction: AnyObject {
+	func didSelect(track: Track)
+}
+
 @MainActor
 final class WeatherRecommendationViewModel {
+	
+	weak var coordinator: WeatherRecommendationCoordinatorAction?
 
 	@Published private(set) var state: WeatherRecommendationState = .initial
 
@@ -84,5 +90,9 @@ extension WeatherRecommendationViewModel {
 		}
 	}
 
-	private func handleTrackSelection(at index: Int) {}
+	private func handleTrackSelection(at index: Int) {
+		guard index < self.state.tracks.count else { return }
+		let track = self.state.tracks[index]
+		self.coordinator?.didSelect(track: track)
+	}
 }
