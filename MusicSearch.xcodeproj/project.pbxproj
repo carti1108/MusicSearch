@@ -37,22 +37,9 @@
 		4F0B6F872EE320D900AE0FD5 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4F0B6EDE2EE2ED0800AE0FD5 /* Exceptions for "MusicSearch" folder in "MusicSearch" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				App/Resources/Info.plist,
-			);
-			target = 4F0B6EB52EE2ED0600AE0FD5 /* MusicSearch */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4F0B6EB82EE2ED0600AE0FD5 /* MusicSearch */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				4F0B6EDE2EE2ED0800AE0FD5 /* Exceptions for "MusicSearch" folder in "MusicSearch" target */,
-			);
 			path = MusicSearch;
 			sourceTree = "<group>";
 		};
