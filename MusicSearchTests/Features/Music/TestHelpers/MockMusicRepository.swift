@@ -34,13 +34,13 @@ final class MockMusicRepository: MusicRepository {
 	var lastFetchArtistInfoArtist: Artist?
 	var lastFetchTrackInfoTrack: Track?
 	
-	func searchTracks(query: String) async throws -> [Track] {
+	func searchTracks(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
 		self.searchTracksCallCount += 1
 		self.lastSearchTracksQuery = query
 		
 		switch self.searchTracksResult {
 		case .success(let tracks):
-			return tracks
+			return (tracks, tracks.count)
 		case .failure(let error):
 			throw error
 		}

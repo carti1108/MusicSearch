@@ -11,10 +11,10 @@ import Foundation
 
 struct SearchTrackUseCaseTests {
 	
-	var mockRepository: MockMusicRepository
+	var mockRepository: MockTrackRepository
 	
 	init() {
-		self.mockRepository = MockMusicRepository()
+		self.mockRepository = MockTrackRepository()
 	}
 	
 	@Test("정상적인 쿼리로 트랙 검색이 동작하는가")
@@ -24,13 +24,14 @@ struct SearchTrackUseCaseTests {
 			Track(title: "Track 1", artist: "Artist 1", imageURL: nil),
 			Track(title: "Track 2", artist: "Artist 2", imageURL: nil)
 		]
-		mockRepository.searchTracksResult = .success(expectedTracks)
+		mockRepository.searchTracksResult = .success((expectedTracks, 2))
 		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 		
-		let useCase = SearchTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
-		let tracks = try await useCase.execute(query: "test query")
+		let result = try await useCase.execute(query: "test query", limit: 20, page: 1)
+		let tracks = result.tracks
 		
 		// Then
 		#expect(tracks.count == 2)
@@ -42,10 +43,11 @@ struct SearchTrackUseCaseTests {
 	@Test("빈 쿼리를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithEmptyQuery() async throws {
 		// Given
-		let useCase = SearchTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
-		let tracks = try await useCase.execute(query: "")
+		let result = try await useCase.execute(query: "", limit: 20, page: 1)
+		let tracks = result.tracks
 		
 		// Then
 		#expect(tracks.isEmpty)
@@ -55,10 +57,11 @@ struct SearchTrackUseCaseTests {
 	@Test("공백만 있는 쿼리를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithWhitespaceQuery() async throws {
 		// Given
-		let useCase = SearchTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
-		let tracks = try await useCase.execute(query: "   ")
+		let result = try await useCase.execute(query: "   ", limit: 20, page: 1)
+		let tracks = result.tracks
 		
 		// Then
 		#expect(tracks.isEmpty)
@@ -73,11 +76,11 @@ struct SearchTrackUseCaseTests {
 		}
 		mockRepository.searchTracksResult = .failure(TestError.testError)
 		
-		let useCase = SearchTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When & Then
 		await #expect(throws: TestError.self) {
-			try await useCase.execute(query: "test")
+			_ = try await useCase.execute(query: "test", limit: 20, page: 1)
 		}
 	}
 }
