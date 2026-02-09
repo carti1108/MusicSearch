@@ -39,8 +39,13 @@ struct FetchChartTopTracksUseCaseImpl: FetchChartTopTracksUseCase {
 			for _ in 0..<initialCount {
 				guard let next = iterator.next() else { break }
 				group.addTask {
-					let enriched = try? await self.trackRepository.fetchTrackInfo(for: next.element)
-					return (next.offset, enriched)
+					do {
+						let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
+						return (next.offset, enriched)
+					} catch {
+						print("Failed to fetch track info for \(next.element.title): \(error)")
+						return (next.offset, nil)
+					}
 				}
 			}
 
@@ -51,8 +56,13 @@ struct FetchChartTopTracksUseCaseImpl: FetchChartTopTracksUseCase {
 
 				if let next = iterator.next() {
 					group.addTask {
-						let enriched = try? await self.trackRepository.fetchTrackInfo(for: next.element)
-						return (next.offset, enriched)
+						do {
+							let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
+							return (next.offset, enriched)
+						} catch {
+							print("Failed to fetch track info for \(next.element.title): \(error)")
+							return (next.offset, nil)
+						}
 					}
 				}
 			}
