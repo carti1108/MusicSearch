@@ -16,11 +16,20 @@ struct TrackSearchState: Equatable {
 	var isLoading: Bool = false
 	var tracks: [Track] = []
 	var errorMessage: String? = nil
+	var currentPage: Int = 1
+	var totalResults: Int = 0
+	var isLoadingMore: Bool = false
+	
+	var canLoadMore: Bool {
+		return !isLoading && !isLoadingMore && tracks.count < totalResults
+	}
 }
 
 enum TrackSearchAction {
 	case search(keyword: String)
 	case select(track: Track)
+	case retry
+	case loadMore
 }
 
 @MainActor
@@ -29,6 +38,10 @@ final class TrackSearchViewModel {
 
 	private let searchSubject: PassthroughSubject<String, Never> = .init()
 	private var cancellables: Set<AnyCancellable> = .init()
+
+	private var lastKeyword: String?
+	
+	private let limit: Int = 20
 
 	private let debounceSeconds: TimeInterval
 	private let searchTracksUseCase: SearchTracksUseCase
@@ -47,6 +60,13 @@ final class TrackSearchViewModel {
 			self.searchSubject.send(keyword)
 		case .select(let track):
 			self.coordinator?.didSelect(track)
+
+		case .retry:
+			guard let lastKeyword = self.lastKeyword else { return }
+			self.performSearch(keyword: lastKeyword)
+			
+		case .loadMore:
+			self.loadMore()
 		}
 	}
 
@@ -65,22 +85,53 @@ final class TrackSearchViewModel {
 			self.state.tracks = []
 			self.state.isLoading = false
 			self.state.errorMessage = nil
+			self.state.currentPage = 1
+			self.state.totalResults = 0
 			return
 		}
+
+		self.lastKeyword = keyword
+		self.state.currentPage = 1
 
 		Task {
 			self.state.isLoading = true
 			self.state.errorMessage = nil
 
 			do {
-				let tracks = try await self.searchTracksUseCase.execute(query: keyword)
-				self.state.tracks = tracks
+				let result = try await self.searchTracksUseCase.execute(query: keyword, limit: self.limit, page: 1)
+				self.state.tracks = result.tracks
+				self.state.totalResults = result.totalResults
 			} catch {
+				print("TrackSearchViewModel Error: \(error)")
 				self.state.errorMessage = "검색 중 오류가 발생했습니다."
 				self.state.tracks = []
+				self.state.totalResults = 0
 			}
 
 			self.state.isLoading = false
+		}
+	}
+	
+	private func loadMore() {
+		guard self.state.canLoadMore, let keyword = self.lastKeyword else { return }
+		
+		let nextPage = self.state.currentPage + 1
+		
+		Task {
+			self.state.isLoadingMore = true
+			
+			do {
+				let result = try await self.searchTracksUseCase.execute(query: keyword, limit: self.limit, page: nextPage)
+				self.state.tracks.append(contentsOf: result.tracks)
+				self.state.currentPage = nextPage
+				// Total results might change, updating it is safe
+				self.state.totalResults = result.totalResults
+			} catch {
+				print("TrackSearchViewModel LoadMore Error: \(error)")
+				// Silent fail for load more, or maybe show a toast
+			}
+			
+			self.state.isLoadingMore = false
 		}
 	}
 }

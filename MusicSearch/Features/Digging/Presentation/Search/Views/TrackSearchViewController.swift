@@ -154,7 +154,10 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		self.lastPresentedErrorMessage = message
 		
 		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "확인", style: .default))
+		alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+		alert.addAction(UIAlertAction(title: "재시도", style: .default, handler: { [weak self] _ in
+			self?.viewModel.process(action: .retry)
+		}))
 		self.present(alert, animated: true)
 	}
 
@@ -167,6 +170,16 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		collectionView.deselectItem(at: indexPath, animated: true)
 		guard let track = self.dataSource.itemIdentifier(for: indexPath) else { return }
 		self.viewModel.process(action: .select(track: track))
+	}
+	
+	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+		let offsetY = scrollView.contentOffset.y
+		let contentHeight = scrollView.contentSize.height
+		let height = scrollView.frame.size.height
+		
+		if offsetY > contentHeight - height * 2 {
+			self.viewModel.process(action: .loadMore)
+		}
 	}
 }
 
