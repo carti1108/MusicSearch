@@ -9,7 +9,7 @@ import Foundation
 import NetworkLayer
 
 enum LastFMAPI {
-	case searchTracks(keyword: String)
+	case searchTracks(keyword: String, limit: Int, page: Int)
 	case fetchTopTracks(tag: String)
 	case fetchSimilarTracks(track: Track)
 	case getTrackInfo(track: Track)
@@ -50,9 +50,11 @@ extension LastFMAPI: Requestable {
 		]
 
 		switch self {
-		case .searchTracks(let keyword):
+		case .searchTracks(let keyword, let limit, let page):
 			params["method"] = "track.search"
 			params["track"] = keyword
+			params["limit"] = limit
+			params["page"] = page
 
 		case .fetchTopTracks(let tag):
 			params["method"] = "tag.gettoptracks"

@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol SearchTracksUseCase {
-	func execute(query: String) async throws -> [Track]
+	func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int)
 }
 
 final class SearchTrackUseCaseImpl: SearchTracksUseCase {
@@ -20,13 +20,15 @@ final class SearchTrackUseCaseImpl: SearchTracksUseCase {
 		self.trackRepository = trackRepository
 	}
 	
-	public func execute(query: String) async throws -> [Track] {
+	public func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
 		guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-			return []
+			return ([], 0)
 		}
 		
-		let tracks = try await self.trackRepository.searchTracks(query: query)
-		return await self.updateTracksWithDetails(tracks)
+		let result = try await self.trackRepository.searchTracks(query: query, limit: limit, page: page)
+		let enrichedTracks = await self.updateTracksWithDetails(result.tracks)
+		
+		return (enrichedTracks, result.totalResults)
 	}
 
 	private func updateTracksWithDetails(_ tracks: [Track]) async -> [Track] {
@@ -41,8 +43,13 @@ final class SearchTrackUseCaseImpl: SearchTracksUseCase {
 			for _ in 0..<initialCount {
 				guard let next = iterator.next() else { break }
 				group.addTask {
-					let enriched = try? await self.trackRepository.fetchTrackInfo(for: next.element)
-					return (next.offset, enriched)
+					do {
+						let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
+						return (next.offset, enriched)
+					} catch {
+						print("Failed to fetch track info for \(next.element.title): \(error)")
+						return (next.offset, nil)
+					}
 				}
 			}
 
@@ -53,8 +60,13 @@ final class SearchTrackUseCaseImpl: SearchTracksUseCase {
 
 				if let next = iterator.next() {
 					group.addTask {
-						let enriched = try? await self.trackRepository.fetchTrackInfo(for: next.element)
-						return (next.offset, enriched)
+						do {
+							let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
+							return (next.offset, enriched)
+						} catch {
+							print("Failed to fetch track info for \(next.element.title): \(error)")
+							return (next.offset, nil)
+						}
 					}
 				}
 			}

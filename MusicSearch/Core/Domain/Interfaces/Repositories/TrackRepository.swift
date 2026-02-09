@@ -8,7 +8,7 @@
 import Foundation
 
 protocol TrackRepository {
-	func searchTracks(query: String) async throws -> [Track]
+	func searchTracks(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int)
 
 	func fetchTopTracks(by tag: String) async throws -> [Track]
 

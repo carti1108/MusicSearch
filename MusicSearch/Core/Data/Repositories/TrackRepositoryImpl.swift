@@ -16,13 +16,16 @@ final class TrackRepositoryImpl: TrackRepository {
 		self.networkManager = networkManager
 	}
 
-	func searchTracks(query: String) async throws -> [Track] {
+	func searchTracks(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
 		let response = try await self.networkManager.perform(
-			with: LastFMAPI.searchTracks(keyword: query),
+			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
 			as: TrackSearchResponseDTO.self
 		)
 
-		return response.results.trackmatches.track.map { $0.toDomain() }
+		let tracks = response.results.trackmatches.track.map { $0.toDomain() }
+		let totalResults = Int(response.results.totalResults) ?? 0
+		
+		return (tracks, totalResults)
 	}
 	
 	func fetchTopTracks(by tag: String) async throws -> [Track] {

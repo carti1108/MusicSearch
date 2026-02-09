@@ -13,6 +13,16 @@ struct TrackSearchResponseDTO: Decodable {
 
 struct TrackMatchesContainerDTO: Decodable {
 	let trackmatches: TrackListDTO
+	let totalResults: String
+	let startIndex: String
+	let itemsPerPage: String
+
+	enum CodingKeys: String, CodingKey {
+		case trackmatches
+		case totalResults = "opensearch:totalResults"
+		case startIndex = "opensearch:startIndex"
+		case itemsPerPage = "opensearch:itemsPerPage"
+	}
 }
 
 struct TrackListDTO: Decodable {
