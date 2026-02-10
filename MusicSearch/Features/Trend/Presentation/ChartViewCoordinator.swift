@@ -7,11 +7,15 @@
 
 import UIKit
 
-final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoordinatorAction {
+final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoordinatorAction, MusicAppRouting {
 	var navigationController: UINavigationController
 	var childCoordinators: [Coordinator] = .init()
 
 	private let component: TrendComponent<T>
+	
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		self.component.fetchMusicAppDeepLinkUseCase
+	}
 
 	init(navigationController: UINavigationController, component: TrendComponent<T>) {
 		self.navigationController = navigationController
@@ -26,9 +30,9 @@ final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoor
 	func didSelect(item: ChartItem) {
 		if item.type == .tracks {
 			let track = Track(title: item.title, artist: item.subtitle, imageURL: item.imageURL)
-			self.component.spotifyService.openSpotify(for: track)
+			self.openMusicApp(for: track)
 		} else {
-			self.component.spotifyService.openSpotify(for: item.title)
+			self.openMusicApp(for: item.title)
 		}
 	}
 }

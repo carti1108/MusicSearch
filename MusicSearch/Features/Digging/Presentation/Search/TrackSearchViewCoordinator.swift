@@ -36,4 +36,3 @@ final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, Track
 		diggingCoordinator.start()
 	}
 }
-

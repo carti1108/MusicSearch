@@ -175,5 +175,3 @@ final class ChartViewModel {
 		}
 	}
 }
-
-

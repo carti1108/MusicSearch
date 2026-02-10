@@ -9,6 +9,5 @@ import Foundation
 
 protocol HomeDependency: Dependency {
 	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase { get }
-	var spotifyService: SpotifyServiceProtocol { get }
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
-

@@ -15,4 +15,3 @@ protocol DiggingDependency: Dependency {
 	
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 }
-

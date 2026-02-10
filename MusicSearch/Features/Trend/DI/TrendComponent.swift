@@ -16,9 +16,9 @@ final class TrendComponent<T: TrendDependency>: Component {
 	init(dependency: T) {
 		self.dependency = dependency
 	}
-	
-	var spotifyService: SpotifyServiceProtocol {
-		self.dependency.spotifyService
+
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		self.dependency.fetchMusicAppDeepLinkUseCase
 	}
 
 	@MainActor

@@ -7,8 +7,6 @@
 
 protocol TrendDependency: Dependency {
 	var fetchChartTopTracksUseCase: FetchChartTopTracksUseCase { get }
-
 	var fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase { get }
-	
-	var spotifyService: SpotifyServiceProtocol { get }
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }

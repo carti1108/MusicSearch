@@ -7,11 +7,15 @@
 
 import UIKit
 
-final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommendationCoordinatorAction {
+final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommendationCoordinatorAction, MusicAppRouting {
 	var navigationController: UINavigationController
 	var childCoordinators: [Coordinator] = .init()
 
 	private let component: HomeComponent<T>
+	
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		self.component.fetchMusicAppDeepLinkUseCase
+	}
 
 	init(navigationController: UINavigationController, component: HomeComponent<T>) {
 		self.navigationController = navigationController
@@ -24,6 +28,6 @@ final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommen
 	}
 	
 	func didSelect(track: Track) {
-		self.component.spotifyService.openSpotify(for: track)
+		self.openMusicApp(for: track)
 	}
 }

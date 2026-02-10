@@ -1,0 +1,13 @@
+//
+//  MusicAppRepository.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 2/10/26.
+//
+
+import Foundation
+
+protocol MusicAppRepository {
+	func fetchDeepLink(for track: Track) async -> URL?
+	func fetchDeepLink(for artist: String) async -> URL?
+}

@@ -48,4 +48,3 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 		return MusicDiggingViewController(viewModel: viewModel)
 	}
 }
-

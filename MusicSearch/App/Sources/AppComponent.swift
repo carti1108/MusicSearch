@@ -27,15 +27,21 @@ final class AppComponent {
 	var chartRepository: ChartRepository {
 		ChartRepositoryImpl(networkManager: self.networkManager)
 	}
+	var musicAppRepository: MusicAppRepository {
+		SpotifyAppRepository(
+			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
+			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+		)
+	}
 
 	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
 		FetchCurrentWeatherUseCaseImpl(locationRepository: self.locationRepository, weatherRepository: self.weatherRepository)
 	}
 
-	let spotifyServiceInstance: SpotifyService // Singleton-like for lifecycle
-	
-	// ... existing init ...
-	
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		FetchMusicAppDeepLinkUseCaseImpl(musicAppRepository: self.musicAppRepository)
+	}
+
 	init(
 		networkManager: NetworkRequesting = NetworkManager.shared,
 		locationManager: LocationManaging = CLLocationManager(),
@@ -44,10 +50,6 @@ final class AppComponent {
 		self.networkManager = networkManager
 		self.locationManager = locationManager
 		self.weatherAPIConfiguration = weatherAPIConfiguration
-		
-		let spotifyClientId = Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? ""
-		let spotifyClientSecret = Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
-		self.spotifyServiceInstance = SpotifyService(clientId: spotifyClientId, clientSecret: spotifyClientSecret)
 	}
 }
 
@@ -80,10 +82,5 @@ extension AppComponent: TrendDependency {
 		FetchChartTopArtistsUseCaseImpl(chartRepository: self.chartRepository)
 	}
 	
-	var spotifyService: SpotifyServiceProtocol {
-		self.spotifyServiceInstance
-	}
+
 }
-
-
-
