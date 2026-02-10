@@ -15,5 +15,3 @@ struct ChartItem: Hashable {
 	let imageURL: URL?
 	let type: ChartType
 }
-
-

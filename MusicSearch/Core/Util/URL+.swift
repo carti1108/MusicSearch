@@ -17,4 +17,3 @@ extension URL {
 		return components.url ?? self
 	}
 }
-

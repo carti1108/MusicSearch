@@ -35,7 +35,6 @@ final class AppRoot {
 	func makeRootTabBarController() -> UITabBarController {
 		let tabBarController = UITabBarController()
 
-		// Home (Weather + 추천 음악)
 		let homeNavigationController = UINavigationController()
 		let homeViewCoordinator = self.homeComponent.makeHomeViewCoordinator(navigationController: homeNavigationController)
 		self.homeCoordinator = homeViewCoordinator
@@ -46,7 +45,6 @@ final class AppRoot {
 			selectedImage: nil
 		)
 
-		// Track 검색
 		let musicNavigationController = UINavigationController()
 		let musicCoordinator = self.diggingComponent.makeTrackSearchCoordinator(
 			navigationController: musicNavigationController
@@ -59,7 +57,6 @@ final class AppRoot {
 			selectedImage: nil
 		)
 
-		// Chart
 		let chartNavigationController = UINavigationController()
 		let chartViewCoordinator = self.trendComponent.makeChartViewCoordinator(navigationController: chartNavigationController)
 		self.chartCoordinator = chartViewCoordinator
@@ -79,4 +76,3 @@ final class AppRoot {
 		return tabBarController
 	}
 }
-

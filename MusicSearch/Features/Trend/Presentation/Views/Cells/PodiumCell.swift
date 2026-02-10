@@ -140,5 +140,3 @@ final class PodiumCell: UICollectionViewCell {
 		}
 	}
 }
-
-

@@ -14,5 +14,3 @@ enum LastFMURL {
 		return url.forcedHTTPS
 	}
 }
-
-

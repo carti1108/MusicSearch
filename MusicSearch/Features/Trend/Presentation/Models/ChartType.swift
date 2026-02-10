@@ -9,5 +9,3 @@ enum ChartType: Int, CaseIterable {
 	case tracks
 	case artists
 }
-
-

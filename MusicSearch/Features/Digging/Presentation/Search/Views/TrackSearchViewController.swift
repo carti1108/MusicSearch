@@ -182,5 +182,3 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		}
 	}
 }
-
-

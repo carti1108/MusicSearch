@@ -22,5 +22,3 @@ struct LastFMArtistNameDTO: Decodable {
 	let mbid: String?
 	let url: String
 }
-
-

@@ -121,5 +121,3 @@ final class RankListCell: UICollectionViewCell {
 		}
 	}
 }
-
-
