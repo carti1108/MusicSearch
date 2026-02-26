@@ -54,7 +54,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		guard let album = trackInfoResponse.track.album,
 			  let images = album.image else {
-			return Track(id: track.id, title: track.title, artist: track.artist, imageURL: nil)
+			return Track(id: track.id, mbid: track.mbid, title: track.title, artist: track.artist, imageURL: nil)
 		}
 
 		let imageString = images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
@@ -66,6 +66,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		return Track(
 			id: track.id,
+			mbid: track.mbid,
 			title: track.title,
 			artist: track.artist,
 			imageURL: imageURL

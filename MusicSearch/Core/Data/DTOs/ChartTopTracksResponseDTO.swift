@@ -25,11 +25,14 @@ struct ChartTrackDTO: Decodable {
 	let image: [LastFMImageDTO]?
 
 	func toDomain() -> Track {
+		let normalizedMBID = self.mbid?.trimmingCharacters(in: .whitespacesAndNewlines)
+		let resolvedMBID = (normalizedMBID?.isEmpty == false) ? normalizedMBID : nil
 		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
 					   ?? self.image?.first { !$0.text.isEmpty }?.text
 
 		return Track(
-			id: (self.mbid?.isEmpty == false) ? self.mbid! : UUID().uuidString,
+			id: resolvedMBID ?? UUID().uuidString,
+			mbid: resolvedMBID,
 			title: self.name,
 			artist: self.artist.name,
 			imageURL: LastFMURL.imageURL(from: imageString)

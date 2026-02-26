@@ -63,8 +63,8 @@ extension LastFMAPI: Requestable {
 		case .fetchSimilarTracks(let track):
 			params["method"] = "track.getsimilar"
 			
-			if !track.id.isEmpty && track.id.count > 10 {
-				params["mbid"] = track.id
+			if let mbid = track.mbid?.trimmingCharacters(in: .whitespacesAndNewlines), !mbid.isEmpty {
+				params["mbid"] = mbid
 			} else {
 				params["track"] = track.title
 				params["artist"] = track.artist
