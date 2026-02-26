@@ -11,10 +11,10 @@ import Foundation
 
 struct FetchTracksByTagUseCaseTests {
 	
-	var mockRepository: MockMusicRepository
+	var mockRepository: MockTrackRepository
 	
 	init() {
-		self.mockRepository = MockMusicRepository()
+		self.mockRepository = MockTrackRepository()
 	}
 	
 	@Test("태그로 트랙 조회가 정상적으로 동작하는가")
@@ -27,7 +27,7 @@ struct FetchTracksByTagUseCaseTests {
 		mockRepository.fetchTopTracksResult = .success(expectedTracks)
 		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 		
-		let useCase = FetchTracksByTagUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
 		let tracks = try await useCase.execute(tag: "chill")
@@ -42,7 +42,7 @@ struct FetchTracksByTagUseCaseTests {
 	@Test("빈 태그를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithEmptyTag() async throws {
 		// Given
-		let useCase = FetchTracksByTagUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
 		let tracks = try await useCase.execute(tag: "")
@@ -55,7 +55,7 @@ struct FetchTracksByTagUseCaseTests {
 	@Test("공백만 있는 태그를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithWhitespaceTag() async throws {
 		// Given
-		let useCase = FetchTracksByTagUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
 		let tracks = try await useCase.execute(tag: "   ")
@@ -71,7 +71,7 @@ struct FetchTracksByTagUseCaseTests {
 		mockRepository.fetchTopTracksResult = .success([
 			Track(title: "Track", artist: "Artist", imageURL: nil)
 		])
-		let useCase = FetchTracksByTagUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 		
 		// When & Then
 		let tags = ["rock", "pop", "jazz", "chill", "ambient"]
@@ -91,7 +91,7 @@ struct FetchTracksByTagUseCaseTests {
 		}
 		mockRepository.fetchTopTracksResult = .failure(TestError.testError)
 		
-		let useCase = FetchTracksByTagUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 		
 		// When & Then
 		await #expect(throws: TestError.self) {
@@ -99,4 +99,3 @@ struct FetchTracksByTagUseCaseTests {
 		}
 	}
 }
-

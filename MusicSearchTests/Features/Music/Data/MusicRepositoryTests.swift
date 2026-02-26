@@ -79,14 +79,10 @@ struct TrackRepositoryTests {
 				track: [
 					LastFMTrackTagDTO(
 						name: "Chill Track 1",
-						artist: LastFMArtistDTO(
+						artist: LastFMArtistNameDTO(
 							name: "Chill Artist",
 							mbid: nil,
-							url: "https://test.com",
-							image: nil,
-							listeners: nil,
-							tags: nil,
-							bio: nil
+							url: "https://test.com"
 						),
 						url: "https://test.com",
 						mbid: nil,
@@ -94,14 +90,10 @@ struct TrackRepositoryTests {
 					),
 					LastFMTrackTagDTO(
 						name: "Chill Track 2",
-						artist: LastFMArtistDTO(
+						artist: LastFMArtistNameDTO(
 							name: "Chill Artist 2",
 							mbid: nil,
-							url: "https://test.com",
-							image: nil,
-							listeners: nil,
-							tags: nil,
-							bio: nil
+							url: "https://test.com"
 						),
 						url: "https://test.com",
 						mbid: nil,
@@ -134,14 +126,10 @@ struct TrackRepositoryTests {
 				track: [
 					LastFMTrackSimilarDTO(
 						name: "Similar Track 1",
-						artist: LastFMArtistDTO(
+						artist: LastFMArtistNameDTO(
 							name: "Similar Artist 1",
 							mbid: nil,
-							url: "https://test.com",
-							image: nil,
-							listeners: nil,
-							tags: nil,
-							bio: nil
+							url: "https://test.com"
 						),
 						url: "https://test.com",
 						mbid: nil,
@@ -169,14 +157,10 @@ struct TrackRepositoryTests {
 		let getInfoDTO = TrackInfoResponseDTO(
 			track: LastFMTrackInfoDTO(
 				name: "Test Track",
-				artist: LastFMArtistDTO(
+				artist: LastFMArtistNameDTO(
 					name: "Test Artist",
 					mbid: nil,
-					url: "https://test.com",
-					image: nil,
-					listeners: nil,
-					tags: nil,
-					bio: nil
+					url: "https://test.com"
 				),
 				album: LastFMAlbumInfoDTO(
 					title: "Album",
@@ -195,4 +179,3 @@ struct TrackRepositoryTests {
 		#expect(enriched.imageURL?.absoluteString == "https://image.com/from_getinfo.jpg")
 	}
 }
-

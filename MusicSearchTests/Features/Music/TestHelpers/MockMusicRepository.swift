@@ -1,5 +1,5 @@
 //
-//  MockMusicRepository.swift
+//  MockTrackRepository.swift
 //  MusicSearchTests
 //
 //  Created by Kiseok on 12/7/25.
@@ -8,30 +8,21 @@
 import Foundation
 @testable import MusicSearch
 
-final class MockMusicRepository: MusicRepository {
+final class MockTrackRepository: TrackRepository {
 	
-	var searchTracksResult: Result<[Track], Error> = .success([])
+	var searchTracksResult: Result<(tracks: [Track], totalResults: Int), Error> = .success(([], 0))
 	var fetchTopTracksResult: Result<[Track], Error> = .success([])
 	var fetchSimilarTracksResult: Result<[Track], Error> = .success([])
-	var searchArtistsResult: Result<[Artist], Error> = .success([])
-	var fetchAlbumsResult: Result<[Album], Error> = .success([])
-	var fetchArtistInfoResult: Result<Artist, Error> = .success(Artist(name: "Mock Artist", imageURL: nil))
 	var fetchTrackInfoResult: Result<Track, Error> = .success(Track(title: "Mock Track", artist: "Mock Artist", imageURL: nil))
 	
 	var searchTracksCallCount = 0
 	var fetchTopTracksCallCount = 0
 	var fetchSimilarTracksCallCount = 0
-	var searchArtistsCallCount = 0
-	var fetchAlbumsCallCount = 0
-	var fetchArtistInfoCallCount = 0
 	var fetchTrackInfoCallCount = 0
 	
 	var lastSearchTracksQuery: String?
 	var lastFetchTopTracksTag: String?
 	var lastFetchSimilarTracksTrack: Track?
-	var lastSearchArtistsQuery: String?
-	var lastFetchAlbumsArtist: Artist?
-	var lastFetchArtistInfoArtist: Artist?
 	var lastFetchTrackInfoTrack: Track?
 	
 	func searchTracks(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
@@ -39,8 +30,8 @@ final class MockMusicRepository: MusicRepository {
 		self.lastSearchTracksQuery = query
 		
 		switch self.searchTracksResult {
-		case .success(let tracks):
-			return (tracks, tracks.count)
+		case .success(let result):
+			return result
 		case .failure(let error):
 			throw error
 		}
@@ -69,42 +60,6 @@ final class MockMusicRepository: MusicRepository {
 			throw error
 		}
 	}
-	
-	func searchArtists(query: String) async throws -> [Artist] {
-		self.searchArtistsCallCount += 1
-		self.lastSearchArtistsQuery = query
-		
-		switch self.searchArtistsResult {
-		case .success(let artists):
-			return artists
-		case .failure(let error):
-			throw error
-		}
-	}
-	
-	func fetchAlbums(for artist: Artist) async throws -> [Album] {
-		self.fetchAlbumsCallCount += 1
-		self.lastFetchAlbumsArtist = artist
-		
-		switch self.fetchAlbumsResult {
-		case .success(let albums):
-			return albums
-		case .failure(let error):
-			throw error
-		}
-	}
-
-	func fetchArtistInfo(for artist: Artist) async throws -> Artist {
-		self.fetchArtistInfoCallCount += 1
-		self.lastFetchArtistInfoArtist = artist
-
-		switch self.fetchArtistInfoResult {
-		case .success(let artist):
-			return artist
-		case .failure(let error):
-			throw error
-		}
-	}
 
 	func fetchTrackInfo(for track: Track) async throws -> Track {
 		self.fetchTrackInfoCallCount += 1
@@ -118,4 +73,3 @@ final class MockMusicRepository: MusicRepository {
 		}
 	}
 }
-

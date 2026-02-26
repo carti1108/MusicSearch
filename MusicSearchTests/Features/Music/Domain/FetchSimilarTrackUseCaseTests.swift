@@ -11,10 +11,10 @@ import Foundation
 
 struct FetchSimilarTrackUseCaseTests {
 	
-	var mockRepository: MockMusicRepository
+	var mockRepository: MockTrackRepository
 	
 	init() {
-		self.mockRepository = MockMusicRepository()
+		self.mockRepository = MockTrackRepository()
 	}
 	
 	@Test("유사 트랙 조회가 정상적으로 동작하는가")
@@ -28,7 +28,7 @@ struct FetchSimilarTrackUseCaseTests {
 		mockRepository.fetchSimilarTracksResult = .success(similarTracks)
 		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 		
-		let useCase = FetchSimilarTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchSimilarTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
 		let result = try await useCase.execute(targetTrack: targetTrack)
@@ -46,7 +46,7 @@ struct FetchSimilarTrackUseCaseTests {
 		let targetTrack = Track(title: "Test Track", artist: "Test Artist", imageURL: nil)
 		mockRepository.fetchSimilarTracksResult = .success([])
 		
-		let useCase = FetchSimilarTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchSimilarTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When
 		let result = try await useCase.execute(targetTrack: targetTrack)
@@ -65,7 +65,7 @@ struct FetchSimilarTrackUseCaseTests {
 		let targetTrack = Track(title: "Test Track", artist: "Test Artist", imageURL: nil)
 		mockRepository.fetchSimilarTracksResult = .failure(TestError.testError)
 		
-		let useCase = FetchSimilarTrackUseCaseImpl(musicRepository: mockRepository)
+		let useCase = FetchSimilarTrackUseCaseImpl(trackRepository: mockRepository)
 		
 		// When & Then
 		await #expect(throws: TestError.self) {
@@ -73,4 +73,3 @@ struct FetchSimilarTrackUseCaseTests {
 		}
 	}
 }
-
