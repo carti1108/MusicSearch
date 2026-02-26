@@ -14,12 +14,26 @@ final class AppComponent {
 	let networkManager: NetworkRequesting
 	let locationManager: LocationManaging
 	let weatherAPIConfiguration: WeatherAPIConfiguration
+	
+	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
+		SpotifyAppRepository(
+			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
+			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+		)
+	}()
+
+	private lazy var fetchMusicAppDeepLinkUseCaseInstance: FetchMusicAppDeepLinkUseCase = {
+		FetchMusicAppDeepLinkUseCaseImpl(musicAppRepository: self.musicAppRepositoryInstance)
+	}()
 
 	var  locationRepository: LocationRepository {
 		LocationRepositoryImpl(locationManager: self.locationManager)
 	}
 	var  weatherRepository: WeatherRepository {
-		WeatherRepositoryImpl(networkManager: self.networkManager)
+		WeatherRepositoryImpl(
+			networkManager: self.networkManager,
+			configuration: self.weatherAPIConfiguration
+		)
 	}
 	var trackRepository: TrackRepository {
 		TrackRepositoryImpl(networkManager: self.networkManager)
@@ -28,10 +42,7 @@ final class AppComponent {
 		ChartRepositoryImpl(networkManager: self.networkManager)
 	}
 	var musicAppRepository: MusicAppRepository {
-		SpotifyAppRepository(
-			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
-			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
-		)
+		self.musicAppRepositoryInstance
 	}
 
 	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
@@ -39,7 +50,7 @@ final class AppComponent {
 	}
 
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-		FetchMusicAppDeepLinkUseCaseImpl(musicAppRepository: self.musicAppRepository)
+		self.fetchMusicAppDeepLinkUseCaseInstance
 	}
 
 	init(

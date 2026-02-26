@@ -7,11 +7,19 @@
 
 import Foundation
 
-final class SpotifyAppRepository: MusicAppRepository {
+actor SpotifyAppRepository: MusicAppRepository {
 	
 	private let clientId: String
 	private let clientSecret: String
 	private var accessToken: String?
+	private var accessTokenExpiry: Date?
+	private let tokenRefreshLeeway: TimeInterval = 60
+
+	private enum SpotifyRepositoryError: Error {
+		case unauthorized
+		case invalidURL
+		case invalidURI
+	}
 	
 	init(clientId: String, clientSecret: String) {
 		self.clientId = clientId
@@ -29,8 +37,7 @@ final class SpotifyAppRepository: MusicAppRepository {
 	
 	private func searchAndGetURL(query: String, type: String) async -> URL? {
 		do {
-			let token = try await self.getAccessToken()
-			let urlString = try await self.search(query: query, type: type, token: token)
+			let urlString = try await self.searchWithRetry(query: query, type: type)
 			return URL(string: urlString)
 		} catch {
 			print("SpotifyService Error: \(error)")
@@ -39,9 +46,23 @@ final class SpotifyAppRepository: MusicAppRepository {
 		}
 	}
 	
-	private func getAccessToken() async throws -> String {
-		if let token = self.accessToken {
+	private func searchWithRetry(query: String, type: String) async throws -> String {
+		let token = try await self.getAccessToken()
+		do {
+			return try await self.search(query: query, type: type, token: token)
+		} catch SpotifyRepositoryError.unauthorized {
+			self.clearToken()
+			let refreshedToken = try await self.getAccessToken(forceRefresh: true)
+			return try await self.search(query: query, type: type, token: refreshedToken)
+		}
+	}
+	
+	private func getAccessToken(forceRefresh: Bool = false) async throws -> String {
+		if !forceRefresh, self.isTokenValid, let token = self.accessToken {
 			return token
+		}
+		if forceRefresh {
+			self.clearToken()
 		}
 		
 		let api = SpotifyAPI.token(clientId: self.clientId, clientSecret: self.clientSecret)
@@ -58,6 +79,7 @@ final class SpotifyAppRepository: MusicAppRepository {
 		
 		let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
 		self.accessToken = tokenResponse.access_token
+		self.accessTokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
 		return tokenResponse.access_token
 	}
 	
@@ -65,36 +87,58 @@ final class SpotifyAppRepository: MusicAppRepository {
 		let api = SpotifyAPI.search(query: query, type: type, token: token)
 		var components = URLComponents(url: api.url, resolvingAgainstBaseURL: true)!
 		components.queryItems = api.queryItems
+		guard let url = components.url else { throw SpotifyRepositoryError.invalidURL }
 		
-		var request = URLRequest(url: components.url!)
+		var request = URLRequest(url: url)
 		request.httpMethod = api.method
 		request.allHTTPHeaderFields = api.headers
 		
 		let (data, response) = try await URLSession.shared.data(for: request)
 		
-		guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+		guard let httpResponse = response as? HTTPURLResponse else {
+			throw URLError(.badServerResponse)
+		}
+		if httpResponse.statusCode == 401 {
+			throw SpotifyRepositoryError.unauthorized
+		}
+		guard (200...299).contains(httpResponse.statusCode) else {
 			throw URLError(.badServerResponse)
 		}
 		
 		if type == "track" {
 			let result = try JSONDecoder().decode(SpotifyTrackSearchResponse.self, from: data)
 			guard let item = result.tracks.items.first else { throw URLError(.resourceUnavailable) }
-
-			return item.external_urls?.spotify ?? self.convertToWebURL(uri: item.uri)
+			if let spotifyURL = item.external_urls?.spotify {
+				return spotifyURL
+			}
+			return try self.convertToWebURL(uri: item.uri)
 		} else {
 			let result = try JSONDecoder().decode(SpotifyArtistSearchResponse.self, from: data)
 			guard let item = result.artists.items.first else { throw URLError(.resourceUnavailable) }
-			return item.external_urls?.spotify ?? self.convertToWebURL(uri: item.uri)
+			if let spotifyURL = item.external_urls?.spotify {
+				return spotifyURL
+			}
+			return try self.convertToWebURL(uri: item.uri)
 		}
 	}
 	
-	private func convertToWebURL(uri: String) -> String {
+	private func convertToWebURL(uri: String) throws -> String {
 
 		let components = uri.components(separatedBy: ":")
-		guard components.count == 3 else { return "" }
+		guard components.count == 3 else { throw SpotifyRepositoryError.invalidURI }
 		let type = components[1]
 		let id = components[2]
 		return "https://open.spotify.com/\(type)/\(id)"
+	}
+	
+	private var isTokenValid: Bool {
+		guard let expiry = self.accessTokenExpiry else { return false }
+		return Date().addingTimeInterval(self.tokenRefreshLeeway) < expiry
+	}
+	
+	private func clearToken() {
+		self.accessToken = nil
+		self.accessTokenExpiry = nil
 	}
 	
 	private func fallbackWebURL(query: String) -> URL? {
