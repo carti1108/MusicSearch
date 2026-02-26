@@ -6,15 +6,21 @@
 //
 
 import UIKit
-import Combine
 
-final class MusicDiggingViewController: UIViewController {
+@MainActor
+protocol MusicDiggingViewableListener: AnyObject {
+	func viewDidAppear()
+	func didTapRetry()
+	func didSelectRecommendation(at indexPath: IndexPath)
+}
+
+@MainActor
+final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, LoadingPresentable, ErrorPresentable {
 
 	enum Section { case recommendations }
 
-	private let viewModel: MusicDiggingViewModel
-	private var cancellables = Set<AnyCancellable>()
-	private var lastPresentedErrorMessage: String?
+	weak var listener: MusicDiggingViewableListener?
+	var lastPresentedErrorMessage: String?
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
@@ -25,13 +31,13 @@ final class MusicDiggingViewController: UIViewController {
 		sv.translatesAutoresizingMaskIntoConstraints = false
 		return sv
 	}()
-	
+
 	private let contentView: UIView = {
 		let view = UIView()
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
-	
+
 	private let seedTrackView = SeedTrackView()
 
 	private let sectionTitleLabel: UILabel = {
@@ -43,7 +49,7 @@ final class MusicDiggingViewController: UIViewController {
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
-	
+
 	private let loadingIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .medium)
 		indicator.color = .white
@@ -51,6 +57,8 @@ final class MusicDiggingViewController: UIViewController {
 		indicator.translatesAutoresizingMaskIntoConstraints = false
 		return indicator
 	}()
+
+	var loadingIndicatorView: UIActivityIndicatorView { self.loadingIndicator }
 
 	private lazy var collectionView: UICollectionView = {
 		let layout = self.createCarouselLayout()
@@ -65,8 +73,8 @@ final class MusicDiggingViewController: UIViewController {
 		return cv
 	}()
 
-	init(viewModel: MusicDiggingViewModel) {
-		self.viewModel = viewModel
+	init(listener: MusicDiggingViewableListener) {
+		self.listener = listener
 		super.init(nibName: nil, bundle: nil)
 	}
 
@@ -79,12 +87,38 @@ final class MusicDiggingViewController: UIViewController {
 		self.setupView()
 		self.setupConstraints()
 		self.configureDataSource()
-		self.bindViewModel()
 	}
 
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
-		self.viewModel.process(action: .viewWillAppear)
+		self.listener?.viewDidAppear()
+	}
+
+	func updateSeedTrack(_ track: Track) {
+		UIView.transition(with: self.seedTrackView, duration: 0.3, options: .transitionCrossDissolve) {
+			self.seedTrackView.configure(with: track)
+		}
+	}
+
+	func updateRecommendations(_ tracks: [Track]) {
+		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
+		snapshot.appendSections([.recommendations])
+		snapshot.appendItems(tracks)
+		self.dataSource.apply(snapshot, animatingDifferences: true)
+
+		if !tracks.isEmpty {
+			self.collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+		}
+	}
+
+	func showLoading(_ isShow: Bool) {
+		self.setLoading(isShow)
+	}
+
+	func showError(_ message: String?) {
+		self.presentErrorIfNeeded(message, onRetry: { [weak self] in
+			self?.listener?.didTapRetry()
+		})
 	}
 
 	private func setupView() {
@@ -97,7 +131,7 @@ final class MusicDiggingViewController: UIViewController {
 
 		self.view.addSubview(self.scrollView)
 		self.scrollView.addSubview(self.contentView)
-		
+
 		self.contentView.addSubview(self.seedTrackView)
 		self.contentView.addSubview(self.sectionTitleLabel)
 		self.contentView.addSubview(self.collectionView)
@@ -108,7 +142,7 @@ final class MusicDiggingViewController: UIViewController {
 
 	private func setupConstraints() {
 		let screenWidth = UIScreen.main.bounds.width
-		
+
 		NSLayoutConstraint.activate([
 			self.scrollView.topAnchor.constraint(equalTo: self.view.topAnchor),
 			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
@@ -134,98 +168,53 @@ final class MusicDiggingViewController: UIViewController {
 			self.collectionView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
 			self.collectionView.heightAnchor.constraint(equalToConstant: screenWidth * 0.4 + 60),
 			self.collectionView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -20),
-			
+
 			self.loadingIndicator.centerXAnchor.constraint(equalTo: self.collectionView.centerXAnchor),
 			self.loadingIndicator.centerYAnchor.constraint(equalTo: self.collectionView.centerYAnchor)
 		])
 	}
 
 	private func createCarouselLayout() -> UICollectionViewLayout {
-		return UICollectionViewCompositionalLayout { sectionIndex, env in
-			let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-												  heightDimension: .fractionalHeight(1.0))
+		return UICollectionViewCompositionalLayout { _, env in
+			let itemSize = NSCollectionLayoutSize(
+				widthDimension: .fractionalWidth(1.0),
+				heightDimension: .fractionalHeight(1.0)
+			)
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
 			let groupWidth = env.container.contentSize.width * 0.4
 			let groupHeight = groupWidth + 40
-			let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(groupWidth),
-												   heightDimension: .absolute(groupHeight))
+			let groupSize = NSCollectionLayoutSize(
+				widthDimension: .absolute(groupWidth),
+				heightDimension: .absolute(groupHeight)
+			)
 			let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
 			let section = NSCollectionLayoutSection(group: group)
 			section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
 			section.interGroupSpacing = 16
 			section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
-
 			return section
 		}
 	}
 
 	private func configureDataSource() {
 		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(collectionView: self.collectionView) {
-			(collectionView, indexPath, track) -> UICollectionViewCell? in
-
-			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackCarouselCell.reuseIdentifier, for: indexPath) as? TrackCarouselCell else {
+			collectionView, indexPath, track in
+			guard let cell = collectionView.dequeueReusableCell(
+				withReuseIdentifier: TrackCarouselCell.reuseIdentifier,
+				for: indexPath
+			) as? TrackCarouselCell else {
 				return UICollectionViewCell()
 			}
 			cell.configure(with: track)
 			return cell
 		}
 	}
-
-	private func bindViewModel() {
-		self.viewModel.$state
-			.receive(on: DispatchQueue.main)
-			.sink { [weak self] state in
-				self?.updateUI(with: state)
-			}
-			.store(in: &self.cancellables)
-	}
-
-	private func updateUI(with state: MusicDiggingState) {
-		self.setLoading(state.isLoading)
-		self.presentErrorIfNeeded(state.errorMessage)
-		UIView.transition(with: self.seedTrackView, duration: 0.3, options: .transitionCrossDissolve) {
-			self.seedTrackView.configure(with: state.seedTrack)
-		}
-
-		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
-		snapshot.appendSections([.recommendations])
-		snapshot.appendItems(state.recommendations)
-		self.dataSource.apply(snapshot, animatingDifferences: true)
-
-		if !state.recommendations.isEmpty {
-			 self.collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
-		}
-	}
-	
-	private func setLoading(_ isLoading: Bool) {
-		if isLoading {
-			self.loadingIndicator.startAnimating()
-		} else {
-			self.loadingIndicator.stopAnimating()
-		}
-	}
-	
-	private func presentErrorIfNeeded(_ message: String?) {
-		guard let message, !message.isEmpty else { return }
-		guard self.lastPresentedErrorMessage != message else { return }
-		guard self.presentedViewController == nil else { return }
-		self.lastPresentedErrorMessage = message
-		
-		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-		alert.addAction(UIAlertAction(title: "재시도", style: .default, handler: { [weak self] _ in
-			self?.viewModel.process(action: .retry)
-		}))
-		self.present(alert, animated: true)
-	}
 }
 
 extension MusicDiggingViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-		guard let selectedTrack = self.dataSource.itemIdentifier(for: indexPath) else { return }
-
-		self.viewModel.process(action: .selectTrack(track: selectedTrack))
+		self.listener?.didSelectRecommendation(at: indexPath)
 	}
 }

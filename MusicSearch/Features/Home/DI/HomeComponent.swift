@@ -36,6 +36,8 @@ final class HomeComponent<T: HomeDependency>: Component {
 	func makeWeatherRecommendationViewController(coordinator: WeatherRecommendationCoordinatorAction) -> WeatherRecommendationViewController {
 		let vm = self.makeWeatherRecommendationViewModel()
 		vm.coordinator = coordinator
-		return WeatherRecommendationViewController(viewModel: vm)
+		let vc = WeatherRecommendationViewController(listener: vm)
+		vm.view = vc
+		return vc
 	}
 }

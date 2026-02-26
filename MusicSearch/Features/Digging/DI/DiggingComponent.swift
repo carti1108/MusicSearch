@@ -39,12 +39,16 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 	func makeTrackSearchViewController(coordinator: TrackSearchViewCoordinatorAction) -> UIViewController {
 		let vm = self.makeTrackSearchViewModel()
 		vm.coordinator = coordinator
-		return TrackSearchViewController(viewModel: vm)
+		let vc = TrackSearchViewController(listener: vm)
+		vm.view = vc
+		return vc
 	}
 
 	@MainActor
 	func makeMusicDiggingViewController(seedTrack: Track) -> MusicDiggingViewController {
 		let viewModel = self.makeMusicDiggingViewModel(seedTrack: seedTrack, fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase)
-		return MusicDiggingViewController(viewModel: viewModel)
+		let vc = MusicDiggingViewController(listener: viewModel)
+		viewModel.view = vc
+		return vc
 	}
 }

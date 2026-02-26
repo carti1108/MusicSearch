@@ -6,20 +6,27 @@
 //
 
 import UIKit
-import Combine
 
-final class ChartViewController: UIViewController {
+@MainActor
+protocol ChartViewableListener: AnyObject {
+	func viewDidLoad()
+	func didChangeSegment(index: Int)
+	func didTapRefresh()
+	func didSelectItem(at indexPath: IndexPath)
+}
+
+@MainActor
+final class ChartViewController: UIViewController, ChartViewable, LoadingPresentable, ErrorPresentable {
 
 	enum Section: Int {
 		case podium
 		case list
 	}
 
-	private let viewModel: ChartViewModel
-	private var cancellables: Set<AnyCancellable> = .init()
+	weak var listener: ChartViewableListener?
 	private var dataSource: UICollectionViewDiffableDataSource<Section, ChartItem>!
-	private var lastPresentedErrorMessage: String?
-	
+	var lastPresentedErrorMessage: String?
+
 	private let loadingIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .large)
 		indicator.hidesWhenStopped = true
@@ -27,8 +34,10 @@ final class ChartViewController: UIViewController {
 		return indicator
 	}()
 
-	init(viewModel: ChartViewModel) {
-		self.viewModel = viewModel
+	var loadingIndicatorView: UIActivityIndicatorView { self.loadingIndicator }
+
+	init(listener: ChartViewableListener) {
+		self.listener = listener
 		super.init(nibName: nil, bundle: nil)
 	}
 
@@ -53,7 +62,6 @@ final class ChartViewController: UIViewController {
 		cv.translatesAutoresizingMaskIntoConstraints = false
 		cv.delegate = self
 		cv.showsVerticalScrollIndicator = false
-
 		cv.alwaysBounceVertical = true
 
 		cv.register(PodiumCell.self, forCellWithReuseIdentifier: PodiumCell.identifier)
@@ -65,10 +73,40 @@ final class ChartViewController: UIViewController {
 		super.viewDidLoad()
 		setupUI()
 		configureDataSource()
-		bindViewModel()
-		self.viewModel.process(action: .viewDidLoad)
+		self.listener?.viewDidLoad()
 	}
-	
+
+	func updateSegment(to index: Int) {
+		if self.segmentControl.selectedSegmentIndex != index {
+			self.segmentControl.selectedSegmentIndex = index
+		}
+	}
+
+	func update(podiumItems: [ChartItem], listItems: [ChartItem]) {
+		var snapshot = NSDiffableDataSourceSnapshot<Section, ChartItem>()
+		snapshot.appendSections([.podium])
+		snapshot.appendItems(podiumItems, toSection: .podium)
+
+		if !listItems.isEmpty {
+			snapshot.appendSections([.list])
+			snapshot.appendItems(listItems, toSection: .list)
+		}
+
+		UIView.performWithoutAnimation {
+			self.dataSource.apply(snapshot, animatingDifferences: false)
+		}
+	}
+
+	func showLoading(_ isShow: Bool) {
+		self.setLoading(isShow)
+	}
+
+	func showError(_ message: String?) {
+		self.presentErrorIfNeeded(message, onRetry: { [weak self] in
+			self?.listener?.didTapRefresh()
+		})
+	}
+
 	private func setupUI() {
 		view.backgroundColor = .systemBackground
 		navigationItem.title = "Global Trend"
@@ -87,15 +125,14 @@ final class ChartViewController: UIViewController {
 			collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
 			collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 			collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-			
+
 			loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 			loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
 		])
 	}
 
 	@objc private func segmentChanged(_ sender: UISegmentedControl) {
-		let type: ChartType = sender.selectedSegmentIndex == 0 ? .tracks : .artists
-		self.viewModel.process(action: .changeType(type))
+		self.listener?.didChangeSegment(index: sender.selectedSegmentIndex)
 	}
 
 	private func createLayout() -> UICollectionViewLayout {
@@ -104,15 +141,11 @@ final class ChartViewController: UIViewController {
 
 			switch section {
 			case .podium:
-				let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0/3.0),
-													  heightDimension: .fractionalHeight(1.0))
+				let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0/3.0), heightDimension: .fractionalHeight(1.0))
 				let item = NSCollectionLayoutItem(layoutSize: itemSize)
 				item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
-
-				let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-													   heightDimension: .fractionalHeight(1.0))
+				let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
 				let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-
 				let sectionLayout = NSCollectionLayoutSection(group: group)
 				sectionLayout.contentInsets = .zero
 				return sectionLayout
@@ -141,73 +174,16 @@ final class ChartViewController: UIViewController {
 			}
 		}
 	}
-
-	private func bindViewModel() {
-		self.viewModel.$state
-			.receive(on: DispatchQueue.main)
-			.sink { [weak self] state in
-				self?.render(state: state)
-			}
-			.store(in: &self.cancellables)
-	}
-
-	private func render(state: ChartViewState) {
-		self.setLoading(state.isLoading)
-		self.presentErrorIfNeeded(state.errorMessage)
-
-		let segmentIndex = (state.type == .tracks) ? 0 : 1
-		if self.segmentControl.selectedSegmentIndex != segmentIndex {
-			self.segmentControl.selectedSegmentIndex = segmentIndex
-		}
-
-		var snapshot = NSDiffableDataSourceSnapshot<Section, ChartItem>()
-		snapshot.appendSections([.podium])
-		snapshot.appendItems(state.podiumItems, toSection: .podium)
-
-		if !state.listItems.isEmpty {
-			snapshot.appendSections([.list])
-			snapshot.appendItems(state.listItems, toSection: .list)
-		}
-
-		UIView.performWithoutAnimation {
-			self.dataSource.apply(snapshot, animatingDifferences: false)
-		}
-	}
-	
-	private func setLoading(_ isLoading: Bool) {
-		if isLoading {
-			self.loadingIndicator.startAnimating()
-		} else {
-			self.loadingIndicator.stopAnimating()
-		}
-	}
-	
-	private func presentErrorIfNeeded(_ message: String?) {
-		guard let message, !message.isEmpty else { return }
-		guard self.lastPresentedErrorMessage != message else { return }
-		guard self.presentedViewController == nil else { return }
-		self.lastPresentedErrorMessage = message
-		
-		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-		alert.addAction(UIAlertAction(title: "재시도", style: .default, handler: { [weak self] _ in
-			self?.viewModel.process(action: .refresh)
-		}))
-		self.present(alert, animated: true)
-	}
 }
 
 extension ChartViewController: UICollectionViewDelegate {
-
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		let offsetY = scrollView.contentOffset.y
-
 		let fadeDistance = collectionView.bounds.height * 0.7
-
 		let alpha = max(0, 1 - (offsetY / fadeDistance))
 		let transform: CGAffineTransform = (offsetY > 0)
-			? CGAffineTransform(translationX: 0, y: offsetY * 0.5)
-			: .identity
+		? CGAffineTransform(translationX: 0, y: offsetY * 0.5)
+		: .identity
 
 		for item in 0..<3 {
 			let indexPath = IndexPath(item: item, section: Section.podium.rawValue)
@@ -216,8 +192,8 @@ extension ChartViewController: UICollectionViewDelegate {
 			cell.transform = transform
 		}
 	}
-	
+
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-		self.viewModel.process(action: .selectItem(at: indexPath))
+		self.listener?.didSelectItem(at: indexPath)
 	}
 }

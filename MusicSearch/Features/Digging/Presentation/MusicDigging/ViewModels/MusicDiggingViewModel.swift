@@ -6,69 +6,90 @@
 //
 
 import Foundation
-import Combine
-
-struct MusicDiggingState {
-	var isLoading: Bool = false
-	var seedTrack: Track
-	var recommendations: [Track] = .init()
-	var errorMessage: String? = nil
-}
-
-enum MusicDiggingAction {
-	case viewWillAppear
-	case selectTrack(track: Track)
-	case retry
-}
 
 @MainActor
-final class MusicDiggingViewModel {
+protocol MusicDiggingViewable: AnyObject {
+	var listener: MusicDiggingViewableListener? { get set }
 
-	@Published private(set) var state: MusicDiggingState
+	func updateSeedTrack(_ track: Track)
+	func updateRecommendations(_ tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
+
+final class MusicDiggingViewModel: MusicDiggingViewableListener {
+
+	var view: MusicDiggingViewable?
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
+	private var loadTask: Task<Void, Never>?
+
+	private var currentSeedTrack: Track
+	private var currentRecommendations: [Track] = []
 
 	init(
 		seedTrack: Track,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	) {
-		self.state = MusicDiggingState(seedTrack: seedTrack)
+		self.currentSeedTrack = seedTrack
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
 	}
 
-	func process(action: MusicDiggingAction) {
-		switch action {
-		case .viewWillAppear:
-			if self.state.recommendations.isEmpty {
-				self.loadRecommendations(basedOn: self.state.seedTrack)
-			}
-		case .selectTrack(let track):
-			self.state.seedTrack = track
-			self.loadRecommendations(basedOn: track)
+	deinit {
+		self.loadTask?.cancel()
+	}
 
-		case .retry:
-			self.loadRecommendations(basedOn: self.state.seedTrack)
+	func viewDidAppear() {
+		self.view?.updateSeedTrack(self.currentSeedTrack)
+		if self.currentRecommendations.isEmpty {
+			self.loadRecommendations(basedOn: self.currentSeedTrack)
+		} else {
+			self.view?.updateRecommendations(self.currentRecommendations)
 		}
 	}
 
+	func didTapRetry() {
+		self.loadRecommendations(basedOn: self.currentSeedTrack)
+	}
+
+	func didSelectRecommendation(at indexPath: IndexPath) {
+		let index = indexPath.item
+		guard index < self.currentRecommendations.count else { return }
+
+		let selectedTrack = self.currentRecommendations[index]
+		self.currentSeedTrack = selectedTrack
+		self.view?.updateSeedTrack(selectedTrack)
+		self.loadRecommendations(basedOn: selectedTrack)
+	}
+
 	private func loadRecommendations(basedOn track: Track) {
-		Task {
-			self.state.isLoading = true
-			self.state.errorMessage = nil
+		self.loadTask?.cancel()
+		self.view?.showLoading(true)
+		self.view?.showError(nil)
+
+		self.loadTask = Task { [weak self] in
+			guard let self else { return }
 
 			do {
 				let tracks = try await self.fetchSimilarTracksUseCase.execute(targetTrack: track)
-				if tracks.isEmpty {
-					state.errorMessage = "추천 곡을 불러오지 못했습니다."
-				}
-				self.state.recommendations = tracks
-			} catch {
-				print("MusicDiggingViewModel Error: \(error)")
-				state.errorMessage = "추천 곡을 불러오지 못했습니다."
-				state.recommendations = []
-			}
+				guard !Task.isCancelled else { return }
 
-			self.state.isLoading = false
+				self.currentRecommendations = tracks
+				self.view?.updateRecommendations(tracks)
+				if tracks.isEmpty {
+					self.view?.showError("추천 곡을 불러오지 못했습니다.")
+				}
+				self.view?.showLoading(false)
+			} catch is CancellationError {
+				return
+			} catch {
+				guard !Task.isCancelled else { return }
+				print("MusicDiggingViewModel Error: \(error)")
+				self.currentRecommendations = []
+				self.view?.updateRecommendations([])
+				self.view?.showError("추천 곡을 불러오지 못했습니다.")
+				self.view?.showLoading(false)
+			}
 		}
 	}
 }

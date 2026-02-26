@@ -38,6 +38,8 @@ final class TrendComponent<T: TrendDependency>: Component {
 	func makeChartViewController(coordinator: ChartViewCoordinatorAction) -> ChartViewController {
 		let vm = self.makeChartViewModel()
 		vm.coordinator = coordinator
-		return ChartViewController(viewModel: vm)
+		let vc = ChartViewController(listener: vm)
+		vm.view = vc
+		return vc
 	}
 }

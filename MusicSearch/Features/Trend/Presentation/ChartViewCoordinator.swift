@@ -8,8 +8,6 @@
 import UIKit
 
 final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoordinatorAction, MusicAppRouting {
-	var navigationController: UINavigationController
-	var childCoordinators: [Coordinator] = .init()
 
 	private let component: TrendComponent<T>
 	
@@ -18,11 +16,11 @@ final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoor
 	}
 
 	init(navigationController: UINavigationController, component: TrendComponent<T>) {
-		self.navigationController = navigationController
 		self.component = component
+		super.init(navigationController: navigationController)
 	}
 
-	func start() {
+	override func start() {
 		let vc = self.component.makeChartViewController(coordinator: self)
 		self.navigationController.setViewControllers([vc], animated: false)
 	}

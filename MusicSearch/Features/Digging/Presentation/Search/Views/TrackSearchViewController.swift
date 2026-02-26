@@ -6,15 +6,22 @@
 //
 
 import UIKit
-import Combine
 
-final class TrackSearchViewController: UIViewController, UISearchResultsUpdating, UICollectionViewDelegate {
+@MainActor
+protocol TrackSearchViewableListener: AnyObject {
+	func didUpdateSearchText(_ keyword: String)
+	func didTapRetry()
+	func didSelectTrack(_ track: Track)
+	func didReachListBottom()
+}
+
+@MainActor
+final class TrackSearchViewController: UIViewController, TrackSearchViewable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
 
 	enum Section { case main }
 
-	private let viewModel: TrackSearchViewModel
-	private var cancellables = Set<AnyCancellable>()
-	private var lastPresentedErrorMessage: String?
+	weak var listener: TrackSearchViewableListener?
+	var lastPresentedErrorMessage: String?
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
@@ -47,6 +54,8 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		return view
 	}()
 
+	var loadingIndicatorView: UIActivityIndicatorView { self.loadingIndicator }
+
 	private let emptyLabel: UILabel = {
 		let label = UILabel()
 		label.text = "검색 결과가 없습니다."
@@ -57,8 +66,8 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		return label
 	}()
 
-	init(viewModel: TrackSearchViewModel) {
-		self.viewModel = viewModel
+	init(listener: TrackSearchViewableListener) {
+		self.listener = listener
 		super.init(nibName: nil, bundle: nil)
 	}
 
@@ -70,7 +79,31 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		super.viewDidLoad()
 		self.setupUI()
 		self.configureDataSource()
-		self.bindViewModel()
+	}
+
+	func updateTracks(_ tracks: [Track]) {
+		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
+		snapshot.appendSections([.main])
+		var seen = Set<Track>()
+		let uniqueTracks = tracks.filter { seen.insert($0).inserted }
+		snapshot.appendItems(uniqueTracks)
+		self.dataSource.apply(snapshot, animatingDifferences: true)
+
+		let hasText = !(self.searchController.searchBar.text?.isEmpty ?? true)
+		self.emptyLabel.isHidden = !(hasText && uniqueTracks.isEmpty)
+	}
+
+	func showLoading(_ isShow: Bool) {
+		self.setLoading(isShow)
+		if isShow {
+			self.emptyLabel.isHidden = true
+		}
+	}
+
+	func showError(_ message: String?) {
+		self.presentErrorIfNeeded(message, onRetry: { [weak self] in
+			self?.listener?.didTapRetry()
+		})
 	}
 
 	private func setupUI() {
@@ -91,7 +124,7 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 			self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
 			self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-			
+
 			self.loadingIndicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
 			self.loadingIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
 
@@ -115,70 +148,24 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 		}
 	}
 
-	private func bindViewModel() {
-		self.viewModel.$state
-			.receive(on: DispatchQueue.main)
-			.sink { [weak self] state in
-				self?.updateUI(with: state)
-			}
-			.store(in: &self.cancellables)
-	}
-
-	private func updateUI(with state: TrackSearchState) {
-		self.setLoading(state.isLoading)
-		self.presentErrorIfNeeded(state.errorMessage)
-
-		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
-		snapshot.appendSections([.main])
-		var seen = Set<Track>()
-		let uniqueTracks = state.tracks.filter { seen.insert($0).inserted }
-		snapshot.appendItems(uniqueTracks)
-		self.dataSource.apply(snapshot, animatingDifferences: true)
-
-		let hasText = !(self.searchController.searchBar.text?.isEmpty ?? true)
-		self.emptyLabel.isHidden = !(hasText && !state.isLoading && uniqueTracks.isEmpty)
-	}
-	
-	private func setLoading(_ isLoading: Bool) {
-		if isLoading {
-			self.loadingIndicator.startAnimating()
-		} else {
-			self.loadingIndicator.stopAnimating()
-		}
-	}
-	
-	private func presentErrorIfNeeded(_ message: String?) {
-		guard let message, !message.isEmpty else { return }
-		guard self.lastPresentedErrorMessage != message else { return }
-		guard self.presentedViewController == nil else { return }
-		self.lastPresentedErrorMessage = message
-		
-		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-		alert.addAction(UIAlertAction(title: "재시도", style: .default, handler: { [weak self] _ in
-			self?.viewModel.process(action: .retry)
-		}))
-		self.present(alert, animated: true)
-	}
-
 	func updateSearchResults(for searchController: UISearchController) {
 		guard let text = searchController.searchBar.text else { return }
-		self.viewModel.process(action: .search(keyword: text))
+		self.listener?.didUpdateSearchText(text)
 	}
 
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		collectionView.deselectItem(at: indexPath, animated: true)
 		guard let track = self.dataSource.itemIdentifier(for: indexPath) else { return }
-		self.viewModel.process(action: .select(track: track))
+		self.listener?.didSelectTrack(track)
 	}
-	
+
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		let offsetY = scrollView.contentOffset.y
 		let contentHeight = scrollView.contentSize.height
 		let height = scrollView.frame.size.height
-		
-		if offsetY > contentHeight - height * 2 {
-			self.viewModel.process(action: .loadMore)
+
+		if offsetY > contentHeight - (height * 2) {
+			self.listener?.didReachListBottom()
 		}
 	}
 }

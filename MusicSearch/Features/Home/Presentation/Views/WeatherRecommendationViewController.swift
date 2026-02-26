@@ -6,13 +6,22 @@
 //
 
 import UIKit
-import Combine
 
-final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable {
+@MainActor
+protocol WeatherRecommendationViewableListener: AnyObject {
+	func viewDidLoad()
+	func didTapRefresh()
+	func didSelectTrack(at index: Int)
+}
+
+@MainActor
+final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, WeatherRecommendationViewable, LoadingPresentable, ErrorPresentable {
 
 	enum Section {
 		case main
 	}
+
+	weak var listener: WeatherRecommendationViewableListener?
 
 	private let weatherContainerView: UIView = {
 		let view = UIView()
@@ -74,14 +83,15 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		return label
 	}()
 
-	private var lastPresentedErrorMessage: String?
-	
 	private let activityIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .large)
 		indicator.hidesWhenStopped = true
 		indicator.translatesAutoresizingMaskIntoConstraints = false
 		return indicator
 	}()
+
+	var loadingIndicatorView: UIActivityIndicatorView { self.activityIndicator }
+	var lastPresentedErrorMessage: String?
 
 	private lazy var scrollView: UIScrollView = {
 		let scrollView = UIScrollView()
@@ -115,84 +125,53 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		return control
 	}()
 
-	private let viewModel: WeatherRecommendationViewModel
-	private var cancellables: Set<AnyCancellable> = .init()
-
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>?
 
-	init(viewModel: WeatherRecommendationViewModel) {
-		self.viewModel = viewModel
-
+	init(listener: WeatherRecommendationViewableListener) {
+		self.listener = listener
 		super.init(nibName: nil, bundle: nil)
-
 	}
-	
+
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
-	
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
-
 		self.setupView()
 		self.setupConstraints()
 		self.configureDataSource()
-		self.bindViewModel()
-		self.viewModel.process(action: .viewWillAppear)
+		self.listener?.viewDidLoad()
 	}
 
-	private func bindViewModel() {
-		self.viewModel.$state
-			.receive(on: DispatchQueue.main)
-			.sink { [weak self] state in
-				self?.updateUI(with: state)
-			}
-			.store(in: &self.cancellables)
-	}
+	func update(weather: Weather, tracks: [Track]) {
+		self.tempLabel.text = "\(Int(weather.temperature))°"
+		self.descriptionLabel.text = weather.description
+		self.locationLabel.text = weather.cityName
+		self.weatherIconImageView.image = UIImage(systemName: self.iconName(for: weather.condition))
 
-	private func updateUI(with state: WeatherRecommendationState) {
-		self.setLoading(state.isLoading)
-		if !state.isLoading {
-			self.refreshControl.endRefreshing()
-		}
-		self.presentErrorIfNeeded(state.errorMessage)
-
-		self.tempLabel.text = "\(Int(state.weather.temperature))°"
-		self.descriptionLabel.text = state.weather.description
-		self.locationLabel.text = state.weather.cityName
-		self.weatherIconImageView.image = UIImage(systemName: self.iconName(for: state.weather.condition))
-		
-		self.view.backgroundColor = self.backgroundColor(for: state.weather.condition)
+		self.view.backgroundColor = self.backgroundColor(for: weather.condition)
 		self.weatherContainerView.backgroundColor = UIColor.white.withAlphaComponent(0.15)
 
 		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
 		snapshot.appendSections([.main])
-		snapshot.appendItems(state.tracks)
+		snapshot.appendItems(tracks)
 		self.dataSource?.apply(snapshot, animatingDifferences: true)
 	}
-	
-	private func setLoading(_ isLoading: Bool) {
-		if isLoading {
-			self.activityIndicator.startAnimating()
-		} else {
-			self.activityIndicator.stopAnimating()
+
+	func showLoading(_ isShow: Bool) {
+		self.setLoading(isShow)
+		if !isShow {
+			self.refreshControl.endRefreshing()
 		}
 	}
-	
-	private func presentErrorIfNeeded(_ message: String?) {
-		guard let message, !message.isEmpty else { return }
-		guard self.lastPresentedErrorMessage != message else { return }
-		guard self.presentedViewController == nil else { return }
-		self.lastPresentedErrorMessage = message
-		
-		let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-		alert.addAction(UIAlertAction(title: "재시도", style: .default, handler: { [weak self] _ in
-			self?.viewModel.process(action: .refresh)
-		}))
-		self.present(alert, animated: true)
+
+	func showError(_ message: String?) {
+		self.presentErrorIfNeeded(message, onRetry: { [weak self] in
+			self?.listener?.didTapRefresh()
+		})
 	}
-	
+
 	private func iconName(for condition: WeatherCondition) -> String {
 		switch condition {
 		case .thunderstorm:
@@ -213,7 +192,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 			return "questionmark.circle.fill"
 		}
 	}
-	
+
 	private func backgroundColor(for condition: WeatherCondition) -> UIColor {
 		switch condition {
 		case .thunderstorm:
@@ -261,46 +240,39 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	@objc private func handleRefresh() {
-		self.viewModel.process(action: .refresh)
+		self.listener?.didTapRefresh()
 	}
 
 	private func setupConstraints() {
 		NSLayoutConstraint.activate([
-			// ScrollView
 			self.scrollView.topAnchor.constraint(equalTo: self.view.topAnchor),
 			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
 			self.scrollView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-			
+
 			self.activityIndicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
 			self.activityIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
 
-			// ContentView
 			self.contentView.topAnchor.constraint(equalTo: self.scrollView.topAnchor),
 			self.contentView.leadingAnchor.constraint(equalTo: self.scrollView.leadingAnchor),
 			self.contentView.trailingAnchor.constraint(equalTo: self.scrollView.trailingAnchor),
 			self.contentView.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor),
 			self.contentView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor),
 
-			// Weather Container
 			self.weatherContainerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 20),
 			self.weatherContainerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 20),
 			self.weatherContainerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -20),
 			self.weatherContainerView.heightAnchor.constraint(equalToConstant: 240),
 
-			// Weather Info Stack
 			self.weatherInfoStack.centerXAnchor.constraint(equalTo: self.weatherContainerView.centerXAnchor),
 			self.weatherInfoStack.centerYAnchor.constraint(equalTo: self.weatherContainerView.centerYAnchor),
 
-			// Weather Icon
 			self.weatherIconImageView.widthAnchor.constraint(equalToConstant: 70),
 			self.weatherIconImageView.heightAnchor.constraint(equalToConstant: 70),
 
-			// Section Title
 			self.sectionTitleLabel.topAnchor.constraint(equalTo: self.weatherContainerView.bottomAnchor, constant: 40),
 			self.sectionTitleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
 
-			// Collection View
 			self.collectionView.topAnchor.constraint(equalTo: self.sectionTitleLabel.bottomAnchor, constant: 20),
 			self.collectionView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.collectionView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
@@ -310,35 +282,41 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	private func configureDataSource() {
-		self.dataSource = UICollectionViewDiffableDataSource<Section,Track>(collectionView: self.collectionView) { [weak self] (collectionView, indexPath, track) -> UICollectionViewCell? in
-			guard let cell: TrackCardCell = self?.collectionView.dequeueReusableCell(withReuseIdentifier: TrackCardCell.reuseIdentifier, for: indexPath) as? TrackCardCell else {
+		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(collectionView: self.collectionView) { [weak self] _, indexPath, track in
+			guard let self,
+				  let cell = self.collectionView.dequeueReusableCell(
+				withReuseIdentifier: TrackCardCell.reuseIdentifier,
+				for: indexPath
+			) as? TrackCardCell else {
 				return UICollectionViewCell()
 			}
 			cell.configure(with: track)
-
 			return cell
 		}
 	}
 
 	private func createCarouselLayout() -> UICollectionViewLayout {
-		return UICollectionViewCompositionalLayout { sectionIndex, env in
-
-			let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-												  heightDimension: .fractionalHeight(1.0))
+		return UICollectionViewCompositionalLayout { _, env in
+			let itemSize = NSCollectionLayoutSize(
+				widthDimension: .fractionalWidth(1.0),
+				heightDimension: .fractionalHeight(1.0)
+			)
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
 			let groupWidth = env.container.contentSize.width * 0.75
-			let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(groupWidth),
-												   heightDimension: .fractionalHeight(1.0))
+			let groupSize = NSCollectionLayoutSize(
+				widthDimension: .absolute(groupWidth),
+				heightDimension: .fractionalHeight(1.0)
+			)
 			let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
 			let section = NSCollectionLayoutSection(group: group)
 			section.orthogonalScrollingBehavior = .groupPagingCentered
 			section.interGroupSpacing = 20
 
-			section.visibleItemsInvalidationHandler = { (items, offset, environment) in
+			section.visibleItemsInvalidationHandler = { items, offset, environment in
 				let containerWidth = environment.container.contentSize.width
-				let centerX = offset.x + containerWidth / 2.0
+				let centerX = offset.x + (containerWidth / 2.0)
 
 				items.forEach { item in
 					let distanceFromCenter = abs(item.frame.midX - centerX)
@@ -355,6 +333,6 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 extension WeatherRecommendationViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-		self.viewModel.process(action: .trackCardSelected(index: indexPath.item))
+		self.listener?.didSelectTrack(at: indexPath.item)
 	}
 }

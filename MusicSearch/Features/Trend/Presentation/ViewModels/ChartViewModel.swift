@@ -6,37 +6,34 @@
 //
 
 import Foundation
-import Combine
 
-struct ChartViewState: Equatable {
-	var type: ChartType = .tracks
-	var isLoading: Bool = false
-	var errorMessage: String? = nil
-	var podiumItems: [ChartItem] = []
-	var listItems: [ChartItem] = []
+@MainActor
+protocol ChartViewable: AnyObject {
+	var listener: ChartViewableListener? { get set }
+
+	func updateSegment(to index: Int)
+	func update(podiumItems: [ChartItem], listItems: [ChartItem])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
 }
 
-enum ChartViewAction {
-	case viewDidLoad
-	case changeType(ChartType)
-	case refresh
-	case selectItem(at: IndexPath)
-}
-
+@MainActor
 protocol ChartViewCoordinatorAction: AnyObject {
 	func didSelect(item: ChartItem)
 }
 
-@MainActor
-final class ChartViewModel {
-	@Published private(set) var state: ChartViewState = .init()
-	
+final class ChartViewModel: ChartViewableListener {
+
+	var view: ChartViewable?
 	weak var coordinator: ChartViewCoordinatorAction?
 
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
 
 	private var loadTask: Task<Void, Never>?
+	private var currentType: ChartType = .tracks
+	private var currentPodiumItems: [ChartItem] = []
+	private var currentListItems: [ChartItem] = []
 
 	private var cachedTrackItems: [ChartItem]?
 	private var cachedArtistItems: [ChartItem]?
@@ -49,92 +46,112 @@ final class ChartViewModel {
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
 	}
 
-	func process(action: ChartViewAction) {
-		switch action {
-		case .viewDidLoad:
-			self.loadIfNeeded(for: self.state.type, force: false)
-
-		case .changeType(let type):
-			guard self.state.type != type else { return }
-			self.state.type = type
-			self.state.listItems = []
-			self.loadIfNeeded(for: type, force: false)
-
-		case .refresh:
-			self.loadIfNeeded(for: self.state.type, force: true)
-			
-		case .selectItem(let indexPath):
-			self.handleSelection(at: indexPath)
-		}
-	}
-
-	private func loadIfNeeded(for type: ChartType, force: Bool) {
-		if !force {
-			if type == .tracks, let cached = self.cachedTrackItems {
-				self.apply(allItems: cached, type: type)
-				return
-			}
-			if type == .artists, let cached = self.cachedArtistItems {
-				self.apply(allItems: cached, type: type)
-				return
-			}
-		}
-
+	deinit {
 		self.loadTask?.cancel()
-		self.loadTask = Task { [weak self] in
-			guard let self else { return }
-
-			self.state.isLoading = true
-			self.state.errorMessage = nil
-
-			do {
-				switch type {
-				case .tracks:
-					let tracks = try await self.fetchChartTopTracksUseCase.execute()
-					let items = self.makeItems(from: tracks)
-					self.cachedTrackItems = items
-					self.apply(allItems: items, type: type)
-
-				case .artists:
-					let artists = try await self.fetchChartTopArtistsUseCase.execute()
-					let items = self.makeItems(from: artists)
-					self.cachedArtistItems = items
-					self.apply(allItems: items, type: type)
-				}
-			} catch {
-				print("ChartViewModel Error: \(error)")
-				self.state.errorMessage = "차트 정보를 불러오지 못했습니다."
-				self.state.podiumItems = []
-				self.state.listItems = []
-			}
-
-			self.state.isLoading = false
-		}
 	}
-	
-	private func handleSelection(at indexPath: IndexPath) {
+
+	func viewDidLoad() {
+		self.loadData(for: self.currentType, force: false)
+	}
+
+	func didChangeSegment(index: Int) {
+		let type: ChartType = (index == 0) ? .tracks : .artists
+		guard self.currentType != type else { return }
+
+		self.currentType = type
+		self.currentPodiumItems = []
+		self.currentListItems = []
+
+		self.view?.update(podiumItems: [], listItems: [])
+		self.loadData(for: type, force: false)
+	}
+
+	func didTapRefresh() {
+		self.loadData(for: self.currentType, force: true)
+	}
+
+	func didSelectItem(at indexPath: IndexPath) {
 		let section = indexPath.section
 		let index = indexPath.item
-		
 		let item: ChartItem?
-		
+
 		if section == 0 { // Podium
-			guard index < self.state.podiumItems.count else { return }
-			item = self.state.podiumItems[index]
+			guard index < self.currentPodiumItems.count else { return }
+			item = self.currentPodiumItems[index]
 		} else { // List
-			guard index < self.state.listItems.count else { return }
-			item = self.state.listItems[index]
+			guard index < self.currentListItems.count else { return }
+			item = self.currentListItems[index]
 		}
-		
+
 		if let item {
 			self.coordinator?.didSelect(item: item)
 		}
 	}
 
-	private func apply(allItems: [ChartItem], type: ChartType) {
+	private func loadData(for type: ChartType, force: Bool) {
+		self.loadTask?.cancel()
+
+		if !force {
+			if type == .tracks, let cached = self.cachedTrackItems {
+				self.loadTask = nil
+				self.view?.showLoading(false)
+				self.view?.showError(nil)
+				self.apply(allItems: cached)
+				return
+			}
+			if type == .artists, let cached = self.cachedArtistItems {
+				self.loadTask = nil
+				self.view?.showLoading(false)
+				self.view?.showError(nil)
+				self.apply(allItems: cached)
+				return
+			}
+		}
+
+		self.view?.showLoading(true)
+		self.view?.showError(nil)
+
+		self.loadTask = Task { [weak self] in
+			guard let self else { return }
+
+			do {
+				switch type {
+				case .tracks:
+					let tracks = try await self.fetchChartTopTracksUseCase.execute()
+					guard !Task.isCancelled else { return }
+					let items = self.makeItems(from: tracks)
+					self.cachedTrackItems = items
+					self.apply(allItems: items)
+					self.view?.showLoading(false)
+
+				case .artists:
+					let artists = try await self.fetchChartTopArtistsUseCase.execute()
+					guard !Task.isCancelled else { return }
+					let items = self.makeItems(from: artists)
+					self.cachedArtistItems = items
+					self.apply(allItems: items)
+					self.view?.showLoading(false)
+				}
+			} catch is CancellationError {
+				return
+			} catch {
+				guard !Task.isCancelled else { return }
+				print("ChartViewModel Error: \(error)")
+				self.view?.showError("차트 정보를 불러오지 못했습니다.")
+
+				self.currentPodiumItems = []
+				self.currentListItems = []
+				self.view?.update(podiumItems: [], listItems: [])
+				self.view?.showLoading(false)
+			}
+		}
+	}
+
+	private func apply(allItems: [ChartItem]) {
 		guard allItems.count >= 3 else {
-			self.state.podiumItems = []
-			self.state.listItems = []
+			self.currentPodiumItems = []
+			self.currentListItems = []
+			self.view?.update(podiumItems: [], listItems: [])
 			return
 		}
 
@@ -142,8 +159,9 @@ final class ChartViewModel {
 		let second = allItems[1]
 		let third = allItems[2]
 
-		self.state.podiumItems = [second, first, third]
-		self.state.listItems = Array(allItems.dropFirst(3))
+		self.currentPodiumItems = [second, first, third]
+		self.currentListItems = Array(allItems.dropFirst(3))
+		self.view?.update(podiumItems: self.currentPodiumItems, listItems: self.currentListItems)
 	}
 
 	private func makeItems(from tracks: [Track]) -> [ChartItem] {

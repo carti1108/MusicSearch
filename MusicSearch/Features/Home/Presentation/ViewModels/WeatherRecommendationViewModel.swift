@@ -6,93 +6,90 @@
 //
 
 import Foundation
-import Combine
 
-struct WeatherRecommendationState {
-	var isLoading: Bool
-	var weather: Weather
-	var tracks: [Track]
-	var errorMessage: String?
+@MainActor
+protocol WeatherRecommendationViewable: AnyObject {
+	var listener: WeatherRecommendationViewableListener? { get set }
 
-	static var initial: Self {
-		.init(
-			isLoading: false,
-			weather: .init(
-				temperature: 0.0,
-				condition: .unknown,
-				description: "",
-				iconCode: "",
-				cityName: ""
-			),
-			tracks: [],
-			errorMessage: nil
-		)
-	}
+	func update(weather: Weather, tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
 }
 
-enum WeatherRecommendationAction {
-	case viewWillAppear
-	case refresh
-	case trackCardSelected(index: Int)
-}
-
+@MainActor
 protocol WeatherRecommendationCoordinatorAction: AnyObject {
 	func didSelect(track: Track)
 }
 
-@MainActor
-final class WeatherRecommendationViewModel {
-	
+final class WeatherRecommendationViewModel: WeatherRecommendationViewableListener {
+
+	var view: WeatherRecommendationViewable?
 	weak var coordinator: WeatherRecommendationCoordinatorAction?
-
-	@Published private(set) var state: WeatherRecommendationState = .initial
-
 	private let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
+	private var loadTask: Task<Void, Never>?
+
+	private var currentWeather: Weather = .init(
+		temperature: 0.0,
+		condition: .unknown,
+		description: "",
+		iconCode: "",
+		cityName: ""
+	)
+	private var currentTracks: [Track] = []
 
 	init(fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase) {
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
 	}
 
-	func process(action: WeatherRecommendationAction) {
-		switch action {
-		case .viewWillAppear:
-			if self.state.tracks.isEmpty {
-				self.loadData()
-			}
-		case .refresh:
-			self.loadData()
-		case .trackCardSelected(let index):
-			self.handleTrackSelection(at: index)
-		}
+	deinit {
+		self.loadTask?.cancel()
 	}
-}
 
-extension WeatherRecommendationViewModel {
+	func viewDidLoad() {
+		guard self.currentTracks.isEmpty else {
+			self.view?.update(weather: self.currentWeather, tracks: self.currentTracks)
+			return
+		}
+		self.loadData()
+	}
+
+	func didTapRefresh() {
+		self.loadData()
+	}
+
+	func didSelectTrack(at index: Int) {
+		guard index < self.currentTracks.count else { return }
+		self.coordinator?.didSelect(track: self.currentTracks[index])
+	}
+
 	private func loadData() {
-		Task {
-			self.state.isLoading = true
-			self.state.errorMessage = nil
+		self.loadTask?.cancel()
+		self.view?.showLoading(true)
+		self.view?.showError(nil)
+
+		self.loadTask = Task { [weak self] in
+			guard let self else { return }
 
 			do {
 				let result = try await self.fetchMusicForWeatherUseCase.execute()
+				guard !Task.isCancelled else { return }
 
-				state.weather = result.weather
-				state.tracks = result.tracks
+				self.currentWeather = result.weather
+				self.currentTracks = result.tracks
+
+				self.view?.update(weather: self.currentWeather, tracks: self.currentTracks)
+				self.view?.showLoading(false)
+			} catch is CancellationError {
+				return
 			} catch {
+				guard !Task.isCancelled else { return }
 				if let localized = error as? LocalizedError, let message = localized.errorDescription {
-					state.errorMessage = message
+					self.view?.showError(message)
 				} else {
-					state.errorMessage = "날씨 추천을 불러오지 못했습니다."
+					self.view?.showError("날씨 추천을 불러오지 못했습니다.")
 				}
+				self.view?.showLoading(false)
 			}
-
-			state.isLoading = false
 		}
-	}
-
-	private func handleTrackSelection(at index: Int) {
-		guard index < self.state.tracks.count else { return }
-		let track = self.state.tracks[index]
-		self.coordinator?.didSelect(track: track)
 	}
 }
