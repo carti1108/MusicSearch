@@ -36,8 +36,7 @@ final class ChartViewController: UIViewController, ChartViewable, LoadingPresent
 
 	var loadingIndicatorView: UIActivityIndicatorView { self.loadingIndicator }
 
-	init(listener: ChartViewableListener) {
-		self.listener = listener
+	init() {
 		super.init(nibName: nil, bundle: nil)
 	}
 

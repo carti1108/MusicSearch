@@ -73,8 +73,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 		return cv
 	}()
 
-	init(listener: MusicDiggingViewableListener) {
-		self.listener = listener
+	init() {
 		super.init(nibName: nil, bundle: nil)
 	}
 

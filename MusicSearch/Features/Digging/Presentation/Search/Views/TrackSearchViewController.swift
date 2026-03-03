@@ -66,8 +66,7 @@ final class TrackSearchViewController: UIViewController, TrackSearchViewable, UI
 		return label
 	}()
 
-	init(listener: TrackSearchViewableListener) {
-		self.listener = listener
+	init() {
 		super.init(nibName: nil, bundle: nil)
 	}
 

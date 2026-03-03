@@ -127,8 +127,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>?
 
-	init(listener: WeatherRecommendationViewableListener) {
-		self.listener = listener
+	init() {
 		super.init(nibName: nil, bundle: nil)
 	}
 
