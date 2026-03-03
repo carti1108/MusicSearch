@@ -10,6 +10,7 @@ import UIKit
 final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, TrackSearchViewCoordinatorAction {
 
 	private let component: DiggingComponent<T>
+	private var trackSearchViewModel: TrackSearchViewModel?
 
 	init(
 		navigationController: UINavigationController,
@@ -20,7 +21,10 @@ final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, Track
 	}
 
 	override func start() {
-		let vc = self.component.makeTrackSearchViewController(coordinator: self)
+		let vc = TrackSearchViewController()
+		let viewModel = self.component.makeTrackSearchViewModel(view: vc)
+		viewModel.coordinator = self
+		self.trackSearchViewModel = viewModel
 		self.navigationController.setViewControllers([vc], animated: false)
 	}
 
@@ -30,6 +34,7 @@ final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, Track
 			component: self.component,
 			seedTrack: track
 		)
+		self.addChild(diggingCoordinator)
 
 		diggingCoordinator.start()
 	}

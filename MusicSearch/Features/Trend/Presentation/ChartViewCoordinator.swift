@@ -10,6 +10,7 @@ import UIKit
 final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoordinatorAction, MusicAppRouting {
 
 	private let component: TrendComponent<T>
+	private var chartViewModel: ChartViewModel?
 	
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.component.fetchMusicAppDeepLinkUseCase
@@ -21,7 +22,10 @@ final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoor
 	}
 
 	override func start() {
-		let vc = self.component.makeChartViewController(coordinator: self)
+		let vc = ChartViewController()
+		let viewModel = self.component.makeChartViewModel(view: vc)
+		viewModel.coordinator = self
+		self.chartViewModel = viewModel
 		self.navigationController.setViewControllers([vc], animated: false)
 	}
 	

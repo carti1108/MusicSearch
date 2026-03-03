@@ -21,8 +21,9 @@ final class HomeComponent<T: HomeDependency>: Component {
 	}
 
 	@MainActor
-	func makeWeatherRecommendationViewModel() -> WeatherRecommendationViewModel {
+	func makeWeatherRecommendationViewModel(view: WeatherRecommendationViewable) -> WeatherRecommendationViewModel {
 		WeatherRecommendationViewModel(
+			view: view,
 			fetchMusicForWeatherUseCase: self.dependency.fetchMusicForWeatherUseCase
 		)
 	}
@@ -30,14 +31,5 @@ final class HomeComponent<T: HomeDependency>: Component {
 	@MainActor
 	func makeHomeViewCoordinator(navigationController: UINavigationController) -> HomeViewCoordinator<T> {
 		HomeViewCoordinator(navigationController: navigationController, component: self)
-	}
-
-	@MainActor
-	func makeWeatherRecommendationViewController(coordinator: WeatherRecommendationCoordinatorAction) -> WeatherRecommendationViewController {
-		let vm = self.makeWeatherRecommendationViewModel()
-		vm.coordinator = coordinator
-		let vc = WeatherRecommendationViewController(listener: vm)
-		vm.view = vc
-		return vc
 	}
 }

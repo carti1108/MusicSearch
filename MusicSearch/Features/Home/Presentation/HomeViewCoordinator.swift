@@ -10,6 +10,7 @@ import UIKit
 final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommendationCoordinatorAction, MusicAppRouting {
 
 	private let component: HomeComponent<T>
+	private var weatherRecommendationViewModel: WeatherRecommendationViewModel?
 	
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.component.fetchMusicAppDeepLinkUseCase
@@ -21,7 +22,10 @@ final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommen
 	}
 
 	override func start() {
-		let vc = self.component.makeWeatherRecommendationViewController(coordinator: self)
+		let vc = WeatherRecommendationViewController()
+		let viewModel = self.component.makeWeatherRecommendationViewModel(view: vc)
+		viewModel.coordinator = self
+		self.weatherRecommendationViewModel = viewModel
 		self.navigationController.setViewControllers([vc], animated: false)
 	}
 	

@@ -22,8 +22,9 @@ final class TrendComponent<T: TrendDependency>: Component {
 	}
 
 	@MainActor
-	func makeChartViewModel() -> ChartViewModel {
+	func makeChartViewModel(view: ChartViewable) -> ChartViewModel {
 		ChartViewModel(
+			view: view,
 			fetchChartTopTracksUseCase: self.dependency.fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: self.dependency.fetchChartTopArtistsUseCase
 		)
@@ -32,14 +33,5 @@ final class TrendComponent<T: TrendDependency>: Component {
 	@MainActor
 	func makeChartViewCoordinator(navigationController: UINavigationController) -> ChartViewCoordinator<T> {
 		ChartViewCoordinator(navigationController: navigationController, component: self)
-	}
-
-	@MainActor
-	func makeChartViewController(coordinator: ChartViewCoordinatorAction) -> ChartViewController {
-		let vm = self.makeChartViewModel()
-		vm.coordinator = coordinator
-		let vc = ChartViewController(listener: vm)
-		vm.view = vc
-		return vc
 	}
 }

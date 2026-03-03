@@ -18,13 +18,20 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 	}
 
 	@MainActor
-	func makeTrackSearchViewModel() -> TrackSearchViewModel {
-		TrackSearchViewModel(searchTracksUseCase: self.dependency.searchTracksUseCase)
+	func makeTrackSearchViewModel(view: TrackSearchViewable) -> TrackSearchViewModel {
+		TrackSearchViewModel(
+			view: view,
+			searchTracksUseCase: self.dependency.searchTracksUseCase
+		)
 	}
 
 	@MainActor
-	func makeMusicDiggingViewModel(seedTrack: Track, fetchSimilarTracksUseCase: FetchSimilarTracksUseCase) -> MusicDiggingViewModel {
-		MusicDiggingViewModel(seedTrack: seedTrack, fetchSimilarTracksUseCase: fetchSimilarTracksUseCase)
+	func makeMusicDiggingViewModel(seedTrack: Track, view: MusicDiggingViewable) -> MusicDiggingViewModel {
+		MusicDiggingViewModel(
+			seedTrack: seedTrack,
+			view: view,
+			fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase
+		)
 	}
 
 	@MainActor
@@ -33,22 +40,5 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 			navigationController: navigationController,
 			component: self
 		)
-	}
-
-	@MainActor
-	func makeTrackSearchViewController(coordinator: TrackSearchViewCoordinatorAction) -> UIViewController {
-		let vm = self.makeTrackSearchViewModel()
-		vm.coordinator = coordinator
-		let vc = TrackSearchViewController(listener: vm)
-		vm.view = vc
-		return vc
-	}
-
-	@MainActor
-	func makeMusicDiggingViewController(seedTrack: Track) -> MusicDiggingViewController {
-		let viewModel = self.makeMusicDiggingViewModel(seedTrack: seedTrack, fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase)
-		let vc = MusicDiggingViewController(listener: viewModel)
-		viewModel.view = vc
-		return vc
 	}
 }
