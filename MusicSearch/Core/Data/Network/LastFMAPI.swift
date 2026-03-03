@@ -43,6 +43,15 @@ extension LastFMAPI: Requestable {
 		return nil
 	}
 
+	var cachePolicy: CachePolicy {
+		switch self {
+		case .getTrackInfo:
+			return .memory
+		case .searchTracks, .fetchTopTracks, .fetchSimilarTracks, .getChartTopTracks, .getChartTopArtists:
+			return .disk
+		}
+	}
+
 	var task: RequestTask {
 		var params: [String: Any] = [
 			"api_key": apiKey,

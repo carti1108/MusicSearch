@@ -31,6 +31,10 @@ enum WeatherAPI {
 }
 
 extension WeatherAPI: Requestable {
+	var cachePolicy: CachePolicy {
+		return .memory
+	}
+
 	var baseURL: URL {
 		switch self {
 		case .fetchWeather(_, _, let config):
