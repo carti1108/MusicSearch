@@ -44,10 +44,16 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 	private let debounceSeconds: TimeInterval
 	private let searchTracksUseCase: SearchTracksUseCase
 
-	init(debounceSeconds: TimeInterval = 0.5, searchTracksUseCase: SearchTracksUseCase) {
+	init(
+		view: TrackSearchViewable,
+		debounceSeconds: TimeInterval = 0.5,
+		searchTracksUseCase: SearchTracksUseCase
+	) {
+		self.view = view
 		self.debounceSeconds = debounceSeconds
 		self.searchTracksUseCase = searchTracksUseCase
 		self.bindSearchInput()
+		self.view?.listener = self
 	}
 
 	deinit {

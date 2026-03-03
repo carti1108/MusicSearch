@@ -35,15 +35,15 @@ final class ChartViewModel: ChartViewableListener {
 	private var currentPodiumItems: [ChartItem] = []
 	private var currentListItems: [ChartItem] = []
 
-	private var cachedTrackItems: [ChartItem]?
-	private var cachedArtistItems: [ChartItem]?
-
 	init(
+		view: ChartViewable,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
 	) {
+		self.view = view
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
+		self.view?.listener = self
 	}
 
 	deinit {
@@ -51,7 +51,7 @@ final class ChartViewModel: ChartViewableListener {
 	}
 
 	func viewDidLoad() {
-		self.loadData(for: self.currentType, force: false)
+		self.loadData(for: self.currentType)
 	}
 
 	func didChangeSegment(index: Int) {
@@ -63,11 +63,11 @@ final class ChartViewModel: ChartViewableListener {
 		self.currentListItems = []
 
 		self.view?.update(podiumItems: [], listItems: [])
-		self.loadData(for: type, force: false)
+		self.loadData(for: type)
 	}
 
 	func didTapRefresh() {
-		self.loadData(for: self.currentType, force: true)
+		self.loadData(for: self.currentType)
 	}
 
 	func didSelectItem(at indexPath: IndexPath) {
@@ -88,25 +88,8 @@ final class ChartViewModel: ChartViewableListener {
 		}
 	}
 
-	private func loadData(for type: ChartType, force: Bool) {
+	private func loadData(for type: ChartType) {
 		self.loadTask?.cancel()
-
-		if !force {
-			if type == .tracks, let cached = self.cachedTrackItems {
-				self.loadTask = nil
-				self.view?.showLoading(false)
-				self.view?.showError(nil)
-				self.apply(allItems: cached)
-				return
-			}
-			if type == .artists, let cached = self.cachedArtistItems {
-				self.loadTask = nil
-				self.view?.showLoading(false)
-				self.view?.showError(nil)
-				self.apply(allItems: cached)
-				return
-			}
-		}
 
 		self.view?.showLoading(true)
 		self.view?.showError(nil)
@@ -120,7 +103,6 @@ final class ChartViewModel: ChartViewableListener {
 					let tracks = try await self.fetchChartTopTracksUseCase.execute()
 					guard !Task.isCancelled else { return }
 					let items = self.makeItems(from: tracks)
-					self.cachedTrackItems = items
 					self.apply(allItems: items)
 					self.view?.showLoading(false)
 
@@ -128,7 +110,6 @@ final class ChartViewModel: ChartViewableListener {
 					let artists = try await self.fetchChartTopArtistsUseCase.execute()
 					guard !Task.isCancelled else { return }
 					let items = self.makeItems(from: artists)
-					self.cachedArtistItems = items
 					self.apply(allItems: items)
 					self.view?.showLoading(false)
 				}

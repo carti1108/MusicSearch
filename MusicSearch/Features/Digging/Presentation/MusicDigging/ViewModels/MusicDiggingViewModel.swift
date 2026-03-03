@@ -29,10 +29,13 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 	init(
 		seedTrack: Track,
+		view: MusicDiggingViewable,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	) {
 		self.currentSeedTrack = seedTrack
+		self.view = view
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
+		self.view?.listener = self
 	}
 
 	deinit {

@@ -37,8 +37,13 @@ final class WeatherRecommendationViewModel: WeatherRecommendationViewableListene
 	)
 	private var currentTracks: [Track] = []
 
-	init(fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase) {
+	init(
+		view: WeatherRecommendationViewable,
+		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
+	) {
+		self.view = view
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
+		self.view?.listener = self
 	}
 
 	deinit {
