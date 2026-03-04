@@ -15,7 +15,7 @@ protocol Coordinating: AnyObject {
 }
 
 @MainActor
-class BaseCoordinator: Coordinating {
+class Coordinator: Coordinating {
 	var navigationController: UINavigationController
 	var childCoordinators: [Coordinating] = []
 

@@ -8,10 +8,6 @@
 import UIKit
 
 final class MusicDiggingViewCoordinator<T: DiggingDependency>: Coordinator {
-
-	var navigationController: UINavigationController
-	var childCoordinators: [Coordinator] = []
-
 	private let component: DiggingComponent<T>
 	private let seedTrack: Track
 
@@ -20,13 +16,13 @@ final class MusicDiggingViewCoordinator<T: DiggingDependency>: Coordinator {
 		component: DiggingComponent<T>,
 		seedTrack: Track
 	) {
-		self.navigationController = navigationController
 		self.component = component
 		self.seedTrack = seedTrack
+		super.init(navigationController: navigationController)
 	}
 
 	@MainActor
-	func start() {
+	override func start() {
 		let diggingVC = self.component.makeMusicDiggingViewController(seedTrack: self.seedTrack)
 		self.navigationController.pushViewController(diggingVC, animated: true)
 	}

@@ -80,22 +80,41 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 <details>
 <summary><b>코드 보기 (View Code)</b></summary>
 
-**Coordinator.swift (Protocol)**
+**Coordinating.swift (Protocol + Base Class)**
 ```swift
-protocol Coordinator: AnyObject {
+@MainActor
+protocol Coordinating: AnyObject {
     var navigationController: UINavigationController { get set }
-    var childCoordinators: [Coordinator] { get set }
+    var childCoordinators: [Coordinating] { get set }
     func start()
+}
+
+@MainActor
+class Coordinator: Coordinating {
+    var navigationController: UINavigationController
+    var childCoordinators: [Coordinating] = []
+
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+
+    func start() {
+        fatalError("start() must be overridden by subclasses")
+    }
 }
 ```
 
 **TrackSearchViewCoordinator.swift (Implementation)**
 ```swift
 final class TrackSearchViewCoordinator: Coordinator {
-    var navigationController: UINavigationController
     // ...
 
-    func start() {
+    init(navigationController: UINavigationController, component: DiggingComponent) {
+        self.component = component
+        super.init(navigationController: navigationController)
+    }
+
+    override func start() {
         let vc = self.component.makeTrackSearchViewController(coordinator: self)
         self.navigationController.setViewControllers([vc], animated: false)
     }

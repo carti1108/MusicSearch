@@ -8,20 +8,17 @@
 import UIKit
 
 final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, TrackSearchViewCoordinatorAction {
-	var navigationController: UINavigationController
-	var childCoordinators: [Coordinator] = .init()
-
 	private let component: DiggingComponent<T>
 
 	init(
 		navigationController: UINavigationController,
 		component: DiggingComponent<T>
 	) {
-		self.navigationController = navigationController
 		self.component = component
+		super.init(navigationController: navigationController)
 	}
 
-	func start() {
+	override func start() {
 		let vc = self.component.makeTrackSearchViewController(coordinator: self)
 		self.navigationController.setViewControllers([vc], animated: false)
 	}

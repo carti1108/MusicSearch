@@ -8,9 +8,6 @@
 import UIKit
 
 final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommendationCoordinatorAction, MusicAppRouting {
-	var navigationController: UINavigationController
-	var childCoordinators: [Coordinator] = .init()
-
 	private let component: HomeComponent<T>
 	
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
@@ -18,11 +15,11 @@ final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommen
 	}
 
 	init(navigationController: UINavigationController, component: HomeComponent<T>) {
-		self.navigationController = navigationController
 		self.component = component
+		super.init(navigationController: navigationController)
 	}
 
-	func start() {
+	override func start() {
 		let vc = self.component.makeWeatherRecommendationViewController(coordinator: self)
 		self.navigationController.setViewControllers([vc], animated: false)
 	}
