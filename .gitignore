@@ -63,3 +63,5 @@ fastlane/test_output
 
 # Configuration files with sensitive data
 Config.xcconfig
+
+ARCHITECTURE_RULES.md
