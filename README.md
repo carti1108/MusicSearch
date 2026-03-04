@@ -91,20 +91,6 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 		self.view?.listener = self
 	}
 }
-
-@MainActor
-class Coordinator: Coordinating {
-    var navigationController: UINavigationController
-    var childCoordinators: [Coordinating] = []
-
-    init(navigationController: UINavigationController) {
-        self.navigationController = navigationController
-    }
-
-    func start() {
-        fatalError("start() must be overridden by subclasses")
-    }
-}
 ```
 
 ### Coordinator Abstraction
