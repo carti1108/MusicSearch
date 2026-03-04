@@ -54,6 +54,7 @@ final class PodiumCell: UICollectionViewCell {
 		self.imageView.backgroundColor = .systemGray5
 		self.imageView.layer.borderWidth = 0
 		self.imageView.layer.borderColor = nil
+		self.containerCenterYConstraint?.constant = -20
 		self.containerView.transform = .identity
 	}
 	
@@ -122,13 +123,15 @@ final class PodiumCell: UICollectionViewCell {
 			self.imageView.layer.borderColor = UIColor.systemYellow.cgColor
 			self.rankLabel.font = .systemFont(ofSize: 36, weight: .black)
 			self.rankLabel.textColor = .systemYellow
-			self.containerView.transform = .identity
+			self.containerCenterYConstraint?.constant = -20
 		} else {
 			self.imageView.layer.borderWidth = 0
 			self.rankLabel.font = .systemFont(ofSize: 24, weight: .bold)
 			self.rankLabel.textColor = .label
-			self.containerView.transform = CGAffineTransform(scaleX: 0.85, y: 0.85).translatedBy(x: 0, y: 80)
+			self.containerCenterYConstraint?.constant = 24
 		}
+
+		self.containerView.transform = .identity
 	}
 
 	private static func rankColor(_ rank: Int) -> UIColor {

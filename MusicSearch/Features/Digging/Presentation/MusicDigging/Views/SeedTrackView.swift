@@ -46,8 +46,6 @@ final class SeedTrackView: UIView {
 		label.textAlignment = .center
 		label.numberOfLines = 2
 		label.lineBreakMode = .byTruncatingTail
-		label.adjustsFontSizeToFitWidth = true
-		label.minimumScaleFactor = 0.8
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
@@ -59,8 +57,6 @@ final class SeedTrackView: UIView {
 		label.textAlignment = .center
 		label.numberOfLines = 1
 		label.lineBreakMode = .byTruncatingTail
-		label.adjustsFontSizeToFitWidth = true
-		label.minimumScaleFactor = 0.8
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()

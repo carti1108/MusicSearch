@@ -32,6 +32,9 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 16, weight: .semibold)
 		label.textColor = .label
+		label.numberOfLines = 1
+		label.lineBreakMode = .byTruncatingTail
+		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()
 
@@ -39,6 +42,9 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 14, weight: .regular)
 		label.textColor = .secondaryLabel
+		label.numberOfLines = 1
+		label.lineBreakMode = .byTruncatingTail
+		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()
 
