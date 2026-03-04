@@ -9,23 +9,6 @@ import UIKit
 import RIBs
 
 @MainActor
-protocol HomePresentableListener: AnyObject {
-	func viewDidLoad()
-	func didTapRefresh()
-	func didSelectTrack(at index: Int)
-}
-
-@MainActor
-protocol HomePresentable: Presentable {
-	var listener: HomePresentableListener? { get set }
-	func update(weather: Weather, tracks: [Track])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
-}
-
-protocol HomeViewControllable: ViewControllable {}
-
-@MainActor
 final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, HomePresentable, HomeViewControllable, ErrorPresentable {
 	enum Section {
 		case main

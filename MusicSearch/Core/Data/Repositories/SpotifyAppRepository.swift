@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import NetworkLayer
 
 actor SpotifyAppRepository: MusicAppRepository {
 
@@ -14,6 +15,7 @@ actor SpotifyAppRepository: MusicAppRepository {
 	private var accessToken: String?
 	private var accessTokenExpiry: Date?
 	private let tokenRefreshLeeway: TimeInterval = 60
+	private let networkManager: NetworkRequesting
 
 	private enum SpotifyRepositoryError: Error {
 		case unauthorized
@@ -21,9 +23,10 @@ actor SpotifyAppRepository: MusicAppRepository {
 		case invalidURI
 	}
 
-	init(clientId: String, clientSecret: String) {
+	init(clientId: String, clientSecret: String, networkManager: NetworkRequesting) {
 		self.clientId = clientId
 		self.clientSecret = clientSecret
+		self.networkManager = networkManager
 	}
 
 	func fetchDeepLink(for track: Track) async -> URL? {
@@ -52,32 +55,29 @@ actor SpotifyAppRepository: MusicAppRepository {
 			return try await self.search(query: query, type: type, token: token)
 		} catch SpotifyRepositoryError.unauthorized {
 			self.clearToken()
-			let refreshedToken = try await self.getAccessToken(forceRefresh: true)
+			let refreshedToken = try await self.getAccessToken(isRefresh: true)
 			return try await self.search(query: query, type: type, token: refreshedToken)
+		} catch let error as NetworkLayer.NetworkError {
+			if case .httpError(let code, _) = error, code == 401 {
+				self.clearToken()
+				let refreshedToken = try await self.getAccessToken(isRefresh: true)
+				return try await self.search(query: query, type: type, token: refreshedToken)
+			}
+			throw error
 		}
 	}
 
-	private func getAccessToken(forceRefresh: Bool = false) async throws -> String {
-		if !forceRefresh, self.isTokenValid, let token = self.accessToken {
+	private func getAccessToken(isRefresh: Bool = false) async throws -> String {
+		if !isRefresh, self.isTokenValid, let token = self.accessToken {
 			return token
 		}
-		if forceRefresh {
+		if isRefresh {
 			self.clearToken()
 		}
 
 		let api = SpotifyAPI.token(clientId: self.clientId, clientSecret: self.clientSecret)
-		var request = URLRequest(url: api.url)
-		request.httpMethod = api.method
-		request.allHTTPHeaderFields = api.headers
-		request.httpBody = api.body
+		let tokenResponse = try await self.networkManager.perform(with: api, as: SpotifyTokenResponse.self)
 
-		let (data, response) = try await URLSession.shared.data(for: request)
-
-		guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-			throw URLError(.badServerResponse)
-		}
-
-		let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
 		self.accessToken = tokenResponse.access_token
 		self.accessTokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
 		return tokenResponse.access_token
@@ -85,35 +85,16 @@ actor SpotifyAppRepository: MusicAppRepository {
 
 	private func search(query: String, type: String, token: String) async throws -> String {
 		let api = SpotifyAPI.search(query: query, type: type, token: token)
-		var components = URLComponents(url: api.url, resolvingAgainstBaseURL: true)!
-		components.queryItems = api.queryItems
-		guard let url = components.url else { throw SpotifyRepositoryError.invalidURL }
-
-		var request = URLRequest(url: url)
-		request.httpMethod = api.method
-		request.allHTTPHeaderFields = api.headers
-
-		let (data, response) = try await URLSession.shared.data(for: request)
-
-		guard let httpResponse = response as? HTTPURLResponse else {
-			throw URLError(.badServerResponse)
-		}
-		if httpResponse.statusCode == 401 {
-			throw SpotifyRepositoryError.unauthorized
-		}
-		guard (200...299).contains(httpResponse.statusCode) else {
-			throw URLError(.badServerResponse)
-		}
 
 		if type == "track" {
-			let result = try JSONDecoder().decode(SpotifyTrackSearchResponse.self, from: data)
+			let result = try await self.networkManager.perform(with: api, as: SpotifyTrackSearchResponse.self)
 			guard let item = result.tracks.items.first else { throw URLError(.resourceUnavailable) }
 			if let spotifyURL = item.external_urls?.spotify {
 				return spotifyURL
 			}
 			return try self.convertToWebURL(uri: item.uri)
 		} else {
-			let result = try JSONDecoder().decode(SpotifyArtistSearchResponse.self, from: data)
+			let result = try await self.networkManager.perform(with: api, as: SpotifyArtistSearchResponse.self)
 			guard let item = result.artists.items.first else { throw URLError(.resourceUnavailable) }
 			if let spotifyURL = item.external_urls?.spotify {
 				return spotifyURL
@@ -123,7 +104,6 @@ actor SpotifyAppRepository: MusicAppRepository {
 	}
 
 	private func convertToWebURL(uri: String) throws -> String {
-
 		let components = uri.components(separatedBy: ":")
 		guard components.count == 3 else { throw SpotifyRepositoryError.invalidURI }
 		let type = components[1]

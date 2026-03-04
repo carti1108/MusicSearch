@@ -13,12 +13,27 @@ protocol TrackSearchRouting: ViewableRouting {
 	func attachMusicDigging(seedTrack: Track)
 }
 
-protocol TrackSearchInteractable: Interactable, TrackSearchViewableListener {
-	var router: TrackSearchRouting? { get set }
+@MainActor
+protocol TrackSearchPresentableListener: AnyObject {
+	func didUpdateSearchText(_ keyword: String)
+	func didTapRetry()
+	func didSelectTrack(_ track: Track)
+	func didReachListBottom()
 }
 
-final class TrackSearchInteractor: PresentableInteractor<TrackSearchViewable>, TrackSearchInteractable {
+@MainActor
+protocol TrackSearchPresentable: Presentable {
+	var listener: TrackSearchPresentableListener? { get set }
+	func updateTracks(_ tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
+
+protocol TrackSearchListener: AnyObject {}
+
+final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>, TrackSearchInteractable, TrackSearchPresentableListener {
 	weak var router: TrackSearchRouting?
+	weak var listener: TrackSearchListener?
 
 	private let searchSubject: PassthroughSubject<String, Never> = .init()
 	private var cancellables: Set<AnyCancellable> = .init()
@@ -39,7 +54,7 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchViewable>, T
 	private let searchTracksUseCase: SearchTracksUseCase
 
 	init(
-		presenter: TrackSearchViewable,
+		presenter: TrackSearchPresentable,
 		debounceSeconds: TimeInterval = 0.5,
 		searchTracksUseCase: SearchTracksUseCase
 	) {
@@ -73,8 +88,8 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchViewable>, T
 
 	private func bindSearchInput() {
 		self.searchSubject
-			.debounce(for: .seconds(self.debounceSeconds), scheduler: RunLoop.main)
 			.removeDuplicates()
+			.debounce(for: .seconds(self.debounceSeconds), scheduler: DispatchQueue.main)
 			.sink { [weak self] keyword in
 				self?.performSearch(keyword: keyword)
 			}

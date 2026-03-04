@@ -12,8 +12,18 @@ protocol HomeDependency: Dependency {
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
+final class HomeComponent: Component<HomeDependency> {
+	fileprivate var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
+		self.dependency.fetchMusicForWeatherUseCase
+	}
+
+	fileprivate var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		self.dependency.fetchMusicAppDeepLinkUseCase
+	}
+}
+
 protocol HomeBuildable: Buildable {
-	func build() -> HomeRouting
+	func build(withListener listener: HomeListener) -> HomeRouting
 }
 
 final class HomeBuilder: Builder<HomeDependency>, HomeBuildable {
@@ -21,14 +31,16 @@ final class HomeBuilder: Builder<HomeDependency>, HomeBuildable {
 		super.init(dependency: dependency)
 	}
 
-	func build() -> HomeRouting {
+	func build(withListener listener: HomeListener) -> HomeRouting {
 		MainActor.assumeIsolated {
+			let component = HomeComponent(dependency: self.dependency)
 			let viewController = WeatherRecommendationViewController()
 			let interactor = HomeInteractor(
 				presenter: viewController,
-				fetchMusicForWeatherUseCase: self.dependency.fetchMusicForWeatherUseCase,
-				fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase
+				fetchMusicForWeatherUseCase: component.fetchMusicForWeatherUseCase,
+				fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase
 			)
+			interactor.listener = listener
 			return HomeRouter(interactor: interactor, viewController: viewController)
 		}
 	}

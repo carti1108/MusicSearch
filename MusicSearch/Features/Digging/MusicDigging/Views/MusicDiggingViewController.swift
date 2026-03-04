@@ -9,28 +9,10 @@ import UIKit
 import RIBs
 
 @MainActor
-protocol MusicDiggingViewableListener: AnyObject {
-	func viewDidAppear()
-	func didTapRetry()
-	func didSelectRecommendation(at indexPath: IndexPath)
-}
-
-@MainActor
-protocol MusicDiggingPresentable: Presentable {
-	var listener: MusicDiggingViewableListener? { get set }
-	func updateSeedTrack(_ track: Track)
-	func updateRecommendations(_ tracks: [Track])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
-}
-
-protocol MusicDiggingViewControllable: ViewControllable {}
-
-@MainActor
 final class MusicDiggingViewController: UIViewController, MusicDiggingPresentable, MusicDiggingViewControllable, LoadingPresentable, ErrorPresentable {
 	enum Section { case recommendations }
 
-	weak var listener: MusicDiggingViewableListener?
+	weak var listener: MusicDiggingPresentableListener?
 	var lastPresentedErrorMessage: String?
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!

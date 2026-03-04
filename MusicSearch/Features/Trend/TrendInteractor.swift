@@ -10,14 +10,30 @@ import RIBs
 
 protocol TrendRouting: ViewableRouting {}
 
-protocol TrendInteractable: Interactable, ChartPresentableListener {
-	var router: TrendRouting? { get set }
+@MainActor
+protocol TrendPresentableListener: AnyObject {
+	func viewDidLoad()
+	func didChangeSegment(index: Int)
+	func didTapRefresh()
+	func didSelectItem(at indexPath: IndexPath)
 }
 
-final class TrendInteractor: PresentableInteractor<ChartPresentable>, TrendInteractable {
+@MainActor
+protocol TrendPresentable: Presentable {
+	var listener: TrendPresentableListener? { get set }
+	func updateSegment(to index: Int)
+	func update(podiumItems: [ChartItem], listItems: [ChartItem])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
+
+protocol TrendListener: AnyObject {}
+
+final class TrendInteractor: PresentableInteractor<TrendPresentable>, TrendInteractable, TrendPresentableListener {
 	private typealias ChartSections = (podium: [ChartItem], list: [ChartItem])
 
 	weak var router: TrendRouting?
+	weak var listener: TrendListener?
 
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
@@ -30,7 +46,7 @@ final class TrendInteractor: PresentableInteractor<ChartPresentable>, TrendInter
 	private var cachedSectionsByType: [Int: ChartSections] = .init()
 
 	init(
-		presenter: ChartPresentable,
+		presenter: TrendPresentable,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
@@ -43,7 +59,7 @@ final class TrendInteractor: PresentableInteractor<ChartPresentable>, TrendInter
 	}
 
 	func viewDidLoad() {
-		self.loadData(for: self.currentType, forceRefresh: false)
+		self.loadData(for: self.currentType, isRefresh: false)
 	}
 
 	func didChangeSegment(index: Int) {
@@ -64,12 +80,12 @@ final class TrendInteractor: PresentableInteractor<ChartPresentable>, TrendInter
 		self.currentPodiumItems = []
 		self.currentListItems = []
 		self.presenter.update(podiumItems: [], listItems: [])
-		self.loadData(for: type, forceRefresh: false)
+		self.loadData(for: type, isRefresh: false)
 	}
 
 	func didTapRefresh() {
 		self.cachedSectionsByType[self.currentType.rawValue] = nil
-		self.loadData(for: self.currentType, forceRefresh: true)
+		self.loadData(for: self.currentType, isRefresh: true)
 	}
 
 	func didSelectItem(at indexPath: IndexPath) {
@@ -95,10 +111,10 @@ final class TrendInteractor: PresentableInteractor<ChartPresentable>, TrendInter
 		}
 	}
 
-	private func loadData(for type: ChartType, forceRefresh: Bool) {
+	private func loadData(for type: ChartType, isRefresh: Bool) {
 		self.loadTask?.cancel()
 
-		if !forceRefresh, let cachedSections = self.cachedSectionsByType[type.rawValue] {
+		if !isRefresh, let cachedSections = self.cachedSectionsByType[type.rawValue] {
 			self.apply(sections: cachedSections, for: type)
 			return
 		}

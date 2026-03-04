@@ -6,64 +6,82 @@
 //
 
 import Foundation
+import NetworkLayer
 
 enum SpotifyAPI {
 	case token(clientId: String, clientSecret: String)
 	case search(query: String, type: String, token: String)
+}
 
-	var url: URL {
+extension SpotifyAPI: Requestable {
+	var cachePolicy: CachePolicy {
 		switch self {
 		case .token:
-			return URL(string: "https://accounts.spotify.com/api/token")!
+			return .memory
 		case .search:
-			return URL(string: "https://api.spotify.com/v1/search")!
+			return .memory
 		}
 	}
 
-	var method: String {
+	var baseURL: URL {
 		switch self {
 		case .token:
-			return "POST"
+			return URL(string: "https://accounts.spotify.com")!
 		case .search:
-			return "GET"
+			return URL(string: "https://api.spotify.com")!
 		}
 	}
 
-	var headers: [String: String] {
+	var path: String {
+		switch self {
+		case .token:
+			return "/api/token"
+		case .search:
+			return "/v1/search"
+		}
+	}
+
+	var method: HTTPMethod {
+		switch self {
+		case .token:
+			return .post
+		case .search:
+			return .get
+		}
+	}
+
+	var headers: [HTTPHeader.Field: String]? {
 		switch self {
 		case .token(let clientId, let clientSecret):
 			let credentialData = "\(clientId):\(clientSecret)".data(using: .utf8)!
 			let base64Credentials = credentialData.base64EncodedString()
 			return [
-				"Authorization": "Basic \(base64Credentials)",
-				"Content-Type": "application/x-www-form-urlencoded"
+				.authorization: "Basic \(base64Credentials)",
+				.contentType: "application/x-www-form-urlencoded"
 			]
 		case .search(_, _, let token):
 			return [
-				"Authorization": "Bearer \(token)"
+				.authorization: "Bearer \(token)"
 			]
 		}
 	}
 
-	var body: Data? {
+	var task: RequestTask {
 		switch self {
 		case .token:
-			return "grant_type=client_credentials".data(using: .utf8)
-		case .search:
-			return nil
-		}
-	}
-
-	var queryItems: [URLQueryItem]? {
-		switch self {
-		case .token:
-			return nil
+			return .requestParameters(
+				parameters: ["grant_type": "client_credentials"],
+				encoding: URLFormEncoder()
+			)
 		case .search(let query, let type, _):
-			return [
-				URLQueryItem(name: "q", value: query),
-				URLQueryItem(name: "type", value: type),
-				URLQueryItem(name: "limit", value: "1")
-			]
+			return .requestParameters(
+				parameters: [
+					"q": query,
+					"type": type,
+					"limit": "1"
+				],
+				encoding: URLQueryEncoder()
+			)
 		}
 	}
 }

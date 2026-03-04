@@ -8,7 +8,10 @@
 import RIBs
 
 protocol MusicDiggingBuildable: Buildable {
-	func build(seedTrack: Track) -> MusicDiggingRouting
+	func build(
+		withListener listener: MusicDiggingListener,
+		seedTrack: Track
+	) -> MusicDiggingRouting
 }
 
 final class MusicDiggingBuilder: Builder<DiggingDependency>, MusicDiggingBuildable {
@@ -16,7 +19,10 @@ final class MusicDiggingBuilder: Builder<DiggingDependency>, MusicDiggingBuildab
 		super.init(dependency: dependency)
 	}
 
-	func build(seedTrack: Track) -> MusicDiggingRouting {
+	func build(
+		withListener listener: MusicDiggingListener,
+		seedTrack: Track
+	) -> MusicDiggingRouting {
 		MainActor.assumeIsolated {
 			let viewController = MusicDiggingViewController()
 			let interactor = MusicDiggingInteractor(
@@ -24,6 +30,7 @@ final class MusicDiggingBuilder: Builder<DiggingDependency>, MusicDiggingBuildab
 				presenter: viewController,
 				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase
 			)
+			interactor.listener = listener
 			return MusicDiggingRouter(interactor: interactor, viewController: viewController)
 		}
 	}

@@ -14,8 +14,25 @@ protocol DiggingDependency: Dependency {
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 }
 
+final class DiggingComponent: Component<DiggingDependency>, DiggingDependency {
+	var searchTracksUseCase: SearchTracksUseCase {
+		self.dependency.searchTracksUseCase
+	}
+
+	var fetchTracksByTagUseCase: FetchTracksByTagUseCase {
+		self.dependency.fetchTracksByTagUseCase
+	}
+
+	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase {
+		self.dependency.fetchSimilarTrackUseCase
+	}
+}
+
 protocol TrackSearchBuildable: Buildable {
-	func build(navigationController: UINavigationController) -> TrackSearchRouting
+	func build(
+		withListener listener: TrackSearchListener,
+		navigationController: UINavigationController
+	) -> TrackSearchRouting
 }
 
 final class TrackSearchBuilder: Builder<DiggingDependency>, TrackSearchBuildable {
@@ -23,14 +40,20 @@ final class TrackSearchBuilder: Builder<DiggingDependency>, TrackSearchBuildable
 		super.init(dependency: dependency)
 	}
 
-	func build(navigationController: UINavigationController) -> TrackSearchRouting {
+	func build(
+		withListener listener: TrackSearchListener,
+		navigationController: UINavigationController
+	) -> TrackSearchRouting {
 		MainActor.assumeIsolated {
+			let component = DiggingComponent(dependency: self.dependency)
 			let viewController = TrackSearchViewController()
 			let interactor = TrackSearchInteractor(
 				presenter: viewController,
-				searchTracksUseCase: self.dependency.searchTracksUseCase
+				searchTracksUseCase: component.searchTracksUseCase
 			)
-			let musicDiggingBuilder = MusicDiggingBuilder(dependency: self.dependency)
+			interactor.listener = listener
+
+			let musicDiggingBuilder = MusicDiggingBuilder(dependency: component)
 			return TrackSearchRouter(
 				interactor: interactor,
 				viewController: viewController,

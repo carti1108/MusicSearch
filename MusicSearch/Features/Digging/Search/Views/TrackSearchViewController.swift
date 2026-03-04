@@ -9,28 +9,10 @@ import UIKit
 import RIBs
 
 @MainActor
-protocol TrackSearchViewableListener: AnyObject {
-	func didUpdateSearchText(_ keyword: String)
-	func didTapRetry()
-	func didSelectTrack(_ track: Track)
-	func didReachListBottom()
-}
-
-@MainActor
-protocol TrackSearchViewable: Presentable {
-	var listener: TrackSearchViewableListener? { get set }
-	func updateTracks(_ tracks: [Track])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
-}
-
-protocol TrackSearchViewControllable: ViewControllable {}
-
-@MainActor
-final class TrackSearchViewController: UIViewController, TrackSearchViewable, TrackSearchViewControllable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
+final class TrackSearchViewController: UIViewController, TrackSearchPresentable, TrackSearchViewControllable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
 	enum Section { case main }
 
-	weak var listener: TrackSearchViewableListener?
+	weak var listener: TrackSearchPresentableListener?
 	var lastPresentedErrorMessage: String?
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!

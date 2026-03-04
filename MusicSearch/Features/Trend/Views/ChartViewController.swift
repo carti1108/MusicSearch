@@ -9,32 +9,13 @@ import UIKit
 import RIBs
 
 @MainActor
-protocol ChartPresentableListener: AnyObject {
-	func viewDidLoad()
-	func didChangeSegment(index: Int)
-	func didTapRefresh()
-	func didSelectItem(at indexPath: IndexPath)
-}
-
-@MainActor
-protocol ChartPresentable: Presentable {
-	var listener: ChartPresentableListener? { get set }
-	func updateSegment(to index: Int)
-	func update(podiumItems: [ChartItem], listItems: [ChartItem])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
-}
-
-protocol ChartViewControllable: ViewControllable {}
-
-@MainActor
-final class ChartViewController: UIViewController, ChartPresentable, ChartViewControllable, LoadingPresentable, ErrorPresentable {
+final class ChartViewController: UIViewController, TrendPresentable, TrendViewControllable, LoadingPresentable, ErrorPresentable {
 	enum Section: Int {
 		case podium
 		case list
 	}
 
-	weak var listener: ChartPresentableListener?
+	weak var listener: TrendPresentableListener?
 	private var dataSource: UICollectionViewDiffableDataSource<Section, ChartItem>!
 	var lastPresentedErrorMessage: String?
 	private var currentSegmentIndex: Int = 0

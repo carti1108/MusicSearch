@@ -72,7 +72,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		let imageURL = imageString
 			.flatMap { URL(string: $0) }?
-			.forcedHTTPS
+			.secureURL
 
 		return Track(
 			id: track.id,

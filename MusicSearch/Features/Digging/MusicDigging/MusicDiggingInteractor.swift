@@ -10,12 +10,27 @@ import RIBs
 
 protocol MusicDiggingRouting: ViewableRouting {}
 
-protocol MusicDiggingInteractable: Interactable, MusicDiggingViewableListener {
-	var router: MusicDiggingRouting? { get set }
+@MainActor
+protocol MusicDiggingPresentableListener: AnyObject {
+	func viewDidAppear()
+	func didTapRetry()
+	func didSelectRecommendation(at indexPath: IndexPath)
 }
 
-final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentable>, MusicDiggingInteractable {
+@MainActor
+protocol MusicDiggingPresentable: Presentable {
+	var listener: MusicDiggingPresentableListener? { get set }
+	func updateSeedTrack(_ track: Track)
+	func updateRecommendations(_ tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
+
+protocol MusicDiggingListener: AnyObject {}
+
+final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentable>, MusicDiggingInteractable, MusicDiggingPresentableListener {
 	weak var router: MusicDiggingRouting?
+	weak var listener: MusicDiggingListener?
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	private var loadTask: Task<Void, Never>?

@@ -8,6 +8,13 @@
 import UIKit
 import RIBs
 
+protocol TrackSearchInteractable: Interactable, MusicDiggingListener {
+	var router: TrackSearchRouting? { get set }
+	var listener: TrackSearchListener? { get set }
+}
+
+protocol TrackSearchViewControllable: ViewControllable {}
+
 final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSearchViewControllable>, TrackSearchRouting {
 	private final class NavigationDelegateProxy: NSObject, UINavigationControllerDelegate {
 		weak var router: TrackSearchRouter?
@@ -46,7 +53,10 @@ final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSear
 	}
 
 	func attachMusicDigging(seedTrack: Track) {
-		let musicDiggingRouter = self.musicDiggingBuilder.build(seedTrack: seedTrack)
+		let musicDiggingRouter = self.musicDiggingBuilder.build(
+			withListener: self.interactor,
+			seedTrack: seedTrack
+		)
 		self.attachChild(musicDiggingRouter)
 
 		let viewController = musicDiggingRouter.viewControllable.uiviewController

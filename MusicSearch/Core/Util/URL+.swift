@@ -8,7 +8,7 @@
 import Foundation
 
 extension URL {
-	var forcedHTTPS: URL {
+	var secureURL: URL {
 		guard self.scheme == "http",
 			  var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
 			return self
