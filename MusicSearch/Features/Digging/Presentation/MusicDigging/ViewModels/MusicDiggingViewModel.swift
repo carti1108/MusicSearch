@@ -66,6 +66,8 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 	private func loadRecommendations(basedOn track: Track) {
 		self.loadTask?.cancel()
+		self.currentRecommendations = []
+		self.view?.updateRecommendations([])
 		self.view?.showLoading(true)
 		self.view?.showError(nil)
 

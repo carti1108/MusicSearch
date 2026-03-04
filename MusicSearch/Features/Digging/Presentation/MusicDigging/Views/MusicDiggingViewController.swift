@@ -112,6 +112,8 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 
 	func showLoading(_ isShow: Bool) {
 		self.setLoading(isShow)
+		self.collectionView.isHidden = isShow
+		self.collectionView.isUserInteractionEnabled = !isShow
 	}
 
 	func showError(_ message: String?) {
@@ -182,7 +184,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
 			let groupWidth = env.container.contentSize.width * 0.4
-			let groupHeight = groupWidth + 40
+			let groupHeight = groupWidth + 72
 			let groupSize = NSCollectionLayoutSize(
 				widthDimension: .absolute(groupWidth),
 				heightDimension: .absolute(groupHeight)
