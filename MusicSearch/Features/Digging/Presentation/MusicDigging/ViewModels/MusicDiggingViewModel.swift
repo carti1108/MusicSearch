@@ -27,6 +27,7 @@ final class MusicDiggingViewModel {
 	@Published private(set) var state: MusicDiggingState
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
+	private var loadTask: Task<Void, Never>?
 
 	init(
 		seedTrack: Track,
@@ -52,16 +53,21 @@ final class MusicDiggingViewModel {
 	}
 
 	private func loadRecommendations(basedOn track: Track) {
-		Task {
-			self.state.isLoading = true
-			self.state.errorMessage = nil
+		self.loadTask?.cancel()
+		self.state.isLoading = true
+		self.state.errorMessage = nil
+		self.state.recommendations = []
 
+		self.loadTask = Task {
 			do {
 				let tracks = try await self.fetchSimilarTracksUseCase.execute(targetTrack: track)
+				guard !Task.isCancelled else { return }
 				if tracks.isEmpty {
 					state.errorMessage = "추천 곡을 불러오지 못했습니다."
 				}
 				self.state.recommendations = tracks
+			} catch is CancellationError {
+				return
 			} catch {
 				print("MusicDiggingViewModel Error: \(error)")
 				state.errorMessage = "추천 곡을 불러오지 못했습니다."

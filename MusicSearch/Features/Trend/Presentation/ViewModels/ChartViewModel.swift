@@ -54,14 +54,20 @@ final class ChartViewModel {
 		case .viewDidLoad:
 			self.loadIfNeeded(for: self.state.type, force: false)
 
-		case .changeType(let type):
-			guard self.state.type != type else { return }
-			self.state.type = type
-			self.state.listItems = []
-			self.loadIfNeeded(for: type, force: false)
+			case .changeType(let type):
+				guard self.state.type != type else { return }
+				self.state.type = type
+				self.state.podiumItems = []
+				self.state.listItems = []
+				self.loadIfNeeded(for: type, force: false)
 
-		case .refresh:
-			self.loadIfNeeded(for: self.state.type, force: true)
+			case .refresh:
+				if self.state.type == .tracks {
+					self.cachedTrackItems = nil
+				} else {
+					self.cachedArtistItems = nil
+				}
+				self.loadIfNeeded(for: self.state.type, force: true)
 			
 		case .selectItem(let indexPath):
 			self.handleSelection(at: indexPath)
@@ -87,23 +93,27 @@ final class ChartViewModel {
 			self.state.isLoading = true
 			self.state.errorMessage = nil
 
-			do {
-				switch type {
-				case .tracks:
-					let tracks = try await self.fetchChartTopTracksUseCase.execute()
-					let items = self.makeItems(from: tracks)
-					self.cachedTrackItems = items
-					self.apply(allItems: items, type: type)
+				do {
+					switch type {
+					case .tracks:
+						let tracks = try await self.fetchChartTopTracksUseCase.execute()
+						guard !Task.isCancelled, self.state.type == type else { return }
+						let items = self.makeItems(from: tracks)
+						self.cachedTrackItems = items
+						self.apply(allItems: items, type: type)
 
-				case .artists:
-					let artists = try await self.fetchChartTopArtistsUseCase.execute()
-					let items = self.makeItems(from: artists)
-					self.cachedArtistItems = items
-					self.apply(allItems: items, type: type)
-				}
-			} catch {
-				print("ChartViewModel Error: \(error)")
-				self.state.errorMessage = "차트 정보를 불러오지 못했습니다."
+					case .artists:
+						let artists = try await self.fetchChartTopArtistsUseCase.execute()
+						guard !Task.isCancelled, self.state.type == type else { return }
+						let items = self.makeItems(from: artists)
+						self.cachedArtistItems = items
+						self.apply(allItems: items, type: type)
+					}
+				} catch is CancellationError {
+					return
+				} catch {
+					print("ChartViewModel Error: \(error)")
+					self.state.errorMessage = "차트 정보를 불러오지 못했습니다."
 				self.state.podiumItems = []
 				self.state.listItems = []
 			}

@@ -140,17 +140,17 @@ final class MusicDiggingViewController: UIViewController {
 		])
 	}
 
-	private func createCarouselLayout() -> UICollectionViewLayout {
-		return UICollectionViewCompositionalLayout { sectionIndex, env in
-			let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-												  heightDimension: .fractionalHeight(1.0))
-			let item = NSCollectionLayoutItem(layoutSize: itemSize)
+		private func createCarouselLayout() -> UICollectionViewLayout {
+			return UICollectionViewCompositionalLayout { sectionIndex, env in
+				let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+													  heightDimension: .fractionalHeight(1.0))
+				let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-			let groupWidth = env.container.contentSize.width * 0.4
-			let groupHeight = groupWidth + 40
-			let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(groupWidth),
-												   heightDimension: .absolute(groupHeight))
-			let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+				let groupWidth = env.container.contentSize.width * 0.4
+				let groupHeight = groupWidth + 72
+				let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(groupWidth),
+													   heightDimension: .absolute(groupHeight))
+				let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
 			let section = NSCollectionLayoutSection(group: group)
 			section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
@@ -205,6 +205,9 @@ final class MusicDiggingViewController: UIViewController {
 		} else {
 			self.loadingIndicator.stopAnimating()
 		}
+
+		self.collectionView.isHidden = isLoading
+		self.collectionView.isUserInteractionEnabled = !isLoading
 	}
 	
 	private func presentErrorIfNeeded(_ message: String?) {

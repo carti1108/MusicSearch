@@ -19,6 +19,9 @@ final class ChartViewController: UIViewController {
 	private var cancellables: Set<AnyCancellable> = .init()
 	private var dataSource: UICollectionViewDiffableDataSource<Section, ChartItem>!
 	private var lastPresentedErrorMessage: String?
+	private var currentSegmentIndex: Int = 0
+	private var segmentOffsets: [Int: CGPoint] = .init()
+	private var isRestoringOffset = false
 	
 	private let loadingIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .large)
@@ -65,6 +68,7 @@ final class ChartViewController: UIViewController {
 		super.viewDidLoad()
 		setupUI()
 		configureDataSource()
+		self.currentSegmentIndex = self.segmentControl.selectedSegmentIndex
 		bindViewModel()
 		self.viewModel.process(action: .viewDidLoad)
 	}
@@ -94,8 +98,28 @@ final class ChartViewController: UIViewController {
 	}
 
 	@objc private func segmentChanged(_ sender: UISegmentedControl) {
+		self.segmentOffsets[self.currentSegmentIndex] = self.collectionView.contentOffset
+		self.currentSegmentIndex = sender.selectedSegmentIndex
 		let type: ChartType = sender.selectedSegmentIndex == 0 ? .tracks : .artists
 		self.viewModel.process(action: .changeType(type))
+	}
+
+	private func restoreScrollOffsetIfNeeded() {
+		let target = self.segmentOffsets[self.currentSegmentIndex] ?? .zero
+		let adjustedInset = self.collectionView.adjustedContentInset
+		let minY = -adjustedInset.top
+		let maxY = max(
+			minY,
+			self.collectionView.contentSize.height
+				- self.collectionView.bounds.height
+				+ adjustedInset.bottom
+		)
+		let clampedY = min(max(target.y, minY), maxY)
+		let clampedOffset = CGPoint(x: 0, y: clampedY)
+
+		self.isRestoringOffset = true
+		self.collectionView.setContentOffset(clampedOffset, animated: false)
+		self.isRestoringOffset = false
 	}
 
 	private func createLayout() -> UICollectionViewLayout {
@@ -157,6 +181,8 @@ final class ChartViewController: UIViewController {
 
 		let segmentIndex = (state.type == .tracks) ? 0 : 1
 		if self.segmentControl.selectedSegmentIndex != segmentIndex {
+			self.segmentOffsets[self.currentSegmentIndex] = self.collectionView.contentOffset
+			self.currentSegmentIndex = segmentIndex
 			self.segmentControl.selectedSegmentIndex = segmentIndex
 		}
 
@@ -170,7 +196,12 @@ final class ChartViewController: UIViewController {
 		}
 
 		UIView.performWithoutAnimation {
-			self.dataSource.apply(snapshot, animatingDifferences: false)
+			self.dataSource.apply(
+				snapshot,
+				animatingDifferences: false
+			) { [weak self] in
+				self?.restoreScrollOffsetIfNeeded()
+			}
 		}
 	}
 	
@@ -200,6 +231,10 @@ final class ChartViewController: UIViewController {
 extension ChartViewController: UICollectionViewDelegate {
 
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+		if !self.isRestoringOffset {
+			self.segmentOffsets[self.currentSegmentIndex] = scrollView.contentOffset
+		}
+
 		let offsetY = scrollView.contentOffset.y
 
 		let fadeDistance = collectionView.bounds.height * 0.7
