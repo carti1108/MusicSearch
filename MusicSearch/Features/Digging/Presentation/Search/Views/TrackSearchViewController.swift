@@ -74,7 +74,8 @@ final class TrackSearchViewController: UIViewController, UISearchResultsUpdating
 	}
 
 	private func setupUI() {
-		self.title = "검색"
+		self.navigationItem.title = "검색"
+		self.tabBarItem.title = "Search"
 		self.view.backgroundColor = .systemBackground
 
 		self.searchController.searchBar.placeholder = "아티스트, 곡 제목 검색"

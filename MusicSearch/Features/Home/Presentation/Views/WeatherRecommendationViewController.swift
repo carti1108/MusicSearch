@@ -70,18 +70,12 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		label.text = "오늘 날씨와 어울리는 선곡 🎧"
 		label.font = .systemFont(ofSize: 22, weight: .bold)
 		label.textColor = .white
+		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
 
 	private var lastPresentedErrorMessage: String?
-	
-	private let activityIndicator: UIActivityIndicatorView = {
-		let indicator = UIActivityIndicatorView(style: .large)
-		indicator.hidesWhenStopped = true
-		indicator.translatesAutoresizingMaskIntoConstraints = false
-		return indicator
-	}()
 
 	private lazy var scrollView: UIScrollView = {
 		let scrollView = UIScrollView()
@@ -156,6 +150,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 			self.refreshControl.endRefreshing()
 		}
 		self.presentErrorIfNeeded(state.errorMessage)
+		self.sectionTitleLabel.isHidden = state.tracks.isEmpty
 
 		self.tempLabel.text = "\(Int(state.weather.temperature))°"
 		self.descriptionLabel.text = state.weather.description
@@ -173,9 +168,15 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	
 	private func setLoading(_ isLoading: Bool) {
 		if isLoading {
-			self.activityIndicator.startAnimating()
+			if !self.refreshControl.isRefreshing {
+				self.refreshControl.beginRefreshing()
+				if self.scrollView.contentOffset.y >= -self.scrollView.adjustedContentInset.top {
+					let yOffset = -self.scrollView.adjustedContentInset.top - self.refreshControl.frame.height
+					self.scrollView.setContentOffset(CGPoint(x: 0, y: yOffset), animated: true)
+				}
+			}
 		} else {
-			self.activityIndicator.stopAnimating()
+			self.refreshControl.endRefreshing()
 		}
 	}
 	
@@ -244,7 +245,6 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.scrollView.refreshControl = self.refreshControl
 		self.view.addSubview(self.scrollView)
 		self.scrollView.addSubview(self.contentView)
-		self.view.addSubview(self.activityIndicator)
 
 		self.contentView.addSubview(self.weatherContainerView)
 		self.weatherContainerView.addSubview(self.weatherInfoStack)
@@ -271,9 +271,6 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
 			self.scrollView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-			
-			self.activityIndicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-			self.activityIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
 
 			// ContentView
 			self.contentView.topAnchor.constraint(equalTo: self.scrollView.topAnchor),
@@ -342,10 +339,10 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 				items.forEach { item in
 					let distanceFromCenter = abs(item.frame.midX - centerX)
-					let minScale: CGFloat = 0.85
-					let scale = max(minScale, 1 - (distanceFromCenter / containerWidth) * 0.4)
-					item.transform = CGAffineTransform(scaleX: scale, y: scale)
-					item.alpha = max(0.6, 1 - (distanceFromCenter / containerWidth))
+					let progress = min(distanceFromCenter / containerWidth, 1.0)
+					let yOffset = progress * 18
+					item.transform = CGAffineTransform(translationX: 0, y: yOffset)
+					item.alpha = max(0.75, 1 - (progress * 0.35))
 				}
 			}
 			return section
