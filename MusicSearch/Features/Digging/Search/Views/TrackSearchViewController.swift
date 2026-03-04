@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RIBs
 
 @MainActor
 protocol TrackSearchViewableListener: AnyObject {
@@ -16,8 +17,17 @@ protocol TrackSearchViewableListener: AnyObject {
 }
 
 @MainActor
-final class TrackSearchViewController: UIViewController, TrackSearchViewable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
+protocol TrackSearchViewable: Presentable {
+	var listener: TrackSearchViewableListener? { get set }
+	func updateTracks(_ tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
 
+protocol TrackSearchViewControllable: ViewControllable {}
+
+@MainActor
+final class TrackSearchViewController: UIViewController, TrackSearchViewable, TrackSearchViewControllable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
 	enum Section { case main }
 
 	weak var listener: TrackSearchViewableListener?

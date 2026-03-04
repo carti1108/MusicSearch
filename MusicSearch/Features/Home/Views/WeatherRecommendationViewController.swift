@@ -6,22 +6,32 @@
 //
 
 import UIKit
+import RIBs
 
 @MainActor
-protocol WeatherRecommendationViewableListener: AnyObject {
+protocol HomePresentableListener: AnyObject {
 	func viewDidLoad()
 	func didTapRefresh()
 	func didSelectTrack(at index: Int)
 }
 
 @MainActor
-final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, WeatherRecommendationViewable, ErrorPresentable {
+protocol HomePresentable: Presentable {
+	var listener: HomePresentableListener? { get set }
+	func update(weather: Weather, tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
 
+protocol HomeViewControllable: ViewControllable {}
+
+@MainActor
+final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, HomePresentable, HomeViewControllable, ErrorPresentable {
 	enum Section {
 		case main
 	}
 
-	weak var listener: WeatherRecommendationViewableListener?
+	weak var listener: HomePresentableListener?
 
 	private let weatherContainerView: UIView = {
 		let view = UIView()
@@ -282,7 +292,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 			collectionView: self.collectionView
 		) { [weak self] _, indexPath, track in
 			guard let self,
-				  let cell = self.collectionView.dequeueReusableCell(
+					let cell = self.collectionView.dequeueReusableCell(
 					withReuseIdentifier: TrackCardCell.reuseIdentifier,
 				for: indexPath
 			) as? TrackCardCell else {

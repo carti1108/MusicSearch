@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RIBs
 
 @MainActor
 protocol MusicDiggingViewableListener: AnyObject {
@@ -15,8 +16,18 @@ protocol MusicDiggingViewableListener: AnyObject {
 }
 
 @MainActor
-final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, LoadingPresentable, ErrorPresentable {
+protocol MusicDiggingPresentable: Presentable {
+	var listener: MusicDiggingViewableListener? { get set }
+	func updateSeedTrack(_ track: Track)
+	func updateRecommendations(_ tracks: [Track])
+	func showLoading(_ isShow: Bool)
+	func showError(_ message: String?)
+}
 
+protocol MusicDiggingViewControllable: ViewControllable {}
+
+@MainActor
+final class MusicDiggingViewController: UIViewController, MusicDiggingPresentable, MusicDiggingViewControllable, LoadingPresentable, ErrorPresentable {
 	enum Section { case recommendations }
 
 	weak var listener: MusicDiggingViewableListener?

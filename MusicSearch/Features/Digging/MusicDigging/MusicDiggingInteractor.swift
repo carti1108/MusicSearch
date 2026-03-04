@@ -1,24 +1,21 @@
 //
-//  MusicDiggingViewModel.swift
+//  MusicDiggingInteractor.swift
 //  MusicSearch
 //
-//  Created by Kiseok on 12/11/25.
+//  Created by Kiseok on 3/4/26.
 //
 
 import Foundation
+import RIBs
 
-@MainActor
-protocol MusicDiggingViewable: AnyObject {
-	var listener: MusicDiggingViewableListener? { get set }
-	func updateSeedTrack(_ track: Track)
-	func updateRecommendations(_ tracks: [Track])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
+protocol MusicDiggingRouting: ViewableRouting {}
+
+protocol MusicDiggingInteractable: Interactable, MusicDiggingViewableListener {
+	var router: MusicDiggingRouting? { get set }
 }
 
-final class MusicDiggingViewModel: MusicDiggingViewableListener {
-
-	var view: MusicDiggingViewable?
+final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentable>, MusicDiggingInteractable {
+	weak var router: MusicDiggingRouting?
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	private var loadTask: Task<Void, Never>?
@@ -28,25 +25,21 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 	init(
 		seedTrack: Track,
-		view: MusicDiggingViewable,
+		presenter: MusicDiggingPresentable,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	) {
 		self.currentSeedTrack = seedTrack
-		self.view = view
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
-		self.view?.listener = self
-	}
-
-	deinit {
-		self.loadTask?.cancel()
+		super.init(presenter: presenter)
+		presenter.listener = self
 	}
 
 	func viewDidAppear() {
-		self.view?.updateSeedTrack(self.currentSeedTrack)
+		self.presenter.updateSeedTrack(self.currentSeedTrack)
 		if self.currentRecommendations.isEmpty {
 			self.loadRecommendations(basedOn: self.currentSeedTrack)
 		} else {
-			self.view?.updateRecommendations(self.currentRecommendations)
+			self.presenter.updateRecommendations(self.currentRecommendations)
 		}
 	}
 
@@ -60,16 +53,16 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 		let selectedTrack = self.currentRecommendations[index]
 		self.currentSeedTrack = selectedTrack
-		self.view?.updateSeedTrack(selectedTrack)
+		self.presenter.updateSeedTrack(selectedTrack)
 		self.loadRecommendations(basedOn: selectedTrack)
 	}
 
 	private func loadRecommendations(basedOn track: Track) {
 		self.loadTask?.cancel()
 		self.currentRecommendations = []
-		self.view?.updateRecommendations([])
-		self.view?.showLoading(true)
-		self.view?.showError(nil)
+		self.presenter.updateRecommendations([])
+		self.presenter.showLoading(true)
+		self.presenter.showError(nil)
 
 		self.loadTask = Task { [weak self] in
 			guard let self else { return }
@@ -79,20 +72,20 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 				guard !Task.isCancelled else { return }
 
 				self.currentRecommendations = tracks
-				self.view?.updateRecommendations(tracks)
+				self.presenter.updateRecommendations(tracks)
 				if tracks.isEmpty {
-					self.view?.showError("추천 곡을 불러오지 못했습니다.")
+					self.presenter.showError("추천 곡을 불러오지 못했습니다.")
 				}
-				self.view?.showLoading(false)
+				self.presenter.showLoading(false)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("MusicDiggingViewModel Error: \(error)")
+				print("MusicDiggingInteractor Error: \(error)")
 				self.currentRecommendations = []
-				self.view?.updateRecommendations([])
-				self.view?.showError("추천 곡을 불러오지 못했습니다.")
-				self.view?.showLoading(false)
+				self.presenter.updateRecommendations([])
+				self.presenter.showError("추천 곡을 불러오지 못했습니다.")
+				self.presenter.showLoading(false)
 			}
 		}
 	}

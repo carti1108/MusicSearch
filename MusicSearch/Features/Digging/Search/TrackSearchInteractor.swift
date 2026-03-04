@@ -1,30 +1,25 @@
 //
-//  TrackSearchViewModel.swift
+//  TrackSearchInteractor.swift
 //  MusicSearch
 //
-//  Created by Kiseok on 12/13/25.
+//  Created by Kiseok on 3/4/26.
 //
 
-import Foundation
 import Combine
+import Foundation
+import RIBs
 
-@MainActor
-protocol TrackSearchViewable: AnyObject {
-	var listener: TrackSearchViewableListener? { get set }
-	func updateTracks(_ tracks: [Track])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
+protocol TrackSearchRouting: ViewableRouting {
+	func attachMusicDigging(seedTrack: Track)
 }
 
-@MainActor
-protocol TrackSearchViewCoordinatorAction: AnyObject {
-	func didSelect(_ track: Track)
+protocol TrackSearchInteractable: Interactable, TrackSearchViewableListener {
+	var router: TrackSearchRouting? { get set }
 }
 
-final class TrackSearchViewModel: TrackSearchViewableListener {
+final class TrackSearchInteractor: PresentableInteractor<TrackSearchViewable>, TrackSearchInteractable {
+	weak var router: TrackSearchRouting?
 
-	var view: TrackSearchViewable?
-	weak var coordinator: TrackSearchViewCoordinatorAction?
 	private let searchSubject: PassthroughSubject<String, Never> = .init()
 	private var cancellables: Set<AnyCancellable> = .init()
 
@@ -44,20 +39,15 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 	private let searchTracksUseCase: SearchTracksUseCase
 
 	init(
-		view: TrackSearchViewable,
+		presenter: TrackSearchViewable,
 		debounceSeconds: TimeInterval = 0.5,
 		searchTracksUseCase: SearchTracksUseCase
 	) {
-		self.view = view
 		self.debounceSeconds = debounceSeconds
 		self.searchTracksUseCase = searchTracksUseCase
+		super.init(presenter: presenter)
 		self.bindSearchInput()
-		self.view?.listener = self
-	}
-
-	deinit {
-		self.searchTask?.cancel()
-		self.loadMoreTask?.cancel()
+		presenter.listener = self
 	}
 
 	func didUpdateSearchText(_ keyword: String) {
@@ -70,7 +60,7 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 	}
 
 	func didSelectTrack(_ track: Track) {
-		self.coordinator?.didSelect(track)
+		self.router?.attachMusicDigging(seedTrack: track)
 	}
 
 	func didReachListBottom() {
@@ -104,9 +94,9 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 			self.isLoading = false
 			self.isLoadingMore = false
 
-			self.view?.updateTracks([])
-			self.view?.showLoading(false)
-			self.view?.showError(nil)
+			self.presenter.updateTracks([])
+			self.presenter.showLoading(false)
+			self.presenter.showError(nil)
 			return
 		}
 
@@ -118,15 +108,15 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 		self.isLoadingMore = false
 		self.isLoading = true
 
-		self.view?.showLoading(true)
-		self.view?.showError(nil)
+		self.presenter.showLoading(true)
+		self.presenter.showError(nil)
 
 		self.searchTask = Task { [weak self] in
 			guard let self else { return }
 			defer {
 				if !Task.isCancelled {
 					self.isLoading = false
-					self.view?.showLoading(false)
+					self.presenter.showLoading(false)
 				}
 			}
 
@@ -141,19 +131,19 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 				self.currentTracks = result.tracks
 				self.totalResults = result.totalResults
 				self.currentPage = 1
-				self.view?.updateTracks(self.currentTracks)
+				self.presenter.updateTracks(self.currentTracks)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrackSearchViewModel Error: \(error)")
+				print("TrackSearchInteractor Error: \(error)")
 
 				self.currentTracks = []
 				self.totalResults = 0
 				self.currentPage = 1
 
-				self.view?.updateTracks([])
-				self.view?.showError("검색 중 오류가 발생했습니다.")
+				self.presenter.updateTracks([])
+				self.presenter.showError("검색 중 오류가 발생했습니다.")
 			}
 		}
 	}
@@ -190,12 +180,12 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 				self.currentTracks.append(contentsOf: result.tracks)
 				self.currentPage = nextPage
 				self.totalResults = result.totalResults
-				self.view?.updateTracks(self.currentTracks)
+				self.presenter.updateTracks(self.currentTracks)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrackSearchViewModel LoadMore Error: \(error)")
+				print("TrackSearchInteractor LoadMore Error: \(error)")
 			}
 		}
 	}

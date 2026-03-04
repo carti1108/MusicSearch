@@ -1,34 +1,27 @@
 //
-//  ChartViewModel.swift
+//  TrendInteractor.swift
 //  MusicSearch
 //
-//  Created by Kiseok on 12/13/25.
+//  Created by Kiseok on 3/4/26.
 //
 
-import Foundation
+import UIKit
+import RIBs
 
-@MainActor
-protocol ChartViewable: AnyObject {
-	var listener: ChartViewableListener? { get set }
-	func updateSegment(to index: Int)
-	func update(podiumItems: [ChartItem], listItems: [ChartItem])
-	func showLoading(_ isShow: Bool)
-	func showError(_ message: String?)
+protocol TrendRouting: ViewableRouting {}
+
+protocol TrendInteractable: Interactable, ChartPresentableListener {
+	var router: TrendRouting? { get set }
 }
 
-@MainActor
-protocol ChartViewCoordinatorAction: AnyObject {
-	func didSelect(item: ChartItem)
-}
-
-final class ChartViewModel: ChartViewableListener {
+final class TrendInteractor: PresentableInteractor<ChartPresentable>, TrendInteractable {
 	private typealias ChartSections = (podium: [ChartItem], list: [ChartItem])
 
-	var view: ChartViewable?
-	weak var coordinator: ChartViewCoordinatorAction?
+	weak var router: TrendRouting?
 
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
+	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 
 	private var loadTask: Task<Void, Never>?
 	private var currentType: ChartType = .tracks
@@ -37,18 +30,16 @@ final class ChartViewModel: ChartViewableListener {
 	private var cachedSectionsByType: [Int: ChartSections] = .init()
 
 	init(
-		view: ChartViewable,
+		presenter: ChartPresentable,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
-		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
+		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	) {
-		self.view = view
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
-		self.view?.listener = self
-	}
-
-	deinit {
-		self.loadTask?.cancel()
+		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		super.init(presenter: presenter)
+		presenter.listener = self
 	}
 
 	func viewDidLoad() {
@@ -60,19 +51,19 @@ final class ChartViewModel: ChartViewableListener {
 		guard self.currentType != type else { return }
 
 		self.currentType = type
-		self.view?.updateSegment(to: index)
+		self.presenter.updateSegment(to: index)
 
 		if let cachedSections = self.cachedSectionsByType[type.rawValue] {
 			self.loadTask?.cancel()
-			self.view?.showError(nil)
-			self.view?.showLoading(false)
+			self.presenter.showError(nil)
+			self.presenter.showLoading(false)
 			self.apply(sections: cachedSections, for: type)
 			return
 		}
 
 		self.currentPodiumItems = []
 		self.currentListItems = []
-		self.view?.update(podiumItems: [], listItems: [])
+		self.presenter.update(podiumItems: [], listItems: [])
 		self.loadData(for: type, forceRefresh: false)
 	}
 
@@ -86,16 +77,21 @@ final class ChartViewModel: ChartViewableListener {
 		let index = indexPath.item
 		let item: ChartItem?
 
-		if section == 0 { // Podium
+		if section == 0 {
 			guard index < self.currentPodiumItems.count else { return }
 			item = self.currentPodiumItems[index]
-		} else { // List
+		} else {
 			guard index < self.currentListItems.count else { return }
 			item = self.currentListItems[index]
 		}
 
-		if let item {
-			self.coordinator?.didSelect(item: item)
+		guard let item else { return }
+
+		if item.type == .tracks {
+			let track = Track(title: item.title, artist: item.subtitle, imageURL: item.imageURL)
+			self.openMusicApp(for: track)
+		} else {
+			self.openMusicApp(for: item.title)
 		}
 	}
 
@@ -107,8 +103,8 @@ final class ChartViewModel: ChartViewableListener {
 			return
 		}
 
-		self.view?.showLoading(true)
-		self.view?.showError(nil)
+		self.presenter.showLoading(true)
+		self.presenter.showError(nil)
 
 		self.loadTask = Task { [weak self] in
 			guard let self else { return }
@@ -121,7 +117,7 @@ final class ChartViewModel: ChartViewableListener {
 					let sections = self.makeSections(from: self.makeItems(from: tracks))
 					self.cachedSectionsByType[type.rawValue] = sections
 					self.apply(sections: sections, for: type)
-					self.view?.showLoading(false)
+					self.presenter.showLoading(false)
 
 				case .artists:
 					let artists = try await self.fetchChartTopArtistsUseCase.execute()
@@ -129,19 +125,19 @@ final class ChartViewModel: ChartViewableListener {
 					let sections = self.makeSections(from: self.makeItems(from: artists))
 					self.cachedSectionsByType[type.rawValue] = sections
 					self.apply(sections: sections, for: type)
-					self.view?.showLoading(false)
+					self.presenter.showLoading(false)
 				}
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("ChartViewModel Error: \(error)")
-				self.view?.showError("차트 정보를 불러오지 못했습니다.")
+				print("TrendInteractor Error: \(error)")
+				self.presenter.showError("차트 정보를 불러오지 못했습니다.")
 
 				if self.currentType == type && self.currentPodiumItems.isEmpty && self.currentListItems.isEmpty {
-					self.view?.update(podiumItems: [], listItems: [])
+					self.presenter.update(podiumItems: [], listItems: [])
 				}
-				self.view?.showLoading(false)
+				self.presenter.showLoading(false)
 			}
 		}
 	}
@@ -163,7 +159,7 @@ final class ChartViewModel: ChartViewableListener {
 		guard self.currentType == type else { return }
 		self.currentPodiumItems = sections.podium
 		self.currentListItems = sections.list
-		self.view?.update(podiumItems: self.currentPodiumItems, listItems: self.currentListItems)
+		self.presenter.update(podiumItems: self.currentPodiumItems, listItems: self.currentListItems)
 	}
 
 	private func makeItems(from tracks: [Track]) -> [ChartItem] {
@@ -192,6 +188,24 @@ final class ChartViewModel: ChartViewableListener {
 				imageURL: artist.imageURL,
 				type: .artists
 			)
+		}
+	}
+
+	private func openMusicApp(for track: Track) {
+		Task {
+			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			await MainActor.run {
+				UIApplication.shared.open(url)
+			}
+		}
+	}
+
+	private func openMusicApp(for artist: String) {
+		Task {
+			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(artist: artist) else { return }
+			await MainActor.run {
+				UIApplication.shared.open(url)
+			}
 		}
 	}
 }
