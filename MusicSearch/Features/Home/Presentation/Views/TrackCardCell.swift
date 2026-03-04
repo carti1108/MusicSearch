@@ -46,7 +46,7 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	private let textStackView: UIStackView = {
 		let stack = UIStackView()
 		stack.axis = .vertical
-		stack.spacing = 6
+		stack.spacing = 4
 		stack.alignment = .center
 		stack.distribution = .fill
 		stack.translatesAutoresizingMaskIntoConstraints = false
@@ -59,7 +59,8 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		label.textColor = .black
 		label.textAlignment = .center
 		label.numberOfLines = 1
-		label.setContentCompressionResistancePriority(.required, for: .vertical)
+		label.lineBreakMode = .byTruncatingTail
+		label.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 		return label
 	}()
 
@@ -69,7 +70,9 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		label.textColor = .darkGray
 		label.textAlignment = .center
 		label.numberOfLines = 1
+		label.lineBreakMode = .byTruncatingTail
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
+		label.setContentHuggingPriority(.required, for: .vertical)
 		return label
 	}()
 
@@ -97,12 +100,12 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 			self.cardBackgroundView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
 			self.cardBackgroundView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 10),
 			self.cardBackgroundView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),
-			self.cardBackgroundView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
+			self.cardBackgroundView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
 
 			self.mainStackView.topAnchor.constraint(equalTo: self.cardBackgroundView.topAnchor, constant: 20),
 			self.mainStackView.leadingAnchor.constraint(equalTo: self.cardBackgroundView.leadingAnchor, constant: 16),
 			self.mainStackView.trailingAnchor.constraint(equalTo: self.cardBackgroundView.trailingAnchor, constant: -16),
-			self.mainStackView.bottomAnchor.constraint(equalTo: self.cardBackgroundView.bottomAnchor, constant: -20),
+			self.mainStackView.bottomAnchor.constraint(equalTo: self.cardBackgroundView.bottomAnchor),
 
 			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor)
 		])

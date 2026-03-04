@@ -46,10 +46,15 @@ final class RankListCell: UICollectionViewCell {
 
 		self.titleLabel.font = .systemFont(ofSize: 16, weight: .medium)
 		self.titleLabel.textColor = .label
+		self.titleLabel.numberOfLines = 1
+		self.titleLabel.lineBreakMode = .byTruncatingTail
+		self.titleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
 		self.subtitleLabel.font = .systemFont(ofSize: 13, weight: .regular)
 		self.subtitleLabel.textColor = .secondaryLabel
 		self.subtitleLabel.numberOfLines = 1
+		self.subtitleLabel.lineBreakMode = .byTruncatingTail
+		self.subtitleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
 		[self.rankLabel, self.imageView, self.titleLabel, self.subtitleLabel].forEach {
 			$0.translatesAutoresizingMaskIntoConstraints = false
