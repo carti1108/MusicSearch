@@ -18,7 +18,8 @@ final class AppComponent {
 	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
 		SpotifyAppRepository(
 			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
-			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? "",
+			networkManager: self.networkManager
 		)
 	}()
 
@@ -102,3 +103,5 @@ extension AppComponent: TrendDependency {
 		FetchChartTopArtistsUseCaseImpl(chartRepository: self.chartRepository)
 	}
 }
+
+extension AppComponent: RootDependency {}

@@ -6,21 +6,23 @@
 //
 
 import UIKit
+import RIBs
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 	var window: UIWindow?
-	private var appRoot: AppRoot?
+	private var launchRouter: LaunchRouting?
 
 	func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 		guard let windowScene = (scene as? UIWindowScene) else { return }
 
-		self.appRoot = AppRoot()
-
 		let window = UIWindow(windowScene: windowScene)
-		window.rootViewController = appRoot?.makeRootTabBarController()
-		window.makeKeyAndVisible()
+		let appComponent = AppComponent()
+		let rootBuilder = RootBuilder(dependency: appComponent)
+		let launchRouter = rootBuilder.build()
+		launchRouter.launch(from: window)
 
+		self.launchRouter = launchRouter
 		self.window = window
 	}
 }
