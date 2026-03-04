@@ -56,7 +56,7 @@ final class PodiumCell: UICollectionViewCell {
 		self.imageView.layer.borderColor = nil
 		self.containerView.transform = .identity
 	}
-	
+
 	override func layoutSubviews() {
 		super.layoutSubviews()
 		if self.isArtist {
@@ -75,7 +75,10 @@ final class PodiumCell: UICollectionViewCell {
 			self.containerView.addSubview($0)
 		}
 
-		self.containerCenterYConstraint = self.containerView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor, constant: -20)
+		self.containerCenterYConstraint = self.containerView.centerYAnchor.constraint(
+			equalTo: self.contentView.centerYAnchor,
+			constant: -20
+		)
 
 		NSLayoutConstraint.activate([
 			self.containerCenterYConstraint!,
@@ -106,7 +109,11 @@ final class PodiumCell: UICollectionViewCell {
 		self.imageView.kf.cancelDownloadTask()
 		self.imageView.image = nil
 		if let url = item.imageURL {
-			let processor = DownsamplingImageProcessor(size: self.imageView.bounds.size == .zero ? CGSize(width: 400, height: 400) : self.imageView.bounds.size)
+			let processor = DownsamplingImageProcessor(
+				size: self.imageView.bounds.size == .zero
+					? CGSize(width: 400, height: 400)
+					: self.imageView.bounds.size
+			)
 			self.imageView.kf.setImage(
 				with: url,
 				options: [

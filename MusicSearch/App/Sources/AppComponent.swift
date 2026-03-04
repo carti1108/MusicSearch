@@ -14,7 +14,7 @@ final class AppComponent {
 	let networkManager: NetworkRequesting
 	let locationManager: LocationManaging
 	let weatherAPIConfiguration: WeatherAPIConfiguration
-	
+
 	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
 		SpotifyAppRepository(
 			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
@@ -26,10 +26,10 @@ final class AppComponent {
 		FetchMusicAppDeepLinkUseCaseImpl(musicAppRepository: self.musicAppRepositoryInstance)
 	}()
 
-	var  locationRepository: LocationRepository {
+	var locationRepository: LocationRepository {
 		LocationRepositoryImpl(locationManager: self.locationManager)
 	}
-	var  weatherRepository: WeatherRepository {
+	var weatherRepository: WeatherRepository {
 		WeatherRepositoryImpl(
 			networkManager: self.networkManager,
 			configuration: self.weatherAPIConfiguration
@@ -46,7 +46,10 @@ final class AppComponent {
 	}
 
 	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
-		FetchCurrentWeatherUseCaseImpl(locationRepository: self.locationRepository, weatherRepository: self.weatherRepository)
+		FetchCurrentWeatherUseCaseImpl(
+			locationRepository: self.locationRepository,
+			weatherRepository: self.weatherRepository
+		)
 	}
 
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
@@ -66,7 +69,10 @@ final class AppComponent {
 
 extension AppComponent: HomeDependency {
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
-		FetchMusicForWeatherUseCaseImpl(fetchCurrentWeatherUseCase: self.fetchCurrentWeatherUseCase, fetchTracksByTagUseCase: self.fetchTracksByTagUseCase)
+		FetchMusicForWeatherUseCaseImpl(
+			fetchCurrentWeatherUseCase: self.fetchCurrentWeatherUseCase,
+			fetchTracksByTagUseCase: self.fetchTracksByTagUseCase
+		)
 	}
 }
 
@@ -86,12 +92,13 @@ extension AppComponent: DiggingDependency {
 
 extension AppComponent: TrendDependency {
 	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {
-		FetchChartTopTracksUseCaseImpl(chartRepository: self.chartRepository, trackRepository: self.trackRepository)
+		FetchChartTopTracksUseCaseImpl(
+			chartRepository: self.chartRepository,
+			trackRepository: self.trackRepository
+		)
 	}
 
 	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase {
 		FetchChartTopArtistsUseCaseImpl(chartRepository: self.chartRepository)
 	}
-	
-
 }

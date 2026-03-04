@@ -10,7 +10,7 @@ import UIKit
 final class TrendComponent<T: TrendDependency>: Component {
 
 	typealias DependencyType = T
-	
+
 	private let dependency: T
 
 	init(dependency: T) {
@@ -31,7 +31,9 @@ final class TrendComponent<T: TrendDependency>: Component {
 	}
 
 	@MainActor
-	func makeChartViewCoordinator(navigationController: UINavigationController) -> ChartViewCoordinator<T> {
+	func makeChartViewCoordinator(
+		navigationController: UINavigationController
+	) -> ChartViewCoordinator<T> {
 		ChartViewCoordinator(navigationController: navigationController, component: self)
 	}
 }

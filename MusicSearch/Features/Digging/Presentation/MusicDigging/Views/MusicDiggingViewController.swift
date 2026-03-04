@@ -198,7 +198,9 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 	}
 
 	private func configureDataSource() {
-		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(collectionView: self.collectionView) {
+		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(
+			collectionView: self.collectionView
+		) {
 			collectionView, indexPath, track in
 			guard let cell = collectionView.dequeueReusableCell(
 				withReuseIdentifier: TrackCarouselCell.reuseIdentifier,

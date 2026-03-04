@@ -26,7 +26,10 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 	}
 
 	@MainActor
-	func makeMusicDiggingViewModel(seedTrack: Track, view: MusicDiggingViewable) -> MusicDiggingViewModel {
+	func makeMusicDiggingViewModel(
+		seedTrack: Track,
+		view: MusicDiggingViewable
+	) -> MusicDiggingViewModel {
 		MusicDiggingViewModel(
 			seedTrack: seedTrack,
 			view: view,
@@ -35,7 +38,9 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 	}
 
 	@MainActor
-	func makeTrackSearchCoordinator(navigationController: UINavigationController) -> TrackSearchViewCoordinator<T> {
+	func makeTrackSearchCoordinator(
+		navigationController: UINavigationController
+	) -> TrackSearchViewCoordinator<T> {
 		return TrackSearchViewCoordinator(
 			navigationController: navigationController,
 			component: self

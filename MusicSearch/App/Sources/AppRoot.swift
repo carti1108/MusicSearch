@@ -36,7 +36,9 @@ final class AppRoot {
 		let tabBarController = UITabBarController()
 
 		let homeNavigationController = UINavigationController()
-		let homeViewCoordinator = self.homeComponent.makeHomeViewCoordinator(navigationController: homeNavigationController)
+		let homeViewCoordinator = self.homeComponent.makeHomeViewCoordinator(
+			navigationController: homeNavigationController
+		)
 		self.homeCoordinator = homeViewCoordinator
 		homeViewCoordinator.start()
 		homeNavigationController.tabBarItem = UITabBarItem(
@@ -58,7 +60,9 @@ final class AppRoot {
 		)
 
 		let chartNavigationController = UINavigationController()
-		let chartViewCoordinator = self.trendComponent.makeChartViewCoordinator(navigationController: chartNavigationController)
+		let chartViewCoordinator = self.trendComponent.makeChartViewCoordinator(
+			navigationController: chartNavigationController
+		)
 		self.chartCoordinator = chartViewCoordinator
 		chartViewCoordinator.start()
 		chartNavigationController.tabBarItem = UITabBarItem(

@@ -140,10 +140,16 @@ final class ChartViewController: UIViewController, ChartViewable, LoadingPresent
 
 			switch section {
 			case .podium:
-				let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0/3.0), heightDimension: .fractionalHeight(1.0))
+				let itemSize = NSCollectionLayoutSize(
+					widthDimension: .fractionalWidth(1.0 / 3.0),
+					heightDimension: .fractionalHeight(1.0)
+				)
 				let item = NSCollectionLayoutItem(layoutSize: itemSize)
 				item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
-				let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+				let groupSize = NSCollectionLayoutSize(
+					widthDimension: .fractionalWidth(1.0),
+					heightDimension: .fractionalHeight(1.0)
+				)
 				let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 				let sectionLayout = NSCollectionLayoutSection(group: group)
 				sectionLayout.contentInsets = .zero
@@ -159,15 +165,23 @@ final class ChartViewController: UIViewController, ChartViewable, LoadingPresent
 	}
 
 	private func configureDataSource() {
-		dataSource = UICollectionViewDiffableDataSource<Section, ChartItem>(collectionView: collectionView) {
+		dataSource = UICollectionViewDiffableDataSource<Section, ChartItem>(
+			collectionView: collectionView
+		) {
 			(collectionView, indexPath, item) -> UICollectionViewCell? in
 
 			if indexPath.section == Section.podium.rawValue {
-				let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PodiumCell.identifier, for: indexPath) as! PodiumCell
+				let cell = collectionView.dequeueReusableCell(
+					withReuseIdentifier: PodiumCell.identifier,
+					for: indexPath
+				) as! PodiumCell
 				cell.configure(with: item)
 				return cell
 			} else {
-				let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RankListCell.identifier, for: indexPath) as! RankListCell
+				let cell = collectionView.dequeueReusableCell(
+					withReuseIdentifier: RankListCell.identifier,
+					for: indexPath
+				) as! RankListCell
 				cell.configure(with: item)
 				return cell
 			}

@@ -8,26 +8,34 @@
 import Foundation
 
 public protocol SearchTracksUseCase {
-	func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int)
+	func execute(
+		query: String,
+		limit: Int,
+		page: Int
+	) async throws -> (tracks: [Track], totalResults: Int)
 }
 
 final class SearchTrackUseCaseImpl: SearchTracksUseCase {
-	
+
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8
-	
+
 	init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
 	}
-	
-	public func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
+
+	public func execute(
+		query: String,
+		limit: Int,
+		page: Int
+	) async throws -> (tracks: [Track], totalResults: Int) {
 		guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
 			return ([], 0)
 		}
-		
+
 		let result = try await self.trackRepository.searchTracks(query: query, limit: limit, page: page)
 		let enrichedTracks = await self.updateTracksWithDetails(result.tracks)
-		
+
 		return (enrichedTracks, result.totalResults)
 	}
 

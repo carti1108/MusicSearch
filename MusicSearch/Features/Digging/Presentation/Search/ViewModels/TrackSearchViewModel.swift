@@ -11,7 +11,6 @@ import Combine
 @MainActor
 protocol TrackSearchViewable: AnyObject {
 	var listener: TrackSearchViewableListener? { get set }
-
 	func updateTracks(_ tracks: [Track])
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)
@@ -132,7 +131,11 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 			}
 
 			do {
-				let result = try await self.searchTracksUseCase.execute(query: keyword, limit: self.limit, page: 1)
+				let result = try await self.searchTracksUseCase.execute(
+					query: keyword,
+					limit: self.limit,
+					page: 1
+				)
 				guard !Task.isCancelled else { return }
 
 				self.currentTracks = result.tracks
@@ -177,7 +180,11 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 			}
 
 			do {
-				let result = try await self.searchTracksUseCase.execute(query: keyword, limit: self.limit, page: nextPage)
+				let result = try await self.searchTracksUseCase.execute(
+					query: keyword,
+					limit: self.limit,
+					page: nextPage
+				)
 				guard !Task.isCancelled else { return }
 
 				self.currentTracks.append(contentsOf: result.tracks)

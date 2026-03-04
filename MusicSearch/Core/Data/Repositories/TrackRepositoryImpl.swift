@@ -16,7 +16,11 @@ final class TrackRepositoryImpl: TrackRepository {
 		self.networkManager = networkManager
 	}
 
-	func searchTracks(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
+	func searchTracks(
+		query: String,
+		limit: Int,
+		page: Int
+	) async throws -> (tracks: [Track], totalResults: Int) {
 		let response = try await self.networkManager.perform(
 			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
 			as: TrackSearchResponseDTO.self
@@ -24,10 +28,10 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		let tracks = response.results.trackmatches.track.map { $0.toDomain() }
 		let totalResults = Int(response.results.totalResults) ?? 0
-		
+
 		return (tracks, totalResults)
 	}
-	
+
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
 		let response = try await self.networkManager.perform(
 			with: LastFMAPI.fetchTopTracks(tag: tag),
@@ -36,7 +40,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		return response.tracks.track.map { $0.toDomain() }
 	}
-	
+
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
 		let response = try await self.networkManager.perform(
 			with: LastFMAPI.fetchSimilarTracks(track: track),
@@ -45,7 +49,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		return response.similartracks.track.map { $0.toDomain() }
 	}
-	
+
 	func fetchTrackInfo(for track: Track) async throws -> Track {
 		let trackInfoResponse = try await self.networkManager.perform(
 			with: LastFMAPI.getTrackInfo(track: track),
@@ -54,7 +58,13 @@ final class TrackRepositoryImpl: TrackRepository {
 
 		guard let album = trackInfoResponse.track.album,
 			  let images = album.image else {
-			return Track(id: track.id, mbid: track.mbid, title: track.title, artist: track.artist, imageURL: nil)
+			return Track(
+				id: track.id,
+				mbid: track.mbid,
+				title: track.title,
+				artist: track.artist,
+				imageURL: nil
+			)
 		}
 
 		let imageString = images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text

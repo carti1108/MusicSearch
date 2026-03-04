@@ -281,10 +281,12 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	private func configureDataSource() {
-		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(collectionView: self.collectionView) { [weak self] _, indexPath, track in
+		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(
+			collectionView: self.collectionView
+		) { [weak self] _, indexPath, track in
 			guard let self,
 				  let cell = self.collectionView.dequeueReusableCell(
-				withReuseIdentifier: TrackCardCell.reuseIdentifier,
+					withReuseIdentifier: TrackCardCell.reuseIdentifier,
 				for: indexPath
 			) as? TrackCardCell else {
 				return UICollectionViewCell()

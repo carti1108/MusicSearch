@@ -9,9 +9,9 @@ import UIKit
 
 final class HomeComponent<T: HomeDependency>: Component {
 	typealias DependencyType = T
-	
+
 	private let dependency: T
-	
+
 	init(dependency: T) {
 		self.dependency = dependency
 	}
@@ -21,7 +21,9 @@ final class HomeComponent<T: HomeDependency>: Component {
 	}
 
 	@MainActor
-	func makeWeatherRecommendationViewModel(view: WeatherRecommendationViewable) -> WeatherRecommendationViewModel {
+	func makeWeatherRecommendationViewModel(
+		view: WeatherRecommendationViewable
+	) -> WeatherRecommendationViewModel {
 		WeatherRecommendationViewModel(
 			view: view,
 			fetchMusicForWeatherUseCase: self.dependency.fetchMusicForWeatherUseCase
@@ -29,7 +31,9 @@ final class HomeComponent<T: HomeDependency>: Component {
 	}
 
 	@MainActor
-	func makeHomeViewCoordinator(navigationController: UINavigationController) -> HomeViewCoordinator<T> {
+	func makeHomeViewCoordinator(
+		navigationController: UINavigationController
+	) -> HomeViewCoordinator<T> {
 		HomeViewCoordinator(navigationController: navigationController, component: self)
 	}
 }
