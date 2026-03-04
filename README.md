@@ -4,6 +4,12 @@
 
 ---
 
+## 실행화면
+
+| Home | Search | Chart |
+| --- | --- | --- |
+| ![Home](https://github.com/user-attachments/assets/e7e79ffb-1256-43b5-b753-4e288b4b5279) | ![Search](https://github.com/user-attachments/assets/9a598c16-8af9-433a-9c75-9b4ccc9888a6) | ![Chart](https://github.com/user-attachments/assets/c0ccd027-376d-44a1-b435-94b136b0846b) |
+
 ## 📂 폴더 구조 (Project Structure)
 ```
 MusicSearch
