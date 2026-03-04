@@ -8,7 +8,6 @@
 import UIKit
 
 final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoordinatorAction, MusicAppRouting {
-
 	private let component: TrendComponent<T>
 	private var chartViewModel: ChartViewModel?
 

@@ -8,7 +8,6 @@
 import UIKit
 
 final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommendationCoordinatorAction, MusicAppRouting {
-
 	private let component: HomeComponent<T>
 	private var weatherRecommendationViewModel: WeatherRecommendationViewModel?
 

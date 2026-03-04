@@ -8,7 +8,6 @@
 import UIKit
 
 final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, TrackSearchViewCoordinatorAction {
-
 	private let component: DiggingComponent<T>
 	private var trackSearchViewModel: TrackSearchViewModel?
 

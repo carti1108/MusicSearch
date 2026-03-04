@@ -91,6 +91,47 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 		self.view?.listener = self
 	}
 }
+
+@MainActor
+class Coordinator: Coordinating {
+    var navigationController: UINavigationController
+    var childCoordinators: [Coordinating] = []
+
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+
+    func start() {
+        fatalError("start() must be overridden by subclasses")
+    }
+}
+```
+
+### Coordinator Abstraction
+
+화면 전환 공통 책임은 `Coordinating` 프로토콜과 `Coordinator` 베이스 클래스로 관리합니다.
+
+```swift
+@MainActor
+protocol Coordinating: AnyObject {
+	var navigationController: UINavigationController { get set }
+	var childCoordinators: [Coordinating] { get set }
+	func start()
+}
+
+@MainActor
+class Coordinator: Coordinating {
+	var navigationController: UINavigationController
+	var childCoordinators: [Coordinating] = []
+
+	init(navigationController: UINavigationController) {
+		self.navigationController = navigationController
+	}
+
+	func start() {
+		fatalError("start() must be overridden by subclasses")
+	}
+}
 ```
 
 ### Coordinator Responsibility

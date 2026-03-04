@@ -8,7 +8,6 @@
 import UIKit
 
 final class MusicDiggingViewCoordinator<T: DiggingDependency>: Coordinator {
-
 	private let component: DiggingComponent<T>
 	private let seedTrack: Track
 	private var viewModel: MusicDiggingViewModel?
@@ -24,13 +23,13 @@ final class MusicDiggingViewCoordinator<T: DiggingDependency>: Coordinator {
 	}
 
 	@MainActor
-		override func start() {
-			let diggingVC = MusicDiggingViewController()
-			let viewModel = self.component.makeMusicDiggingViewModel(
-				seedTrack: self.seedTrack,
-				view: diggingVC
-			)
-			self.viewModel = viewModel
-			self.navigationController.pushViewController(diggingVC, animated: true)
-		}
+	override func start() {
+		let diggingVC = MusicDiggingViewController()
+		let viewModel = self.component.makeMusicDiggingViewModel(
+			seedTrack: self.seedTrack,
+			view: diggingVC
+		)
+		self.viewModel = viewModel
+		self.navigationController.pushViewController(diggingVC, animated: true)
+	}
 }
