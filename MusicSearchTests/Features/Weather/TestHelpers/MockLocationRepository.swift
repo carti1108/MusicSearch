@@ -10,7 +10,7 @@ import Testing
 @testable import MusicSearch
 
 final class MockLocationRepository: LocationRepository {
-	
+
 	var result: (latitude: Double, longitude: Double)?
 	var errorToThrow: Error?
 

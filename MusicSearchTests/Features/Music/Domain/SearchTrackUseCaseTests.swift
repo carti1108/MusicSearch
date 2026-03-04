@@ -10,13 +10,13 @@ import Foundation
 @testable import MusicSearch
 
 struct SearchTrackUseCaseTests {
-	
+
 	var mockRepository: MockTrackRepository
-	
+
 	init() {
 		self.mockRepository = MockTrackRepository()
 	}
-	
+
 	@Test("정상적인 쿼리로 트랙 검색이 동작하는가")
 	mutating func executeSuccess() async throws {
 		// Given
@@ -26,48 +26,48 @@ struct SearchTrackUseCaseTests {
 		]
 		mockRepository.searchTracksResult = .success((expectedTracks, 2))
 		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
-		
+
 		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
-		
+
 		// When
 		let result = try await useCase.execute(query: "test query", limit: 20, page: 1)
 		let tracks = result.tracks
-		
+
 		// Then
 		#expect(tracks.count == 2)
 		#expect(mockRepository.searchTracksCallCount == 1)
 		#expect(mockRepository.fetchTrackInfoCallCount == 2)
 		#expect(mockRepository.lastSearchTracksQuery == "test query")
 	}
-	
+
 	@Test("빈 쿼리를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithEmptyQuery() async throws {
 		// Given
 		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
-		
+
 		// When
 		let result = try await useCase.execute(query: "", limit: 20, page: 1)
 		let tracks = result.tracks
-		
+
 		// Then
 		#expect(tracks.isEmpty)
 		#expect(mockRepository.searchTracksCallCount == 0)
 	}
-	
+
 	@Test("공백만 있는 쿼리를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithWhitespaceQuery() async throws {
 		// Given
 		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
-		
+
 		// When
 		let result = try await useCase.execute(query: "   ", limit: 20, page: 1)
 		let tracks = result.tracks
-		
+
 		// Then
 		#expect(tracks.isEmpty)
 		#expect(mockRepository.searchTracksCallCount == 0)
 	}
-	
+
 	@Test("Repository에서 에러가 발생하면 에러를 전파하는가")
 	mutating func executeWithError() async {
 		// Given
@@ -75,9 +75,9 @@ struct SearchTrackUseCaseTests {
 			case testError
 		}
 		mockRepository.searchTracksResult = .failure(TestError.testError)
-		
+
 		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
-		
+
 		// When & Then
 		await #expect(throws: TestError.self) {
 			_ = try await useCase.execute(query: "test", limit: 20, page: 1)

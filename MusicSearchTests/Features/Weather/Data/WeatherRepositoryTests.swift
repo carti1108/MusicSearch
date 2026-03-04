@@ -49,7 +49,7 @@ struct WeatherRepositoryTests {
 		// Given
 		mockConfig.apiKey = ""
 		let repository = WeatherRepositoryImpl(networkManager: mockNetwork, configuration: mockConfig)
-		
+
 		// When & Then
 		await #expect(throws: WeatherError.configurationError) {
 			try await repository.fetchCurrentWeather(latitude: 0, longitude: 0)
@@ -84,7 +84,7 @@ struct WeatherRepositoryTests {
 			guard case .networkError(let message) = error as? WeatherError else {
 				return false
 			}
-			
+
 			return !message.isEmpty
 		}
 	}

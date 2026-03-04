@@ -8,7 +8,7 @@
 import Foundation
 import CoreLocation
 import Testing
-@testable import MusicSearch 
+@testable import MusicSearch
 
 final class MockLocationManager: LocationManaging {
 
