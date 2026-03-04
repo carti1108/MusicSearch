@@ -17,16 +17,15 @@
 MusicSearch
 ├── App
 │   ├── Resources       # Assets, Info.plist
-│   └── Sources         # AppDelegate, SceneDelegate
+│   └── Sources         # AppDelegate, SceneDelegate, Root RIB
 ├── Core
 │   ├── Domain          # UseCases, Entities, Interfaces
 │   ├── Data            # Repositories, DTOs, Network
-│   ├── Presentation    # Common UI Components
 │   └── Util            # Extensions, Constants
-└── Features
-    ├── Digging         # Music Digging Feature
-    ├── Home            # Home Screen Feature
-    └── Trend           # Chart & Trend Feature
+└── Features (RIBs)
+    ├── Digging         # Search RIB, MusicDigging RIB
+    ├── Home            # Home RIB
+    └── Trend           # Trend RIB
 ```
 
 ---
@@ -37,7 +36,7 @@ MusicSearch
 | --- | --- |
 | **Language** | Swift |
 | **Framework** | UIKit (Code-based) |
-| **Architecture** | MVVM-C, Repository Pattern |
+| **Architecture** | RIBs, Repository Pattern |
 | **Concurrency** | Swift Concurrency (async/await) |
 | **Reactive** | Combine |
 | **Networking** | URLSession |
@@ -48,133 +47,110 @@ MusicSearch
 
 ## 🏗️ 아키텍처 (Architecture)
 
-### 1. Dependency Injection (DI)
-`Component`와 `Dependency` 프로토콜을 기반으로 외부 라이브러리 없이 의존성을 관리합니다.
+### 1. RIBs Architecture
+Uber의 RIBs(Router-Interactor-Builder) 아키텍처를 사용하여 비즈니스 로직과 UI를 완전히 분리함.
 
 <details>
-<summary><b>상세 내용 보기 (View Details)</b></summary>
+<summary><b>RIBs 구성요소</b></summary>
 
-* **Component (Factory)**: 객체 생성을 담당하며, 필요한 의존성을 주입하여 인스턴스(VC, ViewModel, Coordinator)를 생성합니다.
-* **Dependency (Protocol)**: 각 기능(Feature)이 필요로 하는 의존성(UseCase, Repository 등)을 추상화하여 정의합니다.
-* **AppComponent**: 앱의 최상위 컨테이너로, 모든 Feature Dependency를 구현하여 구체적인 의존성을 제공합니다.
+* **Builder**: RIB 생성 및 의존성 주입을 담당
+* **Interactor**: 비즈니스 로직 처리, UseCase 호출
+* **Router**: 자식 RIB attach/detach 및 화면 전환 관리
+* **Presenter (ViewController)**: 수동적 View, UI 렌더링만 담당
 
-**DiggingDependency.swift (Protocol)**
+**TrackSearchBuilder.swift**
 ```swift
-protocol DiggingDependency: Dependency {
-    var searchTracksUseCase: SearchTracksUseCase { get }
-    var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
+protocol TrackSearchBuildable: Buildable {
+    func build(
+        withListener listener: TrackSearchListener,
+        navigationController: UINavigationController
+    ) -> TrackSearchRouting
 }
-```
 
-**DiggingComponent.swift (Factory)**
-```swift
-final class DiggingComponent<T: DiggingDependency>: Component {
-    // ...
-    func makeMusicDiggingViewController(seedTrack: Track) -> MusicDiggingViewController {
-        // ViewModel 생성 시 UseCase 주입
-        let viewModel = self.makeMusicDiggingViewModel(
-            seedTrack: seedTrack, 
-            fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase
+final class TrackSearchBuilder: Builder<DiggingDependency>, TrackSearchBuildable {
+    func build(
+        withListener listener: TrackSearchListener,
+        navigationController: UINavigationController
+    ) -> TrackSearchRouting {
+        let component = DiggingComponent(dependency: self.dependency)
+        let viewController = TrackSearchViewController()
+        let interactor = TrackSearchInteractor(
+            presenter: viewController,
+            searchTracksUseCase: component.searchTracksUseCase
         )
-        return MusicDiggingViewController(viewModel: viewModel)
+        interactor.listener = listener
+        
+        let musicDiggingBuilder = MusicDiggingBuilder(dependency: component)
+        return TrackSearchRouter(
+            interactor: interactor,
+            viewController: viewController,
+            navigationController: navigationController,
+            musicDiggingBuilder: musicDiggingBuilder
+        )
     }
 }
 ```
 </details>
 
-### 2. Coordinator Pattern
-화면 전환 로직을 `ViewController`로부터 완전히 분리하였습니다.
+### 2. Router (화면 전환)
+자식 RIB을 attach/detach하고 네비게이션 스택을 관리함.
 
 <details>
 <summary><b>코드 보기 (View Code)</b></summary>
 
-**Coordinating.swift (Protocol + Base Class)**
+**TrackSearchRouter.swift**
 ```swift
-@MainActor
-protocol Coordinating: AnyObject {
-    var navigationController: UINavigationController { get set }
-    var childCoordinators: [Coordinating] { get set }
-    func start()
-}
-
-@MainActor
-class Coordinator: Coordinating {
-    var navigationController: UINavigationController
-    var childCoordinators: [Coordinating] = []
-
-    init(navigationController: UINavigationController) {
-        self.navigationController = navigationController
-    }
-
-    func start() {
-        fatalError("start() must be overridden by subclasses")
-    }
-}
-```
-
-**TrackSearchViewCoordinator.swift (Implementation)**
-```swift
-final class TrackSearchViewCoordinator: Coordinator {
-    // ...
-
-    init(navigationController: UINavigationController, component: DiggingComponent) {
-        self.component = component
-        super.init(navigationController: navigationController)
-    }
-
-    override func start() {
-        let vc = self.component.makeTrackSearchViewController(coordinator: self)
-        self.navigationController.setViewControllers([vc], animated: false)
-    }
-
-    // 화면 전환 요청 처리
-    func didSelect(_ track: Track) {
-        let diggingCoordinator = MusicDiggingViewCoordinator(
-            navigationController: self.navigationController,
-            component: self.component,
-            seedTrack: track
+final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSearchViewControllable>, TrackSearchRouting {
+    private let navigationController: UINavigationController
+    private let musicDiggingBuilder: MusicDiggingBuildable
+    private var childRoutersByViewControllerID: [ObjectIdentifier: Routing] = [:]
+    
+    func attachMusicDigging(seedTrack: Track) {
+        let musicDiggingRouter = self.musicDiggingBuilder.build(
+            withListener: self.interactor,
+            seedTrack: seedTrack
         )
-        diggingCoordinator.start()
+        self.attachChild(musicDiggingRouter)
+        
+        let viewController = musicDiggingRouter.viewControllable.uiviewController
+        self.childRoutersByViewControllerID[ObjectIdentifier(viewController)] = musicDiggingRouter
+        self.navigationController.pushViewController(viewController, animated: true)
     }
 }
 ```
 </details>
 
-### 3. MVVM-C Communication (`Viewable` / `Listener`)
-View와 ViewModel은 서로의 concrete type을 모르고, 프로토콜을 통해 통신합니다.
+### 3. Presentable / PresentableListener (View ↔ Interactor)
+View와 Interactor는 프로토콜을 통해서만 통신함.
 
 <details>
 <summary><b>코드 보기 (View Code)</b></summary>
 
-**TrackSearchViewModel.swift**
+**TrackSearchInteractor.swift**
 ```swift
 @MainActor
-protocol TrackSearchViewableListener: AnyObject {
+protocol TrackSearchPresentableListener: AnyObject {
     func didUpdateSearchText(_ keyword: String)
     func didTapRetry()
     func didSelectTrack(_ track: Track)
+    func didReachListBottom()
 }
 
 @MainActor
-protocol TrackSearchViewable: AnyObject {
-    var listener: TrackSearchViewableListener? { get set }
+protocol TrackSearchPresentable: Presentable {
+    var listener: TrackSearchPresentableListener? { get set }
     func updateTracks(_ tracks: [Track])
     func showLoading(_ isShow: Bool)
     func showError(_ message: String?)
 }
 
-final class TrackSearchViewModel: TrackSearchViewableListener {
-    var view: TrackSearchViewable?
-    weak var coordinator: TrackSearchViewCoordinatorAction?
+final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>, TrackSearchPresentableListener {
+    weak var router: TrackSearchRouting?
+    weak var listener: TrackSearchListener?
     private let searchTracksUseCase: SearchTracksUseCase
-
-    init(
-        view: TrackSearchViewable,
-        searchTracksUseCase: SearchTracksUseCase
-    ) {
-        self.view = view
-        self.searchTracksUseCase = searchTracksUseCase
-        self.view?.listener = self
+    
+    func didSelectTrack(_ track: Track) {
+        self.router?.attachMusicDigging(seedTrack: track)
     }
 }
 ```
@@ -184,18 +160,18 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 
 ## 🚀 주요 기능 및 구현 (Implementation)
 
-### 검색 방식(Debounce)
-**Combine**의 `debounce` 연산자를 사용하여 사용자 입력에 반응하면서도 과도한 API 호출을 방지합니다.
+### Debounce (검색 최적화)
+Combine의 `debounce`로 과도한 API 호출을 방지함.
 
 <details>
-<summary><b>코드 보기 (View Code)</b></summary>
+<summary><b>코드 보기</b></summary>
 
-**TrackSearchViewModel.swift**
+**TrackSearchInteractor.swift**
 ```swift
 private func bindSearchInput() {
     self.searchSubject
-        .debounce(for: .seconds(self.debounceSeconds), scheduler: RunLoop.main)
         .removeDuplicates()
+        .debounce(for: .seconds(self.debounceSeconds), scheduler: DispatchQueue.main)
         .sink { [weak self] keyword in
             self?.performSearch(keyword: keyword)
         }
@@ -204,68 +180,83 @@ private func bindSearchInput() {
 ```
 </details>
 
-### 무한 스크롤 (Pagination)
+### Task 취소 (Stale Response 방지)
+이전 검색/로딩 Task를 취소하여 순서 보장 및 리소스 절약함.
 
 <details>
-<summary><b>코드 보기 (View Code)</b></summary>
+<summary><b>코드 보기</b></summary>
 
-**TrackSearchViewModel.swift**
+**TrackSearchInteractor.swift**
 ```swift
-private func loadMore() {
-    // 중복 로딩 방지 및 마지막 페이지 체크
-    guard self.state.canLoadMore, let keyword = self.lastKeyword else { return }
+private var searchTask: Task<Void, Never>?
+private var loadMoreTask: Task<Void, Never>?
+
+private func performSearch(keyword: String) {
+    self.searchTask?.cancel()  // 이전 검색 취소
+    self.loadMoreTask?.cancel()
     
-    let nextPage = self.state.currentPage + 1
-    
-    Task {
-        self.state.isLoadingMore = true
-        // 다음 페이지 요청
-        let result = try await self.searchTracksUseCase.execute(query: keyword, limit: self.limit, page: nextPage)
-        // 결과 추가
-        self.state.tracks.append(contentsOf: result.tracks)
-        self.state.currentPage = nextPage
-        self.state.isLoadingMore = false
+    self.searchTask = Task { [weak self] in
+        guard let self else { return }
+        do {
+            let result = try await self.searchTracksUseCase.execute(...)
+            guard !Task.isCancelled else { return }  // 취소 확인
+            
+            self.presenter.updateTracks(result.tracks)
+        } catch is CancellationError {
+            return
+        }
     }
 }
 ```
 </details>
 
-### 딥링크 (Deep Linking)
-음악 앱 연동을 추상화했습니다. Spotify API를 통해 딥링크를 가져오고, 앱이 없으면 웹 플레이어로 폴백합니다.
+### Actor (Thread-Safety)
+SpotifyAppRepository를 Actor로 구현하여 토큰 관리의 race condition을 방지함.
 
 <details>
-<summary><b>코드 보기 (View Code)</b></summary>
-
-**MusicAppRouting.swift**
-```swift
-protocol MusicAppRouting: AnyObject {
-    var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
-}
-
-extension MusicAppRouting {
-    func openMusicApp(for track: Track) {
-        Task {
-            guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-            await MainActor.run {
-                UIApplication.shared.open(url)
-            }
-        }
-    }
-}
-```
+<summary><b>코드 보기</b></summary>
 
 **SpotifyAppRepository.swift**
 ```swift
-func fetchDeepLink(for track: Track) async -> URL? {
-    do {
-        let token = try await self.getAccessToken()
-        let query = "\(track.title) \(track.artist)"
-        let urlString = try await self.search(query: query, type: "track", token: token)
-        return URL(string: urlString)
-    } catch {
-        // 에러 시 검색 페이지로 폴백
-        return self.fallbackWebURL(query: query)
+actor SpotifyAppRepository: MusicAppRepository {
+    private var accessToken: String?
+    private var accessTokenExpiry: Date?
+    
+    private func getAccessToken(forceRefresh: Bool = false) async throws -> String {
+        // 토큰이 유효하면 재사용
+        if !forceRefresh, self.isTokenValid, let token = self.accessToken {
+            return token
+        }
+        
+        // Actor 내부에서 토큰 요청 (thread-safe)
+        let tokenResponse = try await URLSession.shared.data(for: request)
+        self.accessToken = tokenResponse.access_token
+        self.accessTokenExpiry = Date().addingTimeInterval(...)
+        return tokenResponse.access_token
     }
+}
+```
+</details>
+
+### Router를 통한 딥링크
+Router에서 딥링크를 처리하여 외부 앱을 열거나 웹으로 폴백함.
+
+<details>
+<summary><b>코드 보기</b></summary>
+
+**HomeRouter.swift**
+```swift
+func openMusicApp(for track: Track) {
+    Task {
+        guard let url = await self.fetchDeepLink(for: track) else { return }
+        await MainActor.run {
+            UIApplication.shared.open(url)
+        }
+    }
+}
+
+private func fetchDeepLink(for track: Track) async -> URL? {
+    await self.appComponent.musicAppRepository.fetchDeepLink(for: track)
 }
 ```
 </details>
