@@ -11,7 +11,7 @@ final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoor
 
 	private let component: TrendComponent<T>
 	private var chartViewModel: ChartViewModel?
-	
+
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.component.fetchMusicAppDeepLinkUseCase
 	}
@@ -28,7 +28,7 @@ final class ChartViewCoordinator<T: TrendDependency>: Coordinator, ChartViewCoor
 		self.chartViewModel = viewModel
 		self.navigationController.setViewControllers([vc], animated: false)
 	}
-	
+
 	func didSelect(item: ChartItem) {
 		if item.type == .tracks {
 			let track = Track(title: item.title, artist: item.subtitle, imageURL: item.imageURL)

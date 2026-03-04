@@ -12,14 +12,14 @@ public protocol FetchSimilarTracksUseCase {
 }
 
 final class FetchSimilarTrackUseCaseImpl: FetchSimilarTracksUseCase {
-	
+
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8
-	
+
 	init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
 	}
-	
+
 	public func execute(targetTrack: Track) async throws -> [Track] {
 		let tracks = try await self.trackRepository.fetchSimilarTracks(to: targetTrack)
 		return await self.updateTracksWithDetails(tracks)

@@ -22,7 +22,7 @@ public struct DefaultWeatherAPIConfiguration: WeatherAPIConfiguration {
 		Bundle.main.object(forInfoDictionaryKey: "OPENWEATHERMAP_API_KEY") as? String ?? ""
 	}
 	public var units: String { "metric" }
-	
+
 	public init() {}
 }
 

@@ -7,6 +7,6 @@
 
 protocol Component {
 	associatedtype DependencyType: Dependency
-	
+
 	init(dependency: DependencyType)
 }

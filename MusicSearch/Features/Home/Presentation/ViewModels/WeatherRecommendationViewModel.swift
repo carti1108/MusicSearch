@@ -10,7 +10,6 @@ import Foundation
 @MainActor
 protocol WeatherRecommendationViewable: AnyObject {
 	var listener: WeatherRecommendationViewableListener? { get set }
-
 	func update(weather: Weather, tracks: [Track])
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)

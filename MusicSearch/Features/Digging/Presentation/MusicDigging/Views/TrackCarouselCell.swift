@@ -53,7 +53,7 @@ final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 		self.contentView.addSubview(self.albumImageView)
 		self.contentView.addSubview(self.titleLabel)
 		self.contentView.addSubview(self.artistLabel)
-		
+
 		self.titleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 		self.artistLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 

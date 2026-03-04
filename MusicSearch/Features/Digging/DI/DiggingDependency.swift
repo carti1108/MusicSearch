@@ -10,8 +10,6 @@ import NetworkLayer
 
 protocol DiggingDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
-	
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
-	
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 }

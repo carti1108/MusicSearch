@@ -10,7 +10,6 @@ import Foundation
 @MainActor
 protocol MusicDiggingViewable: AnyObject {
 	var listener: MusicDiggingViewableListener? { get set }
-
 	func updateSeedTrack(_ track: Track)
 	func updateRecommendations(_ tracks: [Track])
 	func showLoading(_ isShow: Bool)

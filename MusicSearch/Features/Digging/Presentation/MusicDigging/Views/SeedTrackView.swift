@@ -100,7 +100,7 @@ final class SeedTrackView: UIView {
 			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor),
 
 			self.titleLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 30),
-			
+
 			self.artistLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
 		])
 	}

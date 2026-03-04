@@ -8,6 +8,5 @@
 
 protocol ChartRepository {
 	func fetchTopTracks() async throws -> [Track]
-
 	func fetchTopArtists() async throws -> [Artist]
 }

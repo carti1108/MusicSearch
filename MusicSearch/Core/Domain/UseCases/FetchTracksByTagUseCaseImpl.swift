@@ -12,19 +12,19 @@ public protocol FetchTracksByTagUseCase {
 }
 
 final class FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
-	
+
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8
-	
+
 	init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
 	}
-	
+
 	public func execute(tag: String) async throws -> [Track] {
 		guard !tag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
 			return []
 		}
-		
+
 		let tracks = try await self.trackRepository.fetchTopTracks(by: tag)
 		return await self.updateTracksWithDetails(tracks)
 	}

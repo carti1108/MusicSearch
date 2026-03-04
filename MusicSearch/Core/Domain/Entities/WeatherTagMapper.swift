@@ -23,7 +23,7 @@ struct WeatherTagMapper {
 		case .snow:
 			return ["christmas", "classical", "winter", "ambient"].randomElement() ?? "classical"
 
-		case .atmosphere: 
+		case .atmosphere:
 			return ["dream pop", "shoegaze", "ambient", "electronic"].randomElement() ?? "dream pop"
 
 		case .clear:

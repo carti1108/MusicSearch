@@ -11,10 +11,10 @@ struct WeatherResponseDTO: Decodable {
 	let weather: [WeatherDescriptionDTO]
 	let main: MainWeatherDataDTO
 	let name: String
-	
+
 	func toDomain() -> Weather {
 		let primaryWeather = self.weather.first
-		
+
 		return Weather(
 			temperature: self.main.temp,
 			condition: self.convertToWeatherCondition(id: primaryWeather?.id ?? 800),
@@ -23,7 +23,7 @@ struct WeatherResponseDTO: Decodable {
 			cityName: self.name
 		)
 	}
-	
+
 	private func convertToWeatherCondition(id: Int) -> WeatherCondition {
 		switch id {
 		case 200...232:
@@ -60,7 +60,7 @@ struct MainWeatherDataDTO: Decodable {
 	let tempMax: Double
 	let pressure: Int
 	let humidity: Int
-	
+
 	enum CodingKeys: String, CodingKey {
 		case temp
 		case feelsLike = "feels_like"

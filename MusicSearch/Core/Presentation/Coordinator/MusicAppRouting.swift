@@ -15,7 +15,7 @@ extension MusicAppRouting {
 			}
 		}
 	}
-	
+
 	func openMusicApp(for artist: String) {
 		Task {
 			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(artist: artist) else { return }

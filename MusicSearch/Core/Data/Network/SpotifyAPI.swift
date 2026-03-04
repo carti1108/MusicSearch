@@ -10,7 +10,7 @@ import Foundation
 enum SpotifyAPI {
 	case token(clientId: String, clientSecret: String)
 	case search(query: String, type: String, token: String)
-	
+
 	var url: URL {
 		switch self {
 		case .token:
@@ -19,7 +19,7 @@ enum SpotifyAPI {
 			return URL(string: "https://api.spotify.com/v1/search")!
 		}
 	}
-	
+
 	var method: String {
 		switch self {
 		case .token:
@@ -28,7 +28,7 @@ enum SpotifyAPI {
 			return "GET"
 		}
 	}
-	
+
 	var headers: [String: String] {
 		switch self {
 		case .token(let clientId, let clientSecret):
@@ -44,7 +44,7 @@ enum SpotifyAPI {
 			]
 		}
 	}
-	
+
 	var body: Data? {
 		switch self {
 		case .token:
@@ -53,7 +53,7 @@ enum SpotifyAPI {
 			return nil
 		}
 	}
-	
+
 	var queryItems: [URLQueryItem]? {
 		switch self {
 		case .token:

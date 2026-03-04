@@ -10,7 +10,6 @@ import Foundation
 @MainActor
 protocol ChartViewable: AnyObject {
 	var listener: ChartViewableListener? { get set }
-
 	func updateSegment(to index: Int)
 	func update(podiumItems: [ChartItem], listItems: [ChartItem])
 	func showLoading(_ isShow: Bool)

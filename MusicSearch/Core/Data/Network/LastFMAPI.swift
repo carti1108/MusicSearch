@@ -71,7 +71,7 @@ extension LastFMAPI: Requestable {
 
 		case .fetchSimilarTracks(let track):
 			params["method"] = "track.getsimilar"
-			
+
 			if let mbid = track.mbid?.trimmingCharacters(in: .whitespacesAndNewlines), !mbid.isEmpty {
 				params["mbid"] = mbid
 			} else {

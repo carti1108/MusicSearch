@@ -11,7 +11,7 @@ final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommen
 
 	private let component: HomeComponent<T>
 	private var weatherRecommendationViewModel: WeatherRecommendationViewModel?
-	
+
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.component.fetchMusicAppDeepLinkUseCase
 	}
@@ -28,7 +28,7 @@ final class HomeViewCoordinator<T: HomeDependency>: Coordinator, WeatherRecommen
 		self.weatherRecommendationViewModel = viewModel
 		self.navigationController.setViewControllers([vc], animated: false)
 	}
-	
+
 	func didSelect(track: Track) {
 		self.openMusicApp(for: track)
 	}
