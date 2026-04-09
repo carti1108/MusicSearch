@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 protocol DiggingDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }

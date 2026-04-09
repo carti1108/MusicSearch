@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		4F0B6F452EE2F11A00AE0FD5 /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */; };
 		4F1737E12EEA73D00003260F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4F1737E02EEA73D00003260F /* Kingfisher */; };
+		4F4289E92F87F7F1009ACA35 /* MicroRIBs in Frameworks */ = {isa = PBXBuildFile; productRef = 4F4289E82F87F7F1009ACA35 /* MicroRIBs */; };
 		4F8D8F802EE4875100D4246D /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4F8D8F7F2EE4875100D4246D /* NetworkLayer */; };
-		4FB0D6872F582EBE00C3A1E7 /* RIBs in Frameworks */ = {isa = PBXBuildFile; productRef = 4FB0D6862F582EBE00C3A1E7 /* RIBs */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,9 +73,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F4289E92F87F7F1009ACA35 /* MicroRIBs in Frameworks */,
 				4F1737E12EEA73D00003260F /* Kingfisher in Frameworks */,
 				4F0B6F452EE2F11A00AE0FD5 /* NetworkLayer in Frameworks */,
-				4FB0D6872F582EBE00C3A1E7 /* RIBs in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,7 +148,7 @@
 			packageProductDependencies = (
 				4F0B6F442EE2F11A00AE0FD5 /* NetworkLayer */,
 				4F1737E02EEA73D00003260F /* Kingfisher */,
-				4FB0D6862F582EBE00C3A1E7 /* RIBs */,
+				4F4289E82F87F7F1009ACA35 /* MicroRIBs */,
 			);
 			productName = MusicSearch;
 			productReference = 4F0B6EB62EE2ED0600AE0FD5 /* MusicSearch.app */;
@@ -236,7 +236,7 @@
 			packageReferences = (
 				4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */,
 				4F1737DF2EEA73C60003260F /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				4FB0D6852F582EBE00C3A1E7 /* XCRemoteSwiftPackageReference "RIBs-iOS" */,
+				4F4289E72F87F7F1009ACA35 /* XCRemoteSwiftPackageReference "MicroRIBs" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F0B6EB72EE2ED0600AE0FD5 /* Products */;
@@ -615,12 +615,12 @@
 				minimumVersion = 8.6.2;
 			};
 		};
-		4FB0D6852F582EBE00C3A1E7 /* XCRemoteSwiftPackageReference "RIBs-iOS" */ = {
+		4F4289E72F87F7F1009ACA35 /* XCRemoteSwiftPackageReference "MicroRIBs" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/uber/RIBs-iOS";
+			repositoryURL = "https://github.com/carti1108/MicroRIBs";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				branch = main;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -636,15 +636,15 @@
 			package = 4F1737DF2EEA73C60003260F /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
+		4F4289E82F87F7F1009ACA35 /* MicroRIBs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F4289E72F87F7F1009ACA35 /* XCRemoteSwiftPackageReference "MicroRIBs" */;
+			productName = MicroRIBs;
+		};
 		4F8D8F7F2EE4875100D4246D /* NetworkLayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4F0B6F422EE2F10D00AE0FD5 /* XCRemoteSwiftPackageReference "NetworkLayer" */;
 			productName = NetworkLayer;
-		};
-		4FB0D6862F582EBE00C3A1E7 /* RIBs */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4FB0D6852F582EBE00C3A1E7 /* XCRemoteSwiftPackageReference "RIBs-iOS" */;
-			productName = RIBs;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

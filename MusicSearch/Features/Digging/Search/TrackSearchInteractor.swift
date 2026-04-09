@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import RIBs
+import MicroRIBs
 
 protocol TrackSearchRouting: ViewableRouting {
 	func attachMusicDigging(seedTrack: Track)

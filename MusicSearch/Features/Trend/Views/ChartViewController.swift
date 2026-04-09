@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 @MainActor
 final class ChartViewController: UIViewController, TrendPresentable, TrendViewControllable, LoadingPresentable, ErrorPresentable {

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 @MainActor
 final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, HomePresentable, HomeViewControllable, ErrorPresentable {

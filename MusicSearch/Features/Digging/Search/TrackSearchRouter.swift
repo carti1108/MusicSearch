@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 protocol TrackSearchInteractable: Interactable, MusicDiggingListener {
 	var router: TrackSearchRouting? { get set }
@@ -48,7 +48,7 @@ final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSear
 
 	override func didLoad() {
 		super.didLoad()
-		self.navigationController.setViewControllers([self.viewControllable.uiviewController], animated: false)
+		self.navigationController.setViewControllers([self.viewControllable.uiViewController], animated: false)
 		self.navigationController.delegate = self.navigationDelegateProxy
 	}
 
@@ -59,7 +59,7 @@ final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSear
 		)
 		self.attachChild(musicDiggingRouter)
 
-		let viewController = musicDiggingRouter.viewControllable.uiviewController
+		let viewController = musicDiggingRouter.viewControllable.uiViewController
 		self.childRoutersByViewControllerID[ObjectIdentifier(viewController)] = musicDiggingRouter
 		self.navigationController.pushViewController(viewController, animated: true)
 	}

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 

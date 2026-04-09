@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 @MainActor
 final class TrackSearchViewController: UIViewController, TrackSearchPresentable, TrackSearchViewControllable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {

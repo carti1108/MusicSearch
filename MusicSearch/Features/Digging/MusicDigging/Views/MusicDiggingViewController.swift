@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 @MainActor
 final class MusicDiggingViewController: UIViewController, MusicDiggingPresentable, MusicDiggingViewControllable, LoadingPresentable, ErrorPresentable {

@@ -5,7 +5,7 @@
 //  Created by Kiseok on 3/4/26.
 //
 
-import RIBs
+import MicroRIBs
 
 protocol MusicDiggingBuildable: Buildable {
 	func build(

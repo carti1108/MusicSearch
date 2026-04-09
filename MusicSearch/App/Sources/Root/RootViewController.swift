@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 final class RootViewController: UITabBarController, RootPresentable, RootViewControllable {
 	weak var listener: RootPresentableListener?

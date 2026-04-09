@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import RIBs
+import MicroRIBs
 
 protocol RootInteractable: Interactable, HomeListener, TrackSearchListener, TrendListener {
 	var router: RootRouting? { get set }
@@ -47,7 +47,7 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 		self.attachChild(homeRouter)
 		self.homeRouter = homeRouter
 
-		let homeNavigationController = UINavigationController(rootViewController: homeRouter.viewControllable.uiviewController)
+		let homeNavigationController = UINavigationController(rootViewController: homeRouter.viewControllable.uiViewController)
 		homeNavigationController.tabBarItem = UITabBarItem(
 			title: "Home",
 			image: UIImage(systemName: "house.fill"),
@@ -71,7 +71,7 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 		self.attachChild(trendRouter)
 		self.trendRouter = trendRouter
 
-		let trendNavigationController = UINavigationController(rootViewController: trendRouter.viewControllable.uiviewController)
+		let trendNavigationController = UINavigationController(rootViewController: trendRouter.viewControllable.uiViewController)
 		trendNavigationController.tabBarItem = UITabBarItem(
 			title: "Chart",
 			image: UIImage(systemName: "chart.bar.fill"),

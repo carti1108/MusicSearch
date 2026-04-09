@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import RIBs
+import MicroRIBs
 
 protocol MusicDiggingRouting: ViewableRouting {}
 
