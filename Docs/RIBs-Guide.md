@@ -339,9 +339,9 @@ Child Interactor -> Parent Listener
 
 ---
 
-## 4. 모바일 앱 시나리오별 구현 방식
+## 4. 구현 방식
 
-### 시나리오 1. 앱 시작과 Root RIB 조립
+### 1. 앱 시작과 Root RIB 조립
 
 앱 시작 시점의 책임 분리는 다음 기준.
 
@@ -370,7 +370,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 ```
 
-### 시나리오 2. 리스트 셀 탭 후 상세 화면 이동
+### 2. 리스트 셀 탭 후 상세 화면 이동
 
 처리 순서는 다음 구조.
 
@@ -399,7 +399,7 @@ func attachMusicDigging(seedTrack: Track) {
 }
 ```
 
-### 시나리오 3. 다음 화면에 데이터 전달
+### 3. 다음 화면에 데이터 전달
 
 초기 진입 필수 데이터는 Builder 단계 전달 방식.  
 `MusicDigging`의 seed track이 대표 예시.
@@ -424,7 +424,7 @@ init(
 - 화면 진입 전 반드시 필요한 값: `build(...)` 또는 `init(...)`
 - 진입 후 바뀌는 상태: `Interactor` 내부 상태
 
-### 시나리오 4. iOS 기본 백 버튼으로 pop된 뒤 자식 정리
+### 4. iOS 기본 백 버튼으로 pop된 뒤 자식 정리
 
 RIBs에서 핵심 관리 포인트 중 하나.  
 화면 pop 이후 child router detach 누락 시 subtree 생명주기 불일치 가능성.
@@ -460,7 +460,7 @@ private func detachPoppedChildrenIfNeeded() {
 - pop 확인 시 `detachChild`
 - 화면 stack과 router tree의 동기화 유지
 
-### 시나리오 5. 외부 앱 딥링크 오픈
+### 5. 외부 앱 딥링크 오픈
 
 앱 내부 화면 이동과 외부 앱 호출의 책임 분리 필요.
 
@@ -493,7 +493,7 @@ func didTapSeedTrack() {
 }
 ```
 
-### 시나리오 6. 검색, debounce, retry, pagination
+### 6. 검색, debounce, retry, pagination
 
 입력 제어와 요청 상태 관리는 Interactor 책임 영역.  
 `TrackSearchInteractor`가 대표 사례.
@@ -546,43 +546,9 @@ private func performSearch(keyword: String) {
 
 ---
 
-## 5. 테스트 코드 작성 방법
+## 5. 테스트 코드 작성
 
-현재 `MusicSearchTests`의 중심은 도메인과 유즈케이스 테스트.  
-예시 파일은 [`FetchMusicForWeatherUseCaseTests.swift`](/Users/carti/Desktop/Project/MusicSearch/MusicSearchTests/Features/Home/Domain/FetchMusicForWeatherUseCaseTests.swift).
-
-```swift
-@Test("날씨, 태그, 트랙이 정상적으로 조합되어 WeatherMusicCuration을 반환하는가")
-mutating func executeSuccess() async throws {
-	mockWeatherUseCase.result = expectedWeather
-	mockTrackUseCase.result = expectedTracks
-
-	let useCase = FetchMusicForWeatherUseCaseImpl(
-		fetchCurrentWeatherUseCase: mockWeatherUseCase,
-		fetchTracksByTagUseCase: mockTrackUseCase
-	)
-
-	let curation = try await useCase.execute()
-
-	#expect(curation.weather.cityName == "Seoul")
-	#expect(curation.tracks.count == 2)
-	#expect(mockWeatherUseCase.executeCallCount == 1)
-	#expect(mockTrackUseCase.executeCallCount == 1)
-}
-```
-
-RIB 계층까지 테스트를 넓힐 때의 권장 순서.
-
-### 5-1. Domain / UseCase 테스트
-
-검증 대상.
-
-- 입력 대비 출력
-- 에러 전파
-- 의존성 호출 횟수
-- 매핑 규칙
-
-### 5-2. Interactor 테스트
+### 5-1. Interactor 테스트
 
 검증 대상.
 
@@ -620,7 +586,7 @@ func didSelectTrack_routesToMusicDigging() async {
 - `Router Spy`
 - `UseCase Stub`
 
-### 5-3. Router 테스트
+### 5-2. Router 테스트
 
 검증 대상.
 
@@ -648,7 +614,7 @@ func attachChild_activatesChild() {
 }
 ```
 
-### 5-4. Builder 테스트
+### 5-3. Builder 테스트
 
 Builder 테스트의 초점은 조립 누락 방지.
 
@@ -656,7 +622,7 @@ Builder 테스트의 초점은 조립 누락 방지.
 - dependency 주입 누락 여부
 - 반환 router 타입 적합성
 
-### 5-5. 테스트 작성 체크리스트
+### 5-4. 테스트 작성 체크리스트
 
 - 도메인 규칙은 가장 먼저 고정
 - Interactor는 행동 계약 중심 테스트
@@ -666,23 +632,7 @@ Builder 테스트의 초점은 조립 누락 방지.
 
 ---
 
-## 6. MusicSearch에서 RIBs가 적합한 이유
-
-- 탭 구조와 feature 경계가 분명한 UIKit 앱
-- 검색 -> 추천 상세로 이어지는 하위 플로우 존재
-- back/pop 이후 child 정리 필요성 존재
-- feature별 의존성 경계 분리 필요
-
-RIBs 적용 효과는 다음 항목으로 정리 가능.
-
-- 탭별 subtree 관리 용이성
-- 화면 이동 책임의 Router 집중
-- 비즈니스 로직의 Interactor 집중
-- Dependency / Component 기반 결합도 제어
-
----
-
-## 7. 요약
+## 6. 요약
 
 `MusicSearch`에서 RIBs의 역할은 feature를 트리로 조립하고, 화면 이동과 생명주기를 Router 중심으로 관리하는 구조 제공.
 
