@@ -12,6 +12,7 @@ protocol DiggingDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
 final class DiggingComponent: Component<DiggingDependency>, DiggingDependency {
@@ -25,6 +26,10 @@ final class DiggingComponent: Component<DiggingDependency>, DiggingDependency {
 
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase {
 		self.dependency.fetchSimilarTrackUseCase
+	}
+
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		self.dependency.fetchMusicAppDeepLinkUseCase
 	}
 }
 

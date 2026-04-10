@@ -28,7 +28,8 @@ final class MusicDiggingBuilder: Builder<DiggingDependency>, MusicDiggingBuildab
 			let interactor = MusicDiggingInteractor(
 				seedTrack: seedTrack,
 				presenter: viewController,
-				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase
+				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase,
+				fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase
 			)
 			interactor.listener = listener
 			return MusicDiggingRouter(interactor: interactor, viewController: viewController)

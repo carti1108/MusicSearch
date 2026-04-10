@@ -5,7 +5,7 @@
 //  Created by Kiseok on 3/4/26.
 //
 
-import Foundation
+import UIKit
 import MicroRIBs
 
 protocol MusicDiggingRouting: ViewableRouting {}
@@ -14,6 +14,7 @@ protocol MusicDiggingRouting: ViewableRouting {}
 protocol MusicDiggingPresentableListener: AnyObject {
 	func viewDidAppear()
 	func didTapRetry()
+	func didTapSeedTrack()
 	func didSelectRecommendation(at indexPath: IndexPath)
 }
 
@@ -33,6 +34,7 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 	weak var listener: MusicDiggingListener?
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
+	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	private var loadTask: Task<Void, Never>?
 
 	private var currentSeedTrack: Track
@@ -41,10 +43,12 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 	init(
 		seedTrack: Track,
 		presenter: MusicDiggingPresentable,
-		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
+		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	) {
 		self.currentSeedTrack = seedTrack
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
+		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
 		super.init(presenter: presenter)
 		presenter.listener = self
 	}
@@ -60,6 +64,10 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 
 	func didTapRetry() {
 		self.loadRecommendations(basedOn: self.currentSeedTrack)
+	}
+
+	func didTapSeedTrack() {
+		self.openMusicApp(for: self.currentSeedTrack)
 	}
 
 	func didSelectRecommendation(at indexPath: IndexPath) {
@@ -101,6 +109,15 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 				self.presenter.updateRecommendations([])
 				self.presenter.showError("추천 곡을 불러오지 못했습니다.")
 				self.presenter.showLoading(false)
+			}
+		}
+	}
+
+	private func openMusicApp(for track: Track) {
+		Task {
+			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			await MainActor.run {
+				UIApplication.shared.open(url)
 			}
 		}
 	}
