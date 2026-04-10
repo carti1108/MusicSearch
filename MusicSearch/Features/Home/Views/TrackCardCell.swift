@@ -9,15 +9,18 @@ import UIKit
 import Kingfisher
 
 final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
+	private let glowLayer = CAGradientLayer()
 
 	private let cardBackgroundView: UIView = {
 		let view = UIView()
-		view.backgroundColor = .white
-		view.layer.cornerRadius = 24
+		view.backgroundColor = UIColor.white.withAlphaComponent(0.08)
+		view.layer.cornerRadius = 28
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.1).cgColor
 		view.layer.shadowColor = UIColor.black.cgColor
-		view.layer.shadowOpacity = 0.2
-		view.layer.shadowOffset = CGSize(width: 0, height: 8)
-		view.layer.shadowRadius = 10
+		view.layer.shadowOpacity = 0.22
+		view.layer.shadowOffset = CGSize(width: 0, height: 20)
+		view.layer.shadowRadius = 26
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -55,11 +58,10 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 20, weight: .bold)
-		label.textColor = .black
+		label.font = .systemFont(ofSize: 21, weight: .heavy)
+		label.textColor = .white
 		label.textAlignment = .center
-		label.numberOfLines = 1
-		label.lineBreakMode = .byTruncatingTail
+		label.numberOfLines = 2
 		label.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 		return label
 	}()
@@ -67,7 +69,7 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	private let artistLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 16, weight: .medium)
-		label.textColor = .darkGray
+		label.textColor = UIColor.white.withAlphaComponent(0.68)
 		label.textAlignment = .center
 		label.numberOfLines = 1
 		label.lineBreakMode = .byTruncatingTail
@@ -84,6 +86,15 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	required init?(coder: NSCoder) { fatalError() }
 
 	private func setupUI() {
+		self.glowLayer.colors = [
+			UIColor(red: 0.47, green: 0.82, blue: 0.96, alpha: 0.32).cgColor,
+			UIColor(red: 0.45, green: 0.36, blue: 0.95, alpha: 0.10).cgColor,
+			UIColor.clear.cgColor
+		]
+		self.glowLayer.startPoint = CGPoint(x: 0, y: 0)
+		self.glowLayer.endPoint = CGPoint(x: 1, y: 1)
+		self.cardBackgroundView.layer.insertSublayer(self.glowLayer, at: 0)
+
 		self.contentView.addSubview(self.cardBackgroundView)
 		self.cardBackgroundView.addSubview(self.mainStackView)
 
@@ -105,16 +116,24 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 			self.mainStackView.topAnchor.constraint(equalTo: self.cardBackgroundView.topAnchor, constant: 20),
 			self.mainStackView.leadingAnchor.constraint(equalTo: self.cardBackgroundView.leadingAnchor, constant: 16),
 			self.mainStackView.trailingAnchor.constraint(equalTo: self.cardBackgroundView.trailingAnchor, constant: -16),
-			self.mainStackView.bottomAnchor.constraint(equalTo: self.cardBackgroundView.bottomAnchor),
+			self.mainStackView.bottomAnchor.constraint(equalTo: self.cardBackgroundView.bottomAnchor, constant: -18),
 
 			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor)
 		])
 	}
 
+	override func layoutSubviews() {
+		super.layoutSubviews()
+		self.glowLayer.frame = self.cardBackgroundView.bounds
+		self.glowLayer.cornerRadius = self.cardBackgroundView.layer.cornerRadius
+	}
+
 	override func prepareForReuse() {
 		super.prepareForReuse()
 		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.contentMode = .scaleAspectFit
 		self.albumImageView.image = nil
+		self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.72)
 		self.titleLabel.text = nil
 		self.artistLabel.text = nil
 	}
@@ -126,8 +145,13 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		self.albumImageView.kf.cancelDownloadTask()
 		self.albumImageView.image = nil
 
+		let placeholder = UIImage(
+			systemName: "music.note",
+			withConfiguration: UIImage.SymbolConfiguration(pointSize: 28, weight: .medium)
+		)
+
 		if let url = track.imageURL {
-			let placeholder = UIImage(systemName: "music.note")
+			self.albumImageView.contentMode = .scaleAspectFill
 			self.albumImageView.kf.setImage(
 				with: url,
 				placeholder: placeholder,
@@ -137,7 +161,9 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 				]
 			)
 		} else {
-			self.albumImageView.image = UIImage(systemName: "music.note")
+			self.albumImageView.contentMode = .scaleAspectFit
+			self.albumImageView.image = placeholder
+			self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.72)
 		}
 	}
 }

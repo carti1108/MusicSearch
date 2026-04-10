@@ -15,13 +15,61 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	weak var listener: HomePresentableListener?
+	private let backgroundGradientLayer = CAGradientLayer()
+
+	private let topGlowView: UIView = {
+		let view = UIView()
+		view.backgroundColor = UIColor(red: 0.45, green: 0.87, blue: 0.97, alpha: 0.22)
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
+	private let bottomGlowView: UIView = {
+		let view = UIView()
+		view.backgroundColor = UIColor(red: 0.49, green: 0.40, blue: 0.98, alpha: 0.18)
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
+	private let eyebrowLabel: UILabel = {
+		let label = UILabel()
+		label.text = "SOUNDTRACK FOR RIGHT NOW"
+		label.font = .systemFont(ofSize: 12, weight: .semibold)
+		label.textColor = UIColor.white.withAlphaComponent(0.72)
+		label.translatesAutoresizingMaskIntoConstraints = false
+		return label
+	}()
+
+	private let heroTitleLabel: UILabel = {
+		let label = UILabel()
+		label.text = "오늘의 공기와\n어울리는 플레이리스트"
+		label.font = .systemFont(ofSize: 32, weight: .heavy)
+		label.textColor = .white
+		label.numberOfLines = 2
+		label.translatesAutoresizingMaskIntoConstraints = false
+		return label
+	}()
+
+	private let heroSubtitleLabel: UILabel = {
+		let label = UILabel()
+		label.text = "날씨와 무드를 바탕으로 바로 재생할 수 있는 곡을 골라드려요."
+		label.font = .systemFont(ofSize: 15, weight: .medium)
+		label.textColor = UIColor.white.withAlphaComponent(0.72)
+		label.numberOfLines = 0
+		label.translatesAutoresizingMaskIntoConstraints = false
+		return label
+	}()
 
 	private let weatherContainerView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.15)
-		view.layer.cornerRadius = 30
+		view.backgroundColor = UIColor.white.withAlphaComponent(0.12)
+		view.layer.cornerRadius = 32
 		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.14).cgColor
+		view.layer.shadowColor = UIColor.black.cgColor
+		view.layer.shadowOpacity = 0.28
+		view.layer.shadowOffset = CGSize(width: 0, height: 22)
+		view.layer.shadowRadius = 40
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -45,7 +93,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let tempLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 56, weight: .heavy)
+		label.font = .systemFont(ofSize: 62, weight: .black)
 		label.textColor = .white
 		label.textAlignment = .center
 		return label
@@ -53,7 +101,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let descriptionLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 18, weight: .medium)
+		label.font = .systemFont(ofSize: 17, weight: .semibold)
 		label.textColor = .white
 		label.textAlignment = .center
 		return label
@@ -70,7 +118,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
 		label.text = "오늘 날씨와 어울리는 선곡 🎧"
-		label.font = .systemFont(ofSize: 22, weight: .bold)
+		label.font = .systemFont(ofSize: 24, weight: .heavy)
 		label.textColor = .white
 		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -129,6 +177,13 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.listener?.viewDidLoad()
 	}
 
+	override func viewDidLayoutSubviews() {
+		super.viewDidLayoutSubviews()
+		self.backgroundGradientLayer.frame = self.view.bounds
+		self.topGlowView.layer.cornerRadius = self.topGlowView.bounds.height / 2
+		self.bottomGlowView.layer.cornerRadius = self.bottomGlowView.bounds.height / 2
+	}
+
 	func update(weather: Weather, tracks: [Track]) {
 		self.sectionTitleLabel.isHidden = false
 		self.tempLabel.text = "\(Int(weather.temperature))°"
@@ -136,8 +191,8 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.locationLabel.text = weather.cityName
 		self.weatherIconImageView.image = UIImage(systemName: self.iconName(for: weather.condition))
 
-		self.view.backgroundColor = self.backgroundColor(for: weather.condition)
-		self.weatherContainerView.backgroundColor = UIColor.white.withAlphaComponent(0.15)
+		self.backgroundGradientLayer.colors = self.gradientColors(for: weather.condition).map(\.cgColor)
+		self.weatherContainerView.backgroundColor = UIColor.white.withAlphaComponent(0.12)
 
 		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
 		snapshot.appendSections([.main])
@@ -186,37 +241,76 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		}
 	}
 
-	private func backgroundColor(for condition: WeatherCondition) -> UIColor {
+	private func gradientColors(for condition: WeatherCondition) -> [UIColor] {
 		switch condition {
 		case .thunderstorm:
-			return UIColor(red: 0.2, green: 0.2, blue: 0.3, alpha: 1.0)
+			return [
+				UIColor(red: 0.06, green: 0.08, blue: 0.16, alpha: 1.0),
+				UIColor(red: 0.17, green: 0.17, blue: 0.31, alpha: 1.0),
+				UIColor(red: 0.09, green: 0.11, blue: 0.21, alpha: 1.0)
+			]
 		case .drizzle, .rain:
-			return UIColor(red: 0.15, green: 0.2, blue: 0.35, alpha: 1.0)
+			return [
+				UIColor(red: 0.04, green: 0.10, blue: 0.20, alpha: 1.0),
+				UIColor(red: 0.08, green: 0.25, blue: 0.38, alpha: 1.0),
+				UIColor(red: 0.03, green: 0.16, blue: 0.27, alpha: 1.0)
+			]
 		case .snow:
-			return UIColor(red: 0.4, green: 0.5, blue: 0.6, alpha: 1.0)
+			return [
+				UIColor(red: 0.18, green: 0.25, blue: 0.34, alpha: 1.0),
+				UIColor(red: 0.43, green: 0.55, blue: 0.64, alpha: 1.0),
+				UIColor(red: 0.16, green: 0.20, blue: 0.27, alpha: 1.0)
+			]
 		case .atmosphere:
-			return UIColor(red: 0.3, green: 0.3, blue: 0.4, alpha: 1.0)
+			return [
+				UIColor(red: 0.12, green: 0.12, blue: 0.18, alpha: 1.0),
+				UIColor(red: 0.26, green: 0.26, blue: 0.34, alpha: 1.0),
+				UIColor(red: 0.10, green: 0.10, blue: 0.16, alpha: 1.0)
+			]
 		case .clear:
-			return UIColor(red: 0.2, green: 0.5, blue: 0.8, alpha: 1.0)
+			return [
+				UIColor(red: 0.04, green: 0.09, blue: 0.20, alpha: 1.0),
+				UIColor(red: 0.10, green: 0.39, blue: 0.65, alpha: 1.0),
+				UIColor(red: 0.31, green: 0.59, blue: 0.85, alpha: 1.0)
+			]
 		case .clouds:
-			return UIColor(red: 0.4, green: 0.4, blue: 0.5, alpha: 1.0)
+			return [
+				UIColor(red: 0.08, green: 0.11, blue: 0.18, alpha: 1.0),
+				UIColor(red: 0.24, green: 0.28, blue: 0.40, alpha: 1.0),
+				UIColor(red: 0.14, green: 0.17, blue: 0.24, alpha: 1.0)
+			]
 		case .unknown:
-			return UIColor(red: 0.3, green: 0.3, blue: 0.4, alpha: 1.0)
+			return [
+				UIColor(red: 0.09, green: 0.11, blue: 0.16, alpha: 1.0),
+				UIColor(red: 0.18, green: 0.22, blue: 0.32, alpha: 1.0),
+				UIColor(red: 0.10, green: 0.12, blue: 0.20, alpha: 1.0)
+			]
 		}
 	}
 
 	private func setupView() {
-		self.view.backgroundColor = .systemBackground
+		self.backgroundGradientLayer.startPoint = CGPoint(x: 0.0, y: 0.0)
+		self.backgroundGradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
+		self.backgroundGradientLayer.colors = self.gradientColors(for: .unknown).map(\.cgColor)
+		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
 
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
+		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+		appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
 		self.navigationController?.navigationBar.standardAppearance = appearance
 		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+		self.navigationItem.title = "Home"
 
 		self.scrollView.refreshControl = self.refreshControl
+		self.view.addSubview(self.topGlowView)
+		self.view.addSubview(self.bottomGlowView)
 		self.view.addSubview(self.scrollView)
 		self.scrollView.addSubview(self.contentView)
 
+		self.contentView.addSubview(self.eyebrowLabel)
+		self.contentView.addSubview(self.heroTitleLabel)
+		self.contentView.addSubview(self.heroSubtitleLabel)
 		self.contentView.addSubview(self.weatherContainerView)
 		self.weatherContainerView.addSubview(self.weatherInfoStack)
 
@@ -237,6 +331,16 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private func setupConstraints() {
 		NSLayoutConstraint.activate([
+			self.topGlowView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: -120),
+			self.topGlowView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: -80),
+			self.topGlowView.widthAnchor.constraint(equalToConstant: 260),
+			self.topGlowView.heightAnchor.constraint(equalToConstant: 260),
+
+			self.bottomGlowView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: 100),
+			self.bottomGlowView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 120),
+			self.bottomGlowView.widthAnchor.constraint(equalToConstant: 300),
+			self.bottomGlowView.heightAnchor.constraint(equalToConstant: 300),
+
 			self.scrollView.topAnchor.constraint(equalTo: self.view.topAnchor),
 			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
@@ -248,7 +352,19 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 			self.contentView.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor),
 			self.contentView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor),
 
-			self.weatherContainerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 20),
+			self.eyebrowLabel.topAnchor.constraint(equalTo: self.contentView.safeAreaLayoutGuide.topAnchor, constant: 24),
+			self.eyebrowLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
+			self.eyebrowLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24),
+
+			self.heroTitleLabel.topAnchor.constraint(equalTo: self.eyebrowLabel.bottomAnchor, constant: 10),
+			self.heroTitleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
+			self.heroTitleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24),
+
+			self.heroSubtitleLabel.topAnchor.constraint(equalTo: self.heroTitleLabel.bottomAnchor, constant: 10),
+			self.heroSubtitleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
+			self.heroSubtitleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24),
+
+			self.weatherContainerView.topAnchor.constraint(equalTo: self.heroSubtitleLabel.bottomAnchor, constant: 26),
 			self.weatherContainerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 20),
 			self.weatherContainerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -20),
 			self.weatherContainerView.heightAnchor.constraint(equalToConstant: 240),
