@@ -12,8 +12,16 @@ final class PodiumCell: UICollectionViewCell {
 	static let identifier = "PodiumCell"
 
 	private let containerView = UIView()
-	private var containerCenterYConstraint: NSLayoutConstraint?
 	private var isArtist: Bool = false
+	private let contentStackView: UIStackView = {
+		let stack = UIStackView()
+		stack.axis = .vertical
+		stack.spacing = 10
+		stack.alignment = .fill
+		stack.distribution = .fill
+		stack.translatesAutoresizingMaskIntoConstraints = false
+		return stack
+	}()
 
 	private let rankLabel: UILabel = {
 		let label = UILabel()
@@ -31,9 +39,10 @@ final class PodiumCell: UICollectionViewCell {
 
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 14, weight: .semibold)
+		label.font = .systemFont(ofSize: 14, weight: .bold)
 		label.textAlignment = .center
 		label.numberOfLines = 2
+		label.textColor = .white
 		return label
 	}()
 
@@ -50,11 +59,11 @@ final class PodiumCell: UICollectionViewCell {
 		super.prepareForReuse()
 		self.isArtist = false
 		self.imageView.kf.cancelDownloadTask()
+		self.imageView.contentMode = .scaleAspectFit
 		self.imageView.image = nil
 		self.imageView.backgroundColor = .systemGray5
 		self.imageView.layer.borderWidth = 0
 		self.imageView.layer.borderColor = nil
-		self.containerCenterYConstraint?.constant = -20
 		self.containerView.transform = .identity
 	}
 
@@ -68,36 +77,37 @@ final class PodiumCell: UICollectionViewCell {
 	}
 
 	private func setupUI() {
+		self.containerView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
+		self.containerView.layer.cornerRadius = 24
+		self.containerView.layer.borderWidth = 1
+		self.containerView.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
 		self.contentView.addSubview(self.containerView)
 		self.containerView.translatesAutoresizingMaskIntoConstraints = false
+		self.containerView.addSubview(self.contentStackView)
 
-		[self.imageView, self.rankLabel, self.titleLabel].forEach {
+		[self.imageView, self.titleLabel].forEach {
 			$0.translatesAutoresizingMaskIntoConstraints = false
-			self.containerView.addSubview($0)
+			self.contentStackView.addArrangedSubview($0)
 		}
-
-		self.containerCenterYConstraint = self.containerView.centerYAnchor.constraint(
-			equalTo: self.contentView.centerYAnchor,
-			constant: -20
-		)
+		self.rankLabel.translatesAutoresizingMaskIntoConstraints = false
+		self.containerView.addSubview(self.rankLabel)
 
 		NSLayoutConstraint.activate([
-			self.containerCenterYConstraint!,
+			self.containerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 12),
 			self.containerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.containerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+			self.containerView.bottomAnchor.constraint(lessThanOrEqualTo: self.contentView.bottomAnchor, constant: -12),
 
-			self.imageView.topAnchor.constraint(equalTo: self.containerView.topAnchor),
-			self.imageView.centerXAnchor.constraint(equalTo: self.containerView.centerXAnchor),
-			self.imageView.widthAnchor.constraint(equalTo: self.containerView.widthAnchor, multiplier: 0.95),
+			self.contentStackView.topAnchor.constraint(equalTo: self.containerView.topAnchor, constant: 14),
+			self.contentStackView.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor, constant: 10),
+			self.contentStackView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor, constant: -10),
+			self.contentStackView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -14),
+
+			self.imageView.widthAnchor.constraint(equalTo: self.containerView.widthAnchor, multiplier: 0.78),
 			self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor),
 
 			self.rankLabel.topAnchor.constraint(equalTo: self.imageView.topAnchor, constant: -15),
-			self.rankLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: -5),
-
-			self.titleLabel.topAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: 10),
-			self.titleLabel.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor),
-			self.titleLabel.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor),
-			self.titleLabel.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor)
+			self.rankLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: -5)
 		])
 	}
 
@@ -109,20 +119,30 @@ final class PodiumCell: UICollectionViewCell {
 
 		self.imageView.kf.cancelDownloadTask()
 		self.imageView.image = nil
+		let placeholder = UIImage(
+			systemName: item.type == .artists ? "music.mic" : "music.note",
+			withConfiguration: UIImage.SymbolConfiguration(pointSize: 34, weight: .medium)
+		)
 		if let url = item.imageURL {
 			let processor = DownsamplingImageProcessor(
 				size: self.imageView.bounds.size == .zero
 					? CGSize(width: 400, height: 400)
 					: self.imageView.bounds.size
 			)
+			self.imageView.contentMode = .scaleAspectFill
 			self.imageView.kf.setImage(
 				with: url,
+				placeholder: placeholder,
 				options: [
 					.processor(processor),
 					.scaleFactor(UIScreen.main.scale),
 					.backgroundDecode
 				]
 			)
+		} else {
+			self.imageView.contentMode = .scaleAspectFit
+			self.imageView.image = placeholder
+			self.imageView.tintColor = UIColor.white.withAlphaComponent(0.82)
 		}
 
 		if item.rank == 1 {
@@ -130,15 +150,13 @@ final class PodiumCell: UICollectionViewCell {
 			self.imageView.layer.borderColor = UIColor.systemYellow.cgColor
 			self.rankLabel.font = .systemFont(ofSize: 36, weight: .black)
 			self.rankLabel.textColor = .systemYellow
-			self.containerCenterYConstraint?.constant = -20
+			self.containerView.transform = CGAffineTransform(translationX: 0, y: -14)
 		} else {
 			self.imageView.layer.borderWidth = 0
 			self.rankLabel.font = .systemFont(ofSize: 24, weight: .bold)
-			self.rankLabel.textColor = .label
-			self.containerCenterYConstraint?.constant = 24
+			self.rankLabel.textColor = .white
+			self.containerView.transform = CGAffineTransform(translationX: 0, y: 18)
 		}
-
-		self.containerView.transform = .identity
 	}
 
 	private static func rankColor(_ rank: Int) -> UIColor {
