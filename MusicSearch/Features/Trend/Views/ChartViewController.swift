@@ -235,6 +235,7 @@ final class ChartViewController: UIViewController, TrendPresentable, TrendViewCo
 			switch section {
 			case .podium:
 				let podiumHeight = min(max(env.container.effectiveContentSize.height * 0.42, 280), 320)
+				let verticalInset = max((env.container.effectiveContentSize.height - podiumHeight) / 2, 12)
 				let itemSize = NSCollectionLayoutSize(
 					widthDimension: .fractionalWidth(1.0 / 3.0),
 					heightDimension: .fractionalHeight(1.0)
@@ -247,7 +248,12 @@ final class ChartViewController: UIViewController, TrendPresentable, TrendViewCo
 				)
 				let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 				let sectionLayout = NSCollectionLayoutSection(group: group)
-				sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: 14, bottom: 40, trailing: 14)
+				sectionLayout.contentInsets = NSDirectionalEdgeInsets(
+					top: verticalInset,
+					leading: 14,
+					bottom: verticalInset,
+					trailing: 14
+				)
 				return sectionLayout
 
 			case .list:
