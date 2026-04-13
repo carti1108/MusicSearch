@@ -8,7 +8,7 @@
 import UIKit
 import MicroRIBs
 
-protocol RootInteractable: Interactable, HomeListener, TrackSearchListener, TrendListener {
+protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener {
 	var router: RootRouting? { get set }
 	var listener: RootListener? { get set }
 }
@@ -18,24 +18,24 @@ protocol RootViewControllable: ViewControllable {
 }
 
 final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, RootRouting {
-	private let homeBuilder: HomeBuildable
+	private let weatherRecommendationBuilder: WeatherRecommendationBuildable
 	private let trackSearchBuilder: TrackSearchBuildable
-	private let trendBuilder: TrendBuildable
+	private let chartBuilder: ChartBuildable
 
-	private var homeRouter: HomeRouting?
+	private var weatherRecommendationRouter: WeatherRecommendationRouting?
 	private var trackSearchRouter: TrackSearchRouting?
-	private var trendRouter: TrendRouting?
+	private var chartRouter: ChartRouting?
 
 	init(
 		interactor: RootInteractable,
 		viewController: RootViewControllable,
-		homeBuilder: HomeBuildable,
+		weatherRecommendationBuilder: WeatherRecommendationBuildable,
 		trackSearchBuilder: TrackSearchBuildable,
-		trendBuilder: TrendBuildable
+		chartBuilder: ChartBuildable
 	) {
-		self.homeBuilder = homeBuilder
+		self.weatherRecommendationBuilder = weatherRecommendationBuilder
 		self.trackSearchBuilder = trackSearchBuilder
-		self.trendBuilder = trendBuilder
+		self.chartBuilder = chartBuilder
 		super.init(interactor: interactor, viewController: viewController)
 		interactor.router = self
 	}
@@ -43,13 +43,15 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 	override func didLoad() {
 		super.didLoad()
 
-		let homeRouter = self.homeBuilder.build(withListener: self.interactor)
-		self.attachChild(homeRouter)
-		self.homeRouter = homeRouter
+		let weatherRecommendationRouter = self.weatherRecommendationBuilder.build(withListener: self.interactor)
+		self.attachChild(weatherRecommendationRouter)
+		self.weatherRecommendationRouter = weatherRecommendationRouter
 
-		let homeNavigationController = UINavigationController(rootViewController: homeRouter.viewControllable.uiViewController)
-		homeNavigationController.tabBarItem = UITabBarItem(
-			title: "Home",
+		let weatherRecommendationNavigationController = UINavigationController(
+			rootViewController: weatherRecommendationRouter.viewControllable.uiViewController
+		)
+		weatherRecommendationNavigationController.tabBarItem = UITabBarItem(
+			title: "Weather",
 			image: UIImage(systemName: "house.fill"),
 			selectedImage: nil
 		)
@@ -67,21 +69,21 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 			selectedImage: nil
 		)
 
-		let trendRouter = self.trendBuilder.build(withListener: self.interactor)
-		self.attachChild(trendRouter)
-		self.trendRouter = trendRouter
+		let chartRouter = self.chartBuilder.build(withListener: self.interactor)
+		self.attachChild(chartRouter)
+		self.chartRouter = chartRouter
 
-		let trendNavigationController = UINavigationController(rootViewController: trendRouter.viewControllable.uiViewController)
-		trendNavigationController.tabBarItem = UITabBarItem(
+		let chartNavigationController = UINavigationController(rootViewController: chartRouter.viewControllable.uiViewController)
+		chartNavigationController.tabBarItem = UITabBarItem(
 			title: "Chart",
 			image: UIImage(systemName: "chart.bar.fill"),
 			selectedImage: nil
 		)
 
 		self.viewController.setTabs([
-			homeNavigationController,
+			weatherRecommendationNavigationController,
 			trackSearchNavigationController,
-			trendNavigationController
+			chartNavigationController
 		])
 	}
 }

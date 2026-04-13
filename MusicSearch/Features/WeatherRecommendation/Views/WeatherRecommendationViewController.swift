@@ -9,12 +9,12 @@ import UIKit
 import MicroRIBs
 
 @MainActor
-final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, HomePresentable, HomeViewControllable, ErrorPresentable {
+final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, WeatherRecommendationPresentable, WeatherRecommendationViewControllable, ErrorPresentable {
 	enum Section {
 		case main
 	}
 
-	weak var listener: HomePresentableListener?
+	weak var listener: WeatherRecommendationPresentableListener?
 	private let backgroundGradientLayer = CAGradientLayer()
 
 	private let topGlowView: UIView = {
@@ -300,7 +300,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
 		self.navigationController?.navigationBar.standardAppearance = appearance
 		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
-		self.navigationItem.title = "Home"
+		self.navigationItem.title = "Weather Recommendation"
 
 		self.scrollView.refreshControl = self.refreshControl
 		self.view.addSubview(self.topGlowView)

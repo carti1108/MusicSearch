@@ -68,7 +68,7 @@ final class AppComponent {
 	}
 }
 
-extension AppComponent: HomeDependency {
+extension AppComponent: WeatherRecommendationDependency {
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		FetchMusicForWeatherUseCaseImpl(
 			fetchCurrentWeatherUseCase: self.fetchCurrentWeatherUseCase,
@@ -77,9 +77,9 @@ extension AppComponent: HomeDependency {
 	}
 }
 
-extension AppComponent: DiggingDependency {
+extension AppComponent: TrackSearchDependency {
 	var searchTracksUseCase: any SearchTracksUseCase {
-		SearchTrackUseCaseImpl(trackRepository: self.trackRepository)
+		SearchTracksUseCaseImpl(trackRepository: self.trackRepository)
 	}
 
 	var fetchTracksByTagUseCase: any FetchTracksByTagUseCase {
@@ -87,11 +87,11 @@ extension AppComponent: DiggingDependency {
 	}
 
 	var fetchSimilarTrackUseCase: any FetchSimilarTracksUseCase {
-		FetchSimilarTrackUseCaseImpl(trackRepository: self.trackRepository)
+		FetchSimilarTracksUseCaseImpl(trackRepository: self.trackRepository)
 	}
 }
 
-extension AppComponent: TrendDependency {
+extension AppComponent: ChartDependency {
 	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {
 		FetchChartTopTracksUseCaseImpl(
 			chartRepository: self.chartRepository,

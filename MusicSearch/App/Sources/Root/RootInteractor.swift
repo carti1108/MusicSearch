@@ -28,6 +28,6 @@ final class RootInteractor: PresentableInteractor<RootPresentable>, RootInteract
 	}
 }
 
-extension RootInteractor: HomeListener {}
+extension RootInteractor: WeatherRecommendationListener {}
 extension RootInteractor: TrackSearchListener {}
-extension RootInteractor: TrendListener {}
+extension RootInteractor: ChartListener {}

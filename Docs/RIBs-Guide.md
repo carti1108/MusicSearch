@@ -25,10 +25,10 @@ App Launch
     ├── Interactor: RootInteractor
     ├── Router: RootRouter
     ├── View: RootViewController
-    ├── Child: Home RIB
-    │   ├── Builder: HomeBuilder
-    │   ├── Interactor: HomeInteractor
-    │   ├── Router: HomeRouter
+    ├── Child: WeatherRecommendation RIB
+    │   ├── Builder: WeatherRecommendationBuilder
+    │   ├── Interactor: WeatherRecommendationInteractor
+    │   ├── Router: WeatherRecommendationRouter
     │   └── View: WeatherRecommendationViewController
     ├── Child: TrackSearch RIB
     │   ├── Builder: TrackSearchBuilder
@@ -40,10 +40,10 @@ App Launch
     │       ├── Interactor: MusicDiggingInteractor
     │       ├── Router: MusicDiggingRouter
     │       └── View: MusicDiggingViewController
-    └── Child: Trend RIB
-        ├── Builder: TrendBuilder
-        ├── Interactor: TrendInteractor
-        ├── Router: TrendRouter
+    └── Child: Chart RIB
+        ├── Builder: ChartBuilder
+        ├── Interactor: ChartInteractor
+        ├── Router: ChartRouter
         └── View: ChartViewController
 ```
 
@@ -58,10 +58,10 @@ MusicSearch/App/Sources
     ├── RootRouter.swift
     └── RootViewController.swift
 
-MusicSearch/Features/Home
-├── HomeBuilder.swift
-├── HomeInteractor.swift
-├── HomeRouter.swift
+MusicSearch/Features/WeatherRecommendation
+├── WeatherRecommendationBuilder.swift
+├── WeatherRecommendationInteractor.swift
+├── WeatherRecommendationRouter.swift
 └── Views/WeatherRecommendationViewController.swift
 
 MusicSearch/Features/Digging/Search
@@ -76,10 +76,10 @@ MusicSearch/Features/Digging/MusicDigging
 ├── MusicDiggingRouter.swift
 └── Views/MusicDiggingViewController.swift
 
-MusicSearch/Features/Trend
-├── TrendBuilder.swift
-├── TrendInteractor.swift
-├── TrendRouter.swift
+MusicSearch/Features/Chart
+├── ChartBuilder.swift
+├── ChartInteractor.swift
+├── ChartRouter.swift
 └── Views/ChartViewController.swift
 ```
 
@@ -94,18 +94,18 @@ MusicSearch/Features/Trend
 
 ```swift
 final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, RootRouting {
-	private let homeBuilder: HomeBuildable
+	private let weatherRecommendationBuilder: WeatherRecommendationBuildable
 	private let trackSearchBuilder: TrackSearchBuildable
-	private let trendBuilder: TrendBuildable
+	private let chartBuilder: ChartBuildable
 
 	override func didLoad() {
 		super.didLoad()
 
-		let homeRouter = self.homeBuilder.build(withListener: self.interactor)
-		self.attachChild(homeRouter)
+		let weatherRecommendationRouter = self.weatherRecommendationBuilder.build(withListener: self.interactor)
+		self.attachChild(weatherRecommendationRouter)
 
 		let homeNavigationController = UINavigationController(
-			rootViewController: homeRouter.viewControllable.uiViewController
+			rootViewController: weatherRecommendationRouter.viewControllable.uiViewController
 		)
 
 		let trackSearchNavigationController = UINavigationController()
@@ -115,11 +115,11 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 		)
 		self.attachChild(trackSearchRouter)
 
-		let trendRouter = self.trendBuilder.build(withListener: self.interactor)
-		self.attachChild(trendRouter)
+		let chartRouter = self.chartBuilder.build(withListener: self.interactor)
+		self.attachChild(chartRouter)
 
 		let trendNavigationController = UINavigationController(
-			rootViewController: trendRouter.viewControllable.uiViewController
+			rootViewController: chartRouter.viewControllable.uiViewController
 		)
 
 		self.viewController.setTabs([
@@ -151,9 +151,9 @@ final class RootBuilder: Builder<RootDependency>, RootBuildable {
 			return RootRouter(
 				interactor: interactor,
 				viewController: viewController,
-				homeBuilder: component.homeBuilder,
+				weatherRecommendationBuilder: component.weatherRecommendationBuilder,
 				trackSearchBuilder: component.trackSearchBuilder,
-				trendBuilder: component.trendBuilder
+				chartBuilder: component.chartBuilder
 			)
 		}
 	}
@@ -166,9 +166,9 @@ final class RootBuilder: Builder<RootDependency>, RootBuildable {
 `Component`는 실제 구현체 노출과 하위 feature 전달 창구.
 
 ```swift
-protocol RootDependency: Dependency, HomeDependency, DiggingDependency, TrendDependency {}
+protocol RootDependency: Dependency, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {}
 
-final class RootComponent: Component<RootDependency>, HomeDependency, DiggingDependency, TrendDependency {
+final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
 	}
@@ -246,7 +246,7 @@ protocol TrackSearchPresentable: Presentable {
 자식이 부모 concrete type을 모른 채 상위 플로우에 신호 전달하는 용도.
 
 ```swift
-protocol RootInteractable: Interactable, HomeListener, TrackSearchListener, TrendListener {
+protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener {
 	var router: RootRouting? { get set }
 	var listener: RootListener? { get set }
 }
@@ -467,7 +467,7 @@ private func detachPoppedChildrenIfNeeded() {
 - 앱 내부 이동: Router
 - 외부 앱 오픈 전 비즈니스 판단: Interactor
 
-`HomeInteractor`의 Spotify 딥링크 오픈 예시.
+`WeatherRecommendationInteractor`의 Spotify 딥링크 오픈 예시.
 
 ```swift
 func didSelectTrack(at index: Int) {

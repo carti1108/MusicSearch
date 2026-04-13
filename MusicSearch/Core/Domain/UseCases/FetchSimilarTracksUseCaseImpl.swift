@@ -1,5 +1,5 @@
 //
-//  FetchSimilarTrackUseCaseImpl.swift
+//  FetchSimilarTracksUseCaseImpl.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 12/7/25.
@@ -11,7 +11,7 @@ public protocol FetchSimilarTracksUseCase {
 	func execute(targetTrack: Track) async throws -> [Track]
 }
 
-final class FetchSimilarTrackUseCaseImpl: FetchSimilarTracksUseCase {
+final class FetchSimilarTracksUseCaseImpl: FetchSimilarTracksUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8

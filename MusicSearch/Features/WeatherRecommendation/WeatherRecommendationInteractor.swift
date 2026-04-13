@@ -1,5 +1,5 @@
 //
-//  HomeInteractor.swift
+//  WeatherRecommendationInteractor.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 3/4/26.
@@ -8,29 +8,29 @@
 import UIKit
 import MicroRIBs
 
-protocol HomeRouting: ViewableRouting {}
+protocol WeatherRecommendationRouting: ViewableRouting {}
 
 @MainActor
-protocol HomePresentableListener: AnyObject {
+protocol WeatherRecommendationPresentableListener: AnyObject {
 	func viewDidLoad()
 	func didTapRefresh()
 	func didSelectTrack(at index: Int)
 }
 
 @MainActor
-protocol HomePresentable: Presentable {
-	var listener: HomePresentableListener? { get set }
+protocol WeatherRecommendationPresentable: Presentable {
+	var listener: WeatherRecommendationPresentableListener? { get set }
 	func update(weather: Weather, tracks: [Track])
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)
 }
 
-protocol HomeListener: AnyObject {}
+protocol WeatherRecommendationListener: AnyObject {}
 
 @MainActor
-final class HomeInteractor: PresentableInteractor<HomePresentable>, HomeInteractable, HomePresentableListener {
-	weak var router: HomeRouting?
-	weak var listener: HomeListener?
+final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecommendationPresentable>, WeatherRecommendationInteractable, WeatherRecommendationPresentableListener {
+	weak var router: WeatherRecommendationRouting?
+	weak var listener: WeatherRecommendationListener?
 
 	private let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
 	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
@@ -46,7 +46,7 @@ final class HomeInteractor: PresentableInteractor<HomePresentable>, HomeInteract
 	private var currentTracks: [Track] = []
 
 	init(
-		presenter: HomePresentable,
+		presenter: WeatherRecommendationPresentable,
 		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	) {

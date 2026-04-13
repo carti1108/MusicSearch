@@ -8,14 +8,14 @@
 import UIKit
 import MicroRIBs
 
-protocol DiggingDependency: Dependency {
+protocol TrackSearchDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
-final class DiggingComponent: Component<DiggingDependency>, DiggingDependency {
+final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchDependency, MusicDiggingDependency {
 	var searchTracksUseCase: SearchTracksUseCase {
 		self.dependency.searchTracksUseCase
 	}
@@ -40,8 +40,8 @@ protocol TrackSearchBuildable: Buildable {
 	) -> TrackSearchRouting
 }
 
-final class TrackSearchBuilder: Builder<DiggingDependency>, TrackSearchBuildable {
-	override init(dependency: DiggingDependency) {
+final class TrackSearchBuilder: Builder<TrackSearchDependency>, TrackSearchBuildable {
+	override init(dependency: TrackSearchDependency) {
 		super.init(dependency: dependency)
 	}
 
@@ -50,7 +50,7 @@ final class TrackSearchBuilder: Builder<DiggingDependency>, TrackSearchBuildable
 		navigationController: UINavigationController
 	) -> TrackSearchRouting {
 		MainActor.assumeIsolated {
-			let component = DiggingComponent(dependency: self.dependency)
+			let component = TrackSearchComponent(dependency: self.dependency)
 			let viewController = TrackSearchViewController()
 			let interactor = TrackSearchInteractor(
 				presenter: viewController,

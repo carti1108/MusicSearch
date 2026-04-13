@@ -1,5 +1,5 @@
 //
-//  SearchTrackUseCaseImpl.swift
+//  SearchTracksUseCaseImpl.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 12/7/25.
@@ -15,7 +15,7 @@ public protocol SearchTracksUseCase {
 	) async throws -> (tracks: [Track], totalResults: Int)
 }
 
-final class SearchTrackUseCaseImpl: SearchTracksUseCase {
+final class SearchTracksUseCaseImpl: SearchTracksUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8

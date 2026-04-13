@@ -8,9 +8,9 @@
 import UIKit
 import MicroRIBs
 
-protocol RootDependency: Dependency, HomeDependency, DiggingDependency, TrendDependency {}
+protocol RootDependency: Dependency, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {}
 
-final class RootComponent: Component<RootDependency>, HomeDependency, DiggingDependency, TrendDependency {
+final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
 	}
@@ -39,16 +39,16 @@ final class RootComponent: Component<RootDependency>, HomeDependency, DiggingDep
 		self.dependency.fetchChartTopArtistsUseCase
 	}
 
-	var homeBuilder: HomeBuildable {
-		HomeBuilder(dependency: self)
+	var weatherRecommendationBuilder: WeatherRecommendationBuildable {
+		WeatherRecommendationBuilder(dependency: self)
 	}
 
 	var trackSearchBuilder: TrackSearchBuildable {
 		TrackSearchBuilder(dependency: self)
 	}
 
-	var trendBuilder: TrendBuildable {
-		TrendBuilder(dependency: self)
+	var chartBuilder: ChartBuildable {
+		ChartBuilder(dependency: self)
 	}
 }
 
@@ -70,9 +70,9 @@ final class RootBuilder: Builder<RootDependency>, RootBuildable {
 			return RootRouter(
 				interactor: interactor,
 				viewController: viewController,
-				homeBuilder: component.homeBuilder,
+				weatherRecommendationBuilder: component.weatherRecommendationBuilder,
 				trackSearchBuilder: component.trackSearchBuilder,
-				trendBuilder: component.trendBuilder
+				chartBuilder: component.chartBuilder
 			)
 		}
 	}

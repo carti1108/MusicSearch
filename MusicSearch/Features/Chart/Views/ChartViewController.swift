@@ -10,13 +10,13 @@ import MicroRIBs
 import Kingfisher
 
 @MainActor
-final class ChartViewController: UIViewController, TrendPresentable, TrendViewControllable, LoadingPresentable, ErrorPresentable {
+final class ChartViewController: UIViewController, ChartPresentable, ChartViewControllable, LoadingPresentable, ErrorPresentable {
 	enum Section: Int {
 		case podium
 		case list
 	}
 
-	weak var listener: TrendPresentableListener?
+	weak var listener: ChartPresentableListener?
 	private var dataSource: UICollectionViewDiffableDataSource<Section, ChartItem>!
 	var lastPresentedErrorMessage: String?
 	private var currentSegmentIndex: Int = 0
@@ -158,7 +158,7 @@ final class ChartViewController: UIViewController, TrendPresentable, TrendViewCo
 		self.backgroundGradientLayer.startPoint = CGPoint(x: 0, y: 0)
 		self.backgroundGradientLayer.endPoint = CGPoint(x: 1, y: 1)
 		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
-		navigationItem.title = "Global Trend"
+		navigationItem.title = "Chart"
 		self.navigationController?.navigationBar.tintColor = .white
 
 		let appearance = UINavigationBarAppearance()

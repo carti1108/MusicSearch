@@ -7,7 +7,7 @@
 ## 실행화면
 
 <p align="leading">
-  <img src="https://github.com/user-attachments/assets/e7e79ffb-1256-43b5-b753-4e288b4b5279" width="150" alt="Home" />
+  <img src="https://github.com/user-attachments/assets/e7e79ffb-1256-43b5-b753-4e288b4b5279" width="150" alt="Weather Recommendation" />
   <img src="https://github.com/user-attachments/assets/9a598c16-8af9-433a-9c75-9b4ccc9888a6" width="150" alt="Search" />
   <img src="https://github.com/user-attachments/assets/c0ccd027-376d-44a1-b435-94b136b0846b" width="150" alt="Chart" />
 </p>
@@ -28,8 +28,8 @@ MusicSearch
 │   │   └── Util        # Extensions, Constants
 │   └── Features
 │       ├── Digging     # Search RIB, MusicDigging RIB
-│       ├── Home        # Home RIB
-│       └── Trend       # Trend RIB
+│       ├── WeatherRecommendation  # WeatherRecommendation RIB
+│       └── Chart       # Chart RIB
 ├── MusicSearchTests
 ├── MusicSearchUITests
 └── MusicSearch.xcodeproj
@@ -122,7 +122,7 @@ private func performSearch(keyword: String) {
 #### 구현
 딥링크 URL 조회를 비동기로 수행한 뒤, URL이 준비되면 메인 스레드에서 `UIApplication.shared.open`을 호출하도록 구성.
 
-**HomeInteractor.swift**
+**WeatherRecommendationInteractor.swift**
 ```swift
 private func openMusicApp(for track: Track) {
     Task {

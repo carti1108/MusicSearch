@@ -1,5 +1,5 @@
 //
-//  TrendInteractor.swift
+//  ChartInteractor.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 3/4/26.
@@ -8,10 +8,10 @@
 import UIKit
 import MicroRIBs
 
-protocol TrendRouting: ViewableRouting {}
+protocol ChartRouting: ViewableRouting {}
 
 @MainActor
-protocol TrendPresentableListener: AnyObject {
+protocol ChartPresentableListener: AnyObject {
 	func viewDidLoad()
 	func didChangeSegment(index: Int)
 	func didTapRefresh()
@@ -19,21 +19,21 @@ protocol TrendPresentableListener: AnyObject {
 }
 
 @MainActor
-protocol TrendPresentable: Presentable {
-	var listener: TrendPresentableListener? { get set }
+protocol ChartPresentable: Presentable {
+	var listener: ChartPresentableListener? { get set }
 	func updateSegment(to index: Int)
 	func update(podiumItems: [ChartItem], listItems: [ChartItem])
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)
 }
 
-protocol TrendListener: AnyObject {}
+protocol ChartListener: AnyObject {}
 
-final class TrendInteractor: PresentableInteractor<TrendPresentable>, TrendInteractable, TrendPresentableListener {
+final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInteractable, ChartPresentableListener {
 	private typealias ChartSections = (podium: [ChartItem], list: [ChartItem])
 
-	weak var router: TrendRouting?
-	weak var listener: TrendListener?
+	weak var router: ChartRouting?
+	weak var listener: ChartListener?
 
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
@@ -46,7 +46,7 @@ final class TrendInteractor: PresentableInteractor<TrendPresentable>, TrendInter
 	private var cachedSectionsByType: [Int: ChartSections] = .init()
 
 	init(
-		presenter: TrendPresentable,
+		presenter: ChartPresentable,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
@@ -147,7 +147,7 @@ final class TrendInteractor: PresentableInteractor<TrendPresentable>, TrendInter
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrendInteractor Error: \(error)")
+				print("ChartInteractor Error: \(error)")
 				self.presenter.showError("차트 정보를 불러오지 못했습니다.")
 
 				if self.currentType == type && self.currentPodiumItems.isEmpty && self.currentListItems.isEmpty {

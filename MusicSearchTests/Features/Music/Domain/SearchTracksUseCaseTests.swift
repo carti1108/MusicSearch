@@ -1,5 +1,5 @@
 //
-//  SearchTrackUseCaseTests.swift
+//  SearchTracksUseCaseTests.swift
 //  MusicSearchTests
 //
 //  Created by Kiseok on 12/7/25.
@@ -9,7 +9,7 @@ import Testing
 import Foundation
 @testable import MusicSearch
 
-struct SearchTrackUseCaseTests {
+struct SearchTracksUseCaseTests {
 
 	var mockRepository: MockTrackRepository
 
@@ -27,7 +27,7 @@ struct SearchTrackUseCaseTests {
 		mockRepository.searchTracksResult = .success((expectedTracks, 2))
 		mockRepository.fetchTrackInfoResult = .success(Track(title: "Enriched", artist: "Enriched", imageURL: nil))
 
-		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
+		let useCase = SearchTracksUseCaseImpl(trackRepository: mockRepository)
 
 		// When
 		let result = try await useCase.execute(query: "test query", limit: 20, page: 1)
@@ -43,7 +43,7 @@ struct SearchTrackUseCaseTests {
 	@Test("빈 쿼리를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithEmptyQuery() async throws {
 		// Given
-		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
+		let useCase = SearchTracksUseCaseImpl(trackRepository: mockRepository)
 
 		// When
 		let result = try await useCase.execute(query: "", limit: 20, page: 1)
@@ -57,7 +57,7 @@ struct SearchTrackUseCaseTests {
 	@Test("공백만 있는 쿼리를 입력하면 빈 배열을 반환하는가")
 	mutating func executeWithWhitespaceQuery() async throws {
 		// Given
-		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
+		let useCase = SearchTracksUseCaseImpl(trackRepository: mockRepository)
 
 		// When
 		let result = try await useCase.execute(query: "   ", limit: 20, page: 1)
@@ -76,7 +76,7 @@ struct SearchTrackUseCaseTests {
 		}
 		mockRepository.searchTracksResult = .failure(TestError.testError)
 
-		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
+		let useCase = SearchTracksUseCaseImpl(trackRepository: mockRepository)
 
 		// When & Then
 		await #expect(throws: TestError.self) {
@@ -84,4 +84,3 @@ struct SearchTrackUseCaseTests {
 		}
 	}
 }
-
