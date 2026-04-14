@@ -60,7 +60,7 @@ struct TrackRepositoryTests {
 	@Test("네트워크 에러 발생 시 에러를 던지는가")
 	func searchTracksNetworkError() async {
 		// Given
-		mockNetwork.errorToThrow = NetworkError.transportError(URLError(.notConnectedToInternet))
+		mockNetwork.errorToThrow = NetworkError.transport(URLError(.notConnectedToInternet))
 		let repository = TrackRepositoryImpl(networkManager: mockNetwork)
 
 		// When & Then

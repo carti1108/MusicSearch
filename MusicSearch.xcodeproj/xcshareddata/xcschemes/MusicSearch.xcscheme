@@ -30,7 +30,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:MusicSearchTests/Features/Weather/MusicSearch.xctestplan"
+            reference = "container:MusicSearchTests/MusicSearch.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>

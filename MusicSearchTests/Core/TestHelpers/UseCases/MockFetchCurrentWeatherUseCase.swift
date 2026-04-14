@@ -9,6 +9,10 @@ import Foundation
 @testable import MusicSearch
 
 final class MockFetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
+	enum MockError: Error {
+		case missingStub
+	}
+
 	var result: Weather?
 	var errorToThrow: Error?
 	var executeCallCount = 0
@@ -20,10 +24,7 @@ final class MockFetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
 			throw error
 		}
 
-		guard let result = self.result else {
-			fatalError("MockFetchCurrentWeatherUseCase: result가 설정되지 않았습니다.")
-		}
-
+		guard let result = self.result else { throw MockError.missingStub }
 		return result
 	}
 }

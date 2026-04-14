@@ -10,7 +10,12 @@ import Testing
 import NetworkLayer
 @testable import MusicSearch
 
-final class MockNetworkManager: NetworkRequesting {
+final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
+
+	enum MockError: Error {
+		case missingStub
+		case typeMismatch(expected: Any.Type, actual: Any.Type)
+	}
 
 	var resultDTO: Decodable?
 	var resultDTOByMethod: [String: Decodable] = [:]
@@ -39,11 +44,11 @@ final class MockNetworkManager: NetworkRequesting {
 		}()
 
 		guard let result = result else {
-			 fatalError("Mock: 결과 데이터가 설정되지 않았습니다.")
+			throw MockError.missingStub
 		}
 
 		guard let typedResult = result as? Response else {
-			fatalError("Mock: 요청한 타입과 저장된 데이터의 타입이 일치하지 않습니다.")
+			throw MockError.typeMismatch(expected: Response.self, actual: Swift.type(of: result))
 		}
 
 		return typedResult

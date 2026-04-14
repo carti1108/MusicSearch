@@ -10,6 +10,10 @@ import Testing
 @testable import MusicSearch
 
 final class MockWeatherRepository: WeatherRepository {
+	enum MockError: Error {
+		case missingStub
+	}
+
 	var result: Weather?
 	var errorToThrow: Error?
 
@@ -26,6 +30,6 @@ final class MockWeatherRepository: WeatherRepository {
 		if let result {
 			return result
 		}
-		fatalError("MockWeather: 결과값이 설정되지 않음")
+		throw MockError.missingStub
 	}
 }

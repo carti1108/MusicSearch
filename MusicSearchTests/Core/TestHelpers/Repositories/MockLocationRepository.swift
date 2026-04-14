@@ -10,6 +10,9 @@ import Testing
 @testable import MusicSearch
 
 final class MockLocationRepository: LocationRepository {
+	enum MockError: Error {
+		case missingStub
+	}
 
 	var result: (latitude: Double, longitude: Double)?
 	var errorToThrow: Error?
@@ -21,6 +24,6 @@ final class MockLocationRepository: LocationRepository {
 		if let result {
 			return result
 		}
-		fatalError("MockLocation: 결과값이 설정되지 않음")
+		throw MockError.missingStub
 	}
 }

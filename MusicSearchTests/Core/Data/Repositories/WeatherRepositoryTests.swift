@@ -71,7 +71,7 @@ struct WeatherRepositoryTests {
 	@Test("네트워크 에러 발생 시 WeatherError.networkError로 변환되는가")
 	func networkFailure() async {
 		// Given
-		let realNetworkError = NetworkError.transportError(URLError(.notConnectedToInternet))
+		let realNetworkError = NetworkError.transport(URLError(.notConnectedToInternet))
 
 		mockNetwork.errorToThrow = realNetworkError
 
