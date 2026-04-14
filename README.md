@@ -12,12 +12,22 @@
   <img src="https://github.com/user-attachments/assets/c0ccd027-376d-44a1-b435-94b136b0846b" width="150" alt="Chart" />
 </p>
 
+## 🛠 기술 스택 (Tech Stack)
+
+| Category | Stack |
+| --- | --- |
+| **Language** | Swift |
+| **Framework** | UIKit (Code-based) |
+| **Architecture** | RIBs, Repository Pattern |
+| **Concurrency** | Swift Concurrency (async/await) |
+| **Reactive** | Combine |
+| **Networking** | 자체 네트워크 레이어(`NetworkLayer`), 내부적으로 URLSession 기반 |
+| **UI** | Compositional Layout, DiffableDataSource, Auto Layout |
+| **Open API** | Spotify, Last.fm, OpenWeatherMap |
+
 ## 📂 폴더 구조 (Project Structure)
 ```
 MusicSearch
-├── Docs
-│   ├── Execution       # 실행 화면 및 문서 리소스
-│   └── RIBs-Guide.md   # RIBs 구조 가이드
 ├── MusicSearch
 │   ├── App
 │   │   ├── Resources   # Assets, Info.plist
@@ -37,24 +47,180 @@ MusicSearch
 
 ---
 
-## 🛠 기술 스택 (Tech Stack)
-
-| Category | Stack |
-| --- | --- |
-| **Language** | Swift |
-| **Framework** | UIKit (Code-based) |
-| **Architecture** | RIBs, Repository Pattern |
-| **Concurrency** | Swift Concurrency (async/await) |
-| **Reactive** | Combine |
-| **Networking** | URLSession |
-| **UI** | Compositional Layout, DiffableDataSource, Auto Layout |
-| **Open API** | Spotify, Last.fm, OpenWeatherMap |
-
----
-
 ## 🧭 Architecture Guide
 
 - [RIBs 가이드](./Docs/RIBs-Guide.md)
+
+---
+
+## 🧩 RIBs
+
+- 탭 단위로 Feature RIB를 구성. (`WeatherRecommendation`, `Digging`, `Chart`)
+- 각 Feature는 **Builder / Interactor / Router**로 조립.
+- **Builder**: `Dependency`를 받아서 Feature에 필요한 UseCase/Service를 주입하고, Interactor/Router/View를 연결.
+- **Interactor**: 비즈니스 로직(검색, 추천 로드, 차트 로드)을 담당하고 Presenter에 결과를 반영.
+- **Router**: child RIB attach/detach, 화면 전환(push/tab 구성 등)을 담당.
+- Root는 3개의 탭 RIB를 attach해서 탭바를 구성하고, 각 Feature는 독립적으로 테스트/확장될 수 있게 분리.
+
+<details>
+<summary><b>코드 예시: RootBuilder (의존성 조립)</b></summary>
+
+```swift
+// RootBuilder.swift
+final class RootBuilder: Builder<RootDependency>, RootBuildable {
+  func build() -> LaunchRouting {
+    MainActor.assumeIsolated {
+      let component = RootComponent(dependency: self.dependency)
+      let viewController = RootViewController()
+      let interactor = RootInteractor(presenter: viewController)
+
+      return RootRouter(
+        interactor: interactor,
+        viewController: viewController,
+        weatherRecommendationBuilder: component.weatherRecommendationBuilder,
+        trackSearchBuilder: component.trackSearchBuilder,
+        chartBuilder: component.chartBuilder
+      )
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>코드 예시: RootRouter (탭 RIB attach + 탭 구성)</b></summary>
+
+```swift
+// RootRouter.swift
+override func didLoad() {
+  super.didLoad()
+
+  let weatherRecommendationRouter = self.weatherRecommendationBuilder.build(withListener: self.interactor)
+  self.attachChild(weatherRecommendationRouter)
+
+  let trackSearchNavigationController = UINavigationController()
+  let trackSearchRouter = self.trackSearchBuilder.build(
+    withListener: self.interactor,
+    navigationController: trackSearchNavigationController
+  )
+  self.attachChild(trackSearchRouter)
+
+  let chartRouter = self.chartBuilder.build(withListener: self.interactor)
+  self.attachChild(chartRouter)
+
+  self.viewController.setTabs([
+    UINavigationController(rootViewController: weatherRecommendationRouter.viewControllable.uiViewController),
+    trackSearchNavigationController,
+    UINavigationController(rootViewController: chartRouter.viewControllable.uiViewController)
+  ])
+}
+```
+
+</details>
+
+<details>
+<summary><b>코드 예시: Feature Builder (wiring + 의존성 주입)</b></summary>
+
+```swift
+// WeatherRecommendationBuilder.swift
+func build(withListener listener: WeatherRecommendationListener) -> WeatherRecommendationRouting {
+  MainActor.assumeIsolated {
+    let component = WeatherRecommendationComponent(dependency: self.dependency)
+    let viewController = WeatherRecommendationViewController()
+    let interactor = WeatherRecommendationInteractor(
+      presenter: viewController,
+      fetchMusicForWeatherUseCase: component.fetchMusicForWeatherUseCase,
+      fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase
+    )
+    interactor.listener = listener
+    return WeatherRecommendationRouter(interactor: interactor, viewController: viewController)
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>코드 예시: Feature Interactor (입력 스트림/요청 실행/취소)</b></summary>
+
+```swift
+// TrackSearchInteractor.swift
+private func bindSearchInput() {
+  self.searchSubject
+    .removeDuplicates()
+    .debounce(for: .seconds(self.debounceSeconds), scheduler: DispatchQueue.main)
+    .sink { [weak self] keyword in
+      self?.performSearch(keyword: keyword)
+    }
+    .store(in: &self.cancellables)
+}
+```
+
+</details>
+
+## ✅ Tests
+
+- Repository / UseCase / RIB 단위 테스트를 포함.
+- 테스트 더블은 **Spy/Mock**을 사용.
+- **Builder 테스트**: `build()` 결과 타입과 wiring(Interactor.listener, ViewController.listener 등) 및 의존성 주입을 검증.
+- **Interactor 테스트**: Presenter Spy로 `update/showLoading/showError` 호출을 검증하고, UseCase Mock으로 성공/실패 케이스를 재현.
+- **Router 테스트**: interactor-router 연결(`interactor.router === router`) 및 child attach/detach / navigation 동작을 검증.
+
+<details>
+<summary><b>코드 예시: Builder 테스트 (wiring 검증)</b></summary>
+
+```swift
+// TrackSearchBuilderTests.swift
+let builder = TrackSearchBuilder(dependency: dependency)
+let routing = builder.build(withListener: listener, navigationController: navigationController)
+
+#expect(routing is TrackSearchRouter)
+guard let router = routing as? TrackSearchRouter else { return }
+guard let interactor = router.interactor as? TrackSearchInteractor else { return }
+guard let viewController = router.viewControllable as? TrackSearchViewController else { return }
+
+#expect(interactor.listener === listener)
+#expect(viewController.listener === interactor)
+```
+
+</details>
+
+<details>
+<summary><b>코드 예시: Interactor 테스트 (비동기 로직 + Presenter Spy 검증)</b></summary>
+
+```swift
+// TrackSearchInteractorTests.swift
+let interactor = TrackSearchInteractor(
+  presenter: presenter,
+  debounceSeconds: 0.01,
+  searchTracksUseCase: mockUseCase
+)
+
+interactor.didUpdateSearchText("Muse")
+await waitUntil {
+  mockUseCase.executeCallCount == 1 &&
+  presenter.loadingStates == [true, false] &&
+  presenter.updatedTracksHistory.last?.count == 2
+}
+```
+
+</details>
+
+<details>
+<summary><b>코드 예시: Router 테스트 (child attach + navigation 검증)</b></summary>
+
+```swift
+// TrackSearchRouterTests.swift
+router.load()
+router.attachMusicDigging(seedTrack: seedTrack)
+
+#expect(router.children.count == 1)
+#expect(navigationController.viewControllers.count == 2)
+#expect(navigationController.topViewController === childRouter.viewControllable.uiViewController)
+```
+
+</details>
 
 ---
 
