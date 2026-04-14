@@ -9,10 +9,20 @@ import UIKit
 import Kingfisher
 
 final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
+	private let cardView: UIView = {
+		let view = UIView()
+		view.backgroundColor = UIColor.white.withAlphaComponent(0.06)
+		view.layer.cornerRadius = 22
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
 	private let albumImageView: UIImageView = {
 		let iv = UIImageView()
 		iv.contentMode = .scaleAspectFill
-		iv.layer.cornerRadius = 8
+		iv.layer.cornerRadius = 12
 		iv.layer.masksToBounds = true
 		iv.backgroundColor = .systemGray5
 		iv.translatesAutoresizingMaskIntoConstraints = false
@@ -30,8 +40,8 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 16, weight: .semibold)
-		label.textColor = .label
+		label.font = .systemFont(ofSize: 17, weight: .bold)
+		label.textColor = .white
 		label.numberOfLines = 1
 		label.lineBreakMode = .byTruncatingTail
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
@@ -41,7 +51,7 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 	private let artistLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 14, weight: .regular)
-		label.textColor = .secondaryLabel
+		label.textColor = UIColor.white.withAlphaComponent(0.62)
 		label.numberOfLines = 1
 		label.lineBreakMode = .byTruncatingTail
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
@@ -56,33 +66,65 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 	required init?(coder: NSCoder) { fatalError() }
 
 	private func setupUI() {
-		self.contentView.addSubview(self.albumImageView)
-		self.contentView.addSubview(self.textStackView)
+		self.contentView.backgroundColor = .clear
+		self.contentView.addSubview(self.cardView)
+		self.cardView.addSubview(self.albumImageView)
+		self.cardView.addSubview(self.textStackView)
 		self.textStackView.addArrangedSubview(self.titleLabel)
 		self.textStackView.addArrangedSubview(self.artistLabel)
 
 		NSLayoutConstraint.activate([
-			self.albumImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-			self.albumImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+			self.cardView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 6),
+			self.cardView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+			self.cardView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
+			self.cardView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -6),
+
+			self.albumImageView.leadingAnchor.constraint(equalTo: self.cardView.leadingAnchor, constant: 16),
+			self.albumImageView.centerYAnchor.constraint(equalTo: self.cardView.centerYAnchor),
 			self.albumImageView.widthAnchor.constraint(equalToConstant: 60),
 			self.albumImageView.heightAnchor.constraint(equalToConstant: 60),
 
 			self.textStackView.leadingAnchor.constraint(equalTo: self.albumImageView.trailingAnchor, constant: 16),
-			self.textStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -20),
-			self.textStackView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor),
+			self.textStackView.trailingAnchor.constraint(equalTo: self.cardView.trailingAnchor, constant: -20),
+			self.textStackView.centerYAnchor.constraint(equalTo: self.cardView.centerYAnchor),
 
 			self.contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 80)
 		])
+	}
+
+	override func prepareForReuse() {
+		super.prepareForReuse()
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.contentMode = .scaleAspectFit
+		self.albumImageView.image = nil
+		self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.65)
 	}
 
 	func configure(with track: Track) {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
 
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.image = nil
+		let placeholder = UIImage(
+			systemName: "music.note",
+			withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+		)
+
 		if let url = track.imageURL {
-			self.albumImageView.kf.setImage(with: url)
+			self.albumImageView.contentMode = .scaleAspectFill
+			self.albumImageView.kf.setImage(
+				with: url,
+				placeholder: placeholder,
+				options: [
+					.transition(.fade(0.2)),
+					.cacheOriginalImage
+				]
+			)
 		} else {
-			self.albumImageView.image = UIImage(systemName: "music.note")
+			self.albumImageView.contentMode = .scaleAspectFit
+			self.albumImageView.image = placeholder
+			self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.65)
 		}
 	}
 }

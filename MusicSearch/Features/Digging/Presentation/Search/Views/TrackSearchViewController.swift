@@ -17,11 +17,11 @@ protocol TrackSearchViewableListener: AnyObject {
 
 @MainActor
 final class TrackSearchViewController: UIViewController, TrackSearchViewable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
-
 	enum Section { case main }
 
 	weak var listener: TrackSearchViewableListener?
 	var lastPresentedErrorMessage: String?
+	private let backgroundGradientLayer = CAGradientLayer()
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
@@ -34,12 +34,12 @@ final class TrackSearchViewController: UIViewController, TrackSearchViewable, UI
 
 	private lazy var collectionView: UICollectionView = {
 		var config = UICollectionLayoutListConfiguration(appearance: .plain)
-		config.backgroundColor = .systemBackground
-		config.showsSeparators = true
+		config.backgroundColor = .clear
+		config.showsSeparators = false
 		let layout = UICollectionViewCompositionalLayout.list(using: config)
 
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
-		cv.backgroundColor = .systemBackground
+		cv.backgroundColor = .clear
 		cv.keyboardDismissMode = .onDrag
 		cv.translatesAutoresizingMaskIntoConstraints = false
 		cv.delegate = self
@@ -58,11 +58,46 @@ final class TrackSearchViewController: UIViewController, TrackSearchViewable, UI
 
 	private let emptyLabel: UILabel = {
 		let label = UILabel()
-		label.text = "검색 결과가 없습니다."
-		label.textColor = .secondaryLabel
+		label.text = "검색 결과가 없습니다.\n다른 키워드로 탐색해보세요."
+		label.textColor = UIColor.white.withAlphaComponent(0.68)
 		label.textAlignment = .center
+		label.numberOfLines = 2
 		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
+		return label
+	}()
+
+	private let headerStackView: UIStackView = {
+		let stack = UIStackView()
+		stack.axis = .vertical
+		stack.spacing = 8
+		stack.translatesAutoresizingMaskIntoConstraints = false
+		return stack
+	}()
+
+	private let eyebrowLabel: UILabel = {
+		let label = UILabel()
+		label.text = "DISCOVER"
+		label.font = .systemFont(ofSize: 12, weight: .semibold)
+		label.textColor = UIColor.white.withAlphaComponent(0.62)
+		return label
+	}()
+
+	private let titleLabel: UILabel = {
+		let label = UILabel()
+		label.text = "원하는 곡을 찾고\n바로 Digging 해보세요"
+		label.font = .systemFont(ofSize: 30, weight: .heavy)
+		label.textColor = .white
+		label.numberOfLines = 2
+		return label
+	}()
+
+	private let subtitleLabel: UILabel = {
+		let label = UILabel()
+		label.text = "아티스트나 트랙명을 검색한 뒤 비슷한 곡 흐름으로 이어서 탐색할 수 있어요."
+		label.font = .systemFont(ofSize: 15, weight: .medium)
+		label.textColor = UIColor.white.withAlphaComponent(0.68)
+		label.numberOfLines = 0
 		return label
 	}()
 
@@ -78,6 +113,11 @@ final class TrackSearchViewController: UIViewController, TrackSearchViewable, UI
 		super.viewDidLoad()
 		self.setupUI()
 		self.configureDataSource()
+	}
+
+	override func viewDidLayoutSubviews() {
+		super.viewDidLayoutSubviews()
+		self.backgroundGradientLayer.frame = self.view.bounds
 	}
 
 	func updateTracks(_ tracks: [Track]) {
@@ -108,19 +148,49 @@ final class TrackSearchViewController: UIViewController, TrackSearchViewable, UI
 	private func setupUI() {
 		self.navigationItem.title = "검색"
 		self.tabBarItem.title = "Search"
-		self.view.backgroundColor = .systemBackground
+		self.backgroundGradientLayer.colors = [
+			UIColor(red: 0.03, green: 0.05, blue: 0.11, alpha: 1.0).cgColor,
+			UIColor(red: 0.08, green: 0.10, blue: 0.22, alpha: 1.0).cgColor,
+			UIColor(red: 0.07, green: 0.18, blue: 0.28, alpha: 1.0).cgColor
+		]
+		self.backgroundGradientLayer.startPoint = CGPoint(x: 0, y: 0)
+		self.backgroundGradientLayer.endPoint = CGPoint(x: 1, y: 1)
+		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
 
 		self.searchController.searchBar.placeholder = "아티스트, 곡 제목 검색"
 		self.searchController.searchResultsUpdater = self
+		self.searchController.searchBar.searchTextField.backgroundColor = UIColor.white.withAlphaComponent(0.08)
+		self.searchController.searchBar.searchTextField.textColor = .white
+		self.searchController.searchBar.searchTextField.leftView?.tintColor = UIColor.white.withAlphaComponent(0.72)
+		self.searchController.searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
+			string: "아티스트, 곡 제목 검색",
+			attributes: [.foregroundColor: UIColor.white.withAlphaComponent(0.45)]
+		)
 		self.navigationItem.searchController = self.searchController
 		self.navigationItem.hidesSearchBarWhenScrolling = false
+		self.navigationController?.navigationBar.tintColor = .white
 
+		let appearance = UINavigationBarAppearance()
+		appearance.configureWithTransparentBackground()
+		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+		self.navigationController?.navigationBar.standardAppearance = appearance
+		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+
+		self.headerStackView.addArrangedSubview(self.eyebrowLabel)
+		self.headerStackView.addArrangedSubview(self.titleLabel)
+		self.headerStackView.addArrangedSubview(self.subtitleLabel)
+
+		self.view.addSubview(self.headerStackView)
 		self.view.addSubview(self.collectionView)
 		self.view.addSubview(self.loadingIndicator)
 		self.view.addSubview(self.emptyLabel)
 
 		NSLayoutConstraint.activate([
-			self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor),
+			self.headerStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 12),
+			self.headerStackView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 24),
+			self.headerStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -24),
+
+			self.collectionView.topAnchor.constraint(equalTo: self.headerStackView.bottomAnchor, constant: 18),
 			self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
 			self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),

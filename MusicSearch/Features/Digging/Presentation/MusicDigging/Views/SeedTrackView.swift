@@ -9,12 +9,19 @@ import UIKit
 import Kingfisher
 
 final class SeedTrackView: UIView {
+	var onTap: (() -> Void)?
 
 	private let containerView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.05)
-		view.layer.cornerRadius = 24
-		view.layer.masksToBounds = true
+		view.backgroundColor = UIColor.white.withAlphaComponent(0.08)
+		view.layer.cornerRadius = 28
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		view.layer.shadowColor = UIColor.black.cgColor
+		view.layer.shadowOpacity = 0.24
+		view.layer.shadowOffset = CGSize(width: 0, height: 20)
+		view.layer.shadowRadius = 30
+		view.layer.masksToBounds = false
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -64,9 +71,18 @@ final class SeedTrackView: UIView {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		self.setupUI()
+		self.setupActions()
 	}
 
 	required init?(coder: NSCoder) { fatalError() }
+
+	override func layoutSubviews() {
+		super.layoutSubviews()
+		self.containerView.layer.shadowPath = UIBezierPath(
+			roundedRect: self.containerView.bounds,
+			cornerRadius: self.containerView.layer.cornerRadius
+		).cgPath
+	}
 
 	private func setupUI() {
 		self.addSubview(self.containerView)
@@ -93,23 +109,46 @@ final class SeedTrackView: UIView {
 			self.contentStackView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor, constant: -16),
 			self.contentStackView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -16),
 
-			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor),
-
-			self.titleLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 30),
-
-			self.artistLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
+			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor)
 		])
+	}
+
+	private func setupActions() {
+		let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+		self.containerView.addGestureRecognizer(tapGesture)
+		self.containerView.isUserInteractionEnabled = true
+	}
+
+	@objc
+	private func handleTap() {
+		self.onTap?()
 	}
 
 	func configure(with track: Track) {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
 
-		if let url = track.imageURL {
-			self.albumImageView.kf.setImage(with: url)
-		} else {
-			self.albumImageView.image = UIImage(systemName: "music.note")
-		}
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.image = nil
+		let placeholder = UIImage(
+			systemName: "music.note",
+			withConfiguration: UIImage.SymbolConfiguration(pointSize: 34, weight: .medium)
+		)
 
+		if let url = track.imageURL {
+			self.albumImageView.contentMode = .scaleAspectFill
+			self.albumImageView.kf.setImage(
+				with: url,
+				placeholder: placeholder,
+				options: [
+					.transition(.fade(0.2)),
+					.cacheOriginalImage
+				]
+			)
+		} else {
+			self.albumImageView.contentMode = .scaleAspectFit
+			self.albumImageView.image = placeholder
+			self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.72)
+		}
 	}
 }

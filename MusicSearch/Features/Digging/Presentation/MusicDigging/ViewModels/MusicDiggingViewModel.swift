@@ -19,6 +19,7 @@ protocol MusicDiggingViewable: AnyObject {
 final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 	var view: MusicDiggingViewable?
+	weak var coordinator: MusicDiggingViewCoordinatorAction?
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	private var loadTask: Task<Void, Never>?
@@ -52,6 +53,10 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 	func didTapRetry() {
 		self.loadRecommendations(basedOn: self.currentSeedTrack)
+	}
+
+	func didTapSeedTrack() {
+		self.coordinator?.didTapSeedTrack(self.currentSeedTrack)
 	}
 
 	func didSelectRecommendation(at indexPath: IndexPath) {

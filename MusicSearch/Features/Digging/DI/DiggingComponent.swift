@@ -17,6 +17,10 @@ final class DiggingComponent<T: DiggingDependency>: Component {
 		self.dependency = dependency
 	}
 
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+		self.dependency.fetchMusicAppDeepLinkUseCase
+	}
+
 	@MainActor
 	func makeTrackSearchViewModel(view: TrackSearchViewable) -> TrackSearchViewModel {
 		TrackSearchViewModel(

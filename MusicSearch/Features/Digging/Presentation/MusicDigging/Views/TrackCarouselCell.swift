@@ -9,37 +9,62 @@ import UIKit
 import Kingfisher
 
 final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
+	private let cardView: UIView = {
+		let view = UIView()
+		view.backgroundColor = UIColor.white.withAlphaComponent(0.06)
+		view.layer.cornerRadius = 20
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
+	private let mainStackView: UIStackView = {
+		let stack = UIStackView()
+		stack.axis = .vertical
+		stack.spacing = 10
+		stack.alignment = .fill
+		stack.distribution = .fill
+		stack.translatesAutoresizingMaskIntoConstraints = false
+		return stack
+	}()
 
 	private let albumImageView: UIImageView = {
 		let iv = UIImageView()
 		iv.contentMode = .scaleAspectFill
 		iv.backgroundColor = .systemGray5
 		iv.clipsToBounds = true
-		iv.layer.cornerRadius = 8
+		iv.layer.cornerRadius = 12
 		iv.translatesAutoresizingMaskIntoConstraints = false
 		return iv
 	}()
 
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 14, weight: .bold)
+		label.font = .systemFont(ofSize: 11, weight: .bold)
 		label.textColor = .white
 		label.textAlignment = .left
 		label.numberOfLines = 2
 		label.lineBreakMode = .byTruncatingTail
-		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
 
 	private let artistLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 12, weight: .medium)
+		label.font = .systemFont(ofSize: 9, weight: .medium)
 		label.textColor = .white.withAlphaComponent(0.7)
 		label.textAlignment = .left
 		label.numberOfLines = 1
 		label.lineBreakMode = .byTruncatingTail
-		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
+	}()
+
+	private let spacerView: UIView = {
+		let view = UIView()
+		view.backgroundColor = .clear
+		view.setContentHuggingPriority(.defaultLow, for: .vertical)
+		view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+		return view
 	}()
 
 	override init(frame: CGRect) {
@@ -49,28 +74,44 @@ final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 
 	required init?(coder: NSCoder) { fatalError() }
 
-	private func setupUI() {
-		self.contentView.addSubview(self.albumImageView)
-		self.contentView.addSubview(self.titleLabel)
-		self.contentView.addSubview(self.artistLabel)
+	override func prepareForReuse() {
+		super.prepareForReuse()
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.contentMode = .scaleAspectFit
+		self.albumImageView.image = nil
+		self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.68)
+		self.titleLabel.text = nil
+		self.artistLabel.text = nil
+	}
 
+	private func setupUI() {
+		self.contentView.addSubview(self.cardView)
+		self.cardView.addSubview(self.mainStackView)
+
+		self.mainStackView.addArrangedSubview(self.albumImageView)
+		self.mainStackView.addArrangedSubview(self.titleLabel)
+		self.mainStackView.addArrangedSubview(self.artistLabel)
+		self.mainStackView.addArrangedSubview(self.spacerView)
+
+		self.albumImageView.setContentCompressionResistancePriority(.required, for: .vertical)
 		self.titleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 		self.artistLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+		self.albumImageView.setContentHuggingPriority(.required, for: .vertical)
+		self.titleLabel.setContentHuggingPriority(.required, for: .vertical)
+		self.artistLabel.setContentHuggingPriority(.required, for: .vertical)
 
 		NSLayoutConstraint.activate([
-			self.albumImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
-			self.albumImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-			self.albumImageView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor),
+			self.cardView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+			self.cardView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+			self.cardView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+			self.cardView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
 
-			self.titleLabel.topAnchor.constraint(equalTo: self.albumImageView.bottomAnchor, constant: 8),
-			self.titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-			self.titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+			self.mainStackView.topAnchor.constraint(equalTo: self.cardView.topAnchor, constant: 8),
+			self.mainStackView.leadingAnchor.constraint(equalTo: self.cardView.leadingAnchor, constant: 8),
+			self.mainStackView.trailingAnchor.constraint(equalTo: self.cardView.trailingAnchor, constant: -8),
+			self.mainStackView.bottomAnchor.constraint(equalTo: self.cardView.bottomAnchor, constant: -8),
 
-			self.artistLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 4),
-			self.artistLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-			self.artistLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-			self.artistLabel.bottomAnchor.constraint(lessThanOrEqualTo: self.contentView.bottomAnchor)
+			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor)
 		])
 	}
 
@@ -78,10 +119,27 @@ final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
 
+		self.albumImageView.kf.cancelDownloadTask()
+		self.albumImageView.image = nil
+		let placeholder = UIImage(
+			systemName: "music.note",
+			withConfiguration: UIImage.SymbolConfiguration(pointSize: 24, weight: .medium)
+		)
+
 		if let url = track.imageURL {
-			self.albumImageView.kf.setImage(with: url)
+			self.albumImageView.contentMode = .scaleAspectFill
+			self.albumImageView.kf.setImage(
+				with: url,
+				placeholder: placeholder,
+				options: [
+					.transition(.fade(0.2)),
+					.cacheOriginalImage
+				]
+			)
 		} else {
-			self.albumImageView.image = UIImage(systemName: "music.note")
+			self.albumImageView.contentMode = .scaleAspectFit
+			self.albumImageView.image = placeholder
+			self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.68)
 		}
 	}
 }

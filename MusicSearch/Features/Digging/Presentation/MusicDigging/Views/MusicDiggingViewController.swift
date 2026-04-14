@@ -11,16 +11,17 @@ import UIKit
 protocol MusicDiggingViewableListener: AnyObject {
 	func viewDidAppear()
 	func didTapRetry()
+	func didTapSeedTrack()
 	func didSelectRecommendation(at indexPath: IndexPath)
 }
 
 @MainActor
 final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, LoadingPresentable, ErrorPresentable {
-
 	enum Section { case recommendations }
 
 	weak var listener: MusicDiggingViewableListener?
 	var lastPresentedErrorMessage: String?
+	private let backgroundGradientLayer = CAGradientLayer()
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
@@ -40,10 +41,29 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 
 	private let seedTrackView = SeedTrackView()
 
+	private let eyebrowLabel: UILabel = {
+		let label = UILabel()
+		label.text = "DIGGING MODE"
+		label.font = .systemFont(ofSize: 12, weight: .semibold)
+		label.textColor = UIColor.white.withAlphaComponent(0.64)
+		label.translatesAutoresizingMaskIntoConstraints = false
+		return label
+	}()
+
+	private let titleLabel: UILabel = {
+		let label = UILabel()
+		label.text = "한 곡에서 시작해\n취향의 결을 따라가기"
+		label.font = .systemFont(ofSize: 30, weight: .heavy)
+		label.textColor = .white
+		label.numberOfLines = 2
+		label.translatesAutoresizingMaskIntoConstraints = false
+		return label
+	}()
+
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
 		label.text = "이 곡과 비슷한 무드 🎵"
-		label.font = .systemFont(ofSize: 18, weight: .bold)
+		label.font = .systemFont(ofSize: 24, weight: .heavy)
 		label.textColor = .white
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -88,6 +108,11 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 		self.configureDataSource()
 	}
 
+	override func viewDidLayoutSubviews() {
+		super.viewDidLayoutSubviews()
+		self.backgroundGradientLayer.frame = self.view.bounds
+	}
+
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 		self.listener?.viewDidAppear()
@@ -123,22 +148,36 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 	}
 
 	private func setupView() {
-		self.view.backgroundColor = .black
+		self.backgroundGradientLayer.colors = [
+			UIColor(red: 0.02, green: 0.04, blue: 0.09, alpha: 1.0).cgColor,
+			UIColor(red: 0.07, green: 0.10, blue: 0.18, alpha: 1.0).cgColor,
+			UIColor(red: 0.11, green: 0.19, blue: 0.27, alpha: 1.0).cgColor
+		]
+		self.backgroundGradientLayer.startPoint = CGPoint(x: 0, y: 0)
+		self.backgroundGradientLayer.endPoint = CGPoint(x: 1, y: 1)
+		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
 
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
+		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
 		self.navigationController?.navigationBar.standardAppearance = appearance
 		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+		self.navigationController?.navigationBar.tintColor = .white
 
 		self.view.addSubview(self.scrollView)
 		self.scrollView.addSubview(self.contentView)
 
+		self.contentView.addSubview(self.eyebrowLabel)
+		self.contentView.addSubview(self.titleLabel)
 		self.contentView.addSubview(self.seedTrackView)
 		self.contentView.addSubview(self.sectionTitleLabel)
 		self.contentView.addSubview(self.collectionView)
 		self.contentView.addSubview(self.loadingIndicator)
 
 		self.seedTrackView.translatesAutoresizingMaskIntoConstraints = false
+		self.seedTrackView.onTap = { [weak self] in
+			self?.listener?.didTapSeedTrack()
+		}
 	}
 
 	private func setupConstraints() {
@@ -156,7 +195,15 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 			self.contentView.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor),
 			self.contentView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor),
 
-			self.seedTrackView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+			self.eyebrowLabel.topAnchor.constraint(equalTo: self.contentView.safeAreaLayoutGuide.topAnchor, constant: 18),
+			self.eyebrowLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 20),
+			self.eyebrowLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -20),
+
+			self.titleLabel.topAnchor.constraint(equalTo: self.eyebrowLabel.bottomAnchor, constant: 10),
+			self.titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 20),
+			self.titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -20),
+
+			self.seedTrackView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 18),
 			self.seedTrackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.seedTrackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
 
@@ -167,7 +214,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 			self.collectionView.topAnchor.constraint(equalTo: self.sectionTitleLabel.bottomAnchor, constant: 16),
 			self.collectionView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.collectionView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-			self.collectionView.heightAnchor.constraint(equalToConstant: screenWidth * 0.4 + 60),
+			self.collectionView.heightAnchor.constraint(equalToConstant: screenWidth * 0.4 + 72),
 			self.collectionView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -20),
 
 			self.loadingIndicator.centerXAnchor.constraint(equalTo: self.collectionView.centerXAnchor),
@@ -193,7 +240,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 
 			let section = NSCollectionLayoutSection(group: group)
 			section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
-			section.interGroupSpacing = 16
+			section.interGroupSpacing = 12
 			section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
 			return section
 		}
@@ -202,8 +249,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingViewable, 
 	private func configureDataSource() {
 		self.dataSource = UICollectionViewDiffableDataSource<Section, Track>(
 			collectionView: self.collectionView
-		) {
-			collectionView, indexPath, track in
+		) { collectionView, indexPath, track in
 			guard let cell = collectionView.dequeueReusableCell(
 				withReuseIdentifier: TrackCarouselCell.reuseIdentifier,
 				for: indexPath
