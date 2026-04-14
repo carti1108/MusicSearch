@@ -31,6 +31,7 @@ protocol TrackSearchPresentable: Presentable {
 
 protocol TrackSearchListener: AnyObject {}
 
+@MainActor
 final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>, TrackSearchInteractable, TrackSearchPresentableListener {
 	weak var router: TrackSearchRouting?
 	weak var listener: TrackSearchListener?

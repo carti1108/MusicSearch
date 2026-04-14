@@ -7,6 +7,7 @@
 
 import MicroRIBs
 
+@MainActor
 protocol ChartInteractable: Interactable {
 	var router: ChartRouting? { get set }
 	var listener: ChartListener? { get set }

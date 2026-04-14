@@ -29,6 +29,7 @@ protocol ChartPresentable: Presentable {
 
 protocol ChartListener: AnyObject {}
 
+@MainActor
 final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInteractable, ChartPresentableListener {
 	private typealias ChartSections = (podium: [ChartItem], list: [ChartItem])
 

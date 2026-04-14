@@ -7,6 +7,7 @@
 
 import MicroRIBs
 
+@MainActor
 protocol WeatherRecommendationInteractable: Interactable {
 	var router: WeatherRecommendationRouting? { get set }
 	var listener: WeatherRecommendationListener? { get set }

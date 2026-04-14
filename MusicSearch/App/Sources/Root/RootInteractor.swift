@@ -18,6 +18,7 @@ protocol RootPresentable: Presentable {
 
 protocol RootListener: AnyObject {}
 
+@MainActor
 final class RootInteractor: PresentableInteractor<RootPresentable>, RootInteractable, RootPresentableListener {
 	weak var router: RootRouting?
 	weak var listener: RootListener?

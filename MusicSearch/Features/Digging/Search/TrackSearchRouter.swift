@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol TrackSearchInteractable: Interactable, MusicDiggingListener {
 	var router: TrackSearchRouting? { get set }
 	var listener: TrackSearchListener? { get set }

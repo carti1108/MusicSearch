@@ -29,6 +29,7 @@ protocol MusicDiggingPresentable: Presentable {
 
 protocol MusicDiggingListener: AnyObject {}
 
+@MainActor
 final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentable>, MusicDiggingInteractable, MusicDiggingPresentableListener {
 	weak var router: MusicDiggingRouting?
 	weak var listener: MusicDiggingListener?

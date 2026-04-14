@@ -7,6 +7,7 @@
 
 import MicroRIBs
 
+@MainActor
 protocol MusicDiggingInteractable: Interactable {
 	var router: MusicDiggingRouting? { get set }
 	var listener: MusicDiggingListener? { get set }

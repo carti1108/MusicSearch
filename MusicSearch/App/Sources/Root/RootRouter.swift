@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener {
 	var router: RootRouting? { get set }
 	var listener: RootListener? { get set }
