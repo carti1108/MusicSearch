@@ -7,11 +7,13 @@
 
 import MicroRIBs
 
+@MainActor
 protocol MusicDiggingDependency: Dependency {
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
+@MainActor
 protocol MusicDiggingBuildable: Buildable {
 	func build(
 		withListener listener: MusicDiggingListener,
@@ -19,6 +21,7 @@ protocol MusicDiggingBuildable: Buildable {
 	) -> MusicDiggingRouting
 }
 
+@MainActor
 final class MusicDiggingBuilder: Builder<MusicDiggingDependency>, MusicDiggingBuildable {
 	override init(dependency: MusicDiggingDependency) {
 		super.init(dependency: dependency)

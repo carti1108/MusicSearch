@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol ChartRouting: ViewableRouting {}
 
 @MainActor
@@ -27,6 +28,7 @@ protocol ChartPresentable: Presentable {
 	func showError(_ message: String?)
 }
 
+@MainActor
 protocol ChartListener: AnyObject {}
 
 @MainActor

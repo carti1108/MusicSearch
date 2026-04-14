@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol TrackSearchDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
@@ -15,6 +16,7 @@ protocol TrackSearchDependency: Dependency {
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
+@MainActor
 final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchDependency, MusicDiggingDependency {
 	var searchTracksUseCase: SearchTracksUseCase {
 		self.dependency.searchTracksUseCase
@@ -33,6 +35,7 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 	}
 }
 
+@MainActor
 protocol TrackSearchBuildable: Buildable {
 	func build(
 		withListener listener: TrackSearchListener,
@@ -40,6 +43,7 @@ protocol TrackSearchBuildable: Buildable {
 	) -> TrackSearchRouting
 }
 
+@MainActor
 final class TrackSearchBuilder: Builder<TrackSearchDependency>, TrackSearchBuildable {
 	override init(dependency: TrackSearchDependency) {
 		super.init(dependency: dependency)

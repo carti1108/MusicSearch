@@ -13,8 +13,10 @@ protocol ChartInteractable: Interactable {
 	var listener: ChartListener? { get set }
 }
 
+@MainActor
 protocol ChartViewControllable: ViewControllable {}
 
+@MainActor
 final class ChartRouter: ViewableRouter<ChartInteractable, ChartViewControllable>, ChartRouting {
 	override init(interactor: ChartInteractable, viewController: ChartViewControllable) {
 		super.init(interactor: interactor, viewController: viewController)

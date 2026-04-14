@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol WeatherRecommendationRouting: ViewableRouting {}
 
 @MainActor
@@ -25,6 +26,7 @@ protocol WeatherRecommendationPresentable: Presentable {
 	func showError(_ message: String?)
 }
 
+@MainActor
 protocol WeatherRecommendationListener: AnyObject {}
 
 @MainActor

@@ -14,8 +14,10 @@ protocol TrackSearchInteractable: Interactable, MusicDiggingListener {
 	var listener: TrackSearchListener? { get set }
 }
 
+@MainActor
 protocol TrackSearchViewControllable: ViewControllable {}
 
+@MainActor
 final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSearchViewControllable>, TrackSearchRouting {
 	private final class NavigationDelegateProxy: NSObject, UINavigationControllerDelegate {
 		weak var router: TrackSearchRouter?

@@ -9,6 +9,7 @@ import Combine
 import Foundation
 import MicroRIBs
 
+@MainActor
 protocol TrackSearchRouting: ViewableRouting {
 	func attachMusicDigging(seedTrack: Track)
 }
@@ -29,6 +30,7 @@ protocol TrackSearchPresentable: Presentable {
 	func showError(_ message: String?)
 }
 
+@MainActor
 protocol TrackSearchListener: AnyObject {}
 
 @MainActor

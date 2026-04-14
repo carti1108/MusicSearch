@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol MusicDiggingRouting: ViewableRouting {}
 
 @MainActor
@@ -27,6 +28,7 @@ protocol MusicDiggingPresentable: Presentable {
 	func showError(_ message: String?)
 }
 
+@MainActor
 protocol MusicDiggingListener: AnyObject {}
 
 @MainActor

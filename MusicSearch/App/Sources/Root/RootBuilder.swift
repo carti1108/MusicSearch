@@ -8,8 +8,10 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol RootDependency: Dependency, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {}
 
+@MainActor
 final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
@@ -52,10 +54,12 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	}
 }
 
+@MainActor
 protocol RootBuildable: Buildable {
 	func build() -> LaunchRouting
 }
 
+@MainActor
 final class RootBuilder: Builder<RootDependency>, RootBuildable {
 	override init(dependency: RootDependency) {
 		super.init(dependency: dependency)

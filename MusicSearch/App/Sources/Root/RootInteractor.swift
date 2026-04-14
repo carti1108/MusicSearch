@@ -8,14 +8,18 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 protocol RootRouting: LaunchRouting {}
 
+@MainActor
 protocol RootPresentableListener: AnyObject {}
 
+@MainActor
 protocol RootPresentable: Presentable {
 	var listener: RootPresentableListener? { get set }
 }
 
+@MainActor
 protocol RootListener: AnyObject {}
 
 @MainActor

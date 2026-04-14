@@ -14,10 +14,12 @@ protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSea
 	var listener: RootListener? { get set }
 }
 
+@MainActor
 protocol RootViewControllable: ViewControllable {
 	func setTabs(_ viewControllers: [UIViewController])
 }
 
+@MainActor
 final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, RootRouting {
 	private let weatherRecommendationBuilder: WeatherRecommendationBuildable
 	private let trackSearchBuilder: TrackSearchBuildable

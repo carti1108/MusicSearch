@@ -13,8 +13,10 @@ protocol MusicDiggingInteractable: Interactable {
 	var listener: MusicDiggingListener? { get set }
 }
 
+@MainActor
 protocol MusicDiggingViewControllable: ViewControllable {}
 
+@MainActor
 final class MusicDiggingRouter: ViewableRouter<MusicDiggingInteractable, MusicDiggingViewControllable>, MusicDiggingRouting {
 	override init(interactor: MusicDiggingInteractable, viewController: MusicDiggingViewControllable) {
 		super.init(interactor: interactor, viewController: viewController)

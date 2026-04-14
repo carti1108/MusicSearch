@@ -7,12 +7,14 @@
 
 import MicroRIBs
 
+@MainActor
 protocol ChartDependency: Dependency {
 	var fetchChartTopTracksUseCase: FetchChartTopTracksUseCase { get }
 	var fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
+@MainActor
 final class ChartComponent: Component<ChartDependency> {
 	fileprivate var fetchChartTopTracksUseCase: FetchChartTopTracksUseCase {
 		self.dependency.fetchChartTopTracksUseCase
@@ -27,10 +29,12 @@ final class ChartComponent: Component<ChartDependency> {
 	}
 }
 
+@MainActor
 protocol ChartBuildable: Buildable {
 	func build(withListener listener: ChartListener) -> ChartRouting
 }
 
+@MainActor
 final class ChartBuilder: Builder<ChartDependency>, ChartBuildable {
 	override init(dependency: ChartDependency) {
 		super.init(dependency: dependency)

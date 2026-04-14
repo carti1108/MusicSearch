@@ -7,11 +7,13 @@
 
 import MicroRIBs
 
+@MainActor
 protocol WeatherRecommendationDependency: Dependency {
 	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 
+@MainActor
 final class WeatherRecommendationComponent: Component<WeatherRecommendationDependency> {
 	fileprivate var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
@@ -22,10 +24,12 @@ final class WeatherRecommendationComponent: Component<WeatherRecommendationDepen
 	}
 }
 
+@MainActor
 protocol WeatherRecommendationBuildable: Buildable {
 	func build(withListener listener: WeatherRecommendationListener) -> WeatherRecommendationRouting
 }
 
+@MainActor
 final class WeatherRecommendationBuilder: Builder<WeatherRecommendationDependency>, WeatherRecommendationBuildable {
 	override init(dependency: WeatherRecommendationDependency) {
 		super.init(dependency: dependency)

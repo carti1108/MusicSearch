@@ -13,8 +13,10 @@ protocol WeatherRecommendationInteractable: Interactable {
 	var listener: WeatherRecommendationListener? { get set }
 }
 
+@MainActor
 protocol WeatherRecommendationViewControllable: ViewControllable {}
 
+@MainActor
 final class WeatherRecommendationRouter: ViewableRouter<WeatherRecommendationInteractable, WeatherRecommendationViewControllable>, WeatherRecommendationRouting {
 	override init(interactor: WeatherRecommendationInteractable, viewController: WeatherRecommendationViewControllable) {
 		super.init(interactor: interactor, viewController: viewController)

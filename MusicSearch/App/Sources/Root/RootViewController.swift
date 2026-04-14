@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 final class RootViewController: UITabBarController, RootPresentable, RootViewControllable {
 	weak var listener: RootPresentableListener?
 
