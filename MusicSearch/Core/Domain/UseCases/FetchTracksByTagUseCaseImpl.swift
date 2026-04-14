@@ -14,10 +14,15 @@ public protocol FetchTracksByTagUseCase {
 final class FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 
 	private let trackRepository: TrackRepository
-	private let maxConcurrentInfoRequests: Int = 8
+	private let trackEnrichmentService: TrackEnrichmentService
 
-	init(trackRepository: TrackRepository) {
+	init(
+		trackRepository: TrackRepository,
+		trackEnrichmentService: TrackEnrichmentService? = nil
+	) {
 		self.trackRepository = trackRepository
+		self.trackEnrichmentService = trackEnrichmentService
+			?? TrackEnrichmentServiceImpl(trackRepository: trackRepository)
 	}
 
 	public func execute(tag: String) async throws -> [Track] {
@@ -26,50 +31,6 @@ final class FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 		}
 
 		let tracks = try await self.trackRepository.fetchTopTracks(by: tag)
-		return await self.updateTracksWithDetails(tracks)
-	}
-
-	private func updateTracksWithDetails(_ tracks: [Track]) async -> [Track] {
-		guard !tracks.isEmpty else { return [] }
-
-		var updated = tracks
-
-		await withTaskGroup(of: (Int, Track?).self) { group in
-			var iterator = tracks.enumerated().makeIterator()
-
-			let initialCount = min(self.maxConcurrentInfoRequests, tracks.count)
-			for _ in 0..<initialCount {
-				guard let next = iterator.next() else { break }
-				group.addTask {
-					do {
-						let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
-						return (next.offset, enriched)
-					} catch {
-						print("Failed to fetch track info for \(next.element.title): \(error)")
-						return (next.offset, nil)
-					}
-				}
-			}
-
-			while let (index, enriched) = await group.next() {
-				if let enriched = enriched {
-					updated[index] = enriched
-				}
-
-				if let next = iterator.next() {
-					group.addTask {
-						do {
-							let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
-							return (next.offset, enriched)
-						} catch {
-							print("Failed to fetch track info for \(next.element.title): \(error)")
-							return (next.offset, nil)
-						}
-					}
-				}
-			}
-		}
-
-		return updated
+		return await self.trackEnrichmentService.enrich(tracks)
 	}
 }
