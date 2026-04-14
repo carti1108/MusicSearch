@@ -22,6 +22,12 @@ final class WeatherRepositoryImpl: WeatherRepository {
 	}
 
 	func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> Weather {
+		guard !self.configuration.apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+			  URL(string: self.configuration.baseURL) != nil
+		else {
+			throw WeatherError.configurationError
+		}
+
 		do {
 			let response: WeatherResponseDTO = try await self.networkManager.perform(
 				with: WeatherAPI.fetchWeather(lat: latitude, lon: longitude, config: self.configuration),
