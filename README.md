@@ -41,7 +41,7 @@ MusicSearch
 | **Architecture** | MVVM-C, Repository Pattern |
 | **Concurrency** | Swift Concurrency (async/await) |
 | **Reactive** | Combine |
-| **Networking** | URLSession |
+| **Networking** | 자체 SPM 모듈 NetworkLayer(URLSession 기반) |
 | **UI** | Compositional Layout, DiffableDataSource, Auto Layout |
 | **Open API** | Spotify, Last.fm, OpenWeatherMap |
 
