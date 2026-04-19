@@ -61,12 +61,28 @@ MusicSearch
 struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
     private let fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
     private let fetchTracksByTagUseCase: FetchTracksByTagUseCase
+    private let tagMapper: WeatherTagMapper
+
+    init(
+        fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase,
+        fetchTracksByTagUseCase: FetchTracksByTagUseCase,
+        tagMapper: WeatherTagMapper = WeatherTagMapper()
+    ) {
+        self.fetchCurrentWeatherUseCase = fetchCurrentWeatherUseCase
+        self.fetchTracksByTagUseCase = fetchTracksByTagUseCase
+        self.tagMapper = tagMapper
+    }
 
     func execute() async throws -> WeatherMusicCuration {
         let weather = try await self.fetchCurrentWeatherUseCase.execute()
-        let moodTag = WeatherTagMapper.tag(for: weather.condition)
-        let tracks = try await self.fetchTracksByTagUseCase.execute(tag: moodTag)
-        return WeatherMusicCuration(weather: weather, moodTag: moodTag, tracks: tracks)
+        let tag = self.tagMapper.map(condition: weather.condition)
+        let tracks = try await self.fetchTracksByTagUseCase.execute(tag: tag)
+
+        return .init(
+            weather: weather,
+            moodTag: tag,
+            tracks: tracks
+        )
     }
 }
 ```
@@ -78,14 +94,19 @@ func searchTracks(
     limit: Int,
     page: Int
 ) async throws -> (tracks: [Track], totalResults: Int) {
-    let response = try await self.networkManager.perform(
+    self.makeSearchResult(from: try await self.networkManager.perform(
         with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
         as: TrackSearchResponseDTO.self
-    )
+    ))
+}
 
-    let tracks = response.results.trackmatches.track.map { $0.toDomain() }
-    let totalResults = Int(response.results.totalResults) ?? 0
-    return (tracks, totalResults)
+private func makeSearchResult(
+    from response: TrackSearchResponseDTO
+) -> (tracks: [Track], totalResults: Int) {
+    (
+        tracks: response.results.trackmatches.track.map { $0.toDomain() },
+        totalResults: Int(response.results.totalResults) ?? 0
+    )
 }
 ```
 
@@ -191,31 +212,20 @@ private var canLoadMore: Bool {
 ```
 
 ```swift
-private func updateTracksWithDetails(_ tracks: [Track]) async -> [Track] {
-    guard !tracks.isEmpty else { return [] }
-
-    var updated = tracks
-
-    await withTaskGroup(of: (Int, Track?).self) { group in
-        for (index, track) in tracks.enumerated() {
-            group.addTask {
-                do {
-                    let enriched = try await self.trackRepository.fetchTrackInfo(for: track)
-                    return (index, enriched)
-                } catch {
-                    return (index, nil)
-                }
-            }
-        }
-
-        while let (index, enriched) = await group.next() {
-            if let enriched {
-                updated[index] = enriched
-            }
-        }
+// Array+TrackInfo.swift
+extension Array where Element == Track {
+    func enrichingTrackInfo(
+        maxConcurrentRequests: Int = 8,
+        using fetchTrackInfo: @escaping @Sendable (Track) async throws -> Track
+    ) async -> [Track] {
+        // ... withTaskGroup 병렬 처리 코드 캡슐화 ...
     }
+}
 
-    return updated
+// FetchChartTopTracksUseCaseImpl.swift
+func execute() async throws -> [Track] {
+    let tracks = try await self.chartRepository.fetchTopTracks()
+    return await tracks.enrichingTrackInfo(using: self.chartRepository.fetchTrackInfo(for:))
 }
 ```
 
