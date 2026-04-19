@@ -20,21 +20,16 @@ protocol WeatherRecommendationCoordinatorAction: AnyObject {
 	func didSelect(track: Track)
 }
 
+@MainActor
 final class WeatherRecommendationViewModel: WeatherRecommendationViewableListener {
+	private static let loadingFailureMessage = "날씨 추천을 불러오지 못했습니다."
 
 	var view: WeatherRecommendationViewable?
 	weak var coordinator: WeatherRecommendationCoordinatorAction?
 	private let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
 	private var loadTask: Task<Void, Never>?
 
-	private var currentWeather: Weather = .init(
-		temperature: 0.0,
-		condition: .unknown,
-		description: "",
-		iconCode: "",
-		cityName: ""
-	)
-	private var currentTracks: [Track] = []
+	private var currentCuration: WeatherMusicCuration?
 
 	init(
 		view: WeatherRecommendationViewable,
@@ -50,11 +45,11 @@ final class WeatherRecommendationViewModel: WeatherRecommendationViewableListene
 	}
 
 	func viewDidLoad() {
-		guard self.currentTracks.isEmpty else {
-			self.view?.update(weather: self.currentWeather, tracks: self.currentTracks)
-			return
+		if let currentCuration {
+			self.view?.update(weather: currentCuration.weather, tracks: currentCuration.tracks)
+		} else {
+			self.loadData()
 		}
-		self.loadData()
 	}
 
 	func didTapRefresh() {
@@ -62,8 +57,8 @@ final class WeatherRecommendationViewModel: WeatherRecommendationViewableListene
 	}
 
 	func didSelectTrack(at index: Int) {
-		guard index < self.currentTracks.count else { return }
-		self.coordinator?.didSelect(track: self.currentTracks[index])
+		guard let currentCuration, currentCuration.tracks.indices.contains(index) else { return }
+		self.coordinator?.didSelect(track: currentCuration.tracks[index])
 	}
 
 	private func loadData() {
@@ -73,26 +68,25 @@ final class WeatherRecommendationViewModel: WeatherRecommendationViewableListene
 
 		self.loadTask = Task { [weak self] in
 			guard let self else { return }
+			defer {
+				if !Task.isCancelled {
+					self.view?.showLoading(false)
+				}
+			}
 
 			do {
-				let result = try await self.fetchMusicForWeatherUseCase.execute()
+				let curation = try await self.fetchMusicForWeatherUseCase.execute()
 				guard !Task.isCancelled else { return }
 
-				self.currentWeather = result.weather
-				self.currentTracks = result.tracks
-
-				self.view?.update(weather: self.currentWeather, tracks: self.currentTracks)
-				self.view?.showLoading(false)
+				self.currentCuration = curation
+				self.view?.update(weather: curation.weather, tracks: curation.tracks)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				if let localized = error as? LocalizedError, let message = localized.errorDescription {
-					self.view?.showError(message)
-				} else {
-					self.view?.showError("날씨 추천을 불러오지 못했습니다.")
-				}
-				self.view?.showLoading(false)
+				self.view?.showError(
+					error.userMessage(fallback: Self.loadingFailureMessage)
+				)
 			}
 		}
 	}

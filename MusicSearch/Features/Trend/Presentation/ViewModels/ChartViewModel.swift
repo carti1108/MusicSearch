@@ -21,7 +21,9 @@ protocol ChartViewCoordinatorAction: AnyObject {
 	func didSelect(item: ChartItem)
 }
 
+@MainActor
 final class ChartViewModel: ChartViewableListener {
+	private static let loadingFailureMessage = "차트 정보를 불러오지 못했습니다."
 	private typealias ChartSections = (podium: [ChartItem], list: [ChartItem])
 
 	var view: ChartViewable?
@@ -56,13 +58,13 @@ final class ChartViewModel: ChartViewableListener {
 	}
 
 	func didChangeSegment(index: Int) {
-		let type: ChartType = (index == 0) ? .tracks : .artists
+		let type: ChartType = index == 0 ? .tracks : .artists
 		guard self.currentType != type else { return }
 
 		self.currentType = type
 		self.view?.updateSegment(to: index)
 
-		if let cachedSections = self.cachedSectionsByType[type.rawValue] {
+		if let cachedSections = self.cachedSections(for: type) {
 			self.loadTask?.cancel()
 			self.view?.showError(nil)
 			self.view?.showLoading(false)
@@ -70,9 +72,7 @@ final class ChartViewModel: ChartViewableListener {
 			return
 		}
 
-		self.currentPodiumItems = []
-		self.currentListItems = []
-		self.view?.update(podiumItems: [], listItems: [])
+		self.clearDisplayedSections()
 		self.loadData(for: type, forceRefresh: false)
 	}
 
@@ -82,88 +82,110 @@ final class ChartViewModel: ChartViewableListener {
 	}
 
 	func didSelectItem(at indexPath: IndexPath) {
-		let section = indexPath.section
-		let index = indexPath.item
-		let item: ChartItem?
-
-		if section == 0 { // Podium
-			guard index < self.currentPodiumItems.count else { return }
-			item = self.currentPodiumItems[index]
-		} else { // List
-			guard index < self.currentListItems.count else { return }
-			item = self.currentListItems[index]
-		}
-
-		if let item {
-			self.coordinator?.didSelect(item: item)
-		}
+		guard let item = self.selectedItem(at: indexPath) else { return }
+		self.coordinator?.didSelect(item: item)
 	}
 
 	private func loadData(for type: ChartType, forceRefresh: Bool) {
 		self.loadTask?.cancel()
 
-		if !forceRefresh, let cachedSections = self.cachedSectionsByType[type.rawValue] {
+		if !forceRefresh, let cachedSections = self.cachedSections(for: type) {
 			self.apply(sections: cachedSections, for: type)
 			return
 		}
 
-		self.view?.showLoading(true)
-		self.view?.showError(nil)
+		self.beginLoading()
 
 		self.loadTask = Task { [weak self] in
 			guard let self else { return }
-
-			do {
-				switch type {
-				case .tracks:
-					let tracks = try await self.fetchChartTopTracksUseCase.execute()
-					guard !Task.isCancelled else { return }
-					let sections = self.makeSections(from: self.makeItems(from: tracks))
-					self.cachedSectionsByType[type.rawValue] = sections
-					self.apply(sections: sections, for: type)
-					self.view?.showLoading(false)
-
-				case .artists:
-					let artists = try await self.fetchChartTopArtistsUseCase.execute()
-					guard !Task.isCancelled else { return }
-					let sections = self.makeSections(from: self.makeItems(from: artists))
-					self.cachedSectionsByType[type.rawValue] = sections
-					self.apply(sections: sections, for: type)
+			defer {
+				if !Task.isCancelled {
 					self.view?.showLoading(false)
 				}
+			}
+
+			do {
+				let sections = try await self.fetchSections(for: type)
+				guard !Task.isCancelled else { return }
+
+				self.cache(sections: sections, for: type)
+				self.apply(sections: sections, for: type)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("ChartViewModel Error: \(error)")
-				self.view?.showError("차트 정보를 불러오지 못했습니다.")
+				self.view?.showError(
+					error.userMessage(fallback: Self.loadingFailureMessage)
+				)
 
-				if self.currentType == type && self.currentPodiumItems.isEmpty && self.currentListItems.isEmpty {
+				if self.currentType == type && self.isDisplayingEmptyState {
 					self.view?.update(podiumItems: [], listItems: [])
 				}
-				self.view?.showLoading(false)
 			}
 		}
 	}
 
-	private func makeSections(from allItems: [ChartItem]) -> ChartSections {
-		guard allItems.count >= 3 else {
-			return ([], [])
-		}
+	private func beginLoading() {
+		self.view?.showLoading(true)
+		self.view?.showError(nil)
+	}
 
-		let first = allItems[0]
-		let second = allItems[1]
-		let third = allItems[2]
-		let podiumItems = [second, first, third]
-		let listItems = Array(allItems.dropFirst(3))
-		return (podiumItems, listItems)
+	private func fetchSections(for type: ChartType) async throws -> ChartSections {
+		switch type {
+		case .tracks:
+			return self.makeSections(
+				from: self.makeItems(from: try await self.fetchChartTopTracksUseCase.execute())
+			)
+		case .artists:
+			return self.makeSections(
+				from: self.makeItems(from: try await self.fetchChartTopArtistsUseCase.execute())
+			)
+		}
+	}
+
+	private func selectedItem(at indexPath: IndexPath) -> ChartItem? {
+		switch indexPath.section {
+		case 0:
+			guard self.currentPodiumItems.indices.contains(indexPath.item) else { return nil }
+			return self.currentPodiumItems[indexPath.item]
+		default:
+			guard self.currentListItems.indices.contains(indexPath.item) else { return nil }
+			return self.currentListItems[indexPath.item]
+		}
+	}
+
+	private func cachedSections(for type: ChartType) -> ChartSections? {
+		self.cachedSectionsByType[type.rawValue]
+	}
+
+	private func cache(sections: ChartSections, for type: ChartType) {
+		self.cachedSectionsByType[type.rawValue] = sections
+	}
+
+	private var isDisplayingEmptyState: Bool {
+		self.currentPodiumItems.isEmpty && self.currentListItems.isEmpty
+	}
+
+	private func clearDisplayedSections() {
+		self.currentPodiumItems = []
+		self.currentListItems = []
+		self.view?.update(podiumItems: [], listItems: [])
+	}
+
+	private func makeSections(from allItems: [ChartItem]) -> ChartSections {
+		allItems.indices.contains(2)
+			? (
+				podium: [allItems[1], allItems[0], allItems[2]],
+				list: Array(allItems.dropFirst(3))
+			)
+			: ([], [])
 	}
 
 	private func apply(sections: ChartSections, for type: ChartType) {
 		guard self.currentType == type else { return }
 		self.currentPodiumItems = sections.podium
 		self.currentListItems = sections.list
-		self.view?.update(podiumItems: self.currentPodiumItems, listItems: self.currentListItems)
+		self.view?.update(podiumItems: sections.podium, listItems: sections.list)
 	}
 
 	private func makeItems(from tracks: [Track]) -> [ChartItem] {
@@ -183,7 +205,10 @@ final class ChartViewModel: ChartViewableListener {
 	private func makeItems(from artists: [Artist]) -> [ChartItem] {
 		artists.enumerated().map { index, artist in
 			let rank = index + 1
-			let subtitle = artist.listeners.flatMap { $0.isEmpty ? nil : $0 }.map { "Listeners: \($0)" } ?? ""
+			let subtitle = artist.listeners
+				.flatMap { $0.isEmpty ? nil : $0 }
+				.map { "Listeners: \($0)" } ?? ""
+
 			return ChartItem(
 				id: "\(ChartType.artists.rawValue)-\(rank)",
 				rank: rank,

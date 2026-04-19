@@ -21,7 +21,15 @@ protocol TrackSearchViewCoordinatorAction: AnyObject {
 	func didSelect(_ track: Track)
 }
 
+@MainActor
 final class TrackSearchViewModel: TrackSearchViewableListener {
+	private static let searchFailureMessage = "검색 중 오류가 발생했습니다."
+
+	private struct SearchRequest {
+		let keyword: String
+		let limit: Int
+		let page: Int
+	}
 
 	var view: TrackSearchViewable?
 	weak var coordinator: TrackSearchViewCoordinatorAction?
@@ -92,111 +100,170 @@ final class TrackSearchViewModel: TrackSearchViewableListener {
 	}
 
 	private func performSearch(keyword: String) {
-		guard !keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-			self.searchTask?.cancel()
-			self.loadMoreTask?.cancel()
+		self.searchTask?.cancel()
+		self.loadMoreTask?.cancel()
 
-			self.lastKeyword = nil
-			self.loadingPage = nil
-			self.currentTracks = []
-			self.currentPage = 1
-			self.totalResults = 0
-			self.isLoading = false
-			self.isLoadingMore = false
-
-			self.view?.updateTracks([])
-			self.view?.showLoading(false)
-			self.view?.showError(nil)
+		guard let request = self.prepareSearchRequest(from: keyword) else {
+			self.publishResetSearch()
 			return
 		}
 
-		self.lastKeyword = keyword
-		self.currentPage = 1
-		self.searchTask?.cancel()
-		self.loadMoreTask?.cancel()
-		self.loadingPage = nil
-		self.isLoadingMore = false
-		self.isLoading = true
+		self.beginInitialSearch(with: request)
+	}
 
-		self.view?.showLoading(true)
-		self.view?.showError(nil)
+	private func loadMore() {
+		self.loadMoreTask?.cancel()
+
+		guard let request = self.prepareLoadMoreRequest() else { return }
+		self.beginLoadMore(with: request)
+	}
+
+	private func prepareSearchRequest(from keyword: String) -> SearchRequest? {
+		self.normalizedKeyword(from: keyword)
+			.map { SearchRequest(keyword: $0, limit: self.limit, page: 1) }
+	}
+
+	private func normalizedKeyword(from keyword: String) -> String? {
+		let trimmedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
+		return trimmedKeyword.isEmpty ? nil : trimmedKeyword
+	}
+
+	private func prepareLoadMoreRequest() -> SearchRequest? {
+		self.lastKeyword
+			.flatMap { keyword in self.canLoadMore ? keyword : nil }
+			.map { SearchRequest(keyword: $0, limit: self.limit, page: self.currentPage + 1) }
+			.flatMap { request in self.loadingPage == request.page ? nil : request }
+	}
+
+	private func beginInitialSearch(with request: SearchRequest) {
+		self.beginInitialSearchState(with: request)
 
 		self.searchTask = Task { [weak self] in
 			guard let self else { return }
 			defer {
 				if !Task.isCancelled {
-					self.isLoading = false
+					self.finishSearch()
 					self.view?.showLoading(false)
 				}
 			}
 
 			do {
-				let result = try await self.searchTracksUseCase.execute(
-					query: keyword,
-					limit: self.limit,
-					page: 1
-				)
+				let result = try await self.executeSearch(for: request)
 				guard !Task.isCancelled else { return }
-
-				self.currentTracks = result.tracks
-				self.totalResults = result.totalResults
-				self.currentPage = 1
-				self.view?.updateTracks(self.currentTracks)
+				self.view?.updateTracks(self.applyInitialSearchResult(result))
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrackSearchViewModel Error: \(error)")
-
-				self.currentTracks = []
-				self.totalResults = 0
-				self.currentPage = 1
-
-				self.view?.updateTracks([])
-				self.view?.showError("검색 중 오류가 발생했습니다.")
+				self.view?.updateTracks(self.failInitialSearch())
+				self.view?.showError(
+					error.userMessage(fallback: Self.searchFailureMessage)
+				)
 			}
 		}
 	}
 
-	private func loadMore() {
-		guard self.canLoadMore, let keyword = self.lastKeyword else { return }
+	private func beginLoadMore(with request: SearchRequest) {
+		self.beginLoadMoreState(with: request)
 
-		let nextPage = self.currentPage + 1
-		guard self.loadingPage != nextPage else { return }
-
-		self.loadingPage = nextPage
-		self.isLoadingMore = true
-
-		self.loadMoreTask?.cancel()
 		self.loadMoreTask = Task { [weak self] in
 			guard let self else { return }
 			defer {
 				if !Task.isCancelled {
-					self.isLoadingMore = false
-				}
-				if self.loadingPage == nextPage {
-					self.loadingPage = nil
+					self.finishLoadMore(for: request.page)
 				}
 			}
 
 			do {
-				let result = try await self.searchTracksUseCase.execute(
-					query: keyword,
-					limit: self.limit,
-					page: nextPage
-				)
+				let result = try await self.executeSearch(for: request)
 				guard !Task.isCancelled else { return }
-
-				self.currentTracks.append(contentsOf: result.tracks)
-				self.currentPage = nextPage
-				self.totalResults = result.totalResults
-				self.view?.updateTracks(self.currentTracks)
+				self.view?.updateTracks(
+					self.applyLoadMoreResult(result, page: request.page)
+				)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrackSearchViewModel LoadMore Error: \(error)")
 			}
 		}
+	}
+
+	private func beginInitialSearchState(with request: SearchRequest) {
+		self.lastKeyword = request.keyword
+		self.currentPage = 1
+		self.loadingPage = nil
+		self.isLoadingMore = false
+		self.isLoading = true
+		self.view?.showLoading(true)
+		self.view?.showError(nil)
+	}
+
+	private func beginLoadMoreState(with request: SearchRequest) {
+		self.loadingPage = request.page
+		self.isLoadingMore = true
+	}
+
+	private func executeSearch(
+		for request: SearchRequest
+	) async throws -> (tracks: [Track], totalResults: Int) {
+		try await self.searchTracksUseCase.execute(
+			query: request.keyword,
+			limit: request.limit,
+			page: request.page
+		)
+	}
+
+	private func publishResetSearch() {
+		self.view?.updateTracks(self.resetSearchState())
+		self.view?.showLoading(false)
+		self.view?.showError(nil)
+	}
+
+	private func resetSearchState() -> [Track] {
+		self.lastKeyword = nil
+		self.currentTracks = []
+		self.currentPage = 1
+		self.totalResults = 0
+		self.isLoading = false
+		self.isLoadingMore = false
+		self.loadingPage = nil
+		return self.currentTracks
+	}
+
+	private func finishSearch() {
+		self.isLoading = false
+	}
+
+	private func applyInitialSearchResult(
+		_ result: (tracks: [Track], totalResults: Int)
+	) -> [Track] {
+		self.currentTracks = result.tracks
+		self.totalResults = result.totalResults
+		self.currentPage = 1
+		return self.currentTracks
+	}
+
+	private func failInitialSearch() -> [Track] {
+		self.currentTracks = []
+		self.totalResults = 0
+		self.currentPage = 1
+		return self.currentTracks
+	}
+
+	private func finishLoadMore(for page: Int) {
+		self.isLoadingMore = false
+		if self.loadingPage == page {
+			self.loadingPage = nil
+		}
+	}
+
+	private func applyLoadMoreResult(
+		_ result: (tracks: [Track], totalResults: Int),
+		page: Int
+	) -> [Track] {
+		self.currentTracks.append(contentsOf: result.tracks)
+		self.currentPage = page
+		self.totalResults = result.totalResults
+		return self.currentTracks
 	}
 }

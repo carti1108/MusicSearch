@@ -16,7 +16,9 @@ protocol MusicDiggingViewable: AnyObject {
 	func showError(_ message: String?)
 }
 
+@MainActor
 final class MusicDiggingViewModel: MusicDiggingViewableListener {
+	private static let recommendationFailureMessage = "추천 곡을 불러오지 못했습니다."
 
 	var view: MusicDiggingViewable?
 	weak var coordinator: MusicDiggingViewCoordinatorAction?
@@ -60,10 +62,9 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 	}
 
 	func didSelectRecommendation(at indexPath: IndexPath) {
-		let index = indexPath.item
-		guard index < self.currentRecommendations.count else { return }
+		guard self.currentRecommendations.indices.contains(indexPath.item) else { return }
 
-		let selectedTrack = self.currentRecommendations[index]
+		let selectedTrack = self.currentRecommendations[indexPath.item]
 		self.currentSeedTrack = selectedTrack
 		self.view?.updateSeedTrack(selectedTrack)
 		self.loadRecommendations(basedOn: selectedTrack)
@@ -78,26 +79,31 @@ final class MusicDiggingViewModel: MusicDiggingViewableListener {
 
 		self.loadTask = Task { [weak self] in
 			guard let self else { return }
+			defer {
+				if !Task.isCancelled {
+					self.view?.showLoading(false)
+				}
+			}
 
 			do {
-				let tracks = try await self.fetchSimilarTracksUseCase.execute(targetTrack: track)
+				let recommendations = try await self.fetchSimilarTracksUseCase.execute(
+					targetTrack: track
+				)
 				guard !Task.isCancelled else { return }
-
-				self.currentRecommendations = tracks
-				self.view?.updateRecommendations(tracks)
-				if tracks.isEmpty {
-					self.view?.showError("추천 곡을 불러오지 못했습니다.")
+				guard recommendations.isEmpty == false else {
+					self.view?.showError(Self.recommendationFailureMessage)
+					return
 				}
-				self.view?.showLoading(false)
+
+				self.currentRecommendations = recommendations
+				self.view?.updateRecommendations(recommendations)
 			} catch is CancellationError {
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("MusicDiggingViewModel Error: \(error)")
-				self.currentRecommendations = []
-				self.view?.updateRecommendations([])
-				self.view?.showError("추천 곡을 불러오지 못했습니다.")
-				self.view?.showLoading(false)
+				self.view?.showError(
+					error.userMessage(fallback: Self.recommendationFailureMessage)
+				)
 			}
 		}
 	}
