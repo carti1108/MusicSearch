@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Album: Identifiable, Equatable, Hashable {
+public struct Album: Identifiable, Equatable, Hashable, Sendable {
 	public let id: String
 	public let title: String
 	public let artist: String

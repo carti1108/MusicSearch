@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ChartItem: Hashable {
+struct ChartItem: Hashable, Sendable {
 	let id: String
 	let rank: Int
 	let title: String

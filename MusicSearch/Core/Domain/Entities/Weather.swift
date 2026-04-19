@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum WeatherCondition {
+enum WeatherCondition: Sendable {
 	case thunderstorm
 	case drizzle
 	case rain
