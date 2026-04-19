@@ -22,50 +22,12 @@ final class FetchSimilarTrackUseCaseImpl: FetchSimilarTracksUseCase {
 
 	public func execute(targetTrack: Track) async throws -> [Track] {
 		let tracks = try await self.trackRepository.fetchSimilarTracks(to: targetTrack)
-		return await self.updateTracksWithDetails(tracks)
+		return await self.enrichTrackInfo(for: tracks)
 	}
 
-	private func updateTracksWithDetails(_ tracks: [Track]) async -> [Track] {
-		guard !tracks.isEmpty else { return [] }
-
-		var updated = tracks
-
-		await withTaskGroup(of: (Int, Track?).self) { group in
-			var iterator = tracks.enumerated().makeIterator()
-
-			let initialCount = min(self.maxConcurrentInfoRequests, tracks.count)
-			for _ in 0..<initialCount {
-				guard let next = iterator.next() else { break }
-				group.addTask {
-					do {
-						let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
-						return (next.offset, enriched)
-					} catch {
-						print("Failed to fetch track info for \(next.element.title): \(error)")
-						return (next.offset, nil)
-					}
-				}
-			}
-
-			while let (index, enriched) = await group.next() {
-				if let enriched = enriched {
-					updated[index] = enriched
-				}
-
-				if let next = iterator.next() {
-					group.addTask {
-						do {
-							let enriched = try await self.trackRepository.fetchTrackInfo(for: next.element)
-							return (next.offset, enriched)
-						} catch {
-							print("Failed to fetch track info for \(next.element.title): \(error)")
-							return (next.offset, nil)
-						}
-					}
-				}
-			}
+	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
+		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
+			try await self.trackRepository.fetchTrackInfo(for: track)
 		}
-
-		return updated
 	}
 }

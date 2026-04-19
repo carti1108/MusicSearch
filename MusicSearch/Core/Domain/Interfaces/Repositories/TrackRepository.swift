@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol TrackRepository {
+protocol TrackRepository: Sendable {
 	func searchTracks(
 		query: String,
 		limit: Int,

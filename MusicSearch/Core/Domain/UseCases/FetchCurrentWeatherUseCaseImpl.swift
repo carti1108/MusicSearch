@@ -22,12 +22,10 @@ struct FetchCurrentWeatherUseCaseImpl: FetchCurrentWeatherUseCase {
 	}
 
 	func execute() async throws -> Weather {
-		let (latitude, longitude) = try await self.locationRepository.fetchCurrentLocation()
-		let weather = try await self.weatherRepository.fetchCurrentWeather(
-			latitude: latitude,
-			longitude: longitude
+		let location = try await self.locationRepository.fetchCurrentLocation()
+		return try await self.weatherRepository.fetchCurrentWeather(
+			latitude: location.latitude,
+			longitude: location.longitude
 		)
-
-		return weather
 	}
 }

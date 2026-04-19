@@ -9,6 +9,11 @@ import Foundation
 
 actor SpotifyAppRepository: MusicAppRepository {
 
+	private struct SearchRequest {
+		let query: String
+		let type: String
+	}
+
 	private let clientId: String
 	private let clientSecret: String
 	private var accessToken: String?
@@ -37,11 +42,10 @@ actor SpotifyAppRepository: MusicAppRepository {
 
 	private func searchAndGetURL(query: String, type: String) async -> URL? {
 		do {
-			let urlString = try await self.searchWithRetry(query: query, type: type)
-			return URL(string: urlString)
+			let request = SearchRequest(query: query, type: type)
+			let urlString = try await self.searchWithRetry(query: request.query, type: request.type)
+			return try self.makeURL(from: urlString)
 		} catch {
-			print("SpotifyService Error: \(error)")
-
 			return self.fallbackWebURL(query: query)
 		}
 	}
@@ -123,12 +127,18 @@ actor SpotifyAppRepository: MusicAppRepository {
 	}
 
 	private func convertToWebURL(uri: String) throws -> String {
-
 		let components = uri.components(separatedBy: ":")
 		guard components.count == 3 else { throw SpotifyRepositoryError.invalidURI }
 		let type = components[1]
 		let id = components[2]
 		return "https://open.spotify.com/\(type)/\(id)"
+	}
+
+	private func makeURL(from urlString: String) throws -> URL {
+		guard let url = URL(string: urlString) else {
+			throw SpotifyRepositoryError.invalidURL
+		}
+		return url
 	}
 
 	private var isTokenValid: Bool {

@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-final class TrackRepositoryImpl: TrackRepository {
+final class TrackRepositoryImpl: TrackRepository, @unchecked Sendable {
 
 	private let networkManager: NetworkRequesting
 
@@ -21,58 +21,49 @@ final class TrackRepositoryImpl: TrackRepository {
 		limit: Int,
 		page: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
-		let response = try await self.networkManager.perform(
+		self.makeSearchResult(from: try await self.networkManager.perform(
 			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
 			as: TrackSearchResponseDTO.self
-		)
-
-		let tracks = response.results.trackmatches.track.map { $0.toDomain() }
-		let totalResults = Int(response.results.totalResults) ?? 0
-
-		return (tracks, totalResults)
+		))
 	}
 
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
-		let response = try await self.networkManager.perform(
+		let response: TagTopTracksResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.fetchTopTracks(tag: tag),
 			as: TagTopTracksResponseDTO.self
 		)
-
 		return response.tracks.track.map { $0.toDomain() }
 	}
 
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
-		let response = try await self.networkManager.perform(
+		let response: TrackSimilarResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.fetchSimilarTracks(track: track),
 			as: TrackSimilarResponseDTO.self
 		)
-
 		return response.similartracks.track.map { $0.toDomain() }
 	}
 
 	func fetchTrackInfo(for track: Track) async throws -> Track {
-		let trackInfoResponse = try await self.networkManager.perform(
+		let response: TrackInfoResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.getTrackInfo(track: track),
 			as: TrackInfoResponseDTO.self
 		)
+		return self.merge(track: track, with: response)
+	}
 
-		guard let album = trackInfoResponse.track.album,
-			  let images = album.image else {
-			return Track(
-				id: track.id,
-				mbid: track.mbid,
-				title: track.title,
-				artist: track.artist,
-				imageURL: nil
-			)
-		}
+	private func makeSearchResult(
+		from response: TrackSearchResponseDTO
+	) -> (tracks: [Track], totalResults: Int) {
+		(
+			tracks: response.results.trackmatches.track.map { $0.toDomain() },
+			totalResults: Int(response.results.totalResults) ?? 0
+		)
+	}
 
-		let imageString = images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
-					   ?? images.first { !$0.text.isEmpty }?.text
-
-		let imageURL = imageString
-			.flatMap { URL(string: $0) }?
-			.forcedHTTPS
+	private func merge(track: Track, with response: TrackInfoResponseDTO) -> Track {
+		let imageURL = response.track.album?
+			.image
+			.flatMap(self.makeImageURL(from:))
 
 		return Track(
 			id: track.id,
@@ -81,5 +72,14 @@ final class TrackRepositoryImpl: TrackRepository {
 			artist: track.artist,
 			imageURL: imageURL
 		)
+	}
+
+	private func makeImageURL(from images: [LastFMImageDTO]) -> URL? {
+		(
+			images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
+			?? images.first { !$0.text.isEmpty }?.text
+		)
+		.flatMap(URL.init(string:))?
+		.forcedHTTPS
 	}
 }

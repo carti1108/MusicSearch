@@ -12,7 +12,6 @@ public protocol FetchMusicForWeatherUseCase {
 }
 
 struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
-
 	private let fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
 	private let fetchTracksByTagUseCase: FetchTracksByTagUseCase
 	private let tagMapper: WeatherTagMapper
@@ -32,6 +31,10 @@ struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
 		let tag = self.tagMapper.map(condition: weather.condition)
 		let tracks = try await self.fetchTracksByTagUseCase.execute(tag: tag)
 
-		return .init(weather: weather, moodTag: tag, tracks: tracks)
+		return .init(
+			weather: weather,
+			moodTag: tag,
+			tracks: tracks
+		)
 	}
 }
