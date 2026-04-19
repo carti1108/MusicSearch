@@ -1,6 +1,6 @@
 # MusicSearch 🎵
 
-**MusicSearch**는 사용자가 음악을 검색하고, 차트를 확인하며, 현재 날씨에 어울리는 추천 음악을 받을 수 있는 iOS 애플리케이션입니다.
+**MusicSearch** — 음악 검색·차트·날씨 기반 추천 iOS 앱.
 
 ---
 
@@ -16,17 +16,18 @@
 ```
 MusicSearch
 ├── App
-│   ├── Resources       # Assets, Info.plist
-│   └── Sources         # AppDelegate, SceneDelegate
+│   ├── Resources                   # Assets, Info.plist
+│   └── Sources                     # AppDelegate, SceneDelegate, AppComponent, AppRoot
 ├── Core
-│   ├── Domain          # UseCases, Entities, Interfaces
-│   ├── Data            # Repositories, DTOs, Network
-│   ├── Presentation    # Common UI Components
-│   └── Util            # Extensions, Constants
+│   ├── Domain                      # UseCases, Entities, Interfaces
+│   ├── Data                        # Repositories, DTOs, Network
+│   ├── DependencyInjection         # Component, Dependency 프로토콜
+│   ├── Presentation                # Common UI Protocols (MusicAppRouting)
+│   └── Util                        # Extensions, ReuseIdentifiable, ErrorPresentable
 └── Features
-    ├── Digging         # Music Digging Feature
-    ├── Home            # Home Screen Feature
-    └── Trend           # Chart & Trend Feature
+    ├── Digging                     # 트랙 검색 및 유사 트랙 탐색 Feature
+    ├── Home                        # 날씨 기반 음악 추천 Feature
+    └── Trend                       # 차트 Feature
 ```
 
 ---
@@ -46,113 +47,60 @@ MusicSearch
 
 ---
 
-## 🏗️ 아키텍처 (Architecture)
+## 🚀 기술 구현 (Implementation)
 
-### 1. Dependency Injection (DI)
-`Component`와 `Dependency` 프로토콜을 기반으로 외부 라이브러리 없이 의존성을 관리합니다.
+### 1. 아키텍처
 
-<details>
-<summary><b>상세 내용 보기 (View Details)</b></summary>
+#### Clean Architecture
+- **Core/Domain** — `UseCase`, `Entity`, `Repository Interface`. 비즈니스 규칙이 UIKit·네트워크 구현에 직접 의존하지 않도록 분리.
+- **Core/Data** — 외부 API 응답을 DTO로 수신 후 Domain Entity로 변환. 저장/조회는 Repository 구현체가 담당.
+- **Features** — 데이터 요청은 UseCase 경로만 사용. ViewModel은 API 스펙·DTO 구조를 몰라도 됨.
 
-* **Component (Factory)**: 객체 생성을 담당하며, 필요한 의존성을 주입하여 인스턴스(VC, ViewModel, Coordinator)를 생성합니다.
-* **Dependency (Protocol)**: 각 기능(Feature)이 필요로 하는 의존성(UseCase, Repository 등)을 추상화하여 정의합니다.
-* **AppComponent**: 앱의 최상위 컨테이너로, 모든 Feature Dependency를 구현하여 구체적인 의존성을 제공합니다.
-
-**DiggingDependency.swift (Protocol)**
 ```swift
-protocol DiggingDependency: Dependency {
-    var searchTracksUseCase: SearchTracksUseCase { get }
-    var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
-}
-```
+// FetchMusicForWeatherUseCaseImpl.swift
+struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
+    private let fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
+    private let fetchTracksByTagUseCase: FetchTracksByTagUseCase
 
-**DiggingComponent.swift (Factory)**
-```swift
-final class DiggingComponent<T: DiggingDependency>: Component {
-    // ...
-    func makeMusicDiggingViewController(seedTrack: Track) -> MusicDiggingViewController {
-        // ViewModel 생성 시 UseCase 주입
-        let viewModel = self.makeMusicDiggingViewModel(
-            seedTrack: seedTrack, 
-            fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase
-        )
-        return MusicDiggingViewController(viewModel: viewModel)
-    }
-}
-```
-</details>
-
-### 2. Coordinator Pattern
-화면 전환 로직을 `ViewController`로부터 완전히 분리하였습니다.
-
-<details>
-<summary><b>코드 보기 (View Code)</b></summary>
-
-**Coordinating.swift (Protocol + Base Class)**
-```swift
-@MainActor
-protocol Coordinating: AnyObject {
-    var navigationController: UINavigationController { get set }
-    var childCoordinators: [Coordinating] { get set }
-    func start()
-}
-
-@MainActor
-class Coordinator: Coordinating {
-    var navigationController: UINavigationController
-    var childCoordinators: [Coordinating] = []
-
-    init(navigationController: UINavigationController) {
-        self.navigationController = navigationController
-    }
-
-    func start() {
-        fatalError("start() must be overridden by subclasses")
+    func execute() async throws -> WeatherMusicCuration {
+        let weather = try await self.fetchCurrentWeatherUseCase.execute()
+        let moodTag = WeatherTagMapper.tag(for: weather.condition)
+        let tracks = try await self.fetchTracksByTagUseCase.execute(tag: moodTag)
+        return WeatherMusicCuration(weather: weather, moodTag: moodTag, tracks: tracks)
     }
 }
 ```
 
-**TrackSearchViewCoordinator.swift (Implementation)**
 ```swift
-final class TrackSearchViewCoordinator: Coordinator {
-    // ...
+// TrackRepositoryImpl.swift
+func searchTracks(
+    query: String,
+    limit: Int,
+    page: Int
+) async throws -> (tracks: [Track], totalResults: Int) {
+    let response = try await self.networkManager.perform(
+        with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
+        as: TrackSearchResponseDTO.self
+    )
 
-    init(navigationController: UINavigationController, component: DiggingComponent) {
-        self.component = component
-        super.init(navigationController: navigationController)
-    }
-
-    override func start() {
-        let vc = self.component.makeTrackSearchViewController(coordinator: self)
-        self.navigationController.setViewControllers([vc], animated: false)
-    }
-
-    // 화면 전환 요청 처리
-    func didSelect(_ track: Track) {
-        let diggingCoordinator = MusicDiggingViewCoordinator(
-            navigationController: self.navigationController,
-            component: self.component,
-            seedTrack: track
-        )
-        diggingCoordinator.start()
-    }
+    let tracks = response.results.trackmatches.track.map { $0.toDomain() }
+    let totalResults = Int(response.results.totalResults) ?? 0
+    return (tracks, totalResults)
 }
 ```
-</details>
 
-### 3. MVVM-C Communication (`Viewable` / `Listener`)
-View와 ViewModel은 서로의 concrete type을 모르고, 프로토콜을 통해 통신합니다.
+#### MVVM-C
+- ViewController → 사용자 입력은 `Listener`로 전달. ViewModel → 화면 상태 갱신은 `Viewable`.
+- ViewModel은 네비게이션 직수행 없음. `CoordinatorAction`에만 의존.
+- View / ViewModel / Coordinator 책임 분리 → 테스트 용이·화면 전환 유연.
 
-<details>
-<summary><b>코드 보기 (View Code)</b></summary>
-
-**TrackSearchViewModel.swift**
 ```swift
 @MainActor
 protocol TrackSearchViewableListener: AnyObject {
     func didUpdateSearchText(_ keyword: String)
     func didTapRetry()
     func didSelectTrack(_ track: Track)
+    func didReachListBottom()
 }
 
 @MainActor
@@ -163,80 +111,41 @@ protocol TrackSearchViewable: AnyObject {
     func showError(_ message: String?)
 }
 
-final class TrackSearchViewModel: TrackSearchViewableListener {
-    var view: TrackSearchViewable?
-    weak var coordinator: TrackSearchViewCoordinatorAction?
-    private let searchTracksUseCase: SearchTracksUseCase
+@MainActor
+protocol TrackSearchViewCoordinatorAction: AnyObject {
+    func didSelect(_ track: Track)
+}
+```
 
-    init(
-        view: TrackSearchViewable,
-        searchTracksUseCase: SearchTracksUseCase
-    ) {
-        self.view = view
-        self.searchTracksUseCase = searchTracksUseCase
-        self.view?.listener = self
+### 2. 화면 전환 구현
+
+- **AppRoot** — 탭바 구성. 탭마다 독립 Coordinator 시작.
+- **TrackSearchViewCoordinator** — 검색 화면을 루트로 세팅. 트랙 선택 시 `MusicDiggingViewCoordinator` push.
+- 외부 음악 앱 연결 — `MusicAppRouting`으로 추상화. Coordinator·ViewModel은 URL 구성 세부를 몰라도 됨.
+
+```swift
+final class TrackSearchViewCoordinator<T: DiggingDependency>: Coordinator, TrackSearchViewCoordinatorAction {
+    private let component: DiggingComponent<T>
+
+    override func start() {
+        let vc = TrackSearchViewController()
+        let viewModel = self.component.makeTrackSearchViewModel(view: vc)
+        viewModel.coordinator = self
+        self.navigationController.setViewControllers([vc], animated: false)
+    }
+
+    func didSelect(_ track: Track) {
+        let diggingCoordinator = MusicDiggingViewCoordinator(
+            navigationController: self.navigationController,
+            component: self.component,
+            seedTrack: track
+        )
+        self.addChild(diggingCoordinator)
+        diggingCoordinator.start()
     }
 }
 ```
-</details>
 
----
-
-## 🚀 주요 기능 및 구현 (Implementation)
-
-### 검색 방식(Debounce)
-**Combine**의 `debounce` 연산자를 사용하여 사용자 입력에 반응하면서도 과도한 API 호출을 방지합니다.
-
-<details>
-<summary><b>코드 보기 (View Code)</b></summary>
-
-**TrackSearchViewModel.swift**
-```swift
-private func bindSearchInput() {
-    self.searchSubject
-        .debounce(for: .seconds(self.debounceSeconds), scheduler: RunLoop.main)
-        .removeDuplicates()
-        .sink { [weak self] keyword in
-            self?.performSearch(keyword: keyword)
-        }
-        .store(in: &self.cancellables)
-}
-```
-</details>
-
-### 무한 스크롤 (Pagination)
-
-<details>
-<summary><b>코드 보기 (View Code)</b></summary>
-
-**TrackSearchViewModel.swift**
-```swift
-private func loadMore() {
-    // 중복 로딩 방지 및 마지막 페이지 체크
-    guard self.state.canLoadMore, let keyword = self.lastKeyword else { return }
-    
-    let nextPage = self.state.currentPage + 1
-    
-    Task {
-        self.state.isLoadingMore = true
-        // 다음 페이지 요청
-        let result = try await self.searchTracksUseCase.execute(query: keyword, limit: self.limit, page: nextPage)
-        // 결과 추가
-        self.state.tracks.append(contentsOf: result.tracks)
-        self.state.currentPage = nextPage
-        self.state.isLoadingMore = false
-    }
-}
-```
-</details>
-
-### 딥링크 (Deep Linking)
-음악 앱 연동을 추상화했습니다. Spotify API를 통해 딥링크를 가져오고, 앱이 없으면 웹 플레이어로 폴백합니다.
-
-<details>
-<summary><b>코드 보기 (View Code)</b></summary>
-
-**MusicAppRouting.swift**
 ```swift
 protocol MusicAppRouting: AnyObject {
     var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
@@ -254,18 +163,242 @@ extension MusicAppRouting {
 }
 ```
 
-**SpotifyAppRepository.swift**
+### 3. 데이터 흐름 및 비동기 처리
+
+- 데이터 경로 — `ViewModel → UseCase → Repository → API/DTO → Domain Entity`.
+- 비동기 기본 — `Swift Concurrency(async/await)`. 네트워크·UseCase·Repository 조회·병렬·취소는 `Task`, `TaskGroup`, `actor` 중심.
+- **Combine** — 검색어 입력 등 시간에 따라 이어지는 이벤트 스트림만. `debounce`, `removeDuplicates` 등 입력 제어는 UI 계층에만. Domain/Data로는 전파하지 않음.
+- 기준 — 단발 요청·단발 응답은 Swift Concurrency, 시간에 따라 흘러오는 값의 가공은 Combine.
+- 검색 페이지네이션 — `isLoading`, `isLoadingMore`, `loadingPage`로 중복 요청 방지.
+- 트랙 상세 보강 — `withTaskGroup` 병렬. 개별 실패 시에도 전체 실패 없이 원본 유지.
+
 ```swift
-func fetchDeepLink(for track: Track) async -> URL? {
-    do {
-        let token = try await self.getAccessToken()
-        let query = "\(track.title) \(track.artist)"
-        let urlString = try await self.search(query: query, type: "track", token: token)
-        return URL(string: urlString)
-    } catch {
-        // 에러 시 검색 페이지로 폴백
-        return self.fallbackWebURL(query: query)
+private func bindSearchInput() {
+    self.searchSubject
+        .debounce(for: .seconds(self.debounceSeconds), scheduler: RunLoop.main)
+        .removeDuplicates()
+        .sink { [weak self] keyword in
+            self?.performSearch(keyword: keyword)
+        }
+        .store(in: &self.cancellables)
+}
+```
+
+```swift
+private var canLoadMore: Bool {
+    !self.isLoading && !self.isLoadingMore && self.currentTracks.count < self.totalResults
+}
+```
+
+```swift
+private func updateTracksWithDetails(_ tracks: [Track]) async -> [Track] {
+    guard !tracks.isEmpty else { return [] }
+
+    var updated = tracks
+
+    await withTaskGroup(of: (Int, Track?).self) { group in
+        for (index, track) in tracks.enumerated() {
+            group.addTask {
+                do {
+                    let enriched = try await self.trackRepository.fetchTrackInfo(for: track)
+                    return (index, enriched)
+                } catch {
+                    return (index, nil)
+                }
+            }
+        }
+
+        while let (index, enriched) = await group.next() {
+            if let enriched {
+                updated[index] = enriched
+            }
+        }
+    }
+
+    return updated
+}
+```
+
+### 4. 에러 핸들링 및 비동기 규칙
+
+- 동기 작업 중 발생하는 에러는 `throws`를 사용.
+- 비동기 작업 중 발생하는 에러는 `async throws`를 사용.
+- `Result`는 성공/실패 상태를 저장하거나 전달해야 할 때만 사용.
+- UI 계층에서는 화면 복잡도에 따라 `Result`, `Optional`, 상태 프로퍼티 중 가장 단순한 형태를 선택.
+
+### 5. 의존성 주입
+
+- 외부 DI 프레임워크 없음. `Component` / `Dependency` 프로토콜 조합으로 조립.
+- **AppComponent** — 앱 공통 의존성 소유. Feature Component는 필요한 UseCase만 받아 ViewModel·Coordinator 생성.
+- 테스트 — mock use case / repository 주입 용이.
+
+```swift
+protocol DiggingDependency: Dependency {
+    var searchTracksUseCase: SearchTracksUseCase { get }
+    var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
+    var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
+    var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+}
+```
+
+```swift
+final class DiggingComponent<T: DiggingDependency>: Component {
+    typealias DependencyType = T
+    private let dependency: T
+
+    init(dependency: T) {
+        self.dependency = dependency
+    }
+
+    @MainActor
+    func makeTrackSearchViewModel(view: TrackSearchViewable) -> TrackSearchViewModel {
+        TrackSearchViewModel(
+            view: view,
+            searchTracksUseCase: self.dependency.searchTracksUseCase
+        )
     }
 }
 ```
-</details>
+
+### 6. 테스팅
+
+- 단위 테스트 — `Repository`, `UseCase`, `ViewModel` 중심. 비즈니스 로직·상태 전이 우선.
+- **MusicSearchTests/TestSupport** — `MockRepositories`, `MockUseCases`, `ViewSpies`, `AsyncTestHelper`, `TestDataFactory`로 테스트 더블 공용화.
+- ViewModel 테스트 — loading, error, update, pagination, retry, selection 등 상태 전이. UseCase 테스트 — 성공/실패 전파·fallback.
+
+```swift
+@MainActor
+final class SpyTrackSearchView: TrackSearchViewable {
+    var listener: TrackSearchViewableListener?
+    var updatedTracksHistory: [[Track]] = []
+    var loadingStates: [Bool] = []
+    var errorMessages: [String?] = []
+
+    func updateTracks(_ tracks: [Track]) {
+        self.updatedTracksHistory.append(tracks)
+    }
+
+    func showLoading(_ isShow: Bool) {
+        self.loadingStates.append(isShow)
+    }
+
+    func showError(_ message: String?) {
+        self.errorMessages.append(message)
+    }
+}
+```
+
+```swift
+@MainActor
+struct TrackSearchViewModelTests {
+    @Test("트랙 검색 뷰모델이 더 불러오기가 가능할 때 다음 페이지를 이어붙이는지 확인")
+    func given_다음페이지가존재할때_didReachListBottom하면_다음페이지결과를이어붙이는지() async throws {
+        // given
+        // when
+        // then
+    }
+}
+```
+
+---
+
+## 🔧 트러블 슈팅 (Troubleshooting)
+
+### 1. Spacer View로 셀 내부 여백 안정화
+
+#### 문제
+`TrackCarouselCell`에서 곡 제목이 1줄일 때, 이미지와 텍스트 사이 간격이 과하게 벌어져 카드 내부 균형이 무너지는 문제 발생.
+
+#### 원인
+`UIStackView`를 `distribution = .equalSpacing`으로 두면 남는 높이가 요소들 사이에 균등하게 분배되어, 콘텐츠 길이에 따라 spacing이 달라졌기 때문.
+
+#### 구현
+스택뷰 `distribution = .fill`. 마지막 arranged subview로 `spacerView` 추가 — 잉여 공간은 하단에서만 흡수.
+
+**TrackCarouselCell.swift**
+```swift
+private let mainStackView: UIStackView = {
+    let stack = UIStackView()
+    stack.axis = .vertical
+    stack.spacing = 10
+    stack.alignment = .fill
+    stack.distribution = .fill
+    stack.translatesAutoresizingMaskIntoConstraints = false
+    return stack
+}()
+
+private let spacerView: UIView = {
+    let view = UIView()
+    view.backgroundColor = .clear
+    view.setContentHuggingPriority(.defaultLow, for: .vertical)
+    view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+    return view
+}()
+
+private func setupUI() {
+    self.contentView.addSubview(self.cardView)
+    self.cardView.addSubview(self.mainStackView)
+
+    self.mainStackView.addArrangedSubview(self.albumImageView)
+    self.mainStackView.addArrangedSubview(self.titleLabel)
+    self.mainStackView.addArrangedSubview(self.artistLabel)
+    self.mainStackView.addArrangedSubview(self.spacerView)
+}
+```
+
+#### 결과
+1줄·2줄 모두 이미지–제목–아티스트 spacing 일정. 잉여는 `spacerView`가 흡수.
+
+### 2. 첫 스크롤 시 셀 깜빡임 방지
+
+#### 문제
+Crossfade 적용 후 첫 스크롤·bounce 순간 리스트 셀 번쩍임. 이후 스크롤은 상대적으로 자연스러움.
+
+#### 원인
+첫 스크롤 시점에는 셀 재사용, 레이아웃 갱신, 초기 상태 적용이 겹치기 쉬웠고, `UICollectionViewCell` 자체 속성을 직접 조작하면 레이아웃 엔진의 기본 속성 초기화와 충돌할 가능성이 있음.
+
+#### 구현
+`willDisplay` — 신규 셀에도 현재 progress 즉시 적용. 초기 진입 전 `layoutIfNeeded()` 한 번 후 crossfade 상태 고정.  
+애니메이션 타겟 — `cell`이 아닌 `cell.contentView`로 이동. 레이아웃 속성 초기화와의 충돌 완화.
+
+**ChartViewController.swift**
+```swift
+func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    let progress = self.calculateScrollProgress()
+    self.applyEffect(to: cell, at: indexPath, progress: progress)
+}
+
+private func primeInitialCrossfadeIfNeeded(force: Bool = false) {
+    guard force || !self.hasPrimedInitialCrossfade else { return }
+    guard self.collectionView.bounds.width > 0, self.collectionView.bounds.height > 0 else { return }
+
+    self.collectionView.layoutIfNeeded()
+    self.applyCrossfadeEffects()
+    self.hasPrimedInitialCrossfade = true
+}
+
+func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+    self.primeInitialCrossfadeIfNeeded(force: true)
+}
+```
+
+```swift
+private func applyEffect(to cell: UICollectionViewCell, at indexPath: IndexPath, progress: CGFloat) {
+    let offsetY = max(0, self.collectionView.contentOffset.y)
+
+    if indexPath.section == Section.podium.rawValue {
+        let alpha = 1.0 - progress
+        let transformY = offsetY > 0 ? offsetY * 0.45 : 0
+        cell.contentView.alpha = alpha
+        cell.contentView.transform = CGAffineTransform(translationX: 0, y: transformY)
+    } else if indexPath.section == Section.list.rawValue {
+        let alpha = progress
+        let transformY = 36 * (1.0 - progress)
+        cell.contentView.alpha = alpha
+        cell.contentView.transform = CGAffineTransform(translationX: 0, y: transformY)
+    }
+}
+```
+
+#### 결과
+첫 스크롤 시 번쩍임·기본 상태 복귀 감소. 초기 전환 일관성 개선.
