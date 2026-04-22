@@ -32,7 +32,7 @@ final class LocationRepositoryImpl: LocationRepository {
 	private let timeout: TimeInterval
 
 	init(
-		locationManager: LocationManaging = CLLocationManager(),
+		locationManager: LocationManaging,
 		timeout: TimeInterval = 10.0
 	) {
 		self.locationManager = locationManager
