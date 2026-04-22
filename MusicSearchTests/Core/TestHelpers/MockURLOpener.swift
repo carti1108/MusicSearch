@@ -8,10 +8,10 @@
 import Foundation
 @testable import MusicSearch
 
-@MainActor
 final class MockURLOpener: URLOpening {
 	var openedURLs: [URL] = []
 
+	@MainActor
 	func open(_ url: URL) {
 		self.openedURLs.append(url)
 	}

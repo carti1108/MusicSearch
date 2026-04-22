@@ -8,6 +8,7 @@
 import UIKit
 import MicroRIBs
 
+@MainActor
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 	var window: UIWindow?

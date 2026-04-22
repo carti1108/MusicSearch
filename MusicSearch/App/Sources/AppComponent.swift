@@ -9,6 +9,7 @@ import Foundation
 import NetworkLayer
 import CoreLocation
 
+@MainActor
 final class AppComponent {
 
 	let networkManager: NetworkRequesting
