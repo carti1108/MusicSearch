@@ -112,7 +112,7 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	private func openMusicApp(for track: Track) {
 		Task {
 			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			await self.urlOpener.open(url)
+			self.urlOpener.open(url)
 		}
 	}
 }
