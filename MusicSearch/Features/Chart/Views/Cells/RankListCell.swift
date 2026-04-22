@@ -106,17 +106,13 @@ final class RankListCell: UICollectionViewCell {
 
 		self.imageView.kf.cancelDownloadTask()
 		self.imageView.image = nil
-		let placeholder = UIImage(
-			systemName: item.type == .artists ? "music.mic" : "music.note",
-			withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-		)
 		if let url = item.imageURL {
 			let targetSize = CGSize(width: 40, height: 40)
 			let processor = DownsamplingImageProcessor(size: targetSize)
 			self.imageView.contentMode = .scaleAspectFill
 			self.imageView.kf.setImage(
 				with: url,
-				placeholder: placeholder,
+				placeholder: nil,
 				options: [
 					.processor(processor),
 					.scaleFactor(UIScreen.main.scale),
@@ -124,9 +120,8 @@ final class RankListCell: UICollectionViewCell {
 				]
 			)
 		} else {
-			self.imageView.contentMode = .scaleAspectFit
-			self.imageView.image = placeholder
-			self.imageView.tintColor = UIColor.white.withAlphaComponent(0.78)
+			self.imageView.contentMode = .scaleAspectFill
+			self.imageView.image = nil
 		}
 
 		self.imageView.layer.cornerRadius = (item.type == .artists) ? 20 : 8

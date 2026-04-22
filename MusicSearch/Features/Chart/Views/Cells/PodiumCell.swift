@@ -119,10 +119,6 @@ final class PodiumCell: UICollectionViewCell {
 
 		self.imageView.kf.cancelDownloadTask()
 		self.imageView.image = nil
-		let placeholder = UIImage(
-			systemName: item.type == .artists ? "music.mic" : "music.note",
-			withConfiguration: UIImage.SymbolConfiguration(pointSize: 34, weight: .medium)
-		)
 		if let url = item.imageURL {
 			let processor = DownsamplingImageProcessor(
 				size: self.imageView.bounds.size == .zero
@@ -132,7 +128,7 @@ final class PodiumCell: UICollectionViewCell {
 			self.imageView.contentMode = .scaleAspectFill
 			self.imageView.kf.setImage(
 				with: url,
-				placeholder: placeholder,
+				placeholder: nil,
 				options: [
 					.processor(processor),
 					.scaleFactor(UIScreen.main.scale),
@@ -140,9 +136,8 @@ final class PodiumCell: UICollectionViewCell {
 				]
 			)
 		} else {
-			self.imageView.contentMode = .scaleAspectFit
-			self.imageView.image = placeholder
-			self.imageView.tintColor = UIColor.white.withAlphaComponent(0.82)
+			self.imageView.contentMode = .scaleAspectFill
+			self.imageView.image = nil
 		}
 
 		if item.rank == 1 {
