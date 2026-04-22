@@ -113,13 +113,15 @@ final class MockWeatherRecommendationListener: WeatherRecommendationListener {}
 final class MockWeatherRecommendationDependency: WeatherRecommendationDependency {
 	let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
 	let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	let urlOpener: URLOpening
 
 	init(
 		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.urlOpener = urlOpener
 	}
 }
-

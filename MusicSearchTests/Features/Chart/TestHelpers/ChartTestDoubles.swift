@@ -108,15 +108,17 @@ final class MockChartDependency: ChartDependency {
 	let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
 	let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	let urlOpener: URLOpening
 
 	init(
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.urlOpener = urlOpener
 	}
 }
-

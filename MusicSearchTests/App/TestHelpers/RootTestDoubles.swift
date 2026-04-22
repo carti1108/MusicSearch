@@ -188,6 +188,7 @@ final class MockRootDependency: RootDependency {
 	let fetchSimilarTrackUseCase: FetchSimilarTracksUseCase
 	let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
+	let urlOpener: URLOpening
 
 	init(
 		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase,
@@ -196,7 +197,8 @@ final class MockRootDependency: RootDependency {
 		fetchTracksByTagUseCase: FetchTracksByTagUseCase,
 		fetchSimilarTrackUseCase: FetchSimilarTracksUseCase,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
-		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
+		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
+		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
@@ -205,6 +207,6 @@ final class MockRootDependency: RootDependency {
 		self.fetchSimilarTrackUseCase = fetchSimilarTrackUseCase
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
+		self.urlOpener = urlOpener
 	}
 }
-
