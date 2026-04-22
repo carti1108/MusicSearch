@@ -10,12 +10,13 @@ import Foundation
 enum SpotifyAPI {
 	case token(clientId: String, clientSecret: String)
 	case search(query: String, type: String, token: String)
+	case artistSearch(query: String, token: String, limit: Int)
 
 	var url: URL {
 		switch self {
 		case .token:
 			return URL(string: "https://accounts.spotify.com/api/token")!
-		case .search:
+		case .search, .artistSearch:
 			return URL(string: "https://api.spotify.com/v1/search")!
 		}
 	}
@@ -24,7 +25,7 @@ enum SpotifyAPI {
 		switch self {
 		case .token:
 			return "POST"
-		case .search:
+		case .search, .artistSearch:
 			return "GET"
 		}
 	}
@@ -38,7 +39,7 @@ enum SpotifyAPI {
 				"Authorization": "Basic \(base64Credentials)",
 				"Content-Type": "application/x-www-form-urlencoded"
 			]
-		case .search(_, _, let token):
+		case .search(_, _, let token), .artistSearch(_, let token, _):
 			return [
 				"Authorization": "Bearer \(token)"
 			]
@@ -49,7 +50,7 @@ enum SpotifyAPI {
 		switch self {
 		case .token:
 			return "grant_type=client_credentials".data(using: .utf8)
-		case .search:
+		case .search, .artistSearch:
 			return nil
 		}
 	}
@@ -63,6 +64,12 @@ enum SpotifyAPI {
 				URLQueryItem(name: "q", value: query),
 				URLQueryItem(name: "type", value: type),
 				URLQueryItem(name: "limit", value: "1")
+			]
+		case .artistSearch(let query, _, let limit):
+			return [
+				URLQueryItem(name: "q", value: query),
+				URLQueryItem(name: "type", value: "artist"),
+				URLQueryItem(name: "limit", value: "\(limit)")
 			]
 		}
 	}

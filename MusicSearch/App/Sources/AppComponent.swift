@@ -26,6 +26,17 @@ final class AppComponent {
 		FetchMusicAppDeepLinkUseCaseImpl(musicAppRepository: self.musicAppRepositoryInstance)
 	}()
 
+	private lazy var artistImageRepositoryInstance: ArtistImageRepository = {
+		SpotifyArtistImageRepository(
+			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
+			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+		)
+	}()
+
+	private lazy var fetchArtistImageURLUseCaseInstance: FetchArtistImageURLUseCase = {
+		FetchArtistImageURLUseCaseImpl(artistImageRepository: self.artistImageRepositoryInstance)
+	}()
+
 	var locationRepository: LocationRepository {
 		LocationRepositoryImpl(locationManager: self.locationManager)
 	}
@@ -44,6 +55,9 @@ final class AppComponent {
 	var musicAppRepository: MusicAppRepository {
 		self.musicAppRepositoryInstance
 	}
+	var artistImageRepository: ArtistImageRepository {
+		self.artistImageRepositoryInstance
+	}
 
 	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
 		FetchCurrentWeatherUseCaseImpl(
@@ -54,6 +68,9 @@ final class AppComponent {
 
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.fetchMusicAppDeepLinkUseCaseInstance
+	}
+	var fetchArtistImageURLUseCase: FetchArtistImageURLUseCase {
+		self.fetchArtistImageURLUseCaseInstance
 	}
 
 	init(
@@ -99,6 +116,11 @@ extension AppComponent: TrendDependency {
 	}
 
 	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase {
-		FetchChartTopArtistsUseCaseImpl(chartRepository: self.chartRepository)
+		FetchChartTopArtistsUseCaseImpl(
+			chartRepository: self.chartRepository,
+			artistImageEnrichmentService: ArtistImageEnrichmentServiceImpl(
+				fetchArtistImageURLUseCase: self.fetchArtistImageURLUseCase
+			)
+		)
 	}
 }

@@ -12,12 +12,19 @@ protocol FetchChartTopArtistsUseCase {
 struct FetchChartTopArtistsUseCaseImpl: FetchChartTopArtistsUseCase {
 
 	private let chartRepository: ChartRepository
+	private let artistImageEnrichmentService: ArtistImageEnrichmentService?
 
-	init(chartRepository: ChartRepository) {
+	init(
+		chartRepository: ChartRepository,
+		artistImageEnrichmentService: ArtistImageEnrichmentService? = nil
+	) {
 		self.chartRepository = chartRepository
+		self.artistImageEnrichmentService = artistImageEnrichmentService
 	}
 
 	func execute() async throws -> [Artist] {
-		try await self.chartRepository.fetchTopArtists()
+		let artists = try await self.chartRepository.fetchTopArtists()
+		guard let artistImageEnrichmentService else { return artists }
+		return await artistImageEnrichmentService.enrich(artists)
 	}
 }
