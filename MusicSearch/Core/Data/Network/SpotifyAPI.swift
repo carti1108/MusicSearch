@@ -31,6 +31,7 @@ struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
 enum SpotifyAPI {
 	case token(config: SpotifyAPIConfiguration)
 	case search(query: String, type: String, token: String, config: SpotifyAPIConfiguration)
+	case artistSearch(query: String, token: String, limit: Int, config: SpotifyAPIConfiguration)
 }
 
 extension SpotifyAPI: Requestable {
@@ -38,7 +39,7 @@ extension SpotifyAPI: Requestable {
 		switch self {
 		case .token(_):
 			return .memory
-		case .search(_, _, _, _):
+		case .search(_, _, _, _), .artistSearch(_, _, _, _):
 			return .memory
 		}
 	}
@@ -47,7 +48,7 @@ extension SpotifyAPI: Requestable {
 		switch self {
 		case .token(let config):
 			return URL(string: config.accountsBaseURL)!
-		case .search(_, _, _, let config):
+		case .search(_, _, _, let config), .artistSearch(_, _, _, let config):
 			return URL(string: config.apiBaseURL)!
 		}
 	}
@@ -56,7 +57,7 @@ extension SpotifyAPI: Requestable {
 		switch self {
 		case .token(_):
 			return "/api/token"
-		case .search(_, _, _, _):
+		case .search(_, _, _, _), .artistSearch(_, _, _, _):
 			return "/v1/search"
 		}
 	}
@@ -65,7 +66,7 @@ extension SpotifyAPI: Requestable {
 		switch self {
 		case .token(_):
 			return .post
-		case .search(_, _, _, _):
+		case .search(_, _, _, _), .artistSearch(_, _, _, _):
 			return .get
 		}
 	}
@@ -80,6 +81,10 @@ extension SpotifyAPI: Requestable {
 				.contentType: "application/x-www-form-urlencoded"
 			]
 		case .search(_, _, let token, _):
+			return [
+				.authorization: "Bearer \(token)"
+			]
+		case .artistSearch(_, let token, _, _):
 			return [
 				.authorization: "Bearer \(token)"
 			]
@@ -99,6 +104,15 @@ extension SpotifyAPI: Requestable {
 					"q": query,
 					"type": type,
 					"limit": "1"
+				],
+				encoding: URLQueryEncoder()
+			)
+		case .artistSearch(let query, _, let limit, _):
+			return .requestParameters(
+				parameters: [
+					"q": query,
+					"type": "artist",
+					"limit": "\(limit)"
 				],
 				encoding: URLQueryEncoder()
 			)
