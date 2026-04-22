@@ -10,11 +10,9 @@ import NetworkLayer
 
 actor SpotifyAppRepository: MusicAppRepository {
 
-	private let clientId: String
-	private let clientSecret: String
 	private var accessToken: String?
 	private var accessTokenExpiry: Date?
-	private let tokenRefreshLeeway: TimeInterval = 60
+	private let configuration: SpotifyAPIConfiguration
 	private let networkManager: NetworkRequesting
 
 	private enum SpotifyRepositoryError: Error {
@@ -23,9 +21,11 @@ actor SpotifyAppRepository: MusicAppRepository {
 		case invalidURI
 	}
 
-	init(clientId: String, clientSecret: String, networkManager: NetworkRequesting) {
-		self.clientId = clientId
-		self.clientSecret = clientSecret
+	init(
+		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
+		networkManager: NetworkRequesting
+	) {
+		self.configuration = configuration
 		self.networkManager = networkManager
 	}
 
@@ -75,7 +75,7 @@ actor SpotifyAppRepository: MusicAppRepository {
 			self.clearToken()
 		}
 
-		let api = SpotifyAPI.token(clientId: self.clientId, clientSecret: self.clientSecret)
+		let api = SpotifyAPI.token(config: self.configuration)
 		let tokenResponse = try await self.networkManager.perform(with: api, as: SpotifyTokenResponse.self)
 
 		self.accessToken = tokenResponse.access_token
@@ -84,7 +84,7 @@ actor SpotifyAppRepository: MusicAppRepository {
 	}
 
 	private func search(query: String, type: String, token: String) async throws -> String {
-		let api = SpotifyAPI.search(query: query, type: type, token: token)
+		let api = SpotifyAPI.search(query: query, type: type, token: token, config: self.configuration)
 
 		if type == "track" {
 			let result = try await self.networkManager.perform(with: api, as: SpotifyTrackSearchResponse.self)
@@ -113,7 +113,7 @@ actor SpotifyAppRepository: MusicAppRepository {
 
 	private var isTokenValid: Bool {
 		guard let expiry = self.accessTokenExpiry else { return false }
-		return Date().addingTimeInterval(self.tokenRefreshLeeway) < expiry
+		return Date().addingTimeInterval(self.configuration.tokenRefreshLeeway) < expiry
 	}
 
 	private func clearToken() {

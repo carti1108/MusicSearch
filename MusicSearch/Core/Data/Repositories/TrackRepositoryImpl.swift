@@ -11,9 +11,14 @@ import NetworkLayer
 final class TrackRepositoryImpl: TrackRepository {
 
 	private let networkManager: NetworkRequesting
+	private let lastFMConfiguration: LastFMAPIConfiguration
 
-	init(networkManager: NetworkRequesting) {
+	init(
+		networkManager: NetworkRequesting,
+		lastFMConfiguration: LastFMAPIConfiguration = DefaultLastFMAPIConfiguration()
+	) {
 		self.networkManager = networkManager
+		self.lastFMConfiguration = lastFMConfiguration
 	}
 
 	func searchTracks(
@@ -22,7 +27,12 @@ final class TrackRepositoryImpl: TrackRepository {
 		page: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
 		let response = try await self.networkManager.perform(
-			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
+			with: LastFMAPI.searchTracks(
+				keyword: query,
+				limit: limit,
+				page: page,
+				config: self.lastFMConfiguration
+			),
 			as: TrackSearchResponseDTO.self
 		)
 
@@ -34,7 +44,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
 		let response = try await self.networkManager.perform(
-			with: LastFMAPI.fetchTopTracks(tag: tag),
+			with: LastFMAPI.fetchTopTracks(tag: tag, config: self.lastFMConfiguration),
 			as: TagTopTracksResponseDTO.self
 		)
 
@@ -43,7 +53,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
 		let response = try await self.networkManager.perform(
-			with: LastFMAPI.fetchSimilarTracks(track: track),
+			with: LastFMAPI.fetchSimilarTracks(track: track, config: self.lastFMConfiguration),
 			as: TrackSimilarResponseDTO.self
 		)
 
@@ -52,7 +62,7 @@ final class TrackRepositoryImpl: TrackRepository {
 
 	func fetchTrackInfo(for track: Track) async throws -> Track {
 		let trackInfoResponse = try await self.networkManager.perform(
-			with: LastFMAPI.getTrackInfo(track: track),
+			with: LastFMAPI.getTrackInfo(track: track, config: self.lastFMConfiguration),
 			as: TrackInfoResponseDTO.self
 		)
 

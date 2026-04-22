@@ -14,11 +14,13 @@ final class AppComponent {
 	let networkManager: NetworkRequesting
 	let locationManager: LocationManaging
 	let weatherAPIConfiguration: WeatherAPIConfiguration
+	let lastFMAPIConfiguration: LastFMAPIConfiguration
+	let spotifyAPIConfiguration: SpotifyAPIConfiguration
+	let urlOpener: URLOpening
 
 	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
 		SpotifyAppRepository(
-			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
-			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? "",
+			configuration: self.spotifyAPIConfiguration,
 			networkManager: self.networkManager
 		)
 	}()
@@ -37,10 +39,16 @@ final class AppComponent {
 		)
 	}
 	var trackRepository: TrackRepository {
-		TrackRepositoryImpl(networkManager: self.networkManager)
+		TrackRepositoryImpl(
+			networkManager: self.networkManager,
+			lastFMConfiguration: self.lastFMAPIConfiguration
+		)
 	}
 	var chartRepository: ChartRepository {
-		ChartRepositoryImpl(networkManager: self.networkManager)
+		ChartRepositoryImpl(
+			networkManager: self.networkManager,
+			lastFMConfiguration: self.lastFMAPIConfiguration
+		)
 	}
 	var musicAppRepository: MusicAppRepository {
 		self.musicAppRepositoryInstance
@@ -60,11 +68,17 @@ final class AppComponent {
 	init(
 		networkManager: NetworkRequesting = NetworkManager.shared,
 		locationManager: LocationManaging = CLLocationManager(),
-		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration()
+		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration(),
+		lastFMAPIConfiguration: LastFMAPIConfiguration = DefaultLastFMAPIConfiguration(),
+		spotifyAPIConfiguration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
+		urlOpener: URLOpening = ApplicationURLOpener()
 	) {
 		self.networkManager = networkManager
 		self.locationManager = locationManager
 		self.weatherAPIConfiguration = weatherAPIConfiguration
+		self.lastFMAPIConfiguration = lastFMAPIConfiguration
+		self.spotifyAPIConfiguration = spotifyAPIConfiguration
+		self.urlOpener = urlOpener
 	}
 }
 

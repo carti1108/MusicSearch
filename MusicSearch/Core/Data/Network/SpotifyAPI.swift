@@ -8,58 +8,78 @@
 import Foundation
 import NetworkLayer
 
+protocol SpotifyAPIConfiguration {
+	var accountsBaseURL: String { get }
+	var apiBaseURL: String { get }
+	var clientId: String { get }
+	var clientSecret: String { get }
+	var tokenRefreshLeeway: TimeInterval { get }
+}
+
+struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
+	var accountsBaseURL: String { "https://accounts.spotify.com" }
+	var apiBaseURL: String { "https://api.spotify.com" }
+	var clientId: String {
+		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? ""
+	}
+	var clientSecret: String {
+		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+	}
+	var tokenRefreshLeeway: TimeInterval { 60 }
+}
+
 enum SpotifyAPI {
-	case token(clientId: String, clientSecret: String)
-	case search(query: String, type: String, token: String)
+	case token(config: SpotifyAPIConfiguration)
+	case search(query: String, type: String, token: String, config: SpotifyAPIConfiguration)
 }
 
 extension SpotifyAPI: Requestable {
 	var cachePolicy: CachePolicy {
 		switch self {
-		case .token:
+		case .token(_):
 			return .memory
-		case .search:
+		case .search(_, _, _, _):
 			return .memory
 		}
 	}
 
 	var baseURL: URL {
 		switch self {
-		case .token:
-			return URL(string: "https://accounts.spotify.com")!
-		case .search:
-			return URL(string: "https://api.spotify.com")!
+		case .token(let config):
+			return URL(string: config.accountsBaseURL)!
+		case .search(_, _, _, let config):
+			return URL(string: config.apiBaseURL)!
 		}
 	}
 
 	var path: String {
 		switch self {
-		case .token:
+		case .token(_):
 			return "/api/token"
-		case .search:
+		case .search(_, _, _, _):
 			return "/v1/search"
 		}
 	}
 
 	var method: HTTPMethod {
 		switch self {
-		case .token:
+		case .token(_):
 			return .post
-		case .search:
+		case .search(_, _, _, _):
 			return .get
 		}
 	}
 
 	var headers: [HTTPHeader.Field: String]? {
 		switch self {
-		case .token(let clientId, let clientSecret):
-			let credentialData = "\(clientId):\(clientSecret)".data(using: .utf8)!
+		case .token(let config):
+			let credentialData = "\(config.clientId):\(config.clientSecret)".data(using: .utf8)!
 			let base64Credentials = credentialData.base64EncodedString()
 			return [
 				.authorization: "Basic \(base64Credentials)",
 				.contentType: "application/x-www-form-urlencoded"
 			]
-		case .search(_, _, let token):
+		case .search(_, _, let token, _):
 			return [
 				.authorization: "Bearer \(token)"
 			]
@@ -68,12 +88,12 @@ extension SpotifyAPI: Requestable {
 
 	var task: RequestTask {
 		switch self {
-		case .token:
+		case .token(_):
 			return .requestParameters(
 				parameters: ["grant_type": "client_credentials"],
 				encoding: URLFormEncoder()
 			)
-		case .search(let query, let type, _):
+		case .search(let query, let type, _, _):
 			return .requestParameters(
 				parameters: [
 					"q": query,

@@ -11,14 +11,19 @@ import NetworkLayer
 final class ChartRepositoryImpl: ChartRepository {
 
 	private let networkManager: NetworkRequesting
+	private let lastFMConfiguration: LastFMAPIConfiguration
 
-	init(networkManager: NetworkRequesting) {
+	init(
+		networkManager: NetworkRequesting,
+		lastFMConfiguration: LastFMAPIConfiguration = DefaultLastFMAPIConfiguration()
+	) {
 		self.networkManager = networkManager
+		self.lastFMConfiguration = lastFMConfiguration
 	}
 
 	func fetchTopTracks() async throws -> [Track] {
 		let response = try await self.networkManager.perform(
-			with: LastFMAPI.getChartTopTracks,
+			with: LastFMAPI.getChartTopTracks(config: self.lastFMConfiguration),
 			as: ChartTopTracksResponseDTO.self
 		)
 
@@ -27,7 +32,7 @@ final class ChartRepositoryImpl: ChartRepository {
 
 	func fetchTopArtists() async throws -> [Artist] {
 		let response = try await self.networkManager.perform(
-			with: LastFMAPI.getChartTopArtists,
+			with: LastFMAPI.getChartTopArtists(config: self.lastFMConfiguration),
 			as: ChartTopArtistsResponseDTO.self
 		)
 
