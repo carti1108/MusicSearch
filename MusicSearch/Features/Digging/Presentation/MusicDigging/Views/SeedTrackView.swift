@@ -130,25 +130,20 @@ final class SeedTrackView: UIView {
 
 		self.albumImageView.kf.cancelDownloadTask()
 		self.albumImageView.image = nil
-		let placeholder = UIImage(
-			systemName: "music.note",
-			withConfiguration: UIImage.SymbolConfiguration(pointSize: 34, weight: .medium)
-		)
 
 		if let url = track.imageURL {
 			self.albumImageView.contentMode = .scaleAspectFill
 			self.albumImageView.kf.setImage(
 				with: url,
-				placeholder: placeholder,
+				placeholder: nil,
 				options: [
 					.transition(.fade(0.2)),
 					.cacheOriginalImage
 				]
 			)
 		} else {
-			self.albumImageView.contentMode = .scaleAspectFit
-			self.albumImageView.image = placeholder
-			self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.72)
+			self.albumImageView.contentMode = .scaleAspectFill
+			self.albumImageView.image = nil
 		}
 	}
 }

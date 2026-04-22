@@ -131,9 +131,8 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	override func prepareForReuse() {
 		super.prepareForReuse()
 		self.albumImageView.kf.cancelDownloadTask()
-		self.albumImageView.contentMode = .scaleAspectFit
+		self.albumImageView.contentMode = .scaleAspectFill
 		self.albumImageView.image = nil
-		self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.72)
 		self.titleLabel.text = nil
 		self.artistLabel.text = nil
 	}
@@ -145,25 +144,19 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		self.albumImageView.kf.cancelDownloadTask()
 		self.albumImageView.image = nil
 
-		let placeholder = UIImage(
-			systemName: "music.note",
-			withConfiguration: UIImage.SymbolConfiguration(pointSize: 28, weight: .medium)
-		)
-
 		if let url = track.imageURL {
 			self.albumImageView.contentMode = .scaleAspectFill
 			self.albumImageView.kf.setImage(
 				with: url,
-				placeholder: placeholder,
+				placeholder: nil,
 				options: [
 					.transition(.fade(0.2)),
 					.cacheOriginalImage
 				]
 			)
 		} else {
-			self.albumImageView.contentMode = .scaleAspectFit
-			self.albumImageView.image = placeholder
-			self.albumImageView.tintColor = UIColor.white.withAlphaComponent(0.72)
+			self.albumImageView.contentMode = .scaleAspectFill
+			self.albumImageView.image = nil
 		}
 	}
 }
