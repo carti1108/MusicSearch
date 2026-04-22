@@ -300,7 +300,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
 		self.navigationController?.navigationBar.standardAppearance = appearance
 		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
-		self.navigationItem.title = "Weather Recommendation"
+		self.navigationItem.title = "Home"
 
 		self.scrollView.refreshControl = self.refreshControl
 		self.view.addSubview(self.topGlowView)
