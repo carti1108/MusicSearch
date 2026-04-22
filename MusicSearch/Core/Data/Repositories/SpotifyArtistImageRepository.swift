@@ -6,14 +6,14 @@
 //
 
 import Foundation
+import NetworkLayer
 
 actor SpotifyArtistImageRepository: ArtistImageRepository {
 
-	private let clientId: String
-	private let clientSecret: String
 	private var accessToken: String?
 	private var accessTokenExpiry: Date?
-	private let tokenRefreshLeeway: TimeInterval = 60
+	private let configuration: SpotifyAPIConfiguration
+	private let networkManager: NetworkRequesting
 
 	private enum SpotifyRepositoryError: Error {
 		case invalidURL
@@ -21,11 +21,11 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 	}
 
 	init(
-		clientId: String,
-		clientSecret: String
+		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
+		networkManager: NetworkRequesting
 	) {
-		self.clientId = clientId
-		self.clientSecret = clientSecret
+		self.configuration = configuration
+		self.networkManager = networkManager
 	}
 
 	func fetchImageURL(for artistName: String) async throws -> URL? {
@@ -37,6 +37,13 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 			self.clearToken()
 			let refreshedToken = try await self.getAccessToken(isRefresh: true)
 			return try await self.fetchImageURL(artistName: artistName, token: refreshedToken)
+		} catch let error as NetworkLayer.NetworkError {
+			if case .httpError(let code, _) = error, code == 401 {
+				self.clearToken()
+				let refreshedToken = try await self.getAccessToken(isRefresh: true)
+				return try await self.fetchImageURL(artistName: artistName, token: refreshedToken)
+			}
+			throw error
 		}
 	}
 
@@ -48,19 +55,8 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 			self.clearToken()
 		}
 
-		let api = SpotifyAPI.token(clientId: self.clientId, clientSecret: self.clientSecret)
-		var request = URLRequest(url: api.url)
-		request.httpMethod = api.method
-		request.allHTTPHeaderFields = api.headers
-		request.httpBody = api.body
-
-		let (data, response) = try await URLSession.shared.data(for: request)
-
-		guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-			throw URLError(.badServerResponse)
-		}
-
-		let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
+		let api = SpotifyAPI.token(config: self.configuration)
+		let tokenResponse = try await self.networkManager.perform(with: api, as: SpotifyTokenResponse.self)
 
 		self.accessToken = tokenResponse.access_token
 		self.accessTokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
@@ -71,31 +67,15 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 		let api = SpotifyAPI.artistSearch(
 			query: self.artistSearchQuery(for: artistName),
 			token: token,
-			limit: 1
+			limit: 1,
+			config: self.configuration
 		)
-		var components = URLComponents(url: api.url, resolvingAgainstBaseURL: true)!
-		components.queryItems = api.queryItems
-		guard let url = components.url else { throw SpotifyRepositoryError.invalidURL }
+		let searchResponse = try await self.networkManager.perform(
+			with: api,
+			as: SpotifyArtistImageSearchResponseDTO.self
+		)
 
-		var request = URLRequest(url: url)
-		request.httpMethod = api.method
-		request.allHTTPHeaderFields = api.headers
-
-		let (data, response) = try await URLSession.shared.data(for: request)
-
-		guard let httpResponse = response as? HTTPURLResponse else {
-			throw URLError(.badServerResponse)
-		}
-		if httpResponse.statusCode == 401 {
-			throw SpotifyRepositoryError.unauthorized
-		}
-		guard (200...299).contains(httpResponse.statusCode) else {
-			throw URLError(.badServerResponse)
-		}
-
-		let response = try JSONDecoder().decode(SpotifyArtistImageSearchResponseDTO.self, from: data)
-
-		return self.bestArtistImageURL(from: response.artists.items)
+		return self.bestArtistImageURL(from: searchResponse.artists.items)
 	}
 
 	private func artistSearchQuery(for artistName: String) -> String {
@@ -117,12 +97,12 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 			  let url = URL(string: selectedImage.url) else {
 			return nil
 		}
-		return url.secureURL
+		return url.forcedHTTPS
 	}
 
 	private var isTokenValid: Bool {
 		guard let expiry = self.accessTokenExpiry else { return false }
-		return Date().addingTimeInterval(self.tokenRefreshLeeway) < expiry
+		return Date().addingTimeInterval(self.configuration.tokenRefreshLeeway) < expiry
 	}
 
 	private func clearToken() {

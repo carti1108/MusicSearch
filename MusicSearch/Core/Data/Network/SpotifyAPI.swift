@@ -6,71 +6,112 @@
 //
 
 import Foundation
+import NetworkLayer
+
+protocol SpotifyAPIConfiguration {
+	var accountsBaseURL: String { get }
+	var apiBaseURL: String { get }
+	var clientId: String { get }
+	var clientSecret: String { get }
+	var tokenRefreshLeeway: TimeInterval { get }
+}
+
+struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
+	var accountsBaseURL: String { "https://accounts.spotify.com" }
+	var apiBaseURL: String { "https://api.spotify.com" }
+	var clientId: String {
+		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? ""
+	}
+	var clientSecret: String {
+		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+	}
+	var tokenRefreshLeeway: TimeInterval { 60 }
+}
 
 enum SpotifyAPI {
-	case token(clientId: String, clientSecret: String)
-	case search(query: String, type: String, token: String)
-	case artistSearch(query: String, token: String, limit: Int)
+	case token(config: SpotifyAPIConfiguration)
+	case search(query: String, type: String, token: String, config: SpotifyAPIConfiguration)
+	case artistSearch(query: String, token: String, limit: Int, config: SpotifyAPIConfiguration)
+}
 
-	var url: URL {
+extension SpotifyAPI: Requestable {
+	var cachePolicy: CachePolicy {
 		switch self {
 		case .token:
-			return URL(string: "https://accounts.spotify.com/api/token")!
+			return .memory
 		case .search, .artistSearch:
-			return URL(string: "https://api.spotify.com/v1/search")!
+			return .memory
 		}
 	}
 
-	var method: String {
+	var baseURL: URL {
 		switch self {
-		case .token:
-			return "POST"
-		case .search, .artistSearch:
-			return "GET"
+		case .token(let config):
+			return URL(string: config.accountsBaseURL)!
+		case .search(_, _, _, let config), .artistSearch(_, _, _, let config):
+			return URL(string: config.apiBaseURL)!
 		}
 	}
 
-	var headers: [String: String] {
+	var path: String {
 		switch self {
-		case .token(let clientId, let clientSecret):
-			let credentialData = "\(clientId):\(clientSecret)".data(using: .utf8)!
+		case .token:
+			return "/api/token"
+		case .search, .artistSearch:
+			return "/v1/search"
+		}
+	}
+
+	var method: HTTPMethod {
+		switch self {
+		case .token:
+			return .post
+		case .search, .artistSearch:
+			return .get
+		}
+	}
+
+	var headers: [HTTPHeader.Field: String]? {
+		switch self {
+		case .token(let config):
+			let credentialData = "\(config.clientId):\(config.clientSecret)".data(using: .utf8)!
 			let base64Credentials = credentialData.base64EncodedString()
 			return [
-				"Authorization": "Basic \(base64Credentials)",
-				"Content-Type": "application/x-www-form-urlencoded"
+				.authorization: "Basic \(base64Credentials)",
+				.contentType: "application/x-www-form-urlencoded"
 			]
-		case .search(_, _, let token), .artistSearch(_, let token, _):
+		case .search(_, _, let token, _), .artistSearch(_, let token, _, _):
 			return [
-				"Authorization": "Bearer \(token)"
+				.authorization: "Bearer \(token)"
 			]
 		}
 	}
 
-	var body: Data? {
+	var task: RequestTask {
 		switch self {
 		case .token:
-			return "grant_type=client_credentials".data(using: .utf8)
-		case .search, .artistSearch:
-			return nil
-		}
-	}
-
-	var queryItems: [URLQueryItem]? {
-		switch self {
-		case .token:
-			return nil
-		case .search(let query, let type, _):
-			return [
-				URLQueryItem(name: "q", value: query),
-				URLQueryItem(name: "type", value: type),
-				URLQueryItem(name: "limit", value: "1")
-			]
-		case .artistSearch(let query, _, let limit):
-			return [
-				URLQueryItem(name: "q", value: query),
-				URLQueryItem(name: "type", value: "artist"),
-				URLQueryItem(name: "limit", value: "\(limit)")
-			]
+			return .requestParameters(
+				parameters: ["grant_type": "client_credentials"],
+				encoding: URLFormEncoder()
+			)
+		case .search(let query, let type, _, _):
+			return .requestParameters(
+				parameters: [
+					"q": query,
+					"type": type,
+					"limit": "1"
+				],
+				encoding: URLQueryEncoder()
+			)
+		case .artistSearch(let query, _, let limit, _):
+			return .requestParameters(
+				parameters: [
+					"q": query,
+					"type": "artist",
+					"limit": "\(limit)"
+				],
+				encoding: URLQueryEncoder()
+			)
 		}
 	}
 }

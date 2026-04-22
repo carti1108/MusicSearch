@@ -14,11 +14,12 @@ final class AppComponent {
 	let networkManager: NetworkRequesting
 	let locationManager: LocationManaging
 	let weatherAPIConfiguration: WeatherAPIConfiguration
+	let spotifyAPIConfiguration: SpotifyAPIConfiguration
 
 	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
 		SpotifyAppRepository(
-			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
-			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+			configuration: self.spotifyAPIConfiguration,
+			networkManager: self.networkManager
 		)
 	}()
 
@@ -28,8 +29,8 @@ final class AppComponent {
 
 	private lazy var artistImageRepositoryInstance: ArtistImageRepository = {
 		SpotifyArtistImageRepository(
-			clientId: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? "",
-			clientSecret: Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
+			configuration: self.spotifyAPIConfiguration,
+			networkManager: self.networkManager
 		)
 	}()
 
@@ -76,11 +77,13 @@ final class AppComponent {
 	init(
 		networkManager: NetworkRequesting = NetworkManager.shared,
 		locationManager: LocationManaging = CLLocationManager(),
-		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration()
+		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration(),
+		spotifyAPIConfiguration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration()
 	) {
 		self.networkManager = networkManager
 		self.locationManager = locationManager
 		self.weatherAPIConfiguration = weatherAPIConfiguration
+		self.spotifyAPIConfiguration = spotifyAPIConfiguration
 	}
 }
 
