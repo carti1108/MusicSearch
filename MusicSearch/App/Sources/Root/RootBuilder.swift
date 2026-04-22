@@ -21,6 +21,10 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 		self.dependency.fetchMusicAppDeepLinkUseCase
 	}
 
+	var urlOpener: URLOpening {
+		self.dependency.urlOpener
+	}
+
 	var searchTracksUseCase: any SearchTracksUseCase {
 		self.dependency.searchTracksUseCase
 	}

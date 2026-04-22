@@ -11,6 +11,7 @@ import MicroRIBs
 protocol WeatherRecommendationDependency: Dependency {
 	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var urlOpener: URLOpening { get }
 }
 
 @MainActor
@@ -21,6 +22,10 @@ final class WeatherRecommendationComponent: Component<WeatherRecommendationDepen
 
 	fileprivate var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.dependency.fetchMusicAppDeepLinkUseCase
+	}
+
+	fileprivate var urlOpener: URLOpening {
+		self.dependency.urlOpener
 	}
 }
 
@@ -39,11 +44,12 @@ final class WeatherRecommendationBuilder: Builder<WeatherRecommendationDependenc
 		MainActor.assumeIsolated {
 			let component = WeatherRecommendationComponent(dependency: self.dependency)
 			let viewController = WeatherRecommendationViewController()
-			let interactor = WeatherRecommendationInteractor(
-				presenter: viewController,
-				fetchMusicForWeatherUseCase: component.fetchMusicForWeatherUseCase,
-				fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase
-			)
+				let interactor = WeatherRecommendationInteractor(
+					presenter: viewController,
+					fetchMusicForWeatherUseCase: component.fetchMusicForWeatherUseCase,
+					fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase,
+					urlOpener: component.urlOpener
+				)
 			interactor.listener = listener
 			return WeatherRecommendationRouter(interactor: interactor, viewController: viewController)
 		}

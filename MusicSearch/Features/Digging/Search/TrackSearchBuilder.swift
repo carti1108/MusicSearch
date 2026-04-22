@@ -14,6 +14,7 @@ protocol TrackSearchDependency: Dependency {
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var urlOpener: URLOpening { get }
 }
 
 @MainActor
@@ -32,6 +33,10 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.dependency.fetchMusicAppDeepLinkUseCase
+	}
+
+	var urlOpener: URLOpening {
+		self.dependency.urlOpener
 	}
 }
 

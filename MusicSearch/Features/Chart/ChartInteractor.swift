@@ -41,6 +41,7 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
 	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	private let urlOpener: URLOpening
 
 	private var loadTask: Task<Void, Never>?
 	private var currentType: ChartType = .tracks
@@ -52,11 +53,13 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 		presenter: ChartPresentable,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		urlOpener: URLOpening
 	) {
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.urlOpener = urlOpener
 		super.init(presenter: presenter)
 		presenter.listener = self
 	}
@@ -213,18 +216,14 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 	private func openMusicApp(for track: Track) {
 		Task {
 			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			await MainActor.run {
-				UIApplication.shared.open(url)
-			}
+			await self.urlOpener.open(url)
 		}
 	}
 
 	private func openMusicApp(for artist: String) {
 		Task {
 			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(artist: artist) else { return }
-			await MainActor.run {
-				UIApplication.shared.open(url)
-			}
+			await self.urlOpener.open(url)
 		}
 	}
 }

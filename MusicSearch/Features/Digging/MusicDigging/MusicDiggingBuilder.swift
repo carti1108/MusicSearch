@@ -11,6 +11,7 @@ import MicroRIBs
 protocol MusicDiggingDependency: Dependency {
 	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var urlOpener: URLOpening { get }
 }
 
 @MainActor
@@ -37,7 +38,8 @@ final class MusicDiggingBuilder: Builder<MusicDiggingDependency>, MusicDiggingBu
 				seedTrack: seedTrack,
 				presenter: viewController,
 				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase,
-				fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase
+				fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase,
+				urlOpener: self.dependency.urlOpener
 			)
 			interactor.listener = listener
 			return MusicDiggingRouter(interactor: interactor, viewController: viewController)

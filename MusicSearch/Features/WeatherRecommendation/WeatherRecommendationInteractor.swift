@@ -36,6 +36,7 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 
 	private let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
 	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	private let urlOpener: URLOpening
 	private var loadTask: Task<Void, Never>?
 
 	private var currentWeather: Weather = .init(
@@ -50,10 +51,12 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	init(
 		presenter: WeatherRecommendationPresentable,
 		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		urlOpener: URLOpening
 	) {
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.urlOpener = urlOpener
 		super.init(presenter: presenter)
 		presenter.listener = self
 	}
@@ -109,9 +112,7 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	private func openMusicApp(for track: Track) {
 		Task {
 			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			await MainActor.run {
-				UIApplication.shared.open(url)
-			}
+			await self.urlOpener.open(url)
 		}
 	}
 }

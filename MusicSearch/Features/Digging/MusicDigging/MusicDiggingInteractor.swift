@@ -38,6 +38,7 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	private let urlOpener: URLOpening
 	private var loadTask: Task<Void, Never>?
 
 	private var currentSeedTrack: Track
@@ -47,11 +48,13 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 		seedTrack: Track,
 		presenter: MusicDiggingPresentable,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		urlOpener: URLOpening
 	) {
 		self.currentSeedTrack = seedTrack
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.urlOpener = urlOpener
 		super.init(presenter: presenter)
 		presenter.listener = self
 	}
@@ -119,9 +122,7 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 	private func openMusicApp(for track: Track) {
 		Task {
 			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			await MainActor.run {
-				UIApplication.shared.open(url)
-			}
+			await self.urlOpener.open(url)
 		}
 	}
 }

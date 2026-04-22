@@ -12,6 +12,7 @@ protocol ChartDependency: Dependency {
 	var fetchChartTopTracksUseCase: FetchChartTopTracksUseCase { get }
 	var fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var urlOpener: URLOpening { get }
 }
 
 @MainActor
@@ -26,6 +27,10 @@ final class ChartComponent: Component<ChartDependency> {
 
 	fileprivate var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.dependency.fetchMusicAppDeepLinkUseCase
+	}
+
+	fileprivate var urlOpener: URLOpening {
+		self.dependency.urlOpener
 	}
 }
 
@@ -45,11 +50,12 @@ final class ChartBuilder: Builder<ChartDependency>, ChartBuildable {
 			let component = ChartComponent(dependency: self.dependency)
 			let viewController = ChartViewController()
 			let interactor = ChartInteractor(
-				presenter: viewController,
-				fetchChartTopTracksUseCase: component.fetchChartTopTracksUseCase,
-				fetchChartTopArtistsUseCase: component.fetchChartTopArtistsUseCase,
-				fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase
-			)
+					presenter: viewController,
+					fetchChartTopTracksUseCase: component.fetchChartTopTracksUseCase,
+					fetchChartTopArtistsUseCase: component.fetchChartTopArtistsUseCase,
+					fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase,
+					urlOpener: component.urlOpener
+				)
 			interactor.listener = listener
 			return ChartRouter(interactor: interactor, viewController: viewController)
 		}
