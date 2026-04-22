@@ -2,7 +2,7 @@
 //  Array+TrackInfo.swift
 //  MusicSearch
 //
-//  Created by Codex on 4/18/26.
+//  Created by Kiseok on 4/18/26.
 //
 
 import Foundation
