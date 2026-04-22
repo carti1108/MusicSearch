@@ -113,9 +113,11 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 			(lhs.width ?? 0) < (rhs.width ?? 0)
 		}
 
-		return selectedImage
-			.flatMap { URL(string: $0.url) }?
-			.secureURL
+		guard let selectedImage,
+			  let url = URL(string: selectedImage.url) else {
+			return nil
+		}
+		return url.secureURL
 	}
 
 	private var isTokenValid: Bool {

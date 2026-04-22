@@ -75,11 +75,13 @@ final class TrackRepositoryImpl: TrackRepository, @unchecked Sendable {
 	}
 
 	private func makeImageURL(from images: [LastFMImageDTO]) -> URL? {
-		(
-			images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
+		let imageString = images.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
 			?? images.first { !$0.text.isEmpty }?.text
-		)
-		.flatMap(URL.init(string:))?
-		.forcedHTTPS
+
+		guard let imageString,
+			  let url = URL(string: imageString) else {
+			return nil
+		}
+		return url.forcedHTTPS
 	}
 }
