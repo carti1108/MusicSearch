@@ -2,7 +2,7 @@
 //  ArtistImageEnrichmentService.swift
 //  MusicSearch
 //
-//  Created by Codex on 4/22/26.
+//  Created by Kiseok on 4/22/26.
 //
 
 import Foundation
