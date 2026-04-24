@@ -2,7 +2,7 @@
 
 import Foundation
 
-protocol FetchMusicAppDeepLinkUseCase {
+protocol FetchMusicAppDeepLinkUseCase: Sendable {
 	func execute(track: Track) async -> URL?
 	func execute(artist: String) async -> URL?
 }

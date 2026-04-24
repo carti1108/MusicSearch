@@ -12,7 +12,7 @@ import MicroRIBs
 protocol TrackSearchDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
-	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
+	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 	var urlOpener: URLOpening { get }
 }
@@ -27,8 +27,8 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 		self.dependency.fetchTracksByTagUseCase
 	}
 
-	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase {
-		self.dependency.fetchSimilarTrackUseCase
+	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
+		self.dependency.fetchSimilarTracksUseCase
 	}
 
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {

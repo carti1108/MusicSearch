@@ -126,6 +126,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}()
 
 	var lastPresentedErrorMessage: String?
+	private(set) var isShowingLoading = false
 
 	private lazy var scrollView: UIScrollView = {
 		let scrollView = UIScrollView()
@@ -201,6 +202,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	func showLoading(_ isShow: Bool) {
+		self.isShowingLoading = isShow
 		if isShow {
 			if !self.refreshControl.isRefreshing {
 				self.refreshControl.beginRefreshing()

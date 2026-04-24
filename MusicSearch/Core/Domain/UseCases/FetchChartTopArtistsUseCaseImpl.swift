@@ -5,7 +5,7 @@
 //  Created by Kiseok on 12/13/25.
 //
 
-protocol FetchChartTopArtistsUseCase {
+protocol FetchChartTopArtistsUseCase: Sendable {
 	func execute() async throws -> [Artist]
 }
 

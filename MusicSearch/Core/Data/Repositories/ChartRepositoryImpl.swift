@@ -8,34 +8,27 @@
 import Foundation
 import NetworkLayer
 
-final class ChartRepositoryImpl: ChartRepository {
+struct ChartRepositoryImpl: ChartRepository {
 
 	private let networkManager: NetworkRequesting
-	private let lastFMConfiguration: LastFMAPIConfiguration
 
-	init(
-		networkManager: NetworkRequesting,
-		lastFMConfiguration: LastFMAPIConfiguration = DefaultLastFMAPIConfiguration()
-	) {
+	init(networkManager: NetworkRequesting) {
 		self.networkManager = networkManager
-		self.lastFMConfiguration = lastFMConfiguration
 	}
 
 	func fetchTopTracks() async throws -> [Track] {
-		let response = try await self.networkManager.perform(
-			with: LastFMAPI.getChartTopTracks(config: self.lastFMConfiguration),
+		let response: ChartTopTracksResponseDTO = try await self.networkManager.perform(
+			with: LastFMAPI.getChartTopTracks,
 			as: ChartTopTracksResponseDTO.self
 		)
-
 		return response.tracks.track.map { $0.toDomain() }
 	}
 
 	func fetchTopArtists() async throws -> [Artist] {
-		let response = try await self.networkManager.perform(
-			with: LastFMAPI.getChartTopArtists(config: self.lastFMConfiguration),
+		let response: ChartTopArtistsResponseDTO = try await self.networkManager.perform(
+			with: LastFMAPI.getChartTopArtists,
 			as: ChartTopArtistsResponseDTO.self
 		)
-
 		return response.artists.artist.map { $0.toDomain() }
 	}
 }

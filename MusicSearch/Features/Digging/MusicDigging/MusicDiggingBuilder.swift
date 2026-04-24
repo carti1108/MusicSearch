@@ -9,7 +9,7 @@ import MicroRIBs
 
 @MainActor
 protocol MusicDiggingDependency: Dependency {
-	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
+	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 	var urlOpener: URLOpening { get }
 }
@@ -37,7 +37,7 @@ final class MusicDiggingBuilder: Builder<MusicDiggingDependency>, MusicDiggingBu
 			let interactor = MusicDiggingInteractor(
 				seedTrack: seedTrack,
 				presenter: viewController,
-				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTrackUseCase,
+				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTracksUseCase,
 				fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase,
 				urlOpener: self.dependency.urlOpener
 			)

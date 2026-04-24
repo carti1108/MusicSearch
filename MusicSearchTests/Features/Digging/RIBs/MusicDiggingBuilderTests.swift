@@ -17,7 +17,7 @@ struct MusicDiggingBuilderTests {
 		// Given
 		let fetchSimilarTracksUseCase = MockFetchSimilarTracksUseCaseForBuilder()
 		let dependency = MockMusicDiggingDependency(
-			fetchSimilarTrackUseCase: fetchSimilarTracksUseCase,
+			fetchSimilarTracksUseCase: fetchSimilarTracksUseCase,
 			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForMusicDiggingBuilder()
 		)
 		let builder = MusicDiggingBuilder(dependency: dependency)

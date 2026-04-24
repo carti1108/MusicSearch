@@ -7,30 +7,32 @@
 
 import Foundation
 
-public protocol FetchTracksByTagUseCase {
+public protocol FetchTracksByTagUseCase: Sendable {
 	func execute(tag: String) async throws -> [Track]
 }
 
-final class FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
+struct FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 
 	private let trackRepository: TrackRepository
-	private let trackEnrichmentService: TrackEnrichmentService
+	private let maxConcurrentInfoRequests: Int = 8
 
-	init(
-		trackRepository: TrackRepository,
-		trackEnrichmentService: TrackEnrichmentService? = nil
-	) {
+	init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
-		self.trackEnrichmentService = trackEnrichmentService
-			?? TrackEnrichmentServiceImpl(trackRepository: trackRepository)
 	}
 
 	public func execute(tag: String) async throws -> [Track] {
-		guard !tag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+		let normalizedTag = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+		guard !normalizedTag.isEmpty else {
 			return []
 		}
 
-		let tracks = try await self.trackRepository.fetchTopTracks(by: tag)
-		return await self.trackEnrichmentService.enrich(tracks)
+		let tracks = try await self.trackRepository.fetchTopTracks(by: normalizedTag)
+		return await self.enrichTrackInfo(for: tracks)
+	}
+
+	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
+		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
+			try await self.trackRepository.fetchTrackInfo(for: track)
+		}
 	}
 }

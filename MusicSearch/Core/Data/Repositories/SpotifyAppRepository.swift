@@ -10,6 +10,11 @@ import NetworkLayer
 
 actor SpotifyAppRepository: MusicAppRepository {
 
+	private struct SearchRequest {
+		let query: String
+		let type: String
+	}
+
 	private var accessToken: String?
 	private var accessTokenExpiry: Date?
 	private let configuration: SpotifyAPIConfiguration
@@ -40,11 +45,10 @@ actor SpotifyAppRepository: MusicAppRepository {
 
 	private func searchAndGetURL(query: String, type: String) async -> URL? {
 		do {
-			let urlString = try await self.searchWithRetry(query: query, type: type)
-			return URL(string: urlString)
+			let request = SearchRequest(query: query, type: type)
+			let urlString = try await self.searchWithRetry(query: request.query, type: request.type)
+			return try self.makeURL(from: urlString)
 		} catch {
-			print("SpotifyService Error: \(error)")
-
 			return self.fallbackWebURL(query: query)
 		}
 	}
@@ -55,29 +59,28 @@ actor SpotifyAppRepository: MusicAppRepository {
 			return try await self.search(query: query, type: type, token: token)
 		} catch SpotifyRepositoryError.unauthorized {
 			self.clearToken()
-			let refreshedToken = try await self.getAccessToken(isRefresh: true)
+			let refreshedToken = try await self.getAccessToken(forceRefresh: true)
 			return try await self.search(query: query, type: type, token: refreshedToken)
 		} catch let error as NetworkLayer.NetworkError {
 			if case .httpError(let code, _) = error, code == 401 {
 				self.clearToken()
-				let refreshedToken = try await self.getAccessToken(isRefresh: true)
+				let refreshedToken = try await self.getAccessToken(forceRefresh: true)
 				return try await self.search(query: query, type: type, token: refreshedToken)
 			}
 			throw error
 		}
 	}
 
-	private func getAccessToken(isRefresh: Bool = false) async throws -> String {
-		if !isRefresh, self.isTokenValid, let token = self.accessToken {
+	private func getAccessToken(forceRefresh: Bool = false) async throws -> String {
+		if !forceRefresh, self.isTokenValid, let token = self.accessToken {
 			return token
 		}
-		if isRefresh {
+		if forceRefresh {
 			self.clearToken()
 		}
 
 		let api = SpotifyAPI.token(config: self.configuration)
 		let tokenResponse = try await self.networkManager.perform(with: api, as: SpotifyTokenResponse.self)
-
 		self.accessToken = tokenResponse.access_token
 		self.accessTokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
 		return tokenResponse.access_token
@@ -109,6 +112,13 @@ actor SpotifyAppRepository: MusicAppRepository {
 		let type = components[1]
 		let id = components[2]
 		return "https://open.spotify.com/\(type)/\(id)"
+	}
+
+	private func makeURL(from urlString: String) throws -> URL {
+		guard let url = URL(string: urlString) else {
+			throw SpotifyRepositoryError.invalidURL
+		}
+		return url
 	}
 
 	private var isTokenValid: Bool {

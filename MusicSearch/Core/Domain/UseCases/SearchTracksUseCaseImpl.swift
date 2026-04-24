@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol SearchTracksUseCase {
+public protocol SearchTracksUseCase: Sendable {
 	func execute(
 		query: String,
 		limit: Int,
@@ -15,18 +15,13 @@ public protocol SearchTracksUseCase {
 	) async throws -> (tracks: [Track], totalResults: Int)
 }
 
-final class SearchTracksUseCaseImpl: SearchTracksUseCase {
+struct SearchTracksUseCaseImpl: SearchTracksUseCase {
 
 	private let trackRepository: TrackRepository
-	private let trackEnrichmentService: TrackEnrichmentService
+	private let maxConcurrentInfoRequests: Int = 8
 
-	init(
-		trackRepository: TrackRepository,
-		trackEnrichmentService: TrackEnrichmentService? = nil
-	) {
+	init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
-		self.trackEnrichmentService = trackEnrichmentService
-			?? TrackEnrichmentServiceImpl(trackRepository: trackRepository)
 	}
 
 	public func execute(
@@ -34,13 +29,23 @@ final class SearchTracksUseCaseImpl: SearchTracksUseCase {
 		limit: Int,
 		page: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
-		guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+		let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+		guard !normalizedQuery.isEmpty else {
 			return ([], 0)
 		}
 
-		let result = try await self.trackRepository.searchTracks(query: query, limit: limit, page: page)
-		let enrichedTracks = await self.trackEnrichmentService.enrich(result.tracks)
+		let result = try await self.trackRepository.searchTracks(
+			query: normalizedQuery,
+			limit: limit,
+			page: page
+		)
+		let enrichedTracks = await self.enrichTrackInfo(for: result.tracks)
+		return (tracks: enrichedTracks, totalResults: result.totalResults)
+	}
 
-		return (enrichedTracks, result.totalResults)
+	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
+		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
+			try await self.trackRepository.fetchTrackInfo(for: track)
+		}
 	}
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ArtistImageEnrichmentService {
+protocol ArtistImageEnrichmentService: Sendable {
 	func enrich(_ artists: [Artist]) async -> [Artist]
 }
 

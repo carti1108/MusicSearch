@@ -108,20 +108,20 @@ final class MockTrackSearchListener: TrackSearchListener {}
 final class MockTrackSearchDependency: TrackSearchDependency {
 	let searchTracksUseCase: SearchTracksUseCase
 	let fetchTracksByTagUseCase: FetchTracksByTagUseCase
-	let fetchSimilarTrackUseCase: FetchSimilarTracksUseCase
+	let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	let urlOpener: URLOpening
 
 	init(
 		searchTracksUseCase: SearchTracksUseCase,
 		fetchTracksByTagUseCase: FetchTracksByTagUseCase,
-		fetchSimilarTrackUseCase: FetchSimilarTracksUseCase,
+		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
 		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.searchTracksUseCase = searchTracksUseCase
 		self.fetchTracksByTagUseCase = fetchTracksByTagUseCase
-		self.fetchSimilarTrackUseCase = fetchSimilarTrackUseCase
+		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
 		self.urlOpener = urlOpener
 	}
@@ -258,16 +258,16 @@ final class MockMusicDiggingListener: MusicDiggingListener {}
 
 @MainActor
 final class MockMusicDiggingDependency: MusicDiggingDependency {
-	let fetchSimilarTrackUseCase: FetchSimilarTracksUseCase
+	let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	let urlOpener: URLOpening
 
 	init(
-		fetchSimilarTrackUseCase: FetchSimilarTracksUseCase,
+		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
 		urlOpener: URLOpening = MockURLOpener()
 	) {
-		self.fetchSimilarTrackUseCase = fetchSimilarTrackUseCase
+		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
 		self.urlOpener = urlOpener
 	}

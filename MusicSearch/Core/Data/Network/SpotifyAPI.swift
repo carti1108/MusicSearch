@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-protocol SpotifyAPIConfiguration {
+protocol SpotifyAPIConfiguration: Sendable {
 	var accountsBaseURL: String { get }
 	var apiBaseURL: String { get }
 	var clientId: String { get }
@@ -37,9 +37,9 @@ enum SpotifyAPI {
 extension SpotifyAPI: Requestable {
 	var cachePolicy: CachePolicy {
 		switch self {
-		case .token(_):
+		case .token:
 			return .memory
-		case .search(_, _, _, _), .artistSearch(_, _, _, _):
+		case .search, .artistSearch:
 			return .memory
 		}
 	}
@@ -55,18 +55,18 @@ extension SpotifyAPI: Requestable {
 
 	var path: String {
 		switch self {
-		case .token(_):
+		case .token:
 			return "/api/token"
-		case .search(_, _, _, _), .artistSearch(_, _, _, _):
+		case .search, .artistSearch:
 			return "/v1/search"
 		}
 	}
 
 	var method: HTTPMethod {
 		switch self {
-		case .token(_):
+		case .token:
 			return .post
-		case .search(_, _, _, _), .artistSearch(_, _, _, _):
+		case .search, .artistSearch:
 			return .get
 		}
 	}
@@ -80,11 +80,7 @@ extension SpotifyAPI: Requestable {
 				.authorization: "Basic \(base64Credentials)",
 				.contentType: "application/x-www-form-urlencoded"
 			]
-		case .search(_, _, let token, _):
-			return [
-				.authorization: "Bearer \(token)"
-			]
-		case .artistSearch(_, let token, _, _):
+		case .search(_, _, let token, _), .artistSearch(_, let token, _, _):
 			return [
 				.authorization: "Bearer \(token)"
 			]
@@ -93,7 +89,7 @@ extension SpotifyAPI: Requestable {
 
 	var task: RequestTask {
 		switch self {
-		case .token(_):
+		case .token:
 			return .requestParameters(
 				parameters: ["grant_type": "client_credentials"],
 				encoding: URLFormEncoder()

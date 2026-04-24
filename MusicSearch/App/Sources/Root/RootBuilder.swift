@@ -33,8 +33,8 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 		self.dependency.fetchTracksByTagUseCase
 	}
 
-	var fetchSimilarTrackUseCase: any FetchSimilarTracksUseCase {
-		self.dependency.fetchSimilarTrackUseCase
+	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase {
+		self.dependency.fetchSimilarTracksUseCase
 	}
 
 	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {

@@ -15,6 +15,11 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 	private let configuration: SpotifyAPIConfiguration
 	private let networkManager: NetworkRequesting
 
+	private enum SpotifyRepositoryError: Error {
+		case invalidURL
+		case unauthorized
+	}
+
 	init(
 		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
 		networkManager: NetworkRequesting
@@ -28,6 +33,10 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 
 		do {
 			return try await self.fetchImageURL(artistName: artistName, token: token)
+		} catch SpotifyRepositoryError.unauthorized {
+			self.clearToken()
+			let refreshedToken = try await self.getAccessToken(isRefresh: true)
+			return try await self.fetchImageURL(artistName: artistName, token: refreshedToken)
 		} catch let error as NetworkLayer.NetworkError {
 			if case .httpError(let code, _) = error, code == 401 {
 				self.clearToken()
@@ -61,12 +70,12 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 			limit: 1,
 			config: self.configuration
 		)
-		let response = try await self.networkManager.perform(
+		let searchResponse = try await self.networkManager.perform(
 			with: api,
 			as: SpotifyArtistImageSearchResponseDTO.self
 		)
 
-		return self.bestArtistImageURL(from: response.artists.items)
+		return self.bestArtistImageURL(from: searchResponse.artists.items)
 	}
 
 	private func artistSearchQuery(for artistName: String) -> String {
@@ -84,9 +93,11 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 			(lhs.width ?? 0) < (rhs.width ?? 0)
 		}
 
-		return selectedImage
-			.flatMap { URL(string: $0.url) }?
-			.secureURL
+		guard let selectedImage,
+			  let url = URL(string: selectedImage.url) else {
+			return nil
+		}
+		return url.forcedHTTPS
 	}
 
 	private var isTokenValid: Bool {

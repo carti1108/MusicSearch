@@ -11,7 +11,7 @@ protocol FetchArtistImageURLUseCase: Sendable {
 	func execute(artistName: String) async throws -> URL?
 }
 
-struct FetchArtistImageURLUseCaseImpl: FetchArtistImageURLUseCase {
+final class FetchArtistImageURLUseCaseImpl: FetchArtistImageURLUseCase {
 	private let artistImageRepository: ArtistImageRepository
 
 	init(artistImageRepository: ArtistImageRepository) {

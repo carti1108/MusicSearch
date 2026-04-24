@@ -15,7 +15,6 @@ final class AppComponent {
 	let networkManager: NetworkRequesting
 	let locationManager: LocationManaging
 	let weatherAPIConfiguration: WeatherAPIConfiguration
-	let lastFMAPIConfiguration: LastFMAPIConfiguration
 	let spotifyAPIConfiguration: SpotifyAPIConfiguration
 	let urlOpener: URLOpening
 
@@ -51,16 +50,10 @@ final class AppComponent {
 		)
 	}
 	var trackRepository: TrackRepository {
-		TrackRepositoryImpl(
-			networkManager: self.networkManager,
-			lastFMConfiguration: self.lastFMAPIConfiguration
-		)
+		TrackRepositoryImpl(networkManager: self.networkManager)
 	}
 	var chartRepository: ChartRepository {
-		ChartRepositoryImpl(
-			networkManager: self.networkManager,
-			lastFMConfiguration: self.lastFMAPIConfiguration
-		)
+		ChartRepositoryImpl(networkManager: self.networkManager)
 	}
 	var musicAppRepository: MusicAppRepository {
 		self.musicAppRepositoryInstance
@@ -87,14 +80,12 @@ final class AppComponent {
 		networkManager: NetworkRequesting = NetworkManager.shared,
 		locationManager: LocationManaging = CLLocationManager(),
 		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration(),
-		lastFMAPIConfiguration: LastFMAPIConfiguration = DefaultLastFMAPIConfiguration(),
 		spotifyAPIConfiguration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
 		urlOpener: URLOpening = ApplicationURLOpener()
 	) {
 		self.networkManager = networkManager
 		self.locationManager = locationManager
 		self.weatherAPIConfiguration = weatherAPIConfiguration
-		self.lastFMAPIConfiguration = lastFMAPIConfiguration
 		self.spotifyAPIConfiguration = spotifyAPIConfiguration
 		self.urlOpener = urlOpener
 	}
@@ -118,7 +109,7 @@ extension AppComponent: TrackSearchDependency {
 		FetchTracksByTagUseCaseImpl(trackRepository: self.trackRepository)
 	}
 
-	var fetchSimilarTrackUseCase: any FetchSimilarTracksUseCase {
+	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase {
 		FetchSimilarTracksUseCaseImpl(trackRepository: self.trackRepository)
 	}
 }

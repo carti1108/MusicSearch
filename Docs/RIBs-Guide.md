@@ -164,7 +164,7 @@ RIBs의 의존성 관리는 `Dependency`와 `Component`를 활용.
 protocol TrackSearchDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
-	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase { get }
+	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 }
 ```
@@ -193,8 +193,8 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 		self.dependency.fetchTracksByTagUseCase
 	}
 
-	var fetchSimilarTrackUseCase: FetchSimilarTracksUseCase {
-		self.dependency.fetchSimilarTrackUseCase
+	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
+		self.dependency.fetchSimilarTracksUseCase
 	}
 
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {

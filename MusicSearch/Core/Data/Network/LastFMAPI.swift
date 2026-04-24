@@ -8,43 +8,27 @@
 import Foundation
 import NetworkLayer
 
-protocol LastFMAPIConfiguration {
-	var baseURL: String { get }
-	var apiKey: String { get }
-}
-
-struct DefaultLastFMAPIConfiguration: LastFMAPIConfiguration {
-	var baseURL: String { "https://ws.audioscrobbler.com/2.0" }
-	var apiKey: String {
-		Bundle.main.object(forInfoDictionaryKey: "LASTFM_API_KEY") as? String ?? ""
-	}
-}
-
 enum LastFMAPI {
-	case searchTracks(keyword: String, limit: Int, page: Int, config: LastFMAPIConfiguration)
-	case fetchTopTracks(tag: String, config: LastFMAPIConfiguration)
-	case fetchSimilarTracks(track: Track, config: LastFMAPIConfiguration)
-	case getTrackInfo(track: Track, config: LastFMAPIConfiguration)
-	case getChartTopTracks(config: LastFMAPIConfiguration)
-	case getChartTopArtists(config: LastFMAPIConfiguration)
+	case searchTracks(keyword: String, limit: Int, page: Int)
+	case fetchTopTracks(tag: String)
+	case fetchSimilarTracks(track: Track)
+	case getTrackInfo(track: Track)
+	case getChartTopTracks
+	case getChartTopArtists
 }
 
 extension LastFMAPI: Requestable {
 
-	private var config: LastFMAPIConfiguration {
-		switch self {
-		case .searchTracks(_, _, _, let config),
-			 .fetchTopTracks(_, let config),
-			 .fetchSimilarTracks(_, let config),
-			 .getTrackInfo(_, let config),
-			 .getChartTopTracks(let config),
-			 .getChartTopArtists(let config):
-			return config
+	private var apiKey: String {
+		if let key = Bundle.main.object(forInfoDictionaryKey: "LASTFM_API_KEY") as? String, !key.isEmpty {
+			return key
 		}
+
+		return ""
 	}
 
 	var baseURL: URL {
-		return URL(string: self.config.baseURL)!
+		return URL(string: "https://ws.audioscrobbler.com/2.0")!
 	}
 
 	var path: String {
@@ -61,35 +45,31 @@ extension LastFMAPI: Requestable {
 
 	var cachePolicy: CachePolicy {
 		switch self {
-		case .getTrackInfo(_, _):
+		case .getTrackInfo:
 			return .memory
-		case .searchTracks(_, _, _, _),
-			 .fetchTopTracks(_, _),
-			 .fetchSimilarTracks(_, _),
-			 .getChartTopTracks(_),
-			 .getChartTopArtists(_):
+		case .searchTracks, .fetchTopTracks, .fetchSimilarTracks, .getChartTopTracks, .getChartTopArtists:
 			return .disk
 		}
 	}
 
 	var task: RequestTask {
 		var params: [String: Any] = [
-			"api_key": self.config.apiKey,
+			"api_key": apiKey,
 			"format": "json"
 		]
 
 		switch self {
-		case .searchTracks(let keyword, let limit, let page, _):
+		case .searchTracks(let keyword, let limit, let page):
 			params["method"] = "track.search"
 			params["track"] = keyword
 			params["limit"] = limit
 			params["page"] = page
 
-		case .fetchTopTracks(let tag, _):
+		case .fetchTopTracks(let tag):
 			params["method"] = "tag.gettoptracks"
 			params["tag"] = tag
 
-		case .fetchSimilarTracks(let track, _):
+		case .fetchSimilarTracks(let track):
 			params["method"] = "track.getsimilar"
 
 			if let mbid = track.mbid?.trimmingCharacters(in: .whitespacesAndNewlines), !mbid.isEmpty {
@@ -99,15 +79,15 @@ extension LastFMAPI: Requestable {
 				params["artist"] = track.artist
 			}
 
-		case .getTrackInfo(let track, _):
+		case .getTrackInfo(let track):
 			params["method"] = "track.getInfo"
 			params["track"] = track.title
 			params["artist"] = track.artist
 
-		case .getChartTopTracks(_):
+		case .getChartTopTracks:
 			params["method"] = "chart.gettoptracks"
 
-		case .getChartTopArtists(_):
+		case .getChartTopArtists:
 			params["method"] = "chart.gettopartists"
 		}
 

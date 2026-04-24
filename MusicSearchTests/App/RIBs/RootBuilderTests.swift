@@ -21,7 +21,7 @@ struct RootBuilderTests {
 			fetchMusicAppDeepLinkUseCase: RootMockFetchMusicAppDeepLinkUseCase(),
 			searchTracksUseCase: RootMockSearchTracksUseCase(),
 			fetchTracksByTagUseCase: RootMockFetchTracksByTagUseCase(),
-			fetchSimilarTrackUseCase: RootMockFetchSimilarTracksUseCase(),
+			fetchSimilarTracksUseCase: RootMockFetchSimilarTracksUseCase(),
 			fetchChartTopTracksUseCase: RootMockFetchChartTopTracksUseCase(),
 			fetchChartTopArtistsUseCase: RootMockFetchChartTopArtistsUseCase()
 		)

@@ -19,7 +19,7 @@ struct TrackSearchBuilderTests {
 		let dependency = MockTrackSearchDependency(
 			searchTracksUseCase: MockSearchTracksUseCaseForBuilder(),
 			fetchTracksByTagUseCase: MockFetchTracksByTagUseCaseForTrackSearchBuilder(),
-			fetchSimilarTrackUseCase: MockFetchSimilarTracksUseCaseForTrackSearchBuilder(),
+			fetchSimilarTracksUseCase: MockFetchSimilarTracksUseCaseForTrackSearchBuilder(),
 			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForTrackSearchBuilder()
 		)
 		let builder = TrackSearchBuilder(dependency: dependency)
