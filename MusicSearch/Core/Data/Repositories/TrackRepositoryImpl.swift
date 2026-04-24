@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-final class TrackRepositoryImpl: TrackRepository, @unchecked Sendable {
+struct TrackRepositoryImpl: TrackRepository {
 
 	private let networkManager: NetworkRequesting
 

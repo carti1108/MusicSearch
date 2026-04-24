@@ -5,6 +5,7 @@
 //  Created by Kiseok on 12/13/25.
 //
 
+@MainActor
 protocol TrendDependency: Dependency {
 	var fetchChartTopTracksUseCase: FetchChartTopTracksUseCase { get }
 	var fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase { get }

@@ -8,6 +8,7 @@
 import Foundation
 import NetworkLayer
 
+@MainActor
 protocol DiggingDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }

@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 protocol HomeDependency: Dependency {
 	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }

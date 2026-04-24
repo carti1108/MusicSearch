@@ -7,11 +7,11 @@
 
 import Foundation
 
-public protocol FetchTracksByTagUseCase {
+public protocol FetchTracksByTagUseCase: Sendable {
 	func execute(tag: String) async throws -> [Track]
 }
 
-final class FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
+struct FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8

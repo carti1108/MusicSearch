@@ -7,11 +7,11 @@
 
 import Foundation
 
-public protocol FetchSimilarTracksUseCase {
+public protocol FetchSimilarTracksUseCase: Sendable {
 	func execute(targetTrack: Track) async throws -> [Track]
 }
 
-final class FetchSimilarTrackUseCaseImpl: FetchSimilarTracksUseCase {
+struct FetchSimilarTrackUseCaseImpl: FetchSimilarTracksUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8

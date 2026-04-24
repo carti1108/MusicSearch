@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 final class AppRoot {
 
 	private let appComponent: AppComponent

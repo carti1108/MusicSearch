@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol FetchMusicForWeatherUseCase {
+public protocol FetchMusicForWeatherUseCase: Sendable {
 	func execute() async throws -> WeatherMusicCuration
 }
 

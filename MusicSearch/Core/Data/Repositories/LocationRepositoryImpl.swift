@@ -8,7 +8,7 @@
 import Foundation
 import CoreLocation
 
-protocol LocationManaging {
+protocol LocationManaging: Sendable {
 	var authorizationStatus: CLAuthorizationStatus { get }
 	var desiredAccuracy: CLLocationAccuracy { get set }
 	func requestWhenInUseAuthorization()
@@ -26,7 +26,7 @@ extension CLLocationManager: LocationManaging {
 	}
 }
 
-final class LocationRepositoryImpl: LocationRepository {
+struct LocationRepositoryImpl: LocationRepository {
 
 	private var locationManager: LocationManaging
 	private let timeout: TimeInterval
@@ -57,17 +57,17 @@ final class LocationRepositoryImpl: LocationRepository {
 			throw WeatherError.locationPermissionDenied
 		}
 
-		let location = try await self.withTimeout(self.timeout) { [weak self] in
-			guard let self = self else { throw WeatherError.unknown }
-			return try await self.locationManager.requestLocation()
+		let manager = self.locationManager
+		let location = try await self.withTimeout(self.timeout) {
+			return try await manager.requestLocation()
 		}
 
 		return (location.coordinate.latitude, location.coordinate.longitude)
 	}
 
-	private func withTimeout<T>(
+	private func withTimeout<T: Sendable>(
 		_ timeout: TimeInterval,
-		perform task: @escaping () async throws -> T
+		perform task: @escaping @Sendable () async throws -> T
 	) async throws -> T {
 		try await withThrowingTaskGroup(of: T.self) { group in
 			group.addTask {

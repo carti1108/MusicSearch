@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-protocol SpotifyAPIConfiguration {
+protocol SpotifyAPIConfiguration: Sendable {
 	var accountsBaseURL: String { get }
 	var apiBaseURL: String { get }
 	var clientId: String { get }

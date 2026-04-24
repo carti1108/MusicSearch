@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol SearchTracksUseCase {
+public protocol SearchTracksUseCase: Sendable {
 	func execute(
 		query: String,
 		limit: Int,
@@ -15,7 +15,7 @@ public protocol SearchTracksUseCase {
 	) async throws -> (tracks: [Track], totalResults: Int)
 }
 
-final class SearchTrackUseCaseImpl: SearchTracksUseCase {
+struct SearchTrackUseCaseImpl: SearchTracksUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8

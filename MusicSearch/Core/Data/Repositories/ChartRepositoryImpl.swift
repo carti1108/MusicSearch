@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-final class ChartRepositoryImpl: ChartRepository {
+struct ChartRepositoryImpl: ChartRepository {
 
 	private let networkManager: NetworkRequesting
 

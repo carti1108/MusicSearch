@@ -6,7 +6,7 @@
 //
 
 
-protocol ChartRepository {
+protocol ChartRepository: Sendable {
 	func fetchTopTracks() async throws -> [Track]
 	func fetchTopArtists() async throws -> [Artist]
 }

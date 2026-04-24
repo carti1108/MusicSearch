@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol FetchChartTopTracksUseCase {
+protocol FetchChartTopTracksUseCase: Sendable {
 	func execute() async throws -> [Track]
 }
 

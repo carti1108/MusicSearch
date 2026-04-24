@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-final class WeatherRepositoryImpl: WeatherRepository {
+struct WeatherRepositoryImpl: WeatherRepository {
 
 	private let networkManager: NetworkRequesting
 	private let configuration: WeatherAPIConfiguration

@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol WeatherRepository {
+protocol WeatherRepository: Sendable {
 	func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> Weather
 }

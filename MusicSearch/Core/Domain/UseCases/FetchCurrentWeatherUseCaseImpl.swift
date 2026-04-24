@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol FetchCurrentWeatherUseCase {
+protocol FetchCurrentWeatherUseCase: Sendable {
 	func execute() async throws -> Weather
 }
 
