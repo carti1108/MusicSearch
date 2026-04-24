@@ -20,8 +20,8 @@ struct TrackRepositoryTests {
 
 	// MARK: - searchTracks Tests
 
-	@Test("트랙 검색이 정상적으로 동작하는가")
-	func searchTracksSuccess() async throws {
+	@Test
+	func 트랙검색이정상적으로동작할때_searchTracks하면_성공하는지() async throws {
 		// Given
 		let searchDTO = TrackSearchResponseDTO(
 			results: TrackMatchesContainerDTO(
@@ -57,8 +57,8 @@ struct TrackRepositoryTests {
 		#expect(totalResults == 1)
 	}
 
-	@Test("네트워크 에러 발생 시 에러를 던지는가")
-	func searchTracksNetworkError() async {
+	@Test
+	func 네트워크에러발생할때_searchTracks하면_에러를던지는지() async {
 		// Given
 		mockNetwork.errorToThrow = NetworkError.transport(URLError(.notConnectedToInternet))
 		let repository = TrackRepositoryImpl(networkManager: mockNetwork)
@@ -71,8 +71,8 @@ struct TrackRepositoryTests {
 
 	// MARK: - fetchTopTracks Tests
 
-	@Test("태그 기반 Top 트랙 조회가 정상적으로 동작하는가")
-	func fetchTopTracksSuccess() async throws {
+	@Test
+	func 태그기반Top트랙조회가정상적으로동작할때_fetchTopTracks하면_성공하는지() async throws {
 		// Given
 		let topTracksDTO = TagTopTracksResponseDTO(
 			tracks: TagTrackListDTO(
@@ -116,8 +116,8 @@ struct TrackRepositoryTests {
 
 	// MARK: - fetchSimilarTracks Tests
 
-	@Test("유사 트랙 조회가 정상적으로 동작하는가")
-	func fetchSimilarTracksSuccess() async throws {
+	@Test
+	func 유사트랙조회가정상적으로동작할때_fetchSimilarTracks하면_성공하는지() async throws {
 		// Given
 		let targetTrack = Track(title: "Original", artist: "Artist", imageURL: nil)
 
@@ -150,8 +150,8 @@ struct TrackRepositoryTests {
 		#expect(tracks.first?.title == "Similar Track 1")
 	}
 
-	@Test("트랙 getInfo가 정상적으로 동작하는가")
-	func fetchTrackInfoSuccess() async throws {
+	@Test
+	func 트랙getInfo가정상적으로동작할때_fetchTrackInfo하면_성공하는지() async throws {
 		// Given
 		let track = Track(title: "Test Track", artist: "Test Artist", imageURL: nil)
 		let getInfoDTO = TrackInfoResponseDTO(

@@ -5,8 +5,8 @@ import UIKit
 
 @MainActor
 struct MusicDiggingViewModelTests {
-	@Test("뮤직 디깅 뷰모델이 최초 진입 시 seed와 추천곡을 함께 로드하는지 확인")
-	func given_초기추천이없을때_viewDidAppear하면_seed와추천곡을함께업데이트하는지() async throws {
+	@Test
+	func 초기추천이없을때_viewDidAppear하면_seed와추천곡을함께업데이트하는지() async throws {
 		// given
 		let seedTrack = TestDataFactory.makeTrack(id: "seed", title: "Seed", artist: "Artist")
 		let recommendations = [
@@ -34,8 +34,8 @@ struct MusicDiggingViewModelTests {
 		#expect(useCase.requestedTracks == [seedTrack])
 	}
 
-	@Test("뮤직 디깅 뷰모델이 이미 추천곡을 가진 상태면 캐시를 재사용하는지 확인")
-	func given_이미추천곡이캐시된상태일때_viewDidAppear하면_재조회없이캐시를표시하는지() async throws {
+	@Test
+	func 이미추천곡이캐시된상태일때_viewDidAppear하면_재조회없이캐시를표시하는지() async throws {
 		// given
 		let seedTrack = TestDataFactory.makeTrack(id: "seed", title: "Seed", artist: "Artist")
 		let recommendations = [TestDataFactory.makeTrack(id: "1", title: "Rec 1", artist: "Artist 1")]
@@ -66,8 +66,8 @@ struct MusicDiggingViewModelTests {
 		#expect(view.loadingStates.isEmpty)
 	}
 
-	@Test("뮤직 디깅 뷰모델이 빈 추천 결과를 받으면 에러를 표시하는지 확인")
-	func given_추천결과가비어있을때_viewDidAppear하면_에러메시지를표시하는지() async throws {
+	@Test
+	func 추천결과가비어있을때_viewDidAppear하면_에러메시지를표시하는지() async throws {
 		// given
 		let seedTrack = TestDataFactory.makeTrack(id: "seed", title: "Seed", artist: "Artist")
 		let view = SpyMusicDiggingView()
@@ -90,8 +90,8 @@ struct MusicDiggingViewModelTests {
 		#expect(view.recommendationHistory.last?.isEmpty == true)
 	}
 
-	@Test("뮤직 디깅 뷰모델이 추천곡 선택 시 seed를 교체하고 다시 로드하는지 확인")
-	func given_추천곡이선택될때_didSelectRecommendation하면_seed를교체하고재추천을로드하는지() async throws {
+	@Test
+	func 추천곡이선택될때_didSelectRecommendation하면_seed를교체하고재추천을로드하는지() async throws {
 		// given
 		let seedTrack = TestDataFactory.makeTrack(id: "seed", title: "Seed", artist: "Artist")
 		let firstRecommendations = [
@@ -129,8 +129,8 @@ struct MusicDiggingViewModelTests {
 		#expect(useCase.requestedTracks.map(\.id) == ["seed", "2"])
 	}
 
-	@Test("뮤직 디깅 뷰모델이 seed 트랙 탭을 coordinator에 전달하는지 확인")
-	func given_seed트랙이탭될때_didTapSeedTrack하면_coordinator에선택트랙을전달하는지() {
+	@Test
+	func seed트랙이탭될때_didTapSeedTrack하면_coordinator에선택트랙을전달하는지() {
 		// given
 		let seedTrack = TestDataFactory.makeTrack(id: "seed", title: "Seed", artist: "Artist")
 		let view = SpyMusicDiggingView()

@@ -17,8 +17,8 @@ struct WeatherTagMapperTests {
 		self.mapper = WeatherTagMapper()
 	}
 
-	@Test("thunderstorm은 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapThunderstorm() {
+	@Test
+	func 날씨가Thunderstorm일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .thunderstorm
 		let expectedTags = ["rock", "metal", "dark ambient", "storm"]
@@ -30,8 +30,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("drizzle은 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapDrizzle() {
+	@Test
+	func 날씨가Drizzle일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .drizzle
 		let expectedTags = ["acoustic", "chill", "folk", "mellow"]
@@ -43,8 +43,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("rain은 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapRain() {
+	@Test
+	func 날씨가Rain일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .rain
 		let expectedTags = ["jazz", "blues", "lofi", "piano", "sad"]
@@ -56,8 +56,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("snow는 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapSnow() {
+	@Test
+	func 날씨가Snow일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .snow
 		let expectedTags = ["christmas", "classical", "winter", "ambient"]
@@ -69,8 +69,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("atmosphere는 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapAtmosphere() {
+	@Test
+	func 날씨가Atmosphere일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .atmosphere
 		let expectedTags = ["dream pop", "shoegaze", "ambient", "electronic"]
@@ -82,8 +82,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("clear는 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapClear() {
+	@Test
+	func 날씨가Clear일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .clear
 		let expectedTags = ["pop", "dance", "summer", "happy", "driving"]
@@ -95,8 +95,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("clouds는 정해진 태그 셋 중 하나로 매핑되는가")
-	func mapClouds() {
+	@Test
+	func 날씨가Clouds일때_map하면_매핑된태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .clouds
 		let expectedTags = ["indie", "r&b", "soul", "soft pop"]
@@ -108,8 +108,8 @@ struct WeatherTagMapperTests {
 		#expect(expectedTags.contains(tag))
 	}
 
-	@Test("unknown은 항상 pop으로 매핑되는가")
-	func mapUnknown() {
+	@Test
+	func 알수없는날씨일때_map하면_기본태그를반환하는지() {
 		// Given
 		let condition: WeatherCondition = .unknown
 

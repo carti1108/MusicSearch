@@ -11,8 +11,8 @@ struct FetchChartTopTracksUseCaseTests {
 		self.mockTrackRepository = MockTrackRepository()
 	}
 
-	@Test("차트 트랙 유스케이스가 상세 정보를 반영한 결과를 반환하는지 확인")
-	mutating func given_차트트랙조회결과가있을때_execute하면_상세정보가반영된트랙을반환하는지() async throws {
+	@Test
+	mutating func 차트트랙조회결과가있을때_execute하면_상세정보가반영된트랙을반환하는지() async throws {
 		// given
 		let rawTracks = [
 			TestDataFactory.makeTrack(id: "1", title: "Track 1", artist: "Artist 1"),
@@ -42,8 +42,8 @@ struct FetchChartTopTracksUseCaseTests {
 		#expect(self.mockTrackRepository.fetchTrackInfoCallCount == 2)
 	}
 
-	@Test("차트 트랙 유스케이스가 일부 상세정보 조회 실패 시 원본 트랙을 유지하는지 확인")
-	mutating func given_상세정보조회에일부실패가있을때_execute하면_원본트랙을유지하는지() async throws {
+	@Test
+	mutating func 상세정보조회에일부실패가있을때_execute하면_원본트랙을유지하는지() async throws {
 		// given
 		enum TestError: Error {
 			case failed
@@ -78,8 +78,8 @@ struct FetchChartTopTracksUseCaseTests {
 		#expect(tracks[1] == secondTrack)
 	}
 
-	@Test("차트 트랙 유스케이스가 빈 결과를 그대로 반환하는지 확인")
-	mutating func given_차트트랙이비어있을때_execute하면_빈배열을반환하는지() async throws {
+	@Test
+	mutating func 차트트랙이비어있을때_execute하면_빈배열을반환하는지() async throws {
 		// given
 		self.mockChartRepository.fetchTopTracksResult = .success([])
 		let useCase = FetchChartTopTracksUseCaseImpl(
@@ -95,8 +95,8 @@ struct FetchChartTopTracksUseCaseTests {
 		#expect(self.mockTrackRepository.fetchTrackInfoCallCount == 0)
 	}
 
-	@Test("차트 트랙 유스케이스가 repository 에러를 전파하는지 확인")
-	mutating func given_차트repository에서에러가발생할때_execute하면_에러를전파하는지() async {
+	@Test
+	mutating func 차트repository에서에러가발생할때_execute하면_에러를전파하는지() async {
 		// given
 		enum TestError: Error {
 			case failed

@@ -17,8 +17,8 @@ struct SearchTrackUseCaseTests {
 		self.mockRepository = MockTrackRepository()
 	}
 
-	@Test("정상적인 쿼리로 트랙 검색이 동작하는가")
-	mutating func executeSuccess() async throws {
+	@Test
+	mutating func 위치와날씨정보를순차적으로잘가져올수있을때_execute하면_성공하는지() async throws {
 		// Given
 		let expectedTracks = [
 			Track(title: "Track 1", artist: "Artist 1", imageURL: nil),
@@ -40,8 +40,8 @@ struct SearchTrackUseCaseTests {
 		#expect(mockRepository.lastSearchTracksQuery == "test query")
 	}
 
-	@Test("빈 쿼리를 입력하면 빈 배열을 반환하는가")
-	mutating func executeWithEmptyQuery() async throws {
+	@Test
+	mutating func 빈검색어일때_execute하면_빈결과를반환하는지() async throws {
 		// Given
 		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
 
@@ -54,8 +54,8 @@ struct SearchTrackUseCaseTests {
 		#expect(mockRepository.searchTracksCallCount == 0)
 	}
 
-	@Test("공백만 있는 쿼리를 입력하면 빈 배열을 반환하는가")
-	mutating func executeWithWhitespaceQuery() async throws {
+	@Test
+	mutating func 공백검색어일때_execute하면_빈결과를반환하는지() async throws {
 		// Given
 		let useCase = SearchTrackUseCaseImpl(trackRepository: mockRepository)
 
@@ -68,8 +68,8 @@ struct SearchTrackUseCaseTests {
 		#expect(mockRepository.searchTracksCallCount == 0)
 	}
 
-	@Test("Repository에서 에러가 발생하면 에러를 전파하는가")
-	mutating func executeWithError() async {
+	@Test
+	mutating func 검색중네트워크에러가발생할때_execute하면_에러를던지는지() async {
 		// Given
 		enum TestError: Error {
 			case testError

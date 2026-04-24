@@ -17,8 +17,8 @@ struct FetchTracksByTagUseCaseTests {
 		self.mockRepository = MockTrackRepository()
 	}
 
-	@Test("태그로 트랙 조회가 정상적으로 동작하는가")
-	mutating func executeSuccess() async throws {
+	@Test
+	mutating func 위치와날씨정보를순차적으로잘가져올수있을때_execute하면_성공하는지() async throws {
 		// Given
 		let expectedTracks = [
 			Track(title: "Chill Track 1", artist: "Artist 1", imageURL: nil),
@@ -39,8 +39,8 @@ struct FetchTracksByTagUseCaseTests {
 		#expect(mockRepository.lastFetchTopTracksTag == "chill")
 	}
 
-	@Test("빈 태그를 입력하면 빈 배열을 반환하는가")
-	mutating func executeWithEmptyTag() async throws {
+	@Test
+	mutating func 빈태그일때_execute하면_빈결과를반환하는지() async throws {
 		// Given
 		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 
@@ -52,8 +52,8 @@ struct FetchTracksByTagUseCaseTests {
 		#expect(mockRepository.fetchTopTracksCallCount == 0)
 	}
 
-	@Test("공백만 있는 태그를 입력하면 빈 배열을 반환하는가")
-	mutating func executeWithWhitespaceTag() async throws {
+	@Test
+	mutating func 공백태그일때_execute하면_빈결과를반환하는지() async throws {
 		// Given
 		let useCase = FetchTracksByTagUseCaseImpl(trackRepository: mockRepository)
 
@@ -65,8 +65,8 @@ struct FetchTracksByTagUseCaseTests {
 		#expect(mockRepository.fetchTopTracksCallCount == 0)
 	}
 
-	@Test("다양한 태그로 조회가 가능한가")
-	mutating func executeWithVariousTags() async throws {
+	@Test
+	mutating func 다양한형태의태그일때_execute하면_정상적으로트랙을반환하는지() async throws {
 		// Given
 		mockRepository.fetchTopTracksResult = .success([
 			Track(title: "Track", artist: "Artist", imageURL: nil)
@@ -83,8 +83,8 @@ struct FetchTracksByTagUseCaseTests {
 		#expect(mockRepository.fetchTopTracksCallCount == tags.count)
 	}
 
-	@Test("Repository에서 에러가 발생하면 에러를 전파하는가")
-	mutating func executeWithError() async {
+	@Test
+	mutating func 검색중네트워크에러가발생할때_execute하면_에러를던지는지() async {
 		// Given
 		enum TestError: Error {
 			case testError

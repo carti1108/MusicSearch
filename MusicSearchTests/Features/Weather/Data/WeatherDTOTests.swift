@@ -11,8 +11,8 @@ import Foundation
 
 struct WeatherDTOTests {
 
-	@Test("날씨 ID 200-232는 Thunderstorm으로 변환")
-	func convertThunderstorm() {
+	@Test
+	func 날씨ID가200에서232사이일때_매핑하면_Thunderstorm으로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 200, main: "Thunderstorm", description: "thunderstorm", icon: "11d")],
@@ -27,8 +27,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .thunderstorm)
 	}
 
-	@Test("날씨 ID 300-321은 Drizzle로 변환")
-	func convertDrizzle() {
+	@Test
+	func 날씨ID가300에서321사이일때_매핑하면_Drizzle로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 310, main: "Drizzle", description: "drizzle", icon: "09d")],
@@ -43,8 +43,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .drizzle)
 	}
 
-	@Test("날씨 ID 500-531은 Rain으로 변환")
-	func convertRain() {
+	@Test
+	func 날씨ID가500에서531사이일때_매핑하면_Rain으로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 501, main: "Rain", description: "rain", icon: "10d")],
@@ -59,8 +59,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .rain)
 	}
 
-	@Test("날씨 ID 600-622는 Snow로 변환")
-	func convertSnow() {
+	@Test
+	func 날씨ID가600에서622사이일때_매핑하면_Snow로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 600, main: "Snow", description: "snow", icon: "13d")],
@@ -75,8 +75,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .snow)
 	}
 
-	@Test("날씨 ID 701-781은 Atmosphere로 변환")
-	func convertAtmosphere() {
+	@Test
+	func 날씨ID가701에서781사이일때_매핑하면_Atmosphere로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 721, main: "Haze", description: "haze", icon: "50d")],
@@ -91,8 +91,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .atmosphere)
 	}
 
-	@Test("날씨 ID 800은 Clear로 변환")
-	func convertClear() {
+	@Test
+	func 날씨ID가800일때_매핑하면_Clear로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 800, main: "Clear", description: "clear sky", icon: "01d")],
@@ -107,8 +107,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .clear)
 	}
 
-	@Test("날씨 ID 801-804는 Clouds로 변환")
-	func convertClouds() {
+	@Test
+	func 날씨ID가801에서804사이일때_매핑하면_Clouds로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 802, main: "Clouds", description: "clouds", icon: "03d")],
@@ -123,8 +123,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .clouds)
 	}
 
-	@Test("범위 밖 날씨 ID는 Unknown으로 변환")
-	func convertUnknown() {
+	@Test
+	func 범위를벗어난날씨ID일때_매핑하면_Unknown으로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 999, main: "Unknown", description: "unknown", icon: "99d")],
@@ -139,8 +139,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .unknown)
 	}
 
-	@Test("경계값 - ID 232(Thunderstorm 최대)")
-	func boundaryThunderstormMax() {
+	@Test
+	func 날씨ID가경계값인232일때_매핑하면_Thunderstorm으로변환되는지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 232, main: "Thunderstorm", description: "test", icon: "11d")],
@@ -155,8 +155,8 @@ struct WeatherDTOTests {
 		#expect(weather.condition == .thunderstorm)
 	}
 
-	@Test("경계값 - ID 233은 Thunderstorm이 아님")
-	func boundaryThunderstormOverflow() {
+	@Test
+	func 날씨ID가경계값을벗어난233일때_매핑하면_Thunderstorm이아닌지() {
 		// Given
 		let dto = WeatherResponseDTO(
 			weather: [.init(id: 233, main: "Test", description: "test", icon: "test")],

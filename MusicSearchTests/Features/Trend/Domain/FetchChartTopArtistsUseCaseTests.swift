@@ -9,8 +9,8 @@ struct FetchChartTopArtistsUseCaseTests {
 		self.mockChartRepository = MockChartRepository()
 	}
 
-	@Test("차트 아티스트 유스케이스가 repository 결과를 그대로 반환하는지 확인")
-	mutating func given_아티스트차트조회결과가있을때_execute하면_그대로반환하는지() async throws {
+	@Test
+	mutating func 아티스트차트조회결과가있을때_execute하면_그대로반환하는지() async throws {
 		// given
 		let expectedArtists = [
 			TestDataFactory.makeArtist(name: "Artist A", listeners: "1000"),
@@ -27,8 +27,8 @@ struct FetchChartTopArtistsUseCaseTests {
 		#expect(self.mockChartRepository.fetchTopArtistsCallCount == 1)
 	}
 
-	@Test("차트 아티스트 유스케이스가 repository 에러를 전파하는지 확인")
-	mutating func given_repository에서에러가발생할때_execute하면_에러를전파하는지() async {
+	@Test
+	mutating func repository에서에러가발생할때_execute하면_에러를전파하는지() async {
 		// given
 		enum TestError: Error {
 			case failed

@@ -20,8 +20,8 @@ struct WeatherRepositoryTests {
 		self.mockConfig = MockWeatherConfiguration()
 	}
 
-	@Test("네트워크 응답이 정상적일 때, Weather Domain Entity로 잘 변환되는가")
-	func fetchSuccess() async throws {
+	@Test
+	func 네트워크응답이정상적일때_fetchCurrentWeather하면_Weather도메인엔티티로잘변환되는지() async throws {
 		// Given
 		let dummyDTO = WeatherResponseDTO(
 			weather: [.init(id: 800, main: "Clear", description: "sunny", icon: "01d")],
@@ -44,8 +44,8 @@ struct WeatherRepositoryTests {
 		#expect(weather.condition == .clear)
 	}
 
-	@Test("API Key가 비어있으면 configurationError를 던지는가")
-	mutating func invalidAPIKey() async {
+	@Test
+	mutating func APIKey가비어있을때_fetchCurrentWeather하면_configurationError를던지는지() async {
 		// Given
 		mockConfig.apiKey = ""
 		let repository = WeatherRepositoryImpl(networkManager: mockNetwork, configuration: mockConfig)
@@ -56,8 +56,8 @@ struct WeatherRepositoryTests {
 		}
 	}
 
-	@Test("Base URL이 잘못되었으면 configurationError를 던지는가")
-	mutating func invalidURL() async {
+	@Test
+	mutating func BaseURL이잘못되었을때_fetchCurrentWeather하면_configurationError를던지는지() async {
 		// Given
 		mockConfig.baseURL = ""
 		let repository = WeatherRepositoryImpl(networkManager: mockNetwork, configuration: mockConfig)
@@ -68,8 +68,8 @@ struct WeatherRepositoryTests {
 		}
 	}
 
-	@Test("네트워크 에러 발생 시 WeatherError.networkError로 변환되는가")
-	func networkFailure() async {
+	@Test
+	func 네트워크에러가발생할때_fetchCurrentWeather하면_networkError로변환되는지() async {
 		// Given
 		let realNetworkError = NetworkError.transport(URLError(.notConnectedToInternet))
 
@@ -89,8 +89,8 @@ struct WeatherRepositoryTests {
 		}
 	}
 
-	@Test("음수 온도도 정상적으로 처리되는가")
-	func negativeTemperature() async throws {
+	@Test
+	func 음수온도응답이올때_fetchCurrentWeather하면_정상적으로처리되는지() async throws {
 		// Given
 		let dummyDTO = WeatherResponseDTO(
 			weather: [.init(id: 600, main: "Snow", description: "heavy snow", icon: "13d")],
@@ -110,8 +110,8 @@ struct WeatherRepositoryTests {
 		#expect(weather.cityName == "Moscow")
 	}
 
-	@Test("weather 배열이 비어있을 때 기본값으로 처리되는가")
-	func emptyWeatherArray() async throws {
+	@Test
+	func weather배열이비어있을때_fetchCurrentWeather하면_기본값으로처리되는지() async throws {
 		// Given
 		let dummyDTO = WeatherResponseDTO(
 			weather: [],

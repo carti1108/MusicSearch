@@ -13,8 +13,8 @@ import CoreLocation
 struct LocationRepositoryTests {
 	let mockManager = MockLocationManager()
 
-	@Test("정상적으로 권한이 있고 위치를 빠르게 가져오는 경우")
-	func fetchSuccess() async throws {
+	@Test
+	func 네트워크응답이정상적일때_fetchCurrentWeather하면_Weather도메인엔티티로잘변환되는지() async throws {
 		// Given
 		mockManager.authorizationStatus = .authorizedWhenInUse
 		mockManager.locationToReturn = CLLocation(latitude: 37.5, longitude: 127.0)
@@ -28,8 +28,8 @@ struct LocationRepositoryTests {
 		#expect(result.longitude == 127.0)
 	}
 
-	@Test("위치 권한이 거부(.denied)되었을 때 에러를 던지는가")
-	func permissionDenied() async {
+	@Test
+	func 위치권한이거부되었을때_fetchCurrentLocation하면_에러를던지는지() async {
 		// Given
 		mockManager.authorizationStatus = .denied
 		let repository = LocationRepositoryImpl(locationManager: mockManager)
@@ -40,8 +40,8 @@ struct LocationRepositoryTests {
 		}
 	}
 
-	@Test("위치 요청 시간이 타임아웃 설정을 초과하면 실패하는가")
-	func timeoutOccurs() async {
+	@Test
+	func 위치요청시간이타임아웃설정을초과할때_fetchCurrentLocation하면_실패하는지() async {
 		// Given
 		mockManager.authorizationStatus = .authorizedWhenInUse
 		mockManager.locationToReturn = CLLocation(latitude: 37.5, longitude: 127.0)
@@ -54,8 +54,8 @@ struct LocationRepositoryTests {
 		}
 	}
 
-	@Test("권한이 미결정(.notDetermined)일 때 요청 메서드를 호출하는가")
-	func requestPermissionIfNeeded() async throws {
+	@Test
+	func 권한이미결정일때_fetchCurrentLocation하면_요청메서드를호출하는지() async throws {
 		// Given
 		mockManager.authorizationStatus = .notDetermined
 		mockManager.locationToReturn = CLLocation(latitude: 10.0, longitude: 10.0)

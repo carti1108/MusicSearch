@@ -3,8 +3,8 @@ import Foundation
 @testable import MusicSearch
 
 struct TrackEnrichmentFallbackTests {
-	@Test("검색 유스케이스가 상세정보 일부 실패 시 원본 트랙을 유지하는지 확인")
-	func given_상세정보조회가일부실패할때_searchTrackUseCase를실행하면_실패한트랙은원본을유지하는지() async throws {
+	@Test
+	func 상세정보조회가일부실패할때_searchTrackUseCase를실행하면_실패한트랙은원본을유지하는지() async throws {
 		// given
 		enum TestError: Error {
 			case failed
@@ -37,8 +37,8 @@ struct TrackEnrichmentFallbackTests {
 		#expect(result.tracks[1] == secondTrack)
 	}
 
-	@Test("태그 유스케이스가 상세정보 일부 실패 시 원본 트랙을 유지하는지 확인")
-	func given_상세정보조회가일부실패할때_fetchTracksByTagUseCase를실행하면_실패한트랙은원본을유지하는지() async throws {
+	@Test
+	func 상세정보조회가일부실패할때_fetchTracksByTagUseCase를실행하면_실패한트랙은원본을유지하는지() async throws {
 		// given
 		enum TestError: Error {
 			case failed
@@ -70,8 +70,8 @@ struct TrackEnrichmentFallbackTests {
 		#expect(tracks[1] == secondTrack)
 	}
 
-	@Test("유사곡 유스케이스가 상세정보 일부 실패 시 원본 트랙을 유지하는지 확인")
-	func given_상세정보조회가일부실패할때_fetchSimilarTracksUseCase를실행하면_실패한트랙은원본을유지하는지() async throws {
+	@Test
+	func 상세정보조회가일부실패할때_fetchSimilarTracksUseCase를실행하면_실패한트랙은원본을유지하는지() async throws {
 		// given
 		enum TestError: Error {
 			case failed

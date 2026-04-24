@@ -19,8 +19,8 @@ struct FetchMusicForWeatherUseCaseTests {
 		self.mockTrackUseCase = MockFetchTracksByTagUseCase()
 	}
 
-	@Test("날씨, 태그, 트랙이 정상적으로 조합되어 WeatherMusicCuration을 반환하는가")
-	mutating func executeSuccess() async throws {
+	@Test
+	mutating func 위치와날씨정보를순차적으로잘가져올수있을때_execute하면_성공하는지() async throws {
 		// Given
 		let expectedWeather = Weather(
 			temperature: 20.0,
@@ -58,8 +58,8 @@ struct FetchMusicForWeatherUseCaseTests {
 		#expect(mockTrackUseCase.lastTag == curation.moodTag)
 	}
 
-	@Test("날씨 UseCase에서 에러가 발생하면 에러를 전파하는가")
-	mutating func weatherUseCaseError() async {
+	@Test
+	mutating func 날씨조회중에러가발생할때_execute하면_에러를던지는지() async {
 		// Given
 		enum TestError: Error {
 			case weatherFailed
@@ -80,8 +80,8 @@ struct FetchMusicForWeatherUseCaseTests {
 		#expect(mockTrackUseCase.executeCallCount == 0)
 	}
 
-	@Test("트랙 UseCase에서 에러가 발생하면 에러를 전파하는가")
-	mutating func trackUseCaseError() async {
+	@Test
+	mutating func 트랙조회중에러가발생할때_execute하면_에러를던지는지() async {
 		// Given
 		enum TestError: Error {
 			case trackFetchFailed
@@ -112,8 +112,8 @@ struct FetchMusicForWeatherUseCaseTests {
 		#expect(mockTrackUseCase.executeCallCount == 1)
 	}
 
-	@Test("트랙이 빈 배열이어도 정상적으로 WeatherMusicCuration을 반환하는가")
-	mutating func executeWithEmptyTracks() async throws {
+	@Test
+	mutating func 추천트랙이없을때_execute하면_빈트랙을가진결과를반환하는지() async throws {
 		// Given
 		let expectedWeather = Weather(
 			temperature: 5.0,
@@ -143,8 +143,8 @@ struct FetchMusicForWeatherUseCaseTests {
 		#expect(validTags.contains(curation.moodTag))
 	}
 
-	@Test("clear 날씨 조건에서 적절한 태그가 매핑되는가")
-	mutating func clearWeatherMapping() async throws {
+	@Test
+	mutating func 날씨가Clear일때_execute하면_Pop태그기반의트랙을반환하는지() async throws {
 		// Given
 		let expectedWeather = Weather(
 			temperature: 25.0,

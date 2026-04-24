@@ -5,8 +5,8 @@ import UIKit
 
 @MainActor
 struct ChartViewModelTests {
-	@Test("차트 뷰모델이 트랙 차트를 podium과 list로 분리해 표시하는지 확인")
-	func given_트랙차트조회가성공할때_viewDidLoad하면_podium과list를구성하는지() async throws {
+	@Test
+	func 트랙차트조회가성공할때_viewDidLoad하면_podium과list를구성하는지() async throws {
 		// given
 		let view = SpyChartView()
 		let trackUseCase = MockFetchChartTopTracksUseCase()
@@ -33,8 +33,8 @@ struct ChartViewModelTests {
 		#expect(view.listHistory.last?.map(\.title) == ["Track 4", "Track 5"])
 	}
 
-	@Test("차트 뷰모델이 아티스트 세그먼트 변경 시 아티스트 차트를 로드하는지 확인")
-	func given_아티스트세그먼트로변경할때_didChangeSegment하면_아티스트차트를로드하는지() async throws {
+	@Test
+	func 아티스트세그먼트로변경할때_didChangeSegment하면_아티스트차트를로드하는지() async throws {
 		// given
 		let view = SpyChartView()
 		let trackUseCase = MockFetchChartTopTracksUseCase()
@@ -67,8 +67,8 @@ struct ChartViewModelTests {
 		#expect(view.podiumHistory.last?.map(\.title) == ["Artist 2", "Artist 1", "Artist 3"])
 	}
 
-	@Test("차트 뷰모델이 캐시된 세그먼트로 복귀할 때 재조회하지 않는지 확인")
-	func given_세그먼트데이터가캐시되어있을때_didChangeSegment하면_재조회없이캐시를사용하는지() async throws {
+	@Test
+	func 세그먼트데이터가캐시되어있을때_didChangeSegment하면_재조회없이캐시를사용하는지() async throws {
 		// given
 		let view = SpyChartView()
 		let trackUseCase = MockFetchChartTopTracksUseCase()
@@ -104,8 +104,8 @@ struct ChartViewModelTests {
 		#expect(view.podiumHistory.last?.map(\.title) == ["Track 2", "Track 1", "Track 3"])
 	}
 
-	@Test("차트 뷰모델이 새로고침 시 현재 세그먼트 캐시를 무효화하고 다시 로드하는지 확인")
-	func given_현재세그먼트를새로고침할때_didTapRefresh하면_캐시를무효화하고재조회하는지() async throws {
+	@Test
+	func 현재세그먼트를새로고침할때_didTapRefresh하면_캐시를무효화하고재조회하는지() async throws {
 		// given
 		let view = SpyChartView()
 		let trackUseCase = MockFetchChartTopTracksUseCase()
@@ -145,8 +145,8 @@ struct ChartViewModelTests {
 		#expect(trackUseCase.executeCallCount == 2)
 	}
 
-	@Test("차트 뷰모델이 아이템이 3개 미만이면 빈 섹션을 표시하는지 확인")
-	func given_차트아이템이세개미만일때_viewDidLoad하면_빈섹션을표시하는지() async throws {
+	@Test
+	func 차트아이템이세개미만일때_viewDidLoad하면_빈섹션을표시하는지() async throws {
 		// given
 		let view = SpyChartView()
 		let trackUseCase = MockFetchChartTopTracksUseCase()
@@ -171,8 +171,8 @@ struct ChartViewModelTests {
 		#expect(didRenderEmpty)
 	}
 
-	@Test("차트 뷰모델이 선택한 아이템을 coordinator에 전달하는지 확인")
-	func given_차트아이템이선택될때_didSelectItem하면_coordinator에선택아이템을전달하는지() async throws {
+	@Test
+	func 차트아이템이선택될때_didSelectItem하면_coordinator에선택아이템을전달하는지() async throws {
 		// given
 		let view = SpyChartView()
 		let trackUseCase = MockFetchChartTopTracksUseCase()
@@ -200,8 +200,8 @@ struct ChartViewModelTests {
 		#expect(coordinator.selectedItems.first?.title == "Track 2")
 	}
 
-	@Test("차트 뷰모델이 로딩 실패 시 에러 메시지를 표시하는지 확인")
-	func given_차트로딩에실패할때_viewDidLoad하면_에러메시지를표시하는지() async throws {
+	@Test
+	func 차트로딩에실패할때_viewDidLoad하면_에러메시지를표시하는지() async throws {
 		// given
 		enum TestError: Error {
 			case failed

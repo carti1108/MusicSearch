@@ -10,8 +10,8 @@ struct ChartRepositoryTests {
 		self.mockNetworkManager = MockNetworkManager()
 	}
 
-	@Test("차트 트랙 repository가 DTO를 도메인 모델로 변환하는지 확인")
-	mutating func given_차트트랙DTO가주어질때_fetchTopTracks하면_도메인으로변환하는지() async throws {
+	@Test
+	mutating func 차트트랙DTO가주어질때_fetchTopTracks하면_도메인으로변환하는지() async throws {
 		// given
 		self.mockNetworkManager.resultDTOByMethod["chart.gettoptracks"] = TestDataFactory.makeChartTopTracksResponseDTO(
 			tracks: [
@@ -37,8 +37,8 @@ struct ChartRepositoryTests {
 		#expect(self.mockNetworkManager.requestedMethods == ["chart.gettoptracks"])
 	}
 
-	@Test("차트 아티스트 repository가 DTO를 도메인 모델로 변환하는지 확인")
-	mutating func given_차트아티스트DTO가주어질때_fetchTopArtists하면_도메인으로변환하는지() async throws {
+	@Test
+	mutating func 차트아티스트DTO가주어질때_fetchTopArtists하면_도메인으로변환하는지() async throws {
 		// given
 		self.mockNetworkManager.resultDTOByMethod["chart.gettopartists"] = TestDataFactory.makeChartTopArtistsResponseDTO(
 			artists: [
@@ -63,8 +63,8 @@ struct ChartRepositoryTests {
 		#expect(self.mockNetworkManager.requestedMethods == ["chart.gettopartists"])
 	}
 
-	@Test("차트 repository가 네트워크 에러를 그대로 전파하는지 확인")
-	mutating func given_네트워크에러가발생할때_fetchTopTracks하면_에러를전파하는지() async {
+	@Test
+	mutating func 네트워크에러가발생할때_fetchTopTracks하면_에러를전파하는지() async {
 		// given
 		self.mockNetworkManager.errorToThrow = NetworkError.transport(URLError(.notConnectedToInternet))
 		let repository = ChartRepositoryImpl(networkManager: self.mockNetworkManager)

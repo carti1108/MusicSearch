@@ -24,8 +24,8 @@ struct FetchCurrentWeatherUseCaseTests {
 		)
 	}
 
-	@Test("위치와 날씨 정보를 순차적으로 잘 가져오는지 확인")
-	func executeSuccess() async throws {
+	@Test
+	func 위치와날씨정보를순차적으로잘가져올수있을때_execute하면_성공하는지() async throws {
 		// Given
 		mockLocationRepo.result = (latitude: 37.5, longitude: 127.0)
 		mockWeatherRepo.result = Weather(
@@ -46,8 +46,8 @@ struct FetchCurrentWeatherUseCaseTests {
 		#expect(mockWeatherRepo.receivedLon == 127.0)
 	}
 
-	@Test("위치 정보를 가져오는데 실패하면 즉시 에러를 던지고 중단하는가")
-	func locationFailure() async {
+	@Test
+	func 위치정보를가져오는데실패할때_execute하면_즉시에러를던지고중단하는지() async {
 		// Given
 		mockLocationRepo.errorToThrow = WeatherError.locationFetchFailed
 
@@ -59,8 +59,8 @@ struct FetchCurrentWeatherUseCaseTests {
 		#expect(mockWeatherRepo.receivedLat == nil)
 	}
 
-	@Test("위치는 찾았으나 날씨 정보를 가져오는데 실패하면 에러를 던지는가")
-	func weatherFailure() async {
+	@Test
+	func 위치는찾았으나날씨정보를가져오는데실패할때_execute하면_에러를던지는지() async {
 		// Given
 		mockLocationRepo.result = (latitude: 37.5, longitude: 127.0)
 		mockWeatherRepo.errorToThrow = WeatherError.networkError("Time out")

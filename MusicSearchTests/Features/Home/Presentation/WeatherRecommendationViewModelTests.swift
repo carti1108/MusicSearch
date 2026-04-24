@@ -8,8 +8,8 @@ private struct StubLocalizedError: LocalizedError {
 
 @MainActor
 struct WeatherRecommendationViewModelTests {
-	@Test("날씨 추천 뷰모델이 초기 진입 시 날씨와 트랙을 로드하는지 확인")
-	func given_초기진입성공시_viewDidLoad하면_로딩후날씨와트랙을업데이트하는지() async throws {
+	@Test
+	func 초기진입성공시_viewDidLoad하면_로딩후날씨와트랙을업데이트하는지() async throws {
 		// given
 		let view = SpyWeatherRecommendationView()
 		let useCase = MockFetchMusicForWeatherUseCase()
@@ -40,8 +40,8 @@ struct WeatherRecommendationViewModelTests {
 		#expect((view.errorMessages.last ?? nil) == nil)
 	}
 
-	@Test("날씨 추천 뷰모델이 이미 로드한 데이터가 있으면 캐시를 재사용하는지 확인")
-	func given_이미데이터가로드된상태일때_viewDidLoad하면_재조회없이캐시를표시하는지() async throws {
+	@Test
+	func 이미데이터가로드된상태일때_viewDidLoad하면_재조회없이캐시를표시하는지() async throws {
 		// given
 		let view = SpyWeatherRecommendationView()
 		let useCase = MockFetchMusicForWeatherUseCase()
@@ -73,8 +73,8 @@ struct WeatherRecommendationViewModelTests {
 		#expect(view.loadingStates.isEmpty)
 	}
 
-	@Test("날씨 추천 뷰모델이 새로고침 시 다시 로드하는지 확인")
-	func given_기존데이터가있을때_didTapRefresh하면_최신결과로다시업데이트하는지() async throws {
+	@Test
+	func 기존데이터가있을때_didTapRefresh하면_최신결과로다시업데이트하는지() async throws {
 		// given
 		let view = SpyWeatherRecommendationView()
 		let useCase = MockFetchMusicForWeatherUseCase()
@@ -111,8 +111,8 @@ struct WeatherRecommendationViewModelTests {
 		#expect(view.updatedTracksHistory.last?.first?.title == "Track 2")
 	}
 
-	@Test("날씨 추천 뷰모델이 로컬라이즈드 에러 메시지를 표시하는지 확인")
-	func given_로컬라이즈드에러가발생할때_viewDidLoad하면_에러메시지를표시하는지() async {
+	@Test
+	func 로컬라이즈드에러가발생할때_viewDidLoad하면_에러메시지를표시하는지() async {
 		// given
 		let view = SpyWeatherRecommendationView()
 		let useCase = MockFetchMusicForWeatherUseCase()
@@ -130,8 +130,8 @@ struct WeatherRecommendationViewModelTests {
 		#expect(view.updatedWeathers.isEmpty)
 	}
 
-	@Test("날씨 추천 뷰모델이 유효한 트랙 선택을 coordinator에 전달하는지 확인")
-	func given_유효한인덱스가있을때_didSelectTrack하면_coordinator에선택트랙을전달하는지() async throws {
+	@Test
+	func 유효한인덱스가있을때_didSelectTrack하면_coordinator에선택트랙을전달하는지() async throws {
 		// given
 		let view = SpyWeatherRecommendationView()
 		let coordinator = SpyWeatherRecommendationCoordinator()

@@ -17,8 +17,8 @@ struct FetchSimilarTrackUseCaseTests {
 		self.mockRepository = MockTrackRepository()
 	}
 
-	@Test("유사 트랙 조회가 정상적으로 동작하는가")
-	mutating func executeSuccess() async throws {
+	@Test
+	mutating func 위치와날씨정보를순차적으로잘가져올수있을때_execute하면_성공하는지() async throws {
 		// Given
 		let targetTrack = Track(title: "Original Track", artist: "Original Artist", imageURL: nil)
 		let similarTracks = [
@@ -40,8 +40,8 @@ struct FetchSimilarTrackUseCaseTests {
 		#expect(mockRepository.lastFetchSimilarTracksTrack?.title == "Original Track")
 	}
 
-	@Test("Repository에서 빈 배열을 반환하면 빈 배열을 반환하는가")
-	mutating func executeWithEmptyResult() async throws {
+	@Test
+	mutating func 유사트랙이없을때_execute하면_빈결과를반환하는지() async throws {
 		// Given
 		let targetTrack = Track(title: "Test Track", artist: "Test Artist", imageURL: nil)
 		mockRepository.fetchSimilarTracksResult = .success([])
@@ -56,8 +56,8 @@ struct FetchSimilarTrackUseCaseTests {
 		#expect(mockRepository.fetchSimilarTracksCallCount == 1)
 	}
 
-	@Test("Repository에서 에러가 발생하면 에러를 전파하는가")
-	mutating func executeWithError() async {
+	@Test
+	mutating func 검색중네트워크에러가발생할때_execute하면_에러를던지는지() async {
 		// Given
 		enum TestError: Error {
 			case testError

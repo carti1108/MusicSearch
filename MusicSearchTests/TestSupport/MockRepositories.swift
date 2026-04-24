@@ -11,6 +11,7 @@ enum TestDoubleError: Error, Equatable {
 final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 	var resultDTO: Decodable?
 	var resultDTOByMethod: [String: Decodable] = [:]
+	var resultDTOByType: [String: Decodable] = [:]
 	var errorToThrow: Error?
 	var requestedMethods: [String] = []
 
@@ -36,6 +37,8 @@ final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 		let storedDTO: Decodable?
 		if let method = queryParameters?["method"] as? String,
 		   let dto = self.resultDTOByMethod[method] {
+			storedDTO = dto
+		} else if let dto = self.resultDTOByType[String(describing: Response.self)] {
 			storedDTO = dto
 		} else {
 			storedDTO = self.resultDTO

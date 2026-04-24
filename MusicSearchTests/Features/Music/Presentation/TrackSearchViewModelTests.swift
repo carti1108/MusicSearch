@@ -4,8 +4,8 @@ import Foundation
 
 @MainActor
 struct TrackSearchViewModelTests {
-	@Test("트랙 검색 뷰모델이 정상 검색어를 입력받으면 결과를 업데이트하는지 확인")
-	func given_정상검색어가주어질때_didUpdateSearchText하면_검색결과를업데이트하는지() async throws {
+	@Test
+	func 정상검색어가주어질때_didUpdateSearchText하면_검색결과를업데이트하는지() async throws {
 		// given
 		let view = SpyTrackSearchView()
 		let useCase = MockSearchTracksUseCase()
@@ -34,8 +34,8 @@ struct TrackSearchViewModelTests {
 		#expect((view.errorMessages.last ?? nil) == nil)
 	}
 
-	@Test("트랙 검색 뷰모델이 공백 검색어를 입력받으면 상태를 초기화하는지 확인")
-	func given_공백검색어가주어질때_didUpdateSearchText하면_검색상태를초기화하는지() async throws {
+	@Test
+	func 공백검색어가주어질때_didUpdateSearchText하면_검색상태를초기화하는지() async throws {
 		// given
 		let view = SpyTrackSearchView()
 		let useCase = MockSearchTracksUseCase()
@@ -58,8 +58,8 @@ struct TrackSearchViewModelTests {
 		#expect(useCase.executeCallCount == 0)
 	}
 
-	@Test("트랙 검색 뷰모델이 재시도 시 마지막 키워드로 다시 검색하는지 확인")
-	func given_이전검색이실패했을때_didTapRetry하면_마지막키워드로재검색하는지() async throws {
+	@Test
+	func 이전검색이실패했을때_didTapRetry하면_마지막키워드로재검색하는지() async throws {
 		// given
 		enum TestError: Error {
 			case failed
@@ -99,8 +99,8 @@ struct TrackSearchViewModelTests {
 		#expect(useCase.requests.map { $0.query } == ["retry-keyword", "retry-keyword"])
 	}
 
-	@Test("트랙 검색 뷰모델이 더 불러오기가 가능할 때 다음 페이지를 이어붙이는지 확인")
-	func given_다음페이지가존재할때_didReachListBottom하면_다음페이지결과를이어붙이는지() async throws {
+	@Test
+	func 다음페이지가존재할때_didReachListBottom하면_다음페이지결과를이어붙이는지() async throws {
 		// given
 		let view = SpyTrackSearchView()
 		let useCase = MockSearchTracksUseCase()
@@ -139,8 +139,8 @@ struct TrackSearchViewModelTests {
 		#expect(useCase.requests.map { $0.page } == [1, 2])
 	}
 
-	@Test("트랙 검색 뷰모델이 더 불러올 데이터가 없으면 추가 조회하지 않는지 확인")
-	func given_더불러올데이터가없을때_didReachListBottom하면_추가조회하지않는지() async throws {
+	@Test
+	func 더불러올데이터가없을때_didReachListBottom하면_추가조회하지않는지() async throws {
 		// given
 		let view = SpyTrackSearchView()
 		let useCase = MockSearchTracksUseCase()
@@ -168,8 +168,8 @@ struct TrackSearchViewModelTests {
 		#expect(useCase.executeCallCount == 1)
 	}
 
-	@Test("트랙 검색 뷰모델이 선택한 트랙을 coordinator에 전달하는지 확인")
-	func given_트랙이선택될때_didSelectTrack하면_coordinator에선택트랙을전달하는지() {
+	@Test
+	func 트랙이선택될때_didSelectTrack하면_coordinator에선택트랙을전달하는지() {
 		// given
 		let view = SpyTrackSearchView()
 		let useCase = MockSearchTracksUseCase()

@@ -3,8 +3,8 @@ import Foundation
 @testable import MusicSearch
 
 struct FetchMusicAppDeepLinkUseCaseTests {
-	@Test("딥링크 유스케이스가 트랙 요청을 repository에 그대로 전달하는지 확인")
-	func given_트랙이주어질때_execute하면_repository결과를반환하는지() async {
+	@Test
+	func 트랙이주어질때_execute하면_repository결과를반환하는지() async {
 		// given
 		let repository = MockMusicAppRepository()
 		let track = TestDataFactory.makeTrack(title: "Track", artist: "Artist")
@@ -23,8 +23,8 @@ struct FetchMusicAppDeepLinkUseCaseTests {
 		#expect(callCount == 1)
 	}
 
-	@Test("딥링크 유스케이스가 아티스트 요청을 repository에 그대로 전달하는지 확인")
-	func given_아티스트명이주어질때_execute하면_repository결과를반환하는지() async {
+	@Test
+	func 아티스트명이주어질때_execute하면_repository결과를반환하는지() async {
 		// given
 		let repository = MockMusicAppRepository()
 		let artist = "Artist Name"
