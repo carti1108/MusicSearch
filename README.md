@@ -20,11 +20,9 @@
 
 ## 📱 실행 화면
 
-<p align="leading">
-  <img src="https://github.com/user-attachments/assets/e7e79ffb-1256-43b5-b753-4e288b4b5279" width="150" alt="Weather Recommendation" />
-  <img src="https://github.com/user-attachments/assets/9a598c16-8af9-433a-9c75-9b4ccc9888a6" width="150" alt="Search" />
-  <img src="https://github.com/user-attachments/assets/c0ccd027-376d-44a1-b435-94b136b0846b" width="150" alt="Chart" />
-</p>
+| Weather | Search | Chart |
+| :---: | :---: |:---: |
+| <img src="https://github.com/user-attachments/assets/72dc3c6c-7321-427a-88e1-de0bd4669aa3" width="150" alt="Home" /> | <img src="https://github.com/user-attachments/assets/03e122f6-c892-4715-9211-b5bb99b70559" width="150" alt="Search" /> | <img src="https://github.com/user-attachments/assets/71496392-0bd3-443c-98e3-8d227843b7b6" width="150" alt="Chart" /> |
 
 ---
 
