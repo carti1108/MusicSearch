@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-public protocol WeatherAPIConfiguration {
+public protocol WeatherAPIConfiguration: Sendable {
 	var baseURL: String { get }
 	var apiPath: String { get }
 	var apiKey: String { get }
