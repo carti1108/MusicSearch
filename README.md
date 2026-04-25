@@ -95,21 +95,6 @@ MusicSearch
 
 ---
 
-## 🔐 실행 준비
-
-`Config.xcconfig`에 아래 key 설정. `Info.plist`를 통해 앱에서 사용.
-
-```text
-OPENWEATHERMAP_API_KEY = <OpenWeatherMap API Key>
-LASTFM_API_KEY = <Last.fm API Key>
-SPOTIFY_CLIENT_ID = <Spotify Client ID>
-SPOTIFY_CLIENT_SECRET = <Spotify Client Secret>
-```
-
-Xcode에서 `MusicSearch.xcodeproj`를 열고 `MusicSearch` scheme 실행.
-
----
-
 ## 🧭 아키텍처
 
 RIBs 기반 feature를 `Builder / Interactor / Router / View` 단위로 분리.
