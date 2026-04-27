@@ -14,11 +14,16 @@ final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 	var resultDTOByType: [String: Decodable] = [:]
 	var errorToThrow: Error?
 	var requestedMethods: [String] = []
+	var performCallCount = 0
+	var typeCallCounts: [String: Int] = [:]
 
 	func perform<Response: Decodable>(
 		with requestable: some Requestable,
 		as type: Response.Type
 	) async throws -> Response {
+		performCallCount += 1
+		typeCallCounts[String(describing: Response.self), default: 0] += 1
+
 		if let errorToThrow {
 			throw errorToThrow
 		}

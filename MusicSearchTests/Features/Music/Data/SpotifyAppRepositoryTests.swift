@@ -25,10 +25,8 @@ struct SpotifyAppRepositoryTests {
 				]
 			)
 		)
-
 		mockNetwork.resultDTOByType[String(describing: SpotifyTokenResponse.self)] = tokenResponse
 		mockNetwork.resultDTOByType[String(describing: SpotifyTrackSearchResponse.self)] = searchResponse
-
 		let repository = SpotifyAppRepository(networkManager: mockNetwork)
 		let track = Track(title: "Test Track", artist: "Test Artist", imageURL: nil)
 
@@ -53,10 +51,8 @@ struct SpotifyAppRepositoryTests {
 				]
 			)
 		)
-
 		mockNetwork.resultDTOByType[String(describing: SpotifyTokenResponse.self)] = tokenResponse
 		mockNetwork.resultDTOByType[String(describing: SpotifyArtistSearchResponse.self)] = searchResponse
-
 		let repository = SpotifyAppRepository(networkManager: mockNetwork)
 
 		// when
@@ -70,7 +66,6 @@ struct SpotifyAppRepositoryTests {
 	func 네트워크에러발생시_fetchDeepLink를호출하면_검색결과페이지로FallbackURL을반환하는지() async throws {
 		// given
 		mockNetwork.errorToThrow = NetworkError.transport(URLError(.notConnectedToInternet))
-
 		let repository = SpotifyAppRepository(networkManager: mockNetwork)
 		let track = Track(title: "Test", artist: "Artist", imageURL: nil)
 
@@ -78,7 +73,94 @@ struct SpotifyAppRepositoryTests {
 		let result = await repository.fetchDeepLink(for: track)
 
 		// then
-		// "Test Artist"를 인코딩하면 "Test%20Artist"
 		#expect(result?.absoluteString.contains("https://open.spotify.com/search/") == true)
+	}
+
+	@Test
+	func 유효한토큰이이미있을때_두번째fetchDeepLink를호출하면_토큰을재발급하지않는지() async {
+		// given
+		let tokenResponse = SpotifyTokenResponse(access_token: "cached_token", token_type: "Bearer", expires_in: 3600)
+		let searchResponse = SpotifyTrackSearchResponse(
+			tracks: SpotifyItems(items: [
+				SpotifyItem(uri: "spotify:track:1", external_urls: SpotifyExternalURLs(spotify: "https://open.spotify.com/track/1"))
+			])
+		)
+		mockNetwork.resultDTOByType[String(describing: SpotifyTokenResponse.self)] = tokenResponse
+		mockNetwork.resultDTOByType[String(describing: SpotifyTrackSearchResponse.self)] = searchResponse
+		let repository = SpotifyAppRepository(networkManager: mockNetwork)
+		let track = Track(title: "Song", artist: "Artist", imageURL: nil)
+
+		// when
+		_ = await repository.fetchDeepLink(for: track)
+		_ = await repository.fetchDeepLink(for: track)
+
+		// then
+		#expect(mockNetwork.typeCallCounts[String(describing: SpotifyTokenResponse.self)] == 1)
+	}
+
+	@Test
+	func URI형식이잘못되었을때_fetchDeepLink를호출하면_FallbackURL을반환하는지() async {
+		// given
+		let tokenResponse = SpotifyTokenResponse(access_token: "token", token_type: "Bearer", expires_in: 3600)
+		let searchResponse = SpotifyTrackSearchResponse(
+			tracks: SpotifyItems(items: [
+				SpotifyItem(uri: "invalid-uri-no-colons", external_urls: nil)
+			])
+		)
+		mockNetwork.resultDTOByType[String(describing: SpotifyTokenResponse.self)] = tokenResponse
+		mockNetwork.resultDTOByType[String(describing: SpotifyTrackSearchResponse.self)] = searchResponse
+		let repository = SpotifyAppRepository(networkManager: mockNetwork)
+		let track = Track(title: "Test", artist: "Artist", imageURL: nil)
+
+		// when
+		let result = await repository.fetchDeepLink(for: track)
+
+		// then
+		#expect(result?.absoluteString.contains("https://open.spotify.com/search/") == true)
+	}
+
+	@Test
+	func 검색결과가비어있을때_fetchDeepLink를호출하면_FallbackURL을반환하는지() async {
+		// given
+		let tokenResponse = SpotifyTokenResponse(access_token: "token", token_type: "Bearer", expires_in: 3600)
+		let searchResponse = SpotifyTrackSearchResponse(
+			tracks: SpotifyItems(items: [])
+		)
+		mockNetwork.resultDTOByType[String(describing: SpotifyTokenResponse.self)] = tokenResponse
+		mockNetwork.resultDTOByType[String(describing: SpotifyTrackSearchResponse.self)] = searchResponse
+		let repository = SpotifyAppRepository(networkManager: mockNetwork)
+		let track = Track(title: "Nonexistent", artist: "Nobody", imageURL: nil)
+
+		// when
+		let result = await repository.fetchDeepLink(for: track)
+
+		// then
+		#expect(result?.absoluteString.contains("https://open.spotify.com/search/") == true)
+	}
+
+	@Test
+	func 검색시401에러가발생할때_fetchDeepLink를호출하면_토큰재발급후재시도하는지() async {
+		// given
+		let mockSeq = MockSequentialNetworkManager()
+		let tokenResponse = SpotifyTokenResponse(access_token: "first_token", token_type: "Bearer", expires_in: 3600)
+		let newTokenResponse = SpotifyTokenResponse(access_token: "refreshed_token", token_type: "Bearer", expires_in: 3600)
+		let searchResponse = SpotifyTrackSearchResponse(
+			tracks: SpotifyItems(items: [
+				SpotifyItem(uri: "spotify:track:999", external_urls: SpotifyExternalURLs(spotify: "https://open.spotify.com/track/999"))
+			])
+		)
+		mockSeq.enqueue(tokenResponse, forType: SpotifyTokenResponse.self)
+		mockSeq.enqueueError(NetworkError.httpError(statusCode: 401, data: Data()), forType: String(describing: SpotifyTrackSearchResponse.self))
+		mockSeq.enqueue(newTokenResponse, forType: SpotifyTokenResponse.self)
+		mockSeq.enqueue(searchResponse, forType: SpotifyTrackSearchResponse.self)
+		let repository = SpotifyAppRepository(networkManager: mockSeq)
+		let track = Track(title: "Test", artist: "Artist", imageURL: nil)
+
+		// when
+		let result = await repository.fetchDeepLink(for: track)
+
+		// then
+		#expect(result?.absoluteString == "https://open.spotify.com/track/999")
+		#expect(mockSeq.callCount(for: SpotifyTokenResponse.self) == 2)
 	}
 }
