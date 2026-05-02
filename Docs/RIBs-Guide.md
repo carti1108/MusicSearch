@@ -1,50 +1,78 @@
 # RIBs 가이드
 
-## 1. RIBs 설명
+## 1. 문서 목적
+
+MusicSearch 프로젝트를 RIBs 구조로 마이그레이션하면서 정리한 학습 기록.
+
+RIBs의 일반 개념을 길게 설명하기보다는, 실제 프로젝트에서 ViewController가 갖고 있던 책임을 어떻게 `Builder`, `Interactor`, `Router`, `Component`로 나눴는지 정리.
+
+대표 예시는 `TrackSearch`와 그 child RIB인 `MusicDigging` 흐름을 기준으로 함.
+
+## 2. 마이그레이션하면서 바뀐 핵심
+
+기존 화면 중심 구조에서는 사용자 입력 처리, 상태 변경, 화면 이동, 의존성 생성 책임이 ViewController 근처에 섞이기 쉬웠음.
+
+RIBs로 옮기면서 책임을 다음처럼 나눔.
+
+- ViewController는 사용자 입력을 listener로 전달하고 화면 상태만 반영.
+- Interactor는 검색어, 로딩, 에러, pagination 같은 상태와 비즈니스 흐름을 관리.
+- Router는 child RIB attach / detach 와 navigation push / pop 을 관리.
+- Builder는 RIB 조립과 의존성 연결을 담당.
+- Component는 부모 scope의 dependency를 현재 RIB와 child RIB에 전달.
+
+이 구조 덕분에 `TrackSearch`는 검색 기능 자체에 집중하고, `MusicDigging`으로 넘어가는 흐름은 명시적인 child RIB 관계로 표현할 수 있게 됨.
+
+## 3. RIBs 설명
 
 Uber가 큰 모바일 앱을 여러 명이 동시에 개발할 때 생기는 구조적 문제를 해결하기 위해 만든 아키텍처.
 
-- 테스트하기 쉽고 서로 고립된 단위로 기능을 쪼갤 것
-- 화면 트리보다 비즈니스 로직 트리를 중심으로 앱을 설계할 것
-- 전역 상태를 줄이고, 각 기능이 자기 상태를 자기 스코프 안에서 관리할 것
-- 부모와 자식 사이의 요구사항을 명시적인 계약으로 드러낼 것
-- Builder, Interactor, Router처럼 책임이 분리된 객체들로 기능을 조립할 것
-- 큰 팀에서도 유지 가능한 구조와 tooling을 전제로 설계할 것
+- 테스트하기 쉽고 서로 고립된 단위로 기능을 쪼갤 것.
+- 화면 트리보다 비즈니스 로직 트리를 중심으로 앱을 설계할 것.
+- 전역 상태를 줄이고, 각 기능이 자기 상태를 자기 스코프 안에서 관리할 것.
+- 부모와 자식 사이의 요구사항을 명시적인 계약으로 드러낼 것.
+- Builder, Interactor, Router처럼 책임이 분리된 객체들로 기능을 조립할 것.
 
 RIBs는 화면 전환 패턴이 아니라, 기능을 트리로 나누고 각 노드의 책임과 생명주기를 명확하게 통제하기 위한 아키텍처.
 
-## 2. 코어 메커니즘 상세 및 코드 분석
+## 4. TrackSearch를 기준으로 본 RIBs 구조
 
-RIBs의 핵심 구성 요소는 `Router`, `Interactor`, `Builder`.
+RIBs의 핵심 구성 요소는 `Builder`, `Interactor`, `Router`.
+
+`TrackSearch`는 검색 화면이지만, 단순히 화면 하나만 의미하지 않음. 검색 입력, 검색 상태, pagination, 트랙 선택, `MusicDigging` child RIB로 이동하는 흐름까지 포함하는 하나의 기능 단위.
 
 ### Builder
 
-RIB을 조립하는 객체. View, Interactor, Router를 만들고, 필요한 경우 자식 Builder도 연결. DI를 가장 직접적으로 아는 객체.
+`Builder`는 RIB을 조립하는 객체. View, Interactor, Router를 만들고 필요한 dependency를 연결함.
 
-`RootBuilder`는 Root RIB를 조립하면서 자식 feature builder도 같이 주입.
+`TrackSearchBuilder`는 `TrackSearchViewController`, `TrackSearchInteractor`, `TrackSearchRouter`를 조립한다. 여기서 중요한 점은 Interactor가 ViewController나 Router를 직접 만들지 않는다는 것.
+
+조립 책임은 Builder에 두고, Interactor는 이미 주입된 presenter와 use case만 사용한다.
 
 <details>
-<summary><code>RootBuilder</code> 예시</summary>
+<summary><code>TrackSearchBuilder</code> 예시</summary>
 
 ```swift
 @MainActor
-final class RootBuilder: Builder<RootDependency>, RootBuildable {
-	override init(dependency: RootDependency) {
-		super.init(dependency: dependency)
-	}
-
-	func build() -> LaunchRouting {
+final class TrackSearchBuilder: Builder<TrackSearchDependency>, TrackSearchBuildable {
+	func build(
+		withListener listener: TrackSearchListener,
+		navigationController: UINavigationController
+	) -> TrackSearchRouting {
 		MainActor.assumeIsolated {
-			let component = RootComponent(dependency: self.dependency)
-			let viewController = RootViewController()
-			let interactor = RootInteractor(presenter: viewController)
+			let component = TrackSearchComponent(dependency: self.dependency)
+			let viewController = TrackSearchViewController()
+			let interactor = TrackSearchInteractor(
+				presenter: viewController,
+				searchTracksUseCase: component.searchTracksUseCase
+			)
+			interactor.listener = listener
 
-			return RootRouter(
+			let musicDiggingBuilder = MusicDiggingBuilder(dependency: component)
+			return TrackSearchRouter(
 				interactor: interactor,
 				viewController: viewController,
-				weatherRecommendationBuilder: component.weatherRecommendationBuilder,
-				trackSearchBuilder: component.trackSearchBuilder,
-				chartBuilder: component.chartBuilder
+				navigationController: navigationController,
+				musicDiggingBuilder: musicDiggingBuilder
 			)
 		}
 	}
@@ -53,15 +81,17 @@ final class RootBuilder: Builder<RootDependency>, RootBuildable {
 
 </details>
 
-- RIB 조립 책임이 Builder에만 모여 있음.
+- RIB 조립 책임이 Builder에 모여 있음.
 - Interactor는 child builder를 모르고, 조립 세부사항에 관여하지 않음.
-- Router는 이미 조립된 builder를 받아 attach 책임에만 집중.
+- `MusicDiggingBuilder`는 Builder에서 만들어지고 Router에 전달됨.
 
 ### Interactor
 
-Interactor는 비즈니스 로직과 상태를 담당, 사용자 입력을 받고, 필요하면 Router에 화면 흐름을 요청.
+`Interactor`는 비즈니스 로직과 상태를 담당.
 
-`TrackSearchInteractor`는 검색 입력, debounce, 검색 상태, pagination, 선택 이벤트를 관리.
+`TrackSearchInteractor`는 검색어 입력을 받고, debounce를 적용하고, 로딩 상태와 검색 결과를 관리한다. ViewController는 검색어가 바뀌었다는 사실만 전달하고, 검색을 언제 실행할지와 결과를 어떻게 반영할지는 Interactor가 결정한다.
+
+트랙을 선택했을 때도 ViewController가 직접 화면을 push하지 않음. Interactor가 “MusicDigging으로 이동해야 한다”는 의도를 Router에 전달한다.
 
 <details>
 <summary><code>TrackSearchInteractor</code> 예시</summary>
@@ -79,10 +109,12 @@ final class TrackSearchInteractor:
 	private let searchSubject: PassthroughSubject<String, Never> = .init()
 	private var cancellables: Set<AnyCancellable> = .init()
 
+	private var lastKeyword: String?
 	private var currentTracks: [Track] = []
 	private var currentPage: Int = 1
 	private var totalResults: Int = 0
 	private var isLoading: Bool = false
+	private var isLoadingMore: Bool = false
 
 	func didUpdateSearchText(_ keyword: String) {
 		self.searchSubject.send(keyword)
@@ -91,6 +123,10 @@ final class TrackSearchInteractor:
 	func didSelectTrack(_ track: Track) {
 		self.router?.attachMusicDigging(seedTrack: track)
 	}
+
+	func didReachListBottom() {
+		self.loadMore()
+	}
 }
 ```
 
@@ -98,20 +134,26 @@ final class TrackSearchInteractor:
 
 - View는 입력만 전달.
 - 검색 상태는 Interactor가 소유.
-- 자식 화면 이동은 Interactor가 직접 push 하지 않고 Router에 위임.
+- pagination 판단도 Interactor가 담당.
+- 자식 화면 이동은 Interactor가 직접 push 하지 않고 Router에 요청.
 
 ### Router
 
-Router는 attach / detach 와 화면 전환을 담당. 복잡한 비즈니스 판단은 Interactor에 두고, Router는 자식 RIB의 생명주기와 네비게이션 반영에 집중.
+`Router`는 attach / detach 와 화면 전환을 담당.
 
-`TrackSearchRouter`는 `MusicDigging` child를 attach 하고, 네비게이션 pop 이후 detach 까지 책임.
+`TrackSearchRouter`는 `MusicDigging` child RIB를 attach하고 navigation stack에 화면을 push한다. 여기서 핵심은 화면 전환과 RIB lifecycle을 같이 맞추는 것.
+
+push만 하고 child router를 attach하지 않으면 RIB tree가 깨지고, pop 이후 detach하지 않으면 child lifecycle이 남는다.
 
 <details>
 <summary><code>TrackSearchRouter</code> 예시</summary>
 
 ```swift
 @MainActor
-final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSearchViewControllable>, TrackSearchRouting {
+final class TrackSearchRouter:
+	ViewableRouter<TrackSearchInteractable, TrackSearchViewControllable>,
+	TrackSearchRouting
+{
 	private let navigationController: UINavigationController
 	private let musicDiggingBuilder: MusicDiggingBuildable
 	private var childRoutersByViewControllerID: [ObjectIdentifier: Routing] = [:]
@@ -144,9 +186,10 @@ final class TrackSearchRouter: ViewableRouter<TrackSearchInteractable, TrackSear
 </details>
 
 - 화면 전환과 child lifecycle을 같이 관리.
-- 화면 stack과 router tree의 정합성을 유지.
+- navigation stack과 router tree의 정합성을 유지.
+- pop 이후 화면에서 사라진 child RIB는 detach.
 
-## 3. 의존성 관리
+## 5. 의존성 관리
 
 RIBs의 의존성 관리는 `Dependency`와 `Component`를 활용.
 
@@ -154,7 +197,7 @@ RIBs의 의존성 관리는 `Dependency`와 `Component`를 활용.
 
 `Dependency`는 어떤 RIB가 부모에게 요구하는 최소 계약. "무엇이 필요한가"를 드러내는 인터페이스.
 
-예를 들어 `TrackSearch`는 검색, 태그 기반 조회, 유사곡 조회, 딥링크 생성 기능이 필요하다는 것을 `TrackSearchDependency`로 선언.
+`TrackSearch`는 검색 기능에 필요한 use case와 child인 `MusicDigging`에 전달해야 하는 dependency를 함께 요구한다.
 
 <details>
 <summary><code>TrackSearchDependency</code> 예시</summary>
@@ -166,6 +209,7 @@ protocol TrackSearchDependency: Dependency {
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
 	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var urlOpener: URLOpening { get }
 }
 ```
 
@@ -175,16 +219,22 @@ child는 필요한 계약만 선언하고, 실제 구현은 부모 스코프가 
 
 ### Component
 
-`Component`는 부모 dependency를 받아 현재 스코프에서 필요한 객체를 노출하고, 자식에게 필요한 dependency를 이어주는 객체.
+`Component`는 부모 dependency를 받아 현재 스코프에서 필요한 객체를 노출하고, child scope로 dependency를 이어주는 객체.
 
-`TrackSearchComponent`는 `TrackSearchDependency`를 그대로 노출하면서 동시에 `MusicDiggingDependency`도 만족시켜야 함. 즉 `TrackSearch` 스코프 안에서 child인 `MusicDigging`이 필요한 의존성을 전달하는 역할.
+`TrackSearchComponent`는 `TrackSearchDependency`를 그대로 노출하면서 동시에 `MusicDiggingDependency`도 만족시킨다. 즉 `TrackSearch` 스코프 안에서 child인 `MusicDigging`이 필요한 의존성을 전달하는 연결 지점.
+
+처음에는 이 부분이 헷갈릴 수 있음. Component는 단순히 현재 RIB만을 위한 객체가 아니라, 현재 scope에서 child scope로 dependency를 넘기는 역할도 함.
 
 <details>
 <summary><code>TrackSearchComponent</code> 예시</summary>
 
 ```swift
 @MainActor
-final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchDependency, MusicDiggingDependency {
+final class TrackSearchComponent:
+	Component<TrackSearchDependency>,
+	TrackSearchDependency,
+	MusicDiggingDependency
+{
 	var searchTracksUseCase: SearchTracksUseCase {
 		self.dependency.searchTracksUseCase
 	}
@@ -200,76 +250,26 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.dependency.fetchMusicAppDeepLinkUseCase
 	}
-}
-```
 
-</details>
-
-### AppComponent와 RootComponent의 역할
-
-이 프로젝트에서 의존성 주입의 시작점은 `AppComponent`. 이 객체는 앱 전역에서 공유될 수 있는 객체 생성을 담당하는 composition root 역할.
-
-<details>
-<summary><code>AppComponent</code> 예시</summary>
-
-```swift
-final class AppComponent {
-	let networkManager: NetworkRequesting
-	let locationManager: LocationManaging
-	let weatherAPIConfiguration: WeatherAPIConfiguration
-
-	var trackRepository: TrackRepository {
-		TrackRepositoryImpl(networkManager: self.networkManager)
-	}
-
-	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-		self.fetchMusicAppDeepLinkUseCaseInstance
-	}
-}
-
-extension AppComponent: TrackSearchDependency {
-	var searchTracksUseCase: any SearchTracksUseCase {
-		SearchTracksUseCaseImpl(trackRepository: self.trackRepository)
+	var urlOpener: URLOpening {
+		self.dependency.urlOpener
 	}
 }
 ```
 
 </details>
 
-`RootComponent`는 `AppComponent`가 제공하는 dependency를 받아 실제 feature builder를 만들고 child RIB로 넘김.
+## 6. 데이터 흐름 및 상태 관리
 
-<details>
-<summary><code>RootComponent</code> 예시</summary>
+`TrackSearch`의 기본 흐름은 다음과 같음.
 
-```swift
-@MainActor
-final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {
-	var weatherRecommendationBuilder: WeatherRecommendationBuildable {
-		WeatherRecommendationBuilder(dependency: self)
-	}
-
-	var trackSearchBuilder: TrackSearchBuildable {
-		TrackSearchBuilder(dependency: self)
-	}
-
-	var chartBuilder: ChartBuildable {
-		ChartBuilder(dependency: self)
-	}
-}
+```text
+ViewController -> Interactor -> Router -> Child RIB
 ```
 
-</details>
+### ViewController -> Interactor
 
-- `Dependency`는 각 RIB가 필요한 요구사항을 드러냄.
-- `Component`는 parent scope에서 child scope로 의존성을 전달하는 역할을 수행.
-
-## 4. 데이터 흐름 및 상태 관리
-
-기본 흐름은 `View -> Interactor -> Router`.
-
-### View -> Interactor
-
-View는 사용자 이벤트를 listener를 통해 Interactor로 전달.
+ViewController는 사용자 이벤트를 listener를 통해 Interactor로 전달.
 
 `TrackSearchViewController`는 유저 이벤트를 직접 처리하지 않고 `listener`에게 넘김.
 
@@ -291,7 +291,7 @@ func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPat
 
 </details>
 
-### Interactor -> View
+### Interactor -> ViewController
 
 Interactor는 presenter 프로토콜을 통해 View 상태를 갱신. 검색 결과, 로딩, 에러 모두 Interactor가 결정하고 View는 반영만 함.
 
@@ -343,66 +343,30 @@ func didSelectTrack(_ track: Track) {
 
 </details>
 
-### RIB 간 통신 방법
+### Parent RIB -> Child RIB
 
-RIB 간 통신은 크게 두 단계.
+부모가 child를 만들 때 `withListener:`로 상위 Interactor를 넘김.
 
-- 부모가 child를 만들 때 `withListener:`로 상위 Interactor를 넘김.
-- child는 listener 프로토콜에만 의존하고, 부모 concrete type은 모름.
-
-`RootInteractor`는 각 feature listener를 채택하고 있고, `RootRouter`는 child builder에 `self.interactor`를 넘김.
-
-<details>
-<summary><code>RootInteractor</code> 와 listener 연결 예시</summary>
+`TrackSearchRouter`는 `MusicDiggingBuilder`를 통해 child RIB를 만들고, listener로 `self.interactor`를 넘긴다. child는 listener 프로토콜에만 의존하고, 부모 concrete type은 모름.
 
 ```swift
-@MainActor
-final class RootInteractor: PresentableInteractor<RootPresentable>, RootInteractable, RootPresentableListener {
-	weak var router: RootRouting?
-	weak var listener: RootListener?
-}
-
-extension RootInteractor: WeatherRecommendationListener {}
-extension RootInteractor: TrackSearchListener {}
-extension RootInteractor: ChartListener {}
+let musicDiggingRouter = self.musicDiggingBuilder.build(
+	withListener: self.interactor,
+	seedTrack: seedTrack
+)
 ```
 
-</details>
+## 7. 테스트 전략
 
-<details>
-<summary><code>RootRouter</code> 에서 child listener 연결 예시</summary>
+RIBs로 나누면서 테스트 대상도 더 명확해짐.
 
-```swift
-override func didLoad() {
-	super.didLoad()
-
-	let weatherRecommendationRouter = self.weatherRecommendationBuilder.build(withListener: self.interactor)
-	self.attachChild(weatherRecommendationRouter)
-
-	let trackSearchNavigationController = UINavigationController()
-	let trackSearchRouter = self.trackSearchBuilder.build(
-		withListener: self.interactor,
-		navigationController: trackSearchNavigationController
-	)
-	self.attachChild(trackSearchRouter)
-
-	let chartRouter = self.chartBuilder.build(withListener: self.interactor)
-	self.attachChild(chartRouter)
-}
-```
-
-</details>
-
-## 5. 테스트 전략
-
-- `Core`: UseCase, Repository, DTO, TestHelpers
-- `Features`: RIB 단위 테스트
+- Interactor 테스트는 비즈니스 규칙과 상태 반응을 검증.
+- Router 테스트는 attach / detach 와 child lifecycle 정합성을 검증.
+- Builder 테스트는 listener, presenter, dependency wiring이 빠지지 않았는지 검증.
 
 ### Interactor 테스트
 
-Interactor 테스트는 비즈니스 규칙과 상태 반응을 검증.
-
-`TrackSearchInteractorTests`는 검색 입력 후 presenter 반영과 트랙 선택 시 라우팅 요청을 검증한다.
+`TrackSearchInteractorTests`는 검색어 입력 후 presenter 반영과 트랙 선택 시 라우팅 요청을 검증한다.
 
 <details>
 <summary><code>TrackSearchInteractorTests</code> 예시</summary>
@@ -425,7 +389,11 @@ struct TrackSearchInteractorTests {
 		)
 
 		interactor.didUpdateSearchText("Muse")
-		try? await Task.sleep(for: .milliseconds(100))
+		await waitUntil("검색 결과가 presenter에 반영되지 않았습니다.") {
+			self.mockUseCase.executeCallCount == 1 &&
+			self.presenter.loadingStates == [true, false] &&
+			self.presenter.updatedTracksHistory.last?.count == 2
+		}
 
 		#expect(self.mockUseCase.executeCallCount == 1)
 		#expect(self.presenter.updatedTracksHistory.last?.map(\.title) == ["Hysteria", "Plug In Baby"])
@@ -441,8 +409,6 @@ struct TrackSearchInteractorTests {
 
 ### Router 테스트
 
-Router 테스트는 attach / detach 와 child lifecycle 정합성을 검증.
-
 `TrackSearchRouterTests`는 `MusicDigging` child attach 와 pop 이후 detach 를 검증.
 
 <details>
@@ -453,10 +419,6 @@ Router 테스트는 attach / detach 와 child lifecycle 정합성을 검증.
 struct TrackSearchRouterTests {
 	@Test("attachMusicDigging 호출 시 child router를 붙이고 화면을 push하는가")
 	func attachMusicDiggingPushesChildViewController() {
-		let interactor = TrackSearchInteractor(
-			presenter: presenter,
-			searchTracksUseCase: useCase
-		)
 		let router = TrackSearchRouter(
 			interactor: interactor,
 			viewController: rootViewController,
@@ -479,35 +441,25 @@ struct TrackSearchRouterTests {
 
 Builder 테스트는 조립이 빠지지 않았는지 확인하는 용도.
 
-- 올바른 Router 타입을 만드는가
-- Interactor와 ViewController를 제대로 연결하는가
-- listener wiring 이 빠지지 않았는가
+- 올바른 Router 타입을 만드는가.
+- Interactor와 ViewController를 제대로 연결하는가.
+- listener wiring 이 빠지지 않았는가.
 
 <details>
-<summary><code>WeatherRecommendationBuilderTests</code> 예시</summary>
+<summary><code>TrackSearchBuilderTests</code>에서 확인할 내용</summary>
 
 ```swift
-@MainActor
-struct WeatherRecommendationBuilderTests {
-	@Test("build 시 listener와 presenter가 정상 연결되고 의존성이 주입되는가")
-	func buildWiresListenerPresenterAndDependencies() async {
-		let dependency = MockWeatherRecommendationDependency(
-			fetchMusicForWeatherUseCase: fetchMusicForWeatherUseCase,
-			fetchMusicAppDeepLinkUseCase: fetchMusicAppDeepLinkUseCase
-		)
-		let builder = WeatherRecommendationBuilder(dependency: dependency)
-		let listener = MockWeatherRecommendationListener()
+let routing = builder.build(
+	withListener: listener,
+	navigationController: navigationController
+)
 
-		let routing = builder.build(withListener: listener)
+guard let router = routing as? TrackSearchRouter else { return }
+guard let interactor = router.interactor as? TrackSearchInteractor else { return }
+guard let viewController = router.viewControllable as? TrackSearchViewController else { return }
 
-		guard let router = routing as? WeatherRecommendationRouter else { return }
-		guard let interactor = router.interactor as? WeatherRecommendationInteractor else { return }
-		guard let viewController = router.viewControllable as? WeatherRecommendationViewController else { return }
-
-		#expect(interactor.listener === listener)
-		#expect(viewController.listener === interactor)
-	}
-}
+#expect(interactor.listener === listener)
+#expect(viewController.listener === interactor)
 ```
 
 </details>
