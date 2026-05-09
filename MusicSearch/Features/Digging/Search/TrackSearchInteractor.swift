@@ -154,7 +154,6 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrackSearchInteractor Error: \(error)")
 
 				self.currentTracks = []
 				self.totalResults = 0
@@ -203,7 +202,6 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("TrackSearchInteractor LoadMore Error: \(error)")
 			}
 		}
 	}

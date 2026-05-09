@@ -38,27 +38,3 @@ final class MockFetchTracksByTagUseCase: FetchTracksByTagUseCase {
 		return self.result
 	}
 }
-
-final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
-	var result: Result<[Track], Error> = .success([])
-	var executeHandler: ((Track) async throws -> [Track])?
-	var executeCallCount = 0
-	var requestedTracks: [Track] = []
-
-	func execute(targetTrack: Track) async throws -> [Track] {
-		self.executeCallCount += 1
-		self.requestedTracks.append(targetTrack)
-
-		if let executeHandler {
-			return try await executeHandler(targetTrack)
-		}
-
-		switch self.result {
-		case .success(let tracks):
-			return tracks
-		case .failure(let error):
-			throw error
-		}
-	}
-}
-

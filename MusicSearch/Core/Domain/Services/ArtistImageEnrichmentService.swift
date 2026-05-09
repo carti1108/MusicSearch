@@ -41,7 +41,6 @@ final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentService {
 						let imageURL = try await fetchArtistImageURLUseCase.execute(artistName: name)
 						return (offset, imageURL)
 					} catch {
-						print("Failed to fetch artist image for \(name): \(error)")
 						return (offset, nil)
 					}
 				}
@@ -68,7 +67,6 @@ final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentService {
 							let imageURL = try await fetchArtistImageURLUseCase.execute(artistName: name)
 							return (offset, imageURL)
 						} catch {
-							print("Failed to fetch artist image for \(name): \(error)")
 							return (offset, nil)
 						}
 					}

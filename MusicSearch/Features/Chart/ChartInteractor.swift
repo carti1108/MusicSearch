@@ -153,7 +153,6 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 				return
 			} catch {
 				guard !Task.isCancelled else { return }
-				print("ChartInteractor Error: \(error)")
 				self.presenter.showError("차트 정보를 불러오지 못했습니다.")
 
 				if self.currentType == type && self.currentPodiumItems.isEmpty && self.currentListItems.isEmpty {

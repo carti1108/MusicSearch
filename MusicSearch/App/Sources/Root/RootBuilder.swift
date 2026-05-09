@@ -59,12 +59,7 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 }
 
 @MainActor
-protocol RootBuildable: Buildable {
-	func build() -> LaunchRouting
-}
-
-@MainActor
-final class RootBuilder: Builder<RootDependency>, RootBuildable {
+final class RootBuilder: Builder<RootDependency> {
 	override init(dependency: RootDependency) {
 		super.init(dependency: dependency)
 	}
