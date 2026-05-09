@@ -40,20 +40,36 @@ final class AppComponent {
 		FetchArtistImageURLUseCaseImpl(artistImageRepository: self.artistImageRepositoryInstance)
 	}()
 
-	var locationRepository: LocationRepository {
+	private lazy var locationRepositoryInstance: LocationRepository = {
 		LocationRepositoryImpl(locationManager: self.locationManager)
-	}
-	var weatherRepository: WeatherRepository {
+	}()
+
+	private lazy var weatherRepositoryInstance: WeatherRepository = {
 		WeatherRepositoryImpl(
 			networkManager: self.networkManager,
 			configuration: self.weatherAPIConfiguration
 		)
+	}()
+
+	private lazy var trackRepositoryInstance: TrackRepository = {
+		TrackRepositoryImpl(networkManager: self.networkManager)
+	}()
+
+	private lazy var chartRepositoryInstance: ChartRepository = {
+		ChartRepositoryImpl(networkManager: self.networkManager)
+	}()
+
+	var locationRepository: LocationRepository {
+		self.locationRepositoryInstance
+	}
+	var weatherRepository: WeatherRepository {
+		self.weatherRepositoryInstance
 	}
 	var trackRepository: TrackRepository {
-		TrackRepositoryImpl(networkManager: self.networkManager)
+		self.trackRepositoryInstance
 	}
 	var chartRepository: ChartRepository {
-		ChartRepositoryImpl(networkManager: self.networkManager)
+		self.chartRepositoryInstance
 	}
 	var musicAppRepository: MusicAppRepository {
 		self.musicAppRepositoryInstance

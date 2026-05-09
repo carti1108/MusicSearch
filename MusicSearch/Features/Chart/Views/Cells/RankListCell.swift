@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Kingfisher
 
 final class RankListCell: UICollectionViewCell {
 	static let identifier = "RankListCell"
@@ -35,9 +34,7 @@ final class RankListCell: UICollectionViewCell {
 
 	override func prepareForReuse() {
 		super.prepareForReuse()
-		self.imageView.kf.cancelDownloadTask()
-		self.imageView.contentMode = .scaleAspectFit
-		self.imageView.image = nil
+		self.imageView.setRemoteImage(nil, targetSize: .zero)
 		self.imageView.backgroundColor = .systemGray5
 		self.imageView.tintColor = UIColor.white.withAlphaComponent(0.78)
 	}
@@ -104,25 +101,7 @@ final class RankListCell: UICollectionViewCell {
 		self.subtitleLabel.text = item.subtitle
 		self.imageView.backgroundColor = Self.rankColor(item.rank)
 
-		self.imageView.kf.cancelDownloadTask()
-		self.imageView.image = nil
-		if let url = item.imageURL {
-			let targetSize = CGSize(width: 40, height: 40)
-			let processor = DownsamplingImageProcessor(size: targetSize)
-			self.imageView.contentMode = .scaleAspectFill
-			self.imageView.kf.setImage(
-				with: url,
-				placeholder: nil,
-				options: [
-					.processor(processor),
-					.scaleFactor(UIScreen.main.scale),
-					.backgroundDecode
-				]
-			)
-		} else {
-			self.imageView.contentMode = .scaleAspectFill
-			self.imageView.image = nil
-		}
+		self.imageView.setRemoteImage(item.imageURL, targetSize: CGSize(width: 40, height: 40))
 
 		self.imageView.layer.cornerRadius = (item.type == .artists) ? 20 : 8
 	}

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Kingfisher
 
 final class SeedTrackView: UIView {
 	var onTap: (() -> Void)?
@@ -128,22 +127,6 @@ final class SeedTrackView: UIView {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
 
-		self.albumImageView.kf.cancelDownloadTask()
-		self.albumImageView.image = nil
-
-		if let url = track.imageURL {
-			self.albumImageView.contentMode = .scaleAspectFill
-			self.albumImageView.kf.setImage(
-				with: url,
-				placeholder: nil,
-				options: [
-					.transition(.fade(0.2)),
-					.cacheOriginalImage
-				]
-			)
-		} else {
-			self.albumImageView.contentMode = .scaleAspectFill
-			self.albumImageView.image = nil
-		}
+		self.albumImageView.setRemoteImage(track.imageURL, targetSize: self.albumImageView.bounds.size)
 	}
 }

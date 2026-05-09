@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Kingfisher
 
 final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	private let glowLayer = CAGradientLayer()
@@ -130,9 +129,7 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 
 	override func prepareForReuse() {
 		super.prepareForReuse()
-		self.albumImageView.kf.cancelDownloadTask()
-		self.albumImageView.contentMode = .scaleAspectFill
-		self.albumImageView.image = nil
+		self.albumImageView.setRemoteImage(nil, targetSize: .zero)
 		self.titleLabel.text = nil
 		self.artistLabel.text = nil
 	}
@@ -141,22 +138,6 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
 
-		self.albumImageView.kf.cancelDownloadTask()
-		self.albumImageView.image = nil
-
-		if let url = track.imageURL {
-			self.albumImageView.contentMode = .scaleAspectFill
-			self.albumImageView.kf.setImage(
-				with: url,
-				placeholder: nil,
-				options: [
-					.transition(.fade(0.2)),
-					.cacheOriginalImage
-				]
-			)
-		} else {
-			self.albumImageView.contentMode = .scaleAspectFill
-			self.albumImageView.image = nil
-		}
+		self.albumImageView.setRemoteImage(track.imageURL, targetSize: self.albumImageView.bounds.size)
 	}
 }

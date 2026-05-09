@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Kingfisher
 
 final class PodiumCell: UICollectionViewCell {
 	static let identifier = "PodiumCell"
@@ -58,9 +57,7 @@ final class PodiumCell: UICollectionViewCell {
 	override func prepareForReuse() {
 		super.prepareForReuse()
 		self.isArtist = false
-		self.imageView.kf.cancelDownloadTask()
-		self.imageView.contentMode = .scaleAspectFit
-		self.imageView.image = nil
+		self.imageView.setRemoteImage(nil, targetSize: .zero)
 		self.imageView.backgroundColor = .systemGray5
 		self.imageView.layer.borderWidth = 0
 		self.imageView.layer.borderColor = nil
@@ -117,28 +114,12 @@ final class PodiumCell: UICollectionViewCell {
 		self.imageView.backgroundColor = Self.rankColor(item.rank)
 		self.isArtist = (item.type == .artists)
 
-		self.imageView.kf.cancelDownloadTask()
-		self.imageView.image = nil
-		if let url = item.imageURL {
-			let processor = DownsamplingImageProcessor(
-				size: self.imageView.bounds.size == .zero
-					? CGSize(width: 400, height: 400)
-					: self.imageView.bounds.size
-			)
-			self.imageView.contentMode = .scaleAspectFill
-			self.imageView.kf.setImage(
-				with: url,
-				placeholder: nil,
-				options: [
-					.processor(processor),
-					.scaleFactor(UIScreen.main.scale),
-					.backgroundDecode
-				]
-			)
-		} else {
-			self.imageView.contentMode = .scaleAspectFill
-			self.imageView.image = nil
-		}
+		self.imageView.setRemoteImage(
+			item.imageURL,
+			targetSize: self.imageView.bounds.size == .zero
+				? CGSize(width: 400, height: 400)
+				: self.imageView.bounds.size
+		)
 
 		if item.rank == 1 {
 			self.imageView.layer.borderWidth = 4
