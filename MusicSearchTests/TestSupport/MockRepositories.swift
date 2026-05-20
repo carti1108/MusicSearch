@@ -8,7 +8,17 @@ enum TestDoubleError: Error, Equatable {
 	case mismatchedStubbedType(expected: String, actual: String)
 }
 
+private extension NSLock {
+	func withCriticalSection<T>(_ body: () throws -> T) rethrows -> T {
+		self.lock()
+		defer { self.unlock() }
+		return try body()
+	}
+}
+
 final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
+	private let lock = NSLock()
+
 	var resultDTO: Decodable?
 	var resultDTOByMethod: [String: Decodable] = [:]
 	var resultDTOByType: [String: Decodable] = [:]
@@ -20,10 +30,6 @@ final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 		with requestable: some Requestable,
 		as type: Response.Type
 	) async throws -> Response {
-		if let errorToThrow {
-			throw errorToThrow
-		}
-
 		let queryParameters: [String: Any]? = {
 			if case let .requestParameters(parameters, _) = requestable.task {
 				return parameters
@@ -31,18 +37,24 @@ final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 			return nil
 		}()
 
-		if let method = queryParameters?["method"] as? String {
-			self.requestedMethods.append(method)
+		let method = queryParameters?["method"] as? String
+		let state = self.lock.withCriticalSection {
+			if let method {
+				self.requestedMethods.append(method)
+			}
+
+			return (
+				errorToThrow: self.errorToThrow,
+				storedDTO: self.storedDTO(for: method, responseType: Response.self),
+				performHandler: self.performHandler
+			)
 		}
 
-		let method = queryParameters?["method"] as? String
-		let storedDTO: Decodable? = {
-			if let method, let dto = self.resultDTOByMethod[method] { return dto }
-			if let dto = self.resultDTOByType[String(describing: Response.self)] { return dto }
-			return self.resultDTO
-		}()
+		if let errorToThrow = state.errorToThrow {
+			throw errorToThrow
+		}
 
-		if let storedDTO {
+		if let storedDTO = state.storedDTO {
 			guard let typedResult = storedDTO as? Response else {
 				throw TestDoubleError.mismatchedStubbedType(
 					expected: String(describing: Response.self),
@@ -52,7 +64,7 @@ final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 			return typedResult
 		}
 
-		if let performHandler {
+		if let performHandler = state.performHandler {
 			let handledResult = try performHandler(requestable, String(describing: Response.self))
 			guard let typedResult = handledResult as? Response else {
 				throw TestDoubleError.mismatchedStubbedType(
@@ -65,9 +77,20 @@ final class MockNetworkManager: NetworkRequesting, @unchecked Sendable {
 
 		throw TestDoubleError.missingStubbedValue("MockNetworkManager.resultDTO")
 	}
+
+	private func storedDTO<Response: Decodable>(
+		for method: String?,
+		responseType: Response.Type
+	) -> Decodable? {
+		if let method, let dto = self.resultDTOByMethod[method] { return dto }
+		if let dto = self.resultDTOByType[String(describing: Response.self)] { return dto }
+		return self.resultDTO
+	}
 }
 
 final class MockTrackRepository: TrackRepository, @unchecked Sendable {
+	private let lock = NSLock()
+
 	var searchTracksResult: Result<(tracks: [Track], totalResults: Int), Error> = .success(([], 0))
 	var fetchTopTracksResult: Result<[Track], Error> = .success([])
 	var fetchSimilarTracksResult: Result<[Track], Error> = .success([])
@@ -96,17 +119,24 @@ final class MockTrackRepository: TrackRepository, @unchecked Sendable {
 	var fetchTrackInfoRequests: [Track] = []
 
 	func searchTracks(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
-		self.searchTracksCallCount += 1
-		self.lastSearchTracksQuery = query
-		self.lastSearchTracksLimit = limit
-		self.lastSearchTracksPage = page
-		self.searchTracksRequests.append((query, limit, page))
+		let state = self.lock.withCriticalSection {
+			self.searchTracksCallCount += 1
+			self.lastSearchTracksQuery = query
+			self.lastSearchTracksLimit = limit
+			self.lastSearchTracksPage = page
+			self.searchTracksRequests.append((query, limit, page))
 
-		if let searchTracksHandler {
+			return (
+				handler: self.searchTracksHandler,
+				result: self.searchTracksResult
+			)
+		}
+
+		if let searchTracksHandler = state.handler {
 			return try await searchTracksHandler(query, limit, page)
 		}
 
-		switch self.searchTracksResult {
+		switch state.result {
 		case .success(let result):
 			return result
 		case .failure(let error):
@@ -115,14 +145,21 @@ final class MockTrackRepository: TrackRepository, @unchecked Sendable {
 	}
 
 	func fetchTopTracks(by tag: String) async throws -> [Track] {
-		self.fetchTopTracksCallCount += 1
-		self.lastFetchTopTracksTag = tag
+		let state = self.lock.withCriticalSection {
+			self.fetchTopTracksCallCount += 1
+			self.lastFetchTopTracksTag = tag
 
-		if let fetchTopTracksHandler {
+			return (
+				handler: self.fetchTopTracksHandler,
+				result: self.fetchTopTracksResult
+			)
+		}
+
+		if let fetchTopTracksHandler = state.handler {
 			return try await fetchTopTracksHandler(tag)
 		}
 
-		switch self.fetchTopTracksResult {
+		switch state.result {
 		case .success(let tracks):
 			return tracks
 		case .failure(let error):
@@ -131,14 +168,21 @@ final class MockTrackRepository: TrackRepository, @unchecked Sendable {
 	}
 
 	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
-		self.fetchSimilarTracksCallCount += 1
-		self.lastFetchSimilarTracksTrack = track
+		let state = self.lock.withCriticalSection {
+			self.fetchSimilarTracksCallCount += 1
+			self.lastFetchSimilarTracksTrack = track
 
-		if let fetchSimilarTracksHandler {
+			return (
+				handler: self.fetchSimilarTracksHandler,
+				result: self.fetchSimilarTracksResult
+			)
+		}
+
+		if let fetchSimilarTracksHandler = state.handler {
 			return try await fetchSimilarTracksHandler(track)
 		}
 
-		switch self.fetchSimilarTracksResult {
+		switch state.result {
 		case .success(let tracks):
 			return tracks
 		case .failure(let error):
@@ -147,15 +191,22 @@ final class MockTrackRepository: TrackRepository, @unchecked Sendable {
 	}
 
 	func fetchTrackInfo(for track: Track) async throws -> Track {
-		self.fetchTrackInfoCallCount += 1
-		self.lastFetchTrackInfoTrack = track
-		self.fetchTrackInfoRequests.append(track)
+		let state = self.lock.withCriticalSection {
+			self.fetchTrackInfoCallCount += 1
+			self.lastFetchTrackInfoTrack = track
+			self.fetchTrackInfoRequests.append(track)
 
-		if let fetchTrackInfoHandler {
+			return (
+				handler: self.fetchTrackInfoHandler,
+				result: self.fetchTrackInfoResult
+			)
+		}
+
+		if let fetchTrackInfoHandler = state.handler {
 			return try await fetchTrackInfoHandler(track)
 		}
 
-		switch self.fetchTrackInfoResult {
+		switch state.result {
 		case .success(let track):
 			return track
 		case .failure(let error):
