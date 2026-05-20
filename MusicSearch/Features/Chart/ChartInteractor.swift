@@ -128,22 +128,22 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 		self.presenter.showLoading(true)
 		self.presenter.showError(nil)
 
+		let fetchChartTopTracksUseCase = self.fetchChartTopTracksUseCase
+		let fetchChartTopArtistsUseCase = self.fetchChartTopArtistsUseCase
 		self.loadTask = Task { [weak self] in
-			guard let self else { return }
-
 			do {
 				switch type {
 				case .tracks:
-					let tracks = try await self.fetchChartTopTracksUseCase.execute()
-					guard !Task.isCancelled else { return }
+					let tracks = try await fetchChartTopTracksUseCase.execute()
+					guard !Task.isCancelled, let self else { return }
 					let sections = self.makeSections(from: self.makeItems(from: tracks))
 					self.cachedSectionsByType[type.rawValue] = sections
 					self.apply(sections: sections, for: type)
 					self.presenter.showLoading(false)
 
 				case .artists:
-					let artists = try await self.fetchChartTopArtistsUseCase.execute()
-					guard !Task.isCancelled else { return }
+					let artists = try await fetchChartTopArtistsUseCase.execute()
+					guard !Task.isCancelled, let self else { return }
 					let sections = self.makeSections(from: self.makeItems(from: artists))
 					self.cachedSectionsByType[type.rawValue] = sections
 					self.apply(sections: sections, for: type)
@@ -152,7 +152,7 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 			} catch is CancellationError {
 				return
 			} catch {
-				guard !Task.isCancelled else { return }
+				guard !Task.isCancelled, let self else { return }
 				self.presenter.showError("차트 정보를 불러오지 못했습니다.")
 
 				if self.currentType == type && self.currentPodiumItems.isEmpty && self.currentListItems.isEmpty {
@@ -213,16 +213,20 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 	}
 
 	private func openMusicApp(for track: Track) {
+		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			self.urlOpener.open(url)
+			guard let url = await fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			urlOpener.open(url)
 		}
 	}
 
 	private func openMusicApp(for artist: String) {
+		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(artist: artist) else { return }
-			self.urlOpener.open(url)
+			guard let url = await fetchMusicAppDeepLinkUseCase.execute(artist: artist) else { return }
+			urlOpener.open(url)
 		}
 	}
 }

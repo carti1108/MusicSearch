@@ -129,22 +129,23 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 		self.presenter.showLoading(true)
 		self.presenter.showError(nil)
 
+		let searchTracksUseCase = self.searchTracksUseCase
+		let limit = self.limit
 		self.searchTask = Task { [weak self] in
-			guard let self else { return }
 			defer {
-				if !Task.isCancelled {
+				if !Task.isCancelled, let self {
 					self.isLoading = false
 					self.presenter.showLoading(false)
 				}
 			}
 
 			do {
-				let result = try await self.searchTracksUseCase.execute(
+				let result = try await searchTracksUseCase.execute(
 					query: keyword,
-					limit: self.limit,
+					limit: limit,
 					page: 1
 				)
-				guard !Task.isCancelled else { return }
+				guard !Task.isCancelled, let self else { return }
 
 				self.currentTracks = result.tracks
 				self.totalResults = result.totalResults
@@ -153,7 +154,7 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 			} catch is CancellationError {
 				return
 			} catch {
-				guard !Task.isCancelled else { return }
+				guard !Task.isCancelled, let self else { return }
 
 				self.currentTracks = []
 				self.totalResults = 0
@@ -175,24 +176,25 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 		self.isLoadingMore = true
 
 		self.loadMoreTask?.cancel()
+		let searchTracksUseCase = self.searchTracksUseCase
+		let limit = self.limit
 		self.loadMoreTask = Task { [weak self] in
-			guard let self else { return }
 			defer {
-				if !Task.isCancelled {
+				if !Task.isCancelled, let self {
 					self.isLoadingMore = false
 				}
-				if self.loadingPage == nextPage {
+				if let self, self.loadingPage == nextPage {
 					self.loadingPage = nil
 				}
 			}
 
 			do {
-				let result = try await self.searchTracksUseCase.execute(
+				let result = try await searchTracksUseCase.execute(
 					query: keyword,
-					limit: self.limit,
+					limit: limit,
 					page: nextPage
 				)
-				guard !Task.isCancelled else { return }
+				guard !Task.isCancelled, let self else { return }
 
 				self.currentTracks.append(contentsOf: result.tracks)
 				self.currentPage = nextPage
@@ -201,7 +203,7 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 			} catch is CancellationError {
 				return
 			} catch {
-				guard !Task.isCancelled else { return }
+				return
 			}
 		}
 	}

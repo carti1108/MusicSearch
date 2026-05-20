@@ -83,12 +83,11 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 		self.presenter.showLoading(true)
 		self.presenter.showError(nil)
 
+		let fetchMusicForWeatherUseCase = self.fetchMusicForWeatherUseCase
 		self.loadTask = Task { [weak self] in
-			guard let self else { return }
-
 			do {
-				let result = try await self.fetchMusicForWeatherUseCase.execute()
-				guard !Task.isCancelled else { return }
+				let result = try await fetchMusicForWeatherUseCase.execute()
+				guard !Task.isCancelled, let self else { return }
 
 				self.currentWeather = result.weather
 				self.currentTracks = result.tracks
@@ -98,7 +97,7 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 			} catch is CancellationError {
 				return
 			} catch {
-				guard !Task.isCancelled else { return }
+				guard !Task.isCancelled, let self else { return }
 				if let localized = error as? LocalizedError, let message = localized.errorDescription {
 					self.presenter.showError(message)
 				} else {
@@ -110,9 +109,11 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	}
 
 	private func openMusicApp(for track: Track) {
+		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			self.urlOpener.open(url)
+			guard let url = await fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			urlOpener.open(url)
 		}
 	}
 }

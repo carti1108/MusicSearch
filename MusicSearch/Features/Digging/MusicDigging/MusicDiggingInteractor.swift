@@ -93,12 +93,11 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 		self.presenter.showLoading(true)
 		self.presenter.showError(nil)
 
+		let fetchSimilarTracksUseCase = self.fetchSimilarTracksUseCase
 		self.loadTask = Task { [weak self] in
-			guard let self else { return }
-
 			do {
-				let tracks = try await self.fetchSimilarTracksUseCase.execute(targetTrack: track)
-				guard !Task.isCancelled else { return }
+				let tracks = try await fetchSimilarTracksUseCase.execute(targetTrack: track)
+				guard !Task.isCancelled, let self else { return }
 
 				self.currentRecommendations = tracks
 				self.presenter.updateRecommendations(tracks)
@@ -109,7 +108,7 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 			} catch is CancellationError {
 				return
 			} catch {
-				guard !Task.isCancelled else { return }
+				guard !Task.isCancelled, let self else { return }
 				self.currentRecommendations = []
 				self.presenter.updateRecommendations([])
 				self.presenter.showError("추천 곡을 불러오지 못했습니다.")
@@ -119,9 +118,11 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 	}
 
 	private func openMusicApp(for track: Track) {
+		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await self.fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
-			self.urlOpener.open(url)
+			guard let url = await fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			urlOpener.open(url)
 		}
 	}
 }
