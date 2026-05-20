@@ -16,27 +16,34 @@ extension Array where Element == Track {
 
 		var enrichedTracks = self
 
-		await withTaskGroup(of: (Int, Track?).self) { group in
-			var iterator = self.enumerated().makeIterator()
-			let initialRequestCount = Swift.min(maxConcurrentRequests, self.count)
+		do {
+			try await withThrowingTaskGroup(of: (Int, Track?).self) { group in
+				var iterator = self.enumerated().makeIterator()
+				let initialRequestCount = Swift.min(maxConcurrentRequests, self.count)
 
-			for _ in 0..<initialRequestCount {
-				guard let next = iterator.next() else { break }
-				group.addTask {
-					await Self.enrichedTrackEntry(from: next, using: fetchTrackInfo)
+				for _ in 0..<initialRequestCount {
+					guard let next = iterator.next() else { break }
+					group.addTask {
+						try await Self.enrichedTrackEntry(from: next, using: fetchTrackInfo)
+					}
+				}
+
+				while let (index, enrichedTrack) = try await group.next() {
+					try Task.checkCancellation()
+					if let enrichedTrack {
+						enrichedTracks[index] = enrichedTrack
+					}
+
+					guard let next = iterator.next() else { continue }
+					group.addTask {
+						try await Self.enrichedTrackEntry(from: next, using: fetchTrackInfo)
+					}
 				}
 			}
-
-			while let (index, enrichedTrack) = await group.next() {
-				if let enrichedTrack {
-					enrichedTracks[index] = enrichedTrack
-				}
-
-				guard let next = iterator.next() else { continue }
-				group.addTask {
-					await Self.enrichedTrackEntry(from: next, using: fetchTrackInfo)
-				}
-			}
+		} catch is CancellationError {
+			return self
+		} catch {
+			return enrichedTracks
 		}
 
 		return enrichedTracks
@@ -45,9 +52,12 @@ extension Array where Element == Track {
 	private static func enrichedTrackEntry(
 		from entry: (offset: Int, element: Track),
 		using fetchTrackInfo: @escaping @Sendable (Track) async throws -> Track
-	) async -> (Int, Track?) {
+	) async throws -> (Int, Track?) {
+		try Task.checkCancellation()
 		do {
 			return (entry.offset, try await fetchTrackInfo(entry.element))
+		} catch is CancellationError {
+			throw CancellationError()
 		} catch {
 			return (entry.offset, nil)
 		}
