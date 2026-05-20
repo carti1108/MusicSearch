@@ -12,6 +12,7 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 
 	private var accessToken: String?
 	private var accessTokenExpiry: Date?
+	private var accessTokenRequest: (id: UUID, task: Task<SpotifyTokenResponse, Error>)?
 	private let configuration: SpotifyAPIConfiguration
 	private let networkManager: NetworkRequesting
 
@@ -53,14 +54,38 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 		}
 		if isRefresh {
 			self.clearToken()
+		} else if let accessTokenRequest {
+			let tokenResponse = try await accessTokenRequest.task.value
+			self.storeTokenResponse(tokenResponse)
+			return tokenResponse.access_token
 		}
 
 		let api = SpotifyAPI.token(config: self.configuration)
-		let tokenResponse = try await self.networkManager.perform(with: api, as: SpotifyTokenResponse.self)
+		let networkManager = self.networkManager
+		let requestID = UUID()
+		let requestTask = Task {
+			try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
+		}
+		self.accessTokenRequest = (requestID, requestTask)
 
+		do {
+			let tokenResponse = try await requestTask.value
+			self.storeTokenResponse(tokenResponse)
+			if self.accessTokenRequest?.id == requestID {
+				self.accessTokenRequest = nil
+			}
+			return tokenResponse.access_token
+		} catch {
+			if self.accessTokenRequest?.id == requestID {
+				self.accessTokenRequest = nil
+			}
+			throw error
+		}
+	}
+
+	private func storeTokenResponse(_ tokenResponse: SpotifyTokenResponse) {
 		self.accessToken = tokenResponse.access_token
 		self.accessTokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
-		return tokenResponse.access_token
 	}
 
 	private func fetchImageURL(artistName: String, token: String) async throws -> URL? {
@@ -108,5 +133,7 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 	private func clearToken() {
 		self.accessToken = nil
 		self.accessTokenExpiry = nil
+		self.accessTokenRequest?.task.cancel()
+		self.accessTokenRequest = nil
 	}
 }
