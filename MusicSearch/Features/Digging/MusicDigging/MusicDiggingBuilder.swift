@@ -27,22 +27,20 @@ final class MusicDiggingBuilder: Builder<MusicDiggingDependency>, MusicDiggingBu
 	override init(dependency: MusicDiggingDependency) {
 		super.init(dependency: dependency)
 	}
-
+	
 	func build(
 		withListener listener: MusicDiggingListener,
 		seedTrack: Track
 	) -> MusicDiggingRouting {
-		MainActor.assumeIsolated {
-			let viewController = MusicDiggingViewController()
-			let interactor = MusicDiggingInteractor(
-				seedTrack: seedTrack,
-				presenter: viewController,
-				fetchSimilarTracksUseCase: self.dependency.fetchSimilarTracksUseCase,
-				fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase,
-				urlOpener: self.dependency.urlOpener
-			)
-			interactor.listener = listener
-			return MusicDiggingRouter(interactor: interactor, viewController: viewController)
-		}
+		let viewController = MusicDiggingViewController()
+		let interactor = MusicDiggingInteractor(
+			seedTrack: seedTrack,
+			presenter: viewController,
+			fetchSimilarTracksUseCase: self.dependency.fetchSimilarTracksUseCase,
+			fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase,
+			urlOpener: self.dependency.urlOpener
+		)
+		interactor.listener = listener
+		return MusicDiggingRouter(interactor: interactor, viewController: viewController)
 	}
 }

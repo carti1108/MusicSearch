@@ -65,18 +65,16 @@ final class RootBuilder: Builder<RootDependency> {
 	}
 
 	func build() -> LaunchRouting {
-		MainActor.assumeIsolated {
-			let component = RootComponent(dependency: self.dependency)
-			let viewController = RootViewController()
-			let interactor = RootInteractor(presenter: viewController)
+		let component = RootComponent(dependency: self.dependency)
+		let viewController = RootViewController()
+		let interactor = RootInteractor(presenter: viewController)
 
-			return RootRouter(
-				interactor: interactor,
-				viewController: viewController,
-				weatherRecommendationBuilder: component.weatherRecommendationBuilder,
-				trackSearchBuilder: component.trackSearchBuilder,
-				chartBuilder: component.chartBuilder
-			)
-		}
+		return RootRouter(
+			interactor: interactor,
+			viewController: viewController,
+			weatherRecommendationBuilder: component.weatherRecommendationBuilder,
+			trackSearchBuilder: component.trackSearchBuilder,
+			chartBuilder: component.chartBuilder
+		)
 	}
 }

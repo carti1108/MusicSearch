@@ -44,20 +44,18 @@ final class ChartBuilder: Builder<ChartDependency>, ChartBuildable {
 	override init(dependency: ChartDependency) {
 		super.init(dependency: dependency)
 	}
-
+	
 	func build(withListener listener: ChartListener) -> ChartRouting {
-		MainActor.assumeIsolated {
-			let component = ChartComponent(dependency: self.dependency)
-			let viewController = ChartViewController()
-			let interactor = ChartInteractor(
-					presenter: viewController,
-					fetchChartTopTracksUseCase: component.fetchChartTopTracksUseCase,
-					fetchChartTopArtistsUseCase: component.fetchChartTopArtistsUseCase,
-					fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase,
-					urlOpener: component.urlOpener
-				)
-			interactor.listener = listener
-			return ChartRouter(interactor: interactor, viewController: viewController)
-		}
+		let component = ChartComponent(dependency: self.dependency)
+		let viewController = ChartViewController()
+		let interactor = ChartInteractor(
+			presenter: viewController,
+			fetchChartTopTracksUseCase: component.fetchChartTopTracksUseCase,
+			fetchChartTopArtistsUseCase: component.fetchChartTopArtistsUseCase,
+			fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase,
+			urlOpener: component.urlOpener
+		)
+		interactor.listener = listener
+		return ChartRouter(interactor: interactor, viewController: viewController)
 	}
 }
