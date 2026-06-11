@@ -1,0 +1,6 @@
+import Foundation
+import Feature{{ name }}Interface
+
+public final class Feature{{ name }} {
+    public init() {}
+}

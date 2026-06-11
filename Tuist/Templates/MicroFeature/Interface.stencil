@@ -1,0 +1,12 @@
+import Foundation
+
+public protocol Feature{{ name }}Buildable {
+    // func build(withListener listener: Feature{{ name }}Listener) -> Feature{{ name }}Routing
+}
+
+public protocol Feature{{ name }}Routing {
+    // var viewControllable: ViewControllable { get }
+}
+
+public protocol Feature{{ name }}Listener: AnyObject {
+}

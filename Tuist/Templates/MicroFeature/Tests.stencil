@@ -1,0 +1,8 @@
+import XCTest
+@testable import Feature{{ name }}
+
+final class Feature{{ name }}Tests: XCTestCase {
+    func testExample() {
+        XCTAssertTrue(true)
+    }
+}
