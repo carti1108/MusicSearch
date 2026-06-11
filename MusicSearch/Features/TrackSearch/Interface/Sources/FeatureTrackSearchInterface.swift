@@ -1,0 +1,30 @@
+import Foundation
+import UIKit
+import MicroRIBs
+import MSDomain
+import MSUtil
+
+@MainActor
+public protocol TrackSearchBuildable: Buildable {
+	func build(
+		withListener listener: TrackSearchListener,
+		navigationController: UINavigationController
+	) -> TrackSearchRouting
+}
+
+@MainActor
+public protocol TrackSearchRouting: ViewableRouting {
+	func attachMusicDigging(seedTrack: Track)
+}
+
+@MainActor
+public protocol TrackSearchListener: AnyObject {}
+
+@MainActor
+public protocol TrackSearchDependency: Dependency {
+	var searchTracksUseCase: SearchTracksUseCase { get }
+	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
+	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
+	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var urlOpener: URLOpening { get }
+}
