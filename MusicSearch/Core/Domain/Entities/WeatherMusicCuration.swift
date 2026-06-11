@@ -8,7 +8,7 @@
 import Foundation
 
 public struct WeatherMusicCuration: Sendable {
-	let weather: Weather
-	let moodTag: String
-	let tracks: [Track]
+	public let weather: Weather
+	public let moodTag: String
+	public let tracks: [Track]
 }

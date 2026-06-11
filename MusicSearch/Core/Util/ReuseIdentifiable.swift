@@ -5,11 +5,11 @@
 //  Created by Kiseok on 12/8/25.
 //
 
-protocol ReuseIdentifiable {
+public protocol ReuseIdentifiable {
 	static var reuseIdentifier: String { get }
 }
 
-extension ReuseIdentifiable {
+public extension ReuseIdentifiable {
 	static var reuseIdentifier: String {
 		return String(describing: self)
 	}

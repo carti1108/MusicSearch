@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MSDomain
 
 struct TrackSearchResponseDTO: Decodable {
 	let results: TrackMatchesContainerDTO

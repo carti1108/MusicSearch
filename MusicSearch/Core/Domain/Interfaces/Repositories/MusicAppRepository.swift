@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol MusicAppRepository: Sendable {
+public protocol MusicAppRepository: Sendable {
 	func fetchDeepLink(for track: Track) async -> URL?
 	func fetchDeepLink(for artist: String) async -> URL?
 }

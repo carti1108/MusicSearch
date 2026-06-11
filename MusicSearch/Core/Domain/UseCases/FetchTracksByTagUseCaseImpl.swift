@@ -11,12 +11,12 @@ public protocol FetchTracksByTagUseCase: Sendable {
 	func execute(tag: String) async throws -> [Track]
 }
 
-struct FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
+public struct FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8
 
-	init(trackRepository: TrackRepository) {
+	public init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
 	}
 

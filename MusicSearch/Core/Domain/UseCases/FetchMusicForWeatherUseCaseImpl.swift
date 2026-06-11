@@ -11,12 +11,12 @@ public protocol FetchMusicForWeatherUseCase: Sendable {
 	func execute() async throws -> WeatherMusicCuration
 }
 
-struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
+public struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
 	private let fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
 	private let fetchTracksByTagUseCase: FetchTracksByTagUseCase
 	private let tagMapper: WeatherTagMapper
 
-	init(
+	public init(
 		fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase,
 		fetchTracksByTagUseCase: FetchTracksByTagUseCase,
 		tagMapper: WeatherTagMapper = WeatherTagMapper()
@@ -26,7 +26,7 @@ struct FetchMusicForWeatherUseCaseImpl: FetchMusicForWeatherUseCase {
 		self.tagMapper = tagMapper
 	}
 
-	func execute() async throws -> WeatherMusicCuration {
+	public func execute() async throws -> WeatherMusicCuration {
 		let weather = try await self.fetchCurrentWeatherUseCase.execute()
 		let tag = self.tagMapper.map(condition: weather.condition)
 		let tracks = try await self.fetchTracksByTagUseCase.execute(tag: tag)

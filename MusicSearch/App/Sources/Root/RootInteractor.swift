@@ -7,6 +7,14 @@
 
 import UIKit
 import MicroRIBs
+import FeatureWeatherRecommendation
+import FeatureWeatherRecommendationInterface
+import FeatureChart
+import FeatureChartInterface
+import FeatureMusicDigging
+import FeatureMusicDiggingInterface
+import FeatureTrackSearch
+import FeatureTrackSearchInterface
 
 @MainActor
 protocol RootRouting: LaunchRouting {}

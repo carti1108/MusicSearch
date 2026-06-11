@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum WeatherCondition: Sendable {
+public enum WeatherCondition: Sendable {
 	case thunderstorm
 	case drizzle
 	case rain
@@ -18,14 +18,14 @@ enum WeatherCondition: Sendable {
 	case unknown
 }
 
-struct Weather: Equatable, Sendable {
-	let temperature: Double
-	let condition: WeatherCondition
-	let description: String
-	let iconCode: String
-	let cityName: String
+public struct Weather: Equatable, Sendable {
+	public let temperature: Double
+	public let condition: WeatherCondition
+	public let description: String
+	public let iconCode: String
+	public let cityName: String
 
-	init(
+	public init(
 		temperature: Double,
 		condition: WeatherCondition,
 		description: String,

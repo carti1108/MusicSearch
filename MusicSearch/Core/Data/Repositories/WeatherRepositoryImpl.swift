@@ -7,13 +7,14 @@
 
 import Foundation
 import NetworkLayer
+import MSDomain
 
-struct WeatherRepositoryImpl: WeatherRepository {
+public struct WeatherRepositoryImpl: WeatherRepository {
 
 	private let networkManager: NetworkRequesting
 	private let configuration: WeatherAPIConfiguration
 
-	init(
+	public init(
 		networkManager: NetworkRequesting,
 		configuration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration()
 	) {
@@ -21,7 +22,7 @@ struct WeatherRepositoryImpl: WeatherRepository {
 		self.configuration = configuration
 	}
 
-	func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> Weather {
+	public func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> Weather {
 		try self.validateConfiguration()
 		do {
 			let response: WeatherResponseDTO = try await self.networkManager.perform(

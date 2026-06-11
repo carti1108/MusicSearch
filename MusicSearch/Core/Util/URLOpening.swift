@@ -7,14 +7,17 @@
 
 import UIKit
 
-protocol URLOpening {
+public protocol URLOpening {
 	@MainActor
 	func open(_ url: URL)
 }
 
-struct ApplicationURLOpener: URLOpening {
+public struct ApplicationURLOpener: URLOpening {
+	
+	public init() {}
+
 	@MainActor
-	func open(_ url: URL) {
+	public func open(_ url: URL) {
 		UIApplication.shared.open(url)
 	}
 }

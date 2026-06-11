@@ -15,12 +15,12 @@ public protocol SearchTracksUseCase: Sendable {
 	) async throws -> (tracks: [Track], totalResults: Int)
 }
 
-struct SearchTracksUseCaseImpl: SearchTracksUseCase {
+public struct SearchTracksUseCaseImpl: SearchTracksUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8
 
-	init(trackRepository: TrackRepository) {
+	public init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
 	}
 

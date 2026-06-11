@@ -7,8 +7,9 @@
 
 import Foundation
 import NetworkLayer
+import MSDomain
 
-actor SpotifyAppRepository: MusicAppRepository {
+public actor SpotifyAppRepository: MusicAppRepository {
 
 	private struct SearchRequest {
 		let query: String
@@ -27,7 +28,7 @@ actor SpotifyAppRepository: MusicAppRepository {
 		case invalidURI
 	}
 
-	init(
+	public init(
 		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
 		networkManager: NetworkRequesting
 	) {
@@ -35,12 +36,12 @@ actor SpotifyAppRepository: MusicAppRepository {
 		self.networkManager = networkManager
 	}
 
-	func fetchDeepLink(for track: Track) async -> URL? {
+	public func fetchDeepLink(for track: Track) async -> URL? {
 		let query = "\(track.title) \(track.artist)"
 		return await self.searchAndGetURL(query: query, type: "track")
 	}
 
-	func fetchDeepLink(for artist: String) async -> URL? {
+	public func fetchDeepLink(for artist: String) async -> URL? {
 		return await self.searchAndGetURL(query: artist, type: "artist")
 	}
 

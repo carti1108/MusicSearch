@@ -7,15 +7,15 @@
 
 import Foundation
 
-protocol ArtistImageEnrichmentService: Sendable {
+public protocol ArtistImageEnrichmentService: Sendable {
 	func enrich(_ artists: [Artist]) async -> [Artist]
 }
 
-final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentService {
+public final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentService {
 	private let fetchArtistImageURLUseCase: FetchArtistImageURLUseCase
 	private let maxConcurrentImageRequests: Int
 
-	init(
+	public init(
 		fetchArtistImageURLUseCase: FetchArtistImageURLUseCase,
 		maxConcurrentImageRequests: Int = 8
 	) {
@@ -23,7 +23,7 @@ final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentService {
 		self.maxConcurrentImageRequests = maxConcurrentImageRequests
 	}
 
-	func enrich(_ artists: [Artist]) async -> [Artist] {
+	public func enrich(_ artists: [Artist]) async -> [Artist] {
 		guard !artists.isEmpty else { return [] }
 
 		var updatedArtists = artists

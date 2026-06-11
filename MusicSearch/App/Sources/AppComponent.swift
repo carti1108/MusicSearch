@@ -8,6 +8,17 @@
 import Foundation
 import NetworkLayer
 import CoreLocation
+import MSDomain
+import MSData
+import MSUtil
+import FeatureChart
+import FeatureChartInterface
+import FeatureMusicDigging
+import FeatureMusicDiggingInterface
+import FeatureTrackSearch
+import FeatureTrackSearchInterface
+import FeatureWeatherRecommendation
+import FeatureWeatherRecommendationInterface
 
 @MainActor
 final class AppComponent {

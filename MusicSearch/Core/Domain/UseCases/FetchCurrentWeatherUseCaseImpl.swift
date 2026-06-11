@@ -7,21 +7,21 @@
 
 import Foundation
 
-protocol FetchCurrentWeatherUseCase: Sendable {
+public protocol FetchCurrentWeatherUseCase: Sendable {
 	func execute() async throws -> Weather
 }
 
-struct FetchCurrentWeatherUseCaseImpl: FetchCurrentWeatherUseCase {
+public struct FetchCurrentWeatherUseCaseImpl: FetchCurrentWeatherUseCase {
 
 	private let locationRepository: LocationRepository
 	private let weatherRepository: WeatherRepository
 
-	init(locationRepository: LocationRepository, weatherRepository: WeatherRepository) {
+	public init(locationRepository: LocationRepository, weatherRepository: WeatherRepository) {
 		self.locationRepository = locationRepository
 		self.weatherRepository = weatherRepository
 	}
 
-	func execute() async throws -> Weather {
+	public func execute() async throws -> Weather {
 		let location = try await self.locationRepository.fetchCurrentLocation()
 		return try await self.weatherRepository.fetchCurrentWeather(
 			latitude: location.latitude,

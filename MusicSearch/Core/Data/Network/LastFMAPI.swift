@@ -7,6 +7,7 @@
 
 import Foundation
 import NetworkLayer
+import MSDomain
 
 enum LastFMAPI {
 	case searchTracks(keyword: String, limit: Int, page: Int)

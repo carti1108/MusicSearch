@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol ArtistImageRepository: Sendable {
+public protocol ArtistImageRepository: Sendable {
 	func fetchImageURL(for artistName: String) async throws -> URL?
 }

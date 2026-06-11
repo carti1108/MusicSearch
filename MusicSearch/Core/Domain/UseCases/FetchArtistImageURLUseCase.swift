@@ -7,18 +7,18 @@
 
 import Foundation
 
-protocol FetchArtistImageURLUseCase: Sendable {
+public protocol FetchArtistImageURLUseCase: Sendable {
 	func execute(artistName: String) async throws -> URL?
 }
 
-final class FetchArtistImageURLUseCaseImpl: FetchArtistImageURLUseCase {
+public final class FetchArtistImageURLUseCaseImpl: FetchArtistImageURLUseCase {
 	private let artistImageRepository: ArtistImageRepository
 
-	init(artistImageRepository: ArtistImageRepository) {
+	public init(artistImageRepository: ArtistImageRepository) {
 		self.artistImageRepository = artistImageRepository
 	}
 
-	func execute(artistName: String) async throws -> URL? {
+	public func execute(artistName: String) async throws -> URL? {
 		try await self.artistImageRepository.fetchImageURL(for: artistName)
 	}
 }

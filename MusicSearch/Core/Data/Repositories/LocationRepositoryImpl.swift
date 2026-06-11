@@ -7,8 +7,9 @@
 
 import Foundation
 import CoreLocation
+import MSDomain
 
-protocol LocationManaging: Sendable {
+public protocol LocationManaging: Sendable {
 	var authorizationStatus: CLAuthorizationStatus { get }
 	var desiredAccuracy: CLLocationAccuracy { get set }
 	func requestWhenInUseAuthorization()
@@ -16,7 +17,7 @@ protocol LocationManaging: Sendable {
 }
 
 extension CLLocationManager: LocationManaging {
-	func requestLocation() async throws -> CLLocation {
+	public func requestLocation() async throws -> CLLocation {
 		for try await update in CLLocationUpdate.liveUpdates() {
 			if let location = update.location {
 				return location
@@ -26,12 +27,12 @@ extension CLLocationManager: LocationManaging {
 	}
 }
 
-struct LocationRepositoryImpl: LocationRepository {
+public struct LocationRepositoryImpl: LocationRepository {
 
 	private var locationManager: LocationManaging
 	private let timeout: TimeInterval
 
-	init(
+	public init(
 		locationManager: LocationManaging = CLLocationManager(),
 		timeout: TimeInterval = 10.0
 	) {
@@ -40,7 +41,7 @@ struct LocationRepositoryImpl: LocationRepository {
 		self.timeout = timeout
 	}
 
-	func fetchCurrentLocation() async throws -> (latitude: Double, longitude: Double) {
+	public func fetchCurrentLocation() async throws -> (latitude: Double, longitude: Double) {
 		let status = self.locationManager.authorizationStatus
 
 		switch status {

@@ -11,12 +11,12 @@ public protocol FetchSimilarTracksUseCase: Sendable {
 	func execute(targetTrack: Track) async throws -> [Track]
 }
 
-struct FetchSimilarTracksUseCaseImpl: FetchSimilarTracksUseCase {
+public struct FetchSimilarTracksUseCaseImpl: FetchSimilarTracksUseCase {
 
 	private let trackRepository: TrackRepository
 	private let maxConcurrentInfoRequests: Int = 8
 
-	init(trackRepository: TrackRepository) {
+	public init(trackRepository: TrackRepository) {
 		self.trackRepository = trackRepository
 	}
 

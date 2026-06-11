@@ -7,8 +7,10 @@
 
 import Foundation
 import NetworkLayer
+import MSDomain
+import MSUtil
 
-actor SpotifyArtistImageRepository: ArtistImageRepository {
+public actor SpotifyArtistImageRepository: ArtistImageRepository {
 
 	private var accessToken: String?
 	private var accessTokenExpiry: Date?
@@ -21,7 +23,7 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 		case unauthorized
 	}
 
-	init(
+	public init(
 		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
 		networkManager: NetworkRequesting
 	) {
@@ -29,7 +31,7 @@ actor SpotifyArtistImageRepository: ArtistImageRepository {
 		self.networkManager = networkManager
 	}
 
-	func fetchImageURL(for artistName: String) async throws -> URL? {
+	public func fetchImageURL(for artistName: String) async throws -> URL? {
 		let token = try await self.getAccessToken()
 
 		do {

@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol LocationRepository: Sendable {
+public protocol LocationRepository: Sendable {
 	func fetchCurrentLocation() async throws -> (latitude: Double, longitude: Double)
 }

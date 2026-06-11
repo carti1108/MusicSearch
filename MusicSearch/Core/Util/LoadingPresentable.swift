@@ -8,13 +8,13 @@
 import UIKit
 
 @MainActor
-protocol LoadingPresentable: AnyObject {
+public protocol LoadingPresentable: AnyObject {
 	var loadingIndicatorView: UIActivityIndicatorView { get }
 }
 
 @MainActor
 extension LoadingPresentable {
-	func setLoading(_ isLoading: Bool) {
+	public func setLoading(_ isLoading: Bool) {
 		if isLoading {
 			self.loadingIndicatorView.startAnimating()
 		} else {

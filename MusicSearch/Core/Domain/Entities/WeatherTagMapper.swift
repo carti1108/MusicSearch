@@ -7,9 +7,11 @@
 
 import Foundation
 
-struct WeatherTagMapper {
+public struct WeatherTagMapper: Sendable {
 
-	func map(condition: WeatherCondition) -> String {
+	public init() {}
+
+	public func map(condition: WeatherCondition) -> String {
 		switch condition {
 		case .thunderstorm:
 			return ["rock", "metal", "dark ambient", "storm"].randomElement() ?? "rock"

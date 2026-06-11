@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MSDomain
 
 struct WeatherResponseDTO: Decodable {
 	let weather: [WeatherDescriptionDTO]

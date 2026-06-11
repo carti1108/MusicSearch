@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MSDomain
 
 struct ChartTopTracksResponseDTO: Decodable {
 	let tracks: ChartTrackListDTO

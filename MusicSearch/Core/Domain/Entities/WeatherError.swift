@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum WeatherError: Error, Equatable {
+public enum WeatherError: Error, Equatable {
 	case locationPermissionDenied
 	case locationFetchFailed
 	case configurationError
@@ -16,7 +16,7 @@ enum WeatherError: Error, Equatable {
 }
 
 extension WeatherError: LocalizedError {
-	var errorDescription: String? {
+	public var errorDescription: String? {
 		switch self {
 		case .locationPermissionDenied:
 			return "위치 권한이 필요합니다. 설정에서 권한을 허용해 주세요."

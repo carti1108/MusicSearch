@@ -7,16 +7,17 @@
 
 import Foundation
 import NetworkLayer
+import MSDomain
 
-struct ChartRepositoryImpl: ChartRepository {
+public struct ChartRepositoryImpl: ChartRepository {
 
 	private let networkManager: NetworkRequesting
 
-	init(networkManager: NetworkRequesting) {
+	public init(networkManager: NetworkRequesting) {
 		self.networkManager = networkManager
 	}
 
-	func fetchTopTracks() async throws -> [Track] {
+	public func fetchTopTracks() async throws -> [Track] {
 		let response: ChartTopTracksResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.getChartTopTracks,
 			as: ChartTopTracksResponseDTO.self
@@ -24,7 +25,7 @@ struct ChartRepositoryImpl: ChartRepository {
 		return response.tracks.track.map { $0.toDomain() }
 	}
 
-	func fetchTopArtists() async throws -> [Artist] {
+	public func fetchTopArtists() async throws -> [Artist] {
 		let response: ChartTopArtistsResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.getChartTopArtists,
 			as: ChartTopArtistsResponseDTO.self

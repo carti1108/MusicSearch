@@ -8,7 +8,7 @@
 import Foundation
 import NetworkLayer
 
-protocol SpotifyAPIConfiguration: Sendable {
+public protocol SpotifyAPIConfiguration: Sendable {
 	var accountsBaseURL: String { get }
 	var apiBaseURL: String { get }
 	var clientId: String { get }
@@ -16,16 +16,18 @@ protocol SpotifyAPIConfiguration: Sendable {
 	var tokenRefreshLeeway: TimeInterval { get }
 }
 
-struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
-	var accountsBaseURL: String { "https://accounts.spotify.com" }
-	var apiBaseURL: String { "https://api.spotify.com" }
-	var clientId: String {
+public struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
+	public var accountsBaseURL: String { "https://accounts.spotify.com" }
+	public var apiBaseURL: String { "https://api.spotify.com" }
+	public var clientId: String {
 		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_ID") as? String ?? ""
 	}
-	var clientSecret: String {
+	public var clientSecret: String {
 		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
 	}
-	var tokenRefreshLeeway: TimeInterval { 60 }
+	public var tokenRefreshLeeway: TimeInterval { 60 }
+
+	public init() {}
 }
 
 enum SpotifyAPI {

@@ -8,13 +8,13 @@
 import UIKit
 
 @MainActor
-protocol ErrorPresentable: AnyObject {
+public protocol ErrorPresentable: AnyObject {
 	var lastPresentedErrorMessage: String? { get set }
 }
 
 @MainActor
 extension ErrorPresentable where Self: UIViewController {
-	func presentErrorIfNeeded(
+	public func presentErrorIfNeeded(
 		_ message: String?,
 		title: String = "오류",
 		confirmTitle: String = "확인",

@@ -8,7 +8,7 @@
 import UIKit
 import Kingfisher
 
-extension UIImageView {
+public extension UIImageView {
 	func setRemoteImage(
 		_ url: URL?,
 		targetSize: CGSize,

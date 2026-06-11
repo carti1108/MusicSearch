@@ -7,6 +7,16 @@
 
 import UIKit
 import MicroRIBs
+import FeatureChart
+import FeatureChartInterface
+import FeatureMusicDigging
+import FeatureMusicDiggingInterface
+import FeatureTrackSearch
+import FeatureTrackSearchInterface
+import FeatureWeatherRecommendation
+import FeatureWeatherRecommendationInterface
+import MSDomain
+import MSUtil
 
 @MainActor
 protocol RootDependency: Dependency, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency {}

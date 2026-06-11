@@ -7,6 +7,14 @@
 
 import UIKit
 import MicroRIBs
+import FeatureChart
+import FeatureChartInterface
+import FeatureMusicDigging
+import FeatureMusicDiggingInterface
+import FeatureTrackSearch
+import FeatureTrackSearchInterface
+import FeatureWeatherRecommendation
+import FeatureWeatherRecommendationInterface
 
 @MainActor
 protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener {

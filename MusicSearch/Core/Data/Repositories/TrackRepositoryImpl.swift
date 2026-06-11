@@ -7,16 +7,18 @@
 
 import Foundation
 import NetworkLayer
+import MSDomain
+import MSUtil
 
-struct TrackRepositoryImpl: TrackRepository {
+public struct TrackRepositoryImpl: TrackRepository {
 
 	private let networkManager: NetworkRequesting
 
-	init(networkManager: NetworkRequesting) {
+	public init(networkManager: NetworkRequesting) {
 		self.networkManager = networkManager
 	}
 
-	func searchTracks(
+	public func searchTracks(
 		query: String,
 		limit: Int,
 		page: Int
@@ -27,7 +29,7 @@ struct TrackRepositoryImpl: TrackRepository {
 		))
 	}
 
-	func fetchTopTracks(by tag: String) async throws -> [Track] {
+	public func fetchTopTracks(by tag: String) async throws -> [Track] {
 		let response: TagTopTracksResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.fetchTopTracks(tag: tag),
 			as: TagTopTracksResponseDTO.self
@@ -35,7 +37,7 @@ struct TrackRepositoryImpl: TrackRepository {
 		return response.tracks.track.map { $0.toDomain() }
 	}
 
-	func fetchSimilarTracks(to track: Track) async throws -> [Track] {
+	public func fetchSimilarTracks(to track: Track) async throws -> [Track] {
 		let response: TrackSimilarResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.fetchSimilarTracks(track: track),
 			as: TrackSimilarResponseDTO.self
@@ -43,7 +45,7 @@ struct TrackRepositoryImpl: TrackRepository {
 		return response.similartracks.track.map { $0.toDomain() }
 	}
 
-	func fetchTrackInfo(for track: Track) async throws -> Track {
+	public func fetchTrackInfo(for track: Track) async throws -> Track {
 		let response: TrackInfoResponseDTO = try await self.networkManager.perform(
 			with: LastFMAPI.getTrackInfo(track: track),
 			as: TrackInfoResponseDTO.self
