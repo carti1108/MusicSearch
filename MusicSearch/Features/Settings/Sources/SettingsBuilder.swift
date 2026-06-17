@@ -2,6 +2,7 @@ import MicroRIBs
 import FeatureSettingsInterface
 import NetworkLayer
 
+@MainActor
 public protocol SettingsDependency: Dependency {
     var networkManager: NetworkRequesting { get }
 }

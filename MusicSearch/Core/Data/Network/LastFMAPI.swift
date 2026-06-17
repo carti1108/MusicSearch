@@ -9,7 +9,7 @@ import Foundation
 import NetworkLayer
 import MSDomain
 
-enum LastFMAPI {
+public enum LastFMAPI {
 	case searchTracks(keyword: String, limit: Int, page: Int)
 	case fetchTopTracks(tag: String)
 	case fetchSimilarTracks(track: Track)
@@ -28,23 +28,23 @@ extension LastFMAPI: Requestable {
 		return ""
 	}
 
-	var baseURL: URL {
+	public var baseURL: URL {
 		return URL(string: "https://ws.audioscrobbler.com/2.0")!
 	}
 
-	var path: String {
+	public var path: String {
 		return ""
 	}
 
-	var method: HTTPMethod {
+	public var method: HTTPMethod {
 		return .get
 	}
 
-	var headers: [HTTPHeader.Field: String]? {
+	public var headers: [HTTPHeader.Field: String]? {
 		return nil
 	}
 
-	var cachePolicy: CachePolicy {
+	public var cachePolicy: CachePolicy {
 		switch self {
 		case .getTrackInfo:
 			return .memory
@@ -53,7 +53,7 @@ extension LastFMAPI: Requestable {
 		}
 	}
 
-	var task: RequestTask {
+	public var task: RequestTask {
 		var params: [String: Any] = [
 			"api_key": apiKey,
 			"format": "json"
