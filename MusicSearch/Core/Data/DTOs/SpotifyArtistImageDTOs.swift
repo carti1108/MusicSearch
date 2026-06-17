@@ -7,21 +7,21 @@
 
 import Foundation
 
-struct SpotifyArtistImageSearchResponseDTO: Decodable {
-	let artists: SpotifyArtistImageItemsDTO
+public struct SpotifyArtistImageSearchResponseDTO: Decodable {
+	public let artists: SpotifyArtistImageItemsDTO
 }
 
-struct SpotifyArtistImageItemsDTO: Decodable {
-	let items: [SpotifyArtistImageItemDTO]
+public struct SpotifyArtistImageItemsDTO: Decodable {
+	public let items: [SpotifyArtistImageItemDTO]
 }
 
-struct SpotifyArtistImageItemDTO: Decodable {
-	let name: String
-	let images: [SpotifyImageDTO]
+public struct SpotifyArtistImageItemDTO: Decodable {
+	public let name: String
+	public let images: [SpotifyImageDTO]
 }
 
-struct SpotifyImageDTO: Decodable {
-	let url: String
-	let height: Int?
-	let width: Int?
+public struct SpotifyImageDTO: Decodable {
+	public let url: String
+	public let height: Int?
+	public let width: Int?
 }

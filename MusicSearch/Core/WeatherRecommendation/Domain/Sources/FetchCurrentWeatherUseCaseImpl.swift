@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  FetchCurrentWeatherUseCaseImpl.swift
 //  MusicSearch

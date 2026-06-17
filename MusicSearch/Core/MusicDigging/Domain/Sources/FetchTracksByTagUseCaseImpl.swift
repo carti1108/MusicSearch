@@ -1,3 +1,5 @@
+import MSDomain
+
 //
 //  FetchTracksByTagUseCaseImpl.swift
 //  MusicSearch
@@ -6,6 +8,7 @@
 //
 
 import Foundation
+import TrackSearchDomain
 
 public protocol FetchTracksByTagUseCase: Sendable {
 	func execute(tag: String) async throws -> [Track]

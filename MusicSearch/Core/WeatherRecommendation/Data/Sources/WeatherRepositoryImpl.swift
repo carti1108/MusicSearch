@@ -1,3 +1,4 @@
+import MSData
 //
 //  WeatherRepositoryImpl.swift
 //  MusicSearch
@@ -8,6 +9,7 @@
 import Foundation
 import NetworkLayer
 import MSDomain
+import WeatherRecommendationDomain
 
 public struct WeatherRepositoryImpl: WeatherRepository {
 

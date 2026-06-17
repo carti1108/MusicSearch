@@ -1,3 +1,5 @@
+import MSDomain
+
 //
 //  SearchTracksUseCaseImpl.swift
 //  MusicSearch

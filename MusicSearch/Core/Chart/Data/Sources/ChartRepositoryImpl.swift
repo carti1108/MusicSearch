@@ -1,3 +1,4 @@
+import MSData
 //
 //  ChartRepository.swift
 //  MusicSearch
@@ -8,6 +9,7 @@
 import Foundation
 import NetworkLayer
 import MSDomain
+import ChartDomain
 
 public struct ChartRepositoryImpl: ChartRepository {
 

@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  WeatherTagMapper.swift
 //  MusicSearch

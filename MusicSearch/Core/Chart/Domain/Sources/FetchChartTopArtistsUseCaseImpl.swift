@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  FetchChartTopArtistsUseCaseImpl.swift
 //  MusicSearch

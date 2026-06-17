@@ -8,15 +8,15 @@
 import Foundation
 import MSDomain
 
-struct TrackSearchResponseDTO: Decodable {
-	let results: TrackMatchesContainerDTO
+public struct TrackSearchResponseDTO: Decodable {
+	public let results: TrackMatchesContainerDTO
 }
 
-struct TrackMatchesContainerDTO: Decodable {
-	let trackmatches: TrackListDTO
-	let totalResults: String
-	let startIndex: String
-	let itemsPerPage: String
+public struct TrackMatchesContainerDTO: Decodable {
+	public let trackmatches: TrackListDTO
+	public let totalResults: String
+	public let startIndex: String
+	public let itemsPerPage: String
 
 	enum CodingKeys: String, CodingKey {
 		case trackmatches
@@ -26,34 +26,34 @@ struct TrackMatchesContainerDTO: Decodable {
 	}
 }
 
-struct TrackListDTO: Decodable {
-	let track: [LastFMTrackSearchDTO]
+public struct TrackListDTO: Decodable {
+	public let track: [LastFMTrackSearchDTO]
 }
 
-struct TagTopTracksResponseDTO: Decodable {
-	let tracks: TagTrackListDTO
+public struct TagTopTracksResponseDTO: Decodable {
+	public let tracks: TagTrackListDTO
 }
 
-struct TagTrackListDTO: Decodable {
-	let track: [LastFMTrackTagDTO]
+public struct TagTrackListDTO: Decodable {
+	public let track: [LastFMTrackTagDTO]
 }
 
-struct TrackSimilarResponseDTO: Decodable {
-	let similartracks: SimilarTrackListDTO
+public struct TrackSimilarResponseDTO: Decodable {
+	public let similartracks: SimilarTrackListDTO
 }
 
-struct SimilarTrackListDTO: Decodable {
-	let track: [LastFMTrackSimilarDTO]
+public struct SimilarTrackListDTO: Decodable {
+	public let track: [LastFMTrackSimilarDTO]
 }
 
-struct LastFMTrackSearchDTO: Decodable {
-	let name: String
-	let artist: String
-	let url: String
-	let mbid: String?
-	let image: [LastFMImageDTO]?
+public struct LastFMTrackSearchDTO: Decodable {
+	public let name: String
+	public let artist: String
+	public let url: String
+	public let mbid: String?
+	public let image: [LastFMImageDTO]?
 
-	func toDomain() -> Track {
+	public func toDomain() -> Track {
 		let normalizedMBID = self.mbid?.trimmingCharacters(in: .whitespacesAndNewlines)
 		let resolvedMBID = (normalizedMBID?.isEmpty == false) ? normalizedMBID : nil
 		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
@@ -71,14 +71,14 @@ struct LastFMTrackSearchDTO: Decodable {
 	}
 }
 
-struct LastFMTrackTagDTO: Decodable {
-	let name: String
-	let artist: LastFMArtistNameDTO
-	let url: String
-	let mbid: String?
-	let image: [LastFMImageDTO]?
+public struct LastFMTrackTagDTO: Decodable {
+	public let name: String
+	public let artist: LastFMArtistNameDTO
+	public let url: String
+	public let mbid: String?
+	public let image: [LastFMImageDTO]?
 
-	func toDomain() -> Track {
+	public func toDomain() -> Track {
 		let normalizedMBID = self.mbid?.trimmingCharacters(in: .whitespacesAndNewlines)
 		let resolvedMBID = (normalizedMBID?.isEmpty == false) ? normalizedMBID : nil
 		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
@@ -96,14 +96,14 @@ struct LastFMTrackTagDTO: Decodable {
 	}
 }
 
-struct LastFMTrackSimilarDTO: Decodable {
-	let name: String
-	let artist: LastFMArtistNameDTO
-	let url: String
-	let mbid: String?
-	let image: [LastFMImageDTO]?
+public struct LastFMTrackSimilarDTO: Decodable {
+	public let name: String
+	public let artist: LastFMArtistNameDTO
+	public let url: String
+	public let mbid: String?
+	public let image: [LastFMImageDTO]?
 
-	func toDomain() -> Track {
+	public func toDomain() -> Track {
 		let normalizedMBID = self.mbid?.trimmingCharacters(in: .whitespacesAndNewlines)
 		let resolvedMBID = (normalizedMBID?.isEmpty == false) ? normalizedMBID : nil
 		let imageString = self.image?.first { $0.size == "extralarge" && !$0.text.isEmpty }?.text
@@ -121,17 +121,17 @@ struct LastFMTrackSimilarDTO: Decodable {
 	}
 }
 
-struct TrackInfoResponseDTO: Decodable {
-	let track: LastFMTrackInfoDTO
+public struct TrackInfoResponseDTO: Decodable {
+	public let track: LastFMTrackInfoDTO
 }
 
-struct LastFMTrackInfoDTO: Decodable {
-	let name: String
-	let artist: LastFMArtistNameDTO
-	let album: LastFMAlbumInfoDTO?
+public struct LastFMTrackInfoDTO: Decodable {
+	public let name: String
+	public let artist: LastFMArtistNameDTO
+	public let album: LastFMAlbumInfoDTO?
 }
 
-struct LastFMAlbumInfoDTO: Decodable {
-	let title: String
-	let image: [LastFMImageDTO]?
+public struct LastFMAlbumInfoDTO: Decodable {
+	public let title: String
+	public let image: [LastFMImageDTO]?
 }

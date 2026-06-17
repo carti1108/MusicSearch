@@ -1,3 +1,5 @@
+import MSDomain
+
 //
 //  TrackRepository.swift
 //  MusicSearch

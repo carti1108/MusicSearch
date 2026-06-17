@@ -1,3 +1,4 @@
+import MSData
 //
 //  TrackRepositoryImpl.swift
 //  MusicSearch
@@ -9,6 +10,7 @@ import Foundation
 import NetworkLayer
 import MSDomain
 import MSUtil
+import TrackSearchDomain
 
 public struct TrackRepositoryImpl: TrackRepository {
 

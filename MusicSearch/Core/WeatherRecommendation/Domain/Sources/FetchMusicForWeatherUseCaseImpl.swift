@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  FetchMusicForWeatherUseCaseImpl.swift
 //  MusicSearch
@@ -6,6 +7,7 @@
 //
 
 import Foundation
+import MusicDiggingDomain
 
 public protocol FetchMusicForWeatherUseCase: Sendable {
 	func execute() async throws -> WeatherMusicCuration

@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  WeatherRepository.swift
 //  MusicSearch

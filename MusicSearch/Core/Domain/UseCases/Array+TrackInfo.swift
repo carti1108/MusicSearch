@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Array where Element == Track {
+public extension Array where Element == Track {
 	func enrichingTrackInfo(
 		maxConcurrentRequests: Int = 8,
 		using fetchTrackInfo: @escaping @Sendable (Track) async throws -> Track

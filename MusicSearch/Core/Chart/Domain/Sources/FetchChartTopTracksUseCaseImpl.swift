@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  FetchChartTopTracksUseCaseImpl.swift
 //  MusicSearch
@@ -6,6 +7,7 @@
 //
 
 import Foundation
+import TrackSearchDomain
 
 public protocol FetchChartTopTracksUseCase: Sendable {
 	func execute() async throws -> [Track]

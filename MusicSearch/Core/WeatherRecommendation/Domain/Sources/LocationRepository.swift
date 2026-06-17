@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  LocationRepository.swift
 //  MusicSearch

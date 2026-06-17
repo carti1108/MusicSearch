@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  ChartRepository.swift
 //  MusicSearch

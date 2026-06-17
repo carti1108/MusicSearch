@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct LastFMImageDTO: Decodable {
-	let size: String
-	let text: String
+public struct LastFMImageDTO: Decodable {
+	public let size: String
+	public let text: String
 
 	enum CodingKeys: String, CodingKey {
 		case size
@@ -17,8 +17,8 @@ struct LastFMImageDTO: Decodable {
 	}
 }
 
-struct LastFMArtistNameDTO: Decodable {
-	let name: String
-	let mbid: String?
-	let url: String
+public struct LastFMArtistNameDTO: Decodable {
+	public let name: String
+	public let mbid: String?
+	public let url: String
 }

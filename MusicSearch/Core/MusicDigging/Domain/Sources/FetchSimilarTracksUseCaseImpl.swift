@@ -1,3 +1,5 @@
+import MSDomain
+
 //
 //  FetchSimilarTracksUseCaseImpl.swift
 //  MusicSearch
@@ -6,6 +8,7 @@
 //
 
 import Foundation
+import TrackSearchDomain
 
 public protocol FetchSimilarTracksUseCase: Sendable {
 	func execute(targetTrack: Track) async throws -> [Track]

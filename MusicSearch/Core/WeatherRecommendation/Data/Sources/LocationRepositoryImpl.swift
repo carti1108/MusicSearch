@@ -1,3 +1,4 @@
+import MSData
 //
 //  LocationRepositoryImpl.swift
 //  MusicSearch
@@ -8,6 +9,7 @@
 import Foundation
 import CoreLocation
 import MSDomain
+import WeatherRecommendationDomain
 
 public protocol LocationManaging: Sendable {
 	var authorizationStatus: CLAuthorizationStatus { get }

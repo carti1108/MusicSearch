@@ -1,3 +1,4 @@
+import MSData
 //
 //  ChartTopArtistsDTO.swift
 //  MusicSearch

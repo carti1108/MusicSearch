@@ -1,3 +1,4 @@
+import MSData
 //
 //  WeatherDTO.swift
 //  MusicSearch
@@ -7,6 +8,7 @@
 
 import Foundation
 import MSDomain
+import WeatherRecommendationDomain
 
 struct WeatherResponseDTO: Decodable {
 	let weather: [WeatherDescriptionDTO]

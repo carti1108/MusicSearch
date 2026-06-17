@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  WeatherError.swift
 //  MusicSearch
