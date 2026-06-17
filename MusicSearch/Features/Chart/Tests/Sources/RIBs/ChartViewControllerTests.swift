@@ -1,6 +1,8 @@
+import MSDomain
 import UIKit
 import Testing
-@testable import MusicSearch
+@testable import FeatureChart
+import FeatureChartTesting
 
 @MainActor
 private final class ChartListenerSpy: ChartPresentableListener {

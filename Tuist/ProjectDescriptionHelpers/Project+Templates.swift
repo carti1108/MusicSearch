@@ -1,6 +1,47 @@
 import ProjectDescription
 
 public extension Target {
+    
+    static func domainTargets(
+        name: String,
+        bundlePrefix: String,
+        deploymentTarget: DeploymentTargets,
+        settings: Settings,
+        dependencies: [TargetDependency] = []
+    ) -> Target {
+        return Target.target(
+            name: "\(name)Domain",
+            destinations: [.iPhone],
+            product: .staticFramework,
+            bundleId: "\(bundlePrefix).\(name)Domain",
+            deploymentTargets: deploymentTarget,
+            infoPlist: .default,
+            sources: ["MusicSearch/Core/\(name)/Domain/Sources/**"],
+            dependencies: dependencies,
+            settings: settings
+        )
+    }
+
+    static func dataTargets(
+        name: String,
+        bundlePrefix: String,
+        deploymentTarget: DeploymentTargets,
+        settings: Settings,
+        dependencies: [TargetDependency] = []
+    ) -> Target {
+        return Target.target(
+            name: "\(name)Data",
+            destinations: [.iPhone],
+            product: .staticFramework,
+            bundleId: "\(bundlePrefix).\(name)Data",
+            deploymentTargets: deploymentTarget,
+            infoPlist: .default,
+            sources: ["MusicSearch/Core/\(name)/Data/Sources/**"],
+            dependencies: dependencies,
+            settings: settings
+        )
+    }
+
     static func microFeatureTargets(
         name: String,
         bundlePrefix: String,
@@ -16,7 +57,7 @@ public extension Target {
         let interfaceTarget = Target.target(
             name: "Feature\(name)Interface",
             destinations: [.iPhone],
-            product: .framework,
+            product: .staticFramework,
             bundleId: "\(bundlePrefix).Feature\(name)Interface",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
@@ -28,7 +69,7 @@ public extension Target {
         let implementationTarget = Target.target(
             name: "Feature\(name)",
             destinations: [.iPhone],
-            product: .framework,
+            product: .staticFramework,
             bundleId: "\(bundlePrefix).Feature\(name)",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
@@ -40,7 +81,7 @@ public extension Target {
         let testingTarget = Target.target(
             name: "Feature\(name)Testing",
             destinations: [.iPhone],
-            product: .framework,
+            product: .staticFramework,
             bundleId: "\(bundlePrefix).Feature\(name)Testing",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,

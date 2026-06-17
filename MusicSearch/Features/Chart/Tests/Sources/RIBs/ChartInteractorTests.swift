@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  ChartInteractorTests.swift
 //  MusicSearchTests
@@ -7,7 +8,9 @@
 
 import Foundation
 import Testing
-@testable import MusicSearch
+@testable import FeatureChart
+import FeatureChartTesting
+import ChartDomain
 
 @MainActor
 struct ChartInteractorTests {

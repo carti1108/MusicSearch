@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  ChartRouterTests.swift
 //  MusicSearchTests
@@ -8,7 +9,8 @@
 import Testing
 import UIKit
 import MicroRIBs
-@testable import MusicSearch
+@testable import FeatureChart
+import FeatureChartTesting
 
 @MainActor
 struct ChartRouterTests {

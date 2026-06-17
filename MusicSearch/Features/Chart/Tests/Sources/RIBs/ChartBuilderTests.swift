@@ -1,3 +1,4 @@
+import MSDomain
 //
 //  ChartBuilderTests.swift
 //  MusicSearchTests
@@ -8,7 +9,8 @@
 import Foundation
 import Testing
 import UIKit
-@testable import MusicSearch
+@testable import FeatureChart
+import FeatureChartTesting
 
 @MainActor
 struct ChartBuilderTests {
@@ -20,7 +22,8 @@ struct ChartBuilderTests {
 		let dependency = MockChartDependency(
 			fetchChartTopTracksUseCase: fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: MockFetchChartTopArtistsUseCaseForBuilder(),
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForChartBuilder()
+			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForChartBuilder(),
+			urlOpener: MockURLOpener()
 		)
 		let builder = ChartBuilder(dependency: dependency)
 		let listener = MockChartListener()
