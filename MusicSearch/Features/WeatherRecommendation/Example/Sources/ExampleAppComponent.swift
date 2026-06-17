@@ -4,6 +4,7 @@ import MSDomain
 import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
 import MSUtil
+import WeatherRecommendationDomain
 
 @MainActor
 final class ExampleAppComponent: WeatherRecommendationDependency {

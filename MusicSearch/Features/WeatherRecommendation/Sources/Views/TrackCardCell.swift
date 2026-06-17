@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MSDomain
 import MSUtil
 
@@ -14,14 +15,8 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 
 	private let cardBackgroundView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.08)
-		view.layer.cornerRadius = 28
-		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor.white.withAlphaComponent(0.1).cgColor
-		view.layer.shadowColor = UIColor.black.cgColor
-		view.layer.shadowOpacity = 0.22
-		view.layer.shadowOffset = CGSize(width: 0, height: 20)
-		view.layer.shadowRadius = 26
+		view.backgroundColor = .clear
+		view.layer.cornerRadius = 16
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -51,7 +46,7 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		let stack = UIStackView()
 		stack.axis = .vertical
 		stack.spacing = 4
-		stack.alignment = .center
+		stack.alignment = .fill
 		stack.distribution = .fill
 		stack.translatesAutoresizingMaskIntoConstraints = false
 		return stack
@@ -60,20 +55,20 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	private let titleLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 21, weight: .heavy)
-		label.textColor = .white
+		label.textColor = UIColor(CustomColor.onSurface)
 		label.textAlignment = .center
-		label.numberOfLines = 2
-		label.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+		label.numberOfLines = 0
+		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()
 
 	private let artistLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 16, weight: .medium)
-		label.textColor = UIColor.white.withAlphaComponent(0.68)
+		label.textColor = UIColor(CustomColor.onSurfaceVariant)
 		label.textAlignment = .center
-		label.numberOfLines = 1
-		label.lineBreakMode = .byTruncatingTail
+		label.numberOfLines = 0
+		
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		label.setContentHuggingPriority(.required, for: .vertical)
 		return label
@@ -87,15 +82,6 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 	required init?(coder: NSCoder) { fatalError() }
 
 	private func setupUI() {
-		self.glowLayer.colors = [
-			UIColor(red: 0.47, green: 0.82, blue: 0.96, alpha: 0.32).cgColor,
-			UIColor(red: 0.45, green: 0.36, blue: 0.95, alpha: 0.10).cgColor,
-			UIColor.clear.cgColor
-		]
-		self.glowLayer.startPoint = CGPoint(x: 0, y: 0)
-		self.glowLayer.endPoint = CGPoint(x: 1, y: 1)
-		self.cardBackgroundView.layer.insertSublayer(self.glowLayer, at: 0)
-
 		self.contentView.addSubview(self.cardBackgroundView)
 		self.cardBackgroundView.addSubview(self.mainStackView)
 
@@ -125,8 +111,6 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 
 	override func layoutSubviews() {
 		super.layoutSubviews()
-		self.glowLayer.frame = self.cardBackgroundView.bounds
-		self.glowLayer.cornerRadius = self.cardBackgroundView.layer.cornerRadius
 	}
 
 	override func prepareForReuse() {

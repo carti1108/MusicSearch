@@ -2,6 +2,7 @@ import Foundation
 import MicroRIBs
 import MSDomain
 import MSUtil
+import ChartDomain
 
 @MainActor
 public protocol ChartDependency: Dependency {

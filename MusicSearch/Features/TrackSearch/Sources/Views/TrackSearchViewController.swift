@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MicroRIBs
 import MSDomain
 import MSUtil
@@ -16,7 +17,7 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 
 	weak var listener: TrackSearchPresentableListener?
 	var lastPresentedErrorMessage: String?
-	private let backgroundGradientLayer = CAGradientLayer()
+
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
@@ -74,7 +75,7 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 		let label = UILabel()
 		label.text = "DISCOVER"
 		label.font = .systemFont(ofSize: 12, weight: .semibold)
-		label.textColor = UIColor.white.withAlphaComponent(0.62)
+		label.textColor = UIColor(CustomColor.onSurfaceVariant)
 		return label
 	}()
 
@@ -82,7 +83,7 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 		let label = UILabel()
 		label.text = "원하는 곡을 찾고\n바로 Digging 해보세요"
 		label.font = .systemFont(ofSize: 30, weight: .heavy)
-		label.textColor = .white
+		label.textColor = UIColor(CustomColor.onSurface)
 		label.numberOfLines = 2
 		return label
 	}()
@@ -112,7 +113,6 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
-		self.backgroundGradientLayer.frame = self.view.bounds
 	}
 
 	func updateTracks(_ tracks: [Track]) {
@@ -143,31 +143,24 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 	private func setupUI() {
 		self.navigationItem.title = "검색"
 		self.tabBarItem.title = "Search"
-		self.backgroundGradientLayer.colors = [
-			UIColor(red: 0.03, green: 0.05, blue: 0.11, alpha: 1.0).cgColor,
-			UIColor(red: 0.08, green: 0.10, blue: 0.22, alpha: 1.0).cgColor,
-			UIColor(red: 0.07, green: 0.18, blue: 0.28, alpha: 1.0).cgColor
-		]
-		self.backgroundGradientLayer.startPoint = CGPoint(x: 0, y: 0)
-		self.backgroundGradientLayer.endPoint = CGPoint(x: 1, y: 1)
-		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
+		self.view.backgroundColor = UIColor(CustomColor.background)
 
 		self.searchController.searchBar.placeholder = "아티스트, 곡 제목 검색"
 		self.searchController.searchResultsUpdater = self
-		self.searchController.searchBar.searchTextField.backgroundColor = UIColor.white.withAlphaComponent(0.08)
-		self.searchController.searchBar.searchTextField.textColor = .white
-		self.searchController.searchBar.searchTextField.leftView?.tintColor = UIColor.white.withAlphaComponent(0.72)
+		self.searchController.searchBar.searchTextField.backgroundColor = UIColor(CustomColor.surfaceContainerHigh)
+		self.searchController.searchBar.searchTextField.textColor = UIColor(CustomColor.onSurface)
+		self.searchController.searchBar.searchTextField.leftView?.tintColor = UIColor(CustomColor.onSurfaceVariant)
 		self.searchController.searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
 			string: "아티스트, 곡 제목 검색",
-			attributes: [.foregroundColor: UIColor.white.withAlphaComponent(0.45)]
+			attributes: [.foregroundColor: UIColor(CustomColor.onSurfaceVariant)]
 		)
 		self.navigationItem.searchController = self.searchController
 		self.navigationItem.hidesSearchBarWhenScrolling = false
-		self.navigationController?.navigationBar.tintColor = .white
+		self.navigationController?.navigationBar.tintColor = UIColor(CustomColor.onSurface)
 
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
-		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+		appearance.titleTextAttributes = [.foregroundColor: UIColor(CustomColor.onSurface)]
 		self.navigationController?.navigationBar.standardAppearance = appearance
 		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
 

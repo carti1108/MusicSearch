@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MSDesignSystem
 
 final class PodiumCell: UICollectionViewCell {
 	static let identifier = "PodiumCell"
@@ -40,7 +41,7 @@ final class PodiumCell: UICollectionViewCell {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 14, weight: .bold)
 		label.textAlignment = .center
-		label.numberOfLines = 2
+		label.numberOfLines = 0
 		label.textColor = .white
 		return label
 	}()
@@ -69,15 +70,12 @@ final class PodiumCell: UICollectionViewCell {
 		if self.isArtist {
 			self.imageView.layer.cornerRadius = self.imageView.bounds.width / 2
 		} else {
-			self.imageView.layer.cornerRadius = 20
+			self.imageView.layer.cornerRadius = 16
 		}
 	}
 
 	private func setupUI() {
-		self.containerView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
-		self.containerView.layer.cornerRadius = 24
-		self.containerView.layer.borderWidth = 1
-		self.containerView.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		self.containerView.backgroundColor = .clear
 		self.contentView.addSubview(self.containerView)
 		self.containerView.translatesAutoresizingMaskIntoConstraints = false
 		self.containerView.addSubview(self.contentStackView)
@@ -89,6 +87,7 @@ final class PodiumCell: UICollectionViewCell {
 		self.rankLabel.translatesAutoresizingMaskIntoConstraints = false
 		self.containerView.addSubview(self.rankLabel)
 
+		self.contentStackView.alignment = .center
 		NSLayoutConstraint.activate([
 			self.containerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 12),
 			self.containerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
@@ -100,16 +99,16 @@ final class PodiumCell: UICollectionViewCell {
 			self.contentStackView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor, constant: -10),
 			self.contentStackView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -14),
 
-			self.imageView.widthAnchor.constraint(equalTo: self.containerView.widthAnchor, multiplier: 0.78),
+			self.imageView.widthAnchor.constraint(equalTo: self.containerView.widthAnchor, multiplier: 0.85),
 			self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor),
+			self.titleLabel.widthAnchor.constraint(equalTo: self.contentStackView.widthAnchor),
 
-			self.rankLabel.topAnchor.constraint(equalTo: self.imageView.topAnchor, constant: -15),
-			self.rankLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: -5)
+			self.rankLabel.topAnchor.constraint(equalTo: self.imageView.topAnchor, constant: -20),
+			self.rankLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: -15)
 		])
 	}
 
 	func configure(with item: ChartItem) {
-		self.rankLabel.text = "\(item.rank)"
 		self.titleLabel.text = item.title
 		self.imageView.backgroundColor = Self.rankColor(item.rank)
 		self.isArtist = (item.type == .artists)
@@ -121,18 +120,35 @@ final class PodiumCell: UICollectionViewCell {
 				: self.imageView.bounds.size
 		)
 
+		let rankString = "\(item.rank)"
+		var foregroundColor = UIColor.white
+		var fontSize: CGFloat = 36
+		var yOffset: CGFloat = 18
+		var scale: CGFloat = 0.85
+
 		if item.rank == 1 {
-			self.imageView.layer.borderWidth = 4
-			self.imageView.layer.borderColor = UIColor.systemYellow.cgColor
-			self.rankLabel.font = .systemFont(ofSize: 36, weight: .black)
-			self.rankLabel.textColor = .systemYellow
-			self.containerView.transform = CGAffineTransform(translationX: 0, y: -14)
-		} else {
+			foregroundColor = UIColor(CustomColor.primary)
 			self.imageView.layer.borderWidth = 0
-			self.rankLabel.font = .systemFont(ofSize: 24, weight: .bold)
-			self.rankLabel.textColor = .white
-			self.containerView.transform = CGAffineTransform(translationX: 0, y: 18)
+			fontSize = 54
+			yOffset = -14
+			scale = 1.05
+			self.titleLabel.font = .systemFont(ofSize: 15, weight: .heavy)
+		} else {
+			foregroundColor = UIColor(CustomColor.onSurfaceVariant)
+			self.imageView.layer.borderWidth = 1
+			self.imageView.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
+			fontSize = 42
+			yOffset = 18
+			scale = 0.85
+			self.titleLabel.font = .systemFont(ofSize: 13, weight: .bold)
 		}
+
+		let attributes: [NSAttributedString.Key: Any] = [
+			.foregroundColor: foregroundColor,
+			.font: UIFont.systemFont(ofSize: fontSize, weight: .black)
+		]
+		self.rankLabel.attributedText = NSAttributedString(string: rankString, attributes: attributes)
+		self.containerView.transform = CGAffineTransform(translationX: 0, y: yOffset).scaledBy(x: scale, y: scale)
 	}
 
 	private static func rankColor(_ rank: Int) -> UIColor {

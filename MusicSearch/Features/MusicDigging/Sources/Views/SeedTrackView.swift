@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MSDomain
 
 final class SeedTrackView: UIView {
@@ -13,15 +14,10 @@ final class SeedTrackView: UIView {
 
 	private let containerView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.08)
-		view.layer.cornerRadius = 28
+		view.backgroundColor = .clear
 		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
-		view.layer.shadowColor = UIColor.black.cgColor
-		view.layer.shadowOpacity = 0.24
-		view.layer.shadowOffset = CGSize(width: 0, height: 20)
-		view.layer.shadowRadius = 30
-		view.layer.masksToBounds = false
+		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
+		view.layer.cornerRadius = 16
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -51,8 +47,8 @@ final class SeedTrackView: UIView {
 		label.font = .systemFont(ofSize: 24, weight: .heavy)
 		label.textColor = .white
 		label.textAlignment = .center
-		label.numberOfLines = 2
-		label.lineBreakMode = .byTruncatingTail
+		label.numberOfLines = 0
+		
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
@@ -62,8 +58,8 @@ final class SeedTrackView: UIView {
 		label.font = .systemFont(ofSize: 16, weight: .medium)
 		label.textColor = .white.withAlphaComponent(0.8)
 		label.textAlignment = .center
-		label.numberOfLines = 1
-		label.lineBreakMode = .byTruncatingTail
+		label.numberOfLines = 0
+		
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
@@ -78,10 +74,6 @@ final class SeedTrackView: UIView {
 
 	override func layoutSubviews() {
 		super.layoutSubviews()
-		self.containerView.layer.shadowPath = UIBezierPath(
-			roundedRect: self.containerView.bounds,
-			cornerRadius: self.containerView.layer.cornerRadius
-		).cgPath
 	}
 
 	private func setupUI() {

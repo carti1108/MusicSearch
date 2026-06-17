@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MicroRIBs
 import MSDomain
 import MSUtil
@@ -16,7 +17,6 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	weak var listener: MusicDiggingPresentableListener?
 	var lastPresentedErrorMessage: String?
-	private let backgroundGradientLayer = CAGradientLayer()
 
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
@@ -57,9 +57,16 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "이 곡과 비슷한 무드 🎵"
+		let attributedString = NSMutableAttributedString(string: "이 곡과 비슷한 무드 ")
+		let attachment = NSTextAttachment()
+		attachment.image = UIImage(systemName: "music.note")?.withTintColor(UIColor(CustomColor.onSurface), renderingMode: .alwaysOriginal)
+		let bounds = CGRect(x: 0, y: -4, width: 24, height: 24)
+		attachment.bounds = bounds
+		attributedString.append(NSAttributedString(attachment: attachment))
+		label.attributedText = attributedString
 		label.font = .systemFont(ofSize: 24, weight: .heavy)
-		label.textColor = .white
+		label.textColor = UIColor(CustomColor.onSurface)
+		label.numberOfLines = 0
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
@@ -105,7 +112,6 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
-		self.backgroundGradientLayer.frame = self.view.bounds
 	}
 
 	override func viewDidAppear(_ animated: Bool) {
@@ -143,15 +149,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 	}
 
 	private func setupView() {
-		self.backgroundGradientLayer.colors = [
-			UIColor(red: 0.02, green: 0.04, blue: 0.09, alpha: 1.0).cgColor,
-			UIColor(red: 0.07, green: 0.10, blue: 0.18, alpha: 1.0).cgColor,
-			UIColor(red: 0.11, green: 0.19, blue: 0.27, alpha: 1.0).cgColor
-		]
-		self.backgroundGradientLayer.startPoint = CGPoint(x: 0, y: 0)
-		self.backgroundGradientLayer.endPoint = CGPoint(x: 1, y: 1)
-		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
-
+		self.view.backgroundColor = UIColor(CustomColor.background)
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
 		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]

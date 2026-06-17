@@ -11,6 +11,9 @@ import CoreLocation
 import MSDomain
 import MSData
 import MSUtil
+import ChartData
+import TrackSearchData
+import WeatherRecommendationData
 import FeatureChart
 import FeatureChartInterface
 import FeatureMusicDigging
@@ -19,6 +22,21 @@ import FeatureTrackSearch
 import FeatureTrackSearchInterface
 import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
+import WeatherRecommendationDomain
+import TrackSearchDomain
+import ChartDomain
+import MusicDiggingDomain
+import ArchiveDomain
+import ArchiveData
+import FeatureAddArchiveInterface
+import FeatureAddArchive
+import FeatureArchiveSearchInterface
+import FeatureArchiveSearch
+import FeatureArchiveFolderInterface
+import FeatureArchiveFolder
+import FeatureSettingsInterface
+import FeatureSettings
+import SwiftData
 
 @MainActor
 final class AppComponent {
@@ -69,6 +87,40 @@ final class AppComponent {
 	private lazy var chartRepositoryInstance: ChartRepository = {
 		ChartRepositoryImpl(networkManager: self.networkManager)
 	}()
+
+
+	private lazy var modelContainer: ModelContainer = {
+		do {
+			return try ModelContainer(for: SDArchivedTrack.self)
+		} catch {
+			fatalError("Could not initialize ModelContainer")
+		}
+	}()
+
+	private lazy var archiveRepositoryInstance: ArchiveRepository = {
+		ArchiveRepositoryImpl(modelContext: self.modelContainer.mainContext)
+	}()
+
+	
+	var addArchiveBuilder: AddArchiveBuildable {
+		AddArchiveBuilder(dependency: self)
+	}
+	
+	var archiveSearchBuilder: ArchiveSearchBuildable {
+		ArchiveSearchBuilder(dependency: self)
+	}
+	
+	var archiveFolderBuilder: ArchiveFolderBuildable {
+		ArchiveFolderBuilder(dependency: self)
+	}
+	
+	var settingsBuilder: SettingsBuildable {
+		SettingsBuilder(dependency: self)
+	}
+
+	var archiveRepository: ArchiveRepository {
+		self.archiveRepositoryInstance
+	}
 
 	var locationRepository: LocationRepository {
 		self.locationRepositoryInstance
@@ -139,6 +191,10 @@ extension AppComponent: TrackSearchDependency {
 	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase {
 		FetchSimilarTracksUseCaseImpl(trackRepository: self.trackRepository)
 	}
+
+	var musicDiggingBuilder: any MusicDiggingBuildable {
+		MusicDiggingBuilder(dependency: self)
+	}
 }
 
 extension AppComponent: ChartDependency {
@@ -159,4 +215,14 @@ extension AppComponent: ChartDependency {
 	}
 }
 
+@MainActor
 extension AppComponent: RootDependency {}
+
+@MainActor
+extension AppComponent: ArchiveSearchDependency {}
+
+@MainActor
+extension AppComponent: ArchiveFolderDependency {}
+
+@MainActor
+extension AppComponent: SettingsDependency {}

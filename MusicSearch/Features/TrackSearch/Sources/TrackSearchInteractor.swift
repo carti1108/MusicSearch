@@ -10,8 +10,8 @@ import Foundation
 import MicroRIBs
 import FeatureTrackSearchInterface
 import FeatureMusicDiggingInterface
-import FeatureMusicDigging
 import MSDomain
+import TrackSearchDomain
 
 
 

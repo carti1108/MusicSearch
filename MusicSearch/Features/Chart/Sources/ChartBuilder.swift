@@ -9,6 +9,7 @@ import MicroRIBs
 import MSDomain
 import MSUtil
 import FeatureChartInterface
+import ChartDomain
 
 @MainActor
 final class ChartComponent: Component<ChartDependency> {

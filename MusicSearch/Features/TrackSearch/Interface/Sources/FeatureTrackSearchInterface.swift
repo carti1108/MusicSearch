@@ -3,6 +3,9 @@ import UIKit
 import MicroRIBs
 import MSDomain
 import MSUtil
+import TrackSearchDomain
+import MusicDiggingDomain
+import FeatureMusicDiggingInterface
 
 @MainActor
 public protocol TrackSearchBuildable: Buildable {
@@ -27,4 +30,5 @@ public protocol TrackSearchDependency: Dependency {
 	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
 	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
 	var urlOpener: URLOpening { get }
+	var musicDiggingBuilder: MusicDiggingBuildable { get }
 }

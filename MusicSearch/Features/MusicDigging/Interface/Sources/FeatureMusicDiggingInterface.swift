@@ -2,6 +2,7 @@ import Foundation
 import MicroRIBs
 import MSDomain
 import MSUtil
+import MusicDiggingDomain
 
 @MainActor
 public protocol MusicDiggingBuildable: Buildable {

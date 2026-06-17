@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Combine
+import MSDesignSystem
 import MicroRIBs
 import Kingfisher
 import MSUtil
@@ -25,7 +27,6 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	private var isRestoringOffset = false
 	private var hasPrimedInitialCrossfade = false
 	private var imagePrefetcher: ImagePrefetcher?
-	private let backgroundGradientLayer = CAGradientLayer()
 
 	private let loadingIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .large)
@@ -45,12 +46,16 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	}
 
 	private lazy var segmentControl: UISegmentedControl = {
-		let sc = UISegmentedControl(items: ["🔥 Top Tracks", "🎤 Top Artists"])
+		let flameImage = UIImage(systemName: "flame.fill")
+		let micImage = UIImage(systemName: "music.mic")
+		let sc = UISegmentedControl(items: ["Top Tracks", "Top Artists"])
+		sc.setImage(flameImage, forSegmentAt: 0)
+		sc.setImage(micImage, forSegmentAt: 1)
 		sc.selectedSegmentIndex = 0
-		sc.backgroundColor = UIColor.white.withAlphaComponent(0.08)
-		sc.selectedSegmentTintColor = UIColor(red: 0.34, green: 0.56, blue: 0.98, alpha: 1.0)
-		sc.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-		sc.setTitleTextAttributes([.foregroundColor: UIColor.white.withAlphaComponent(0.65)], for: .normal)
+		sc.backgroundColor = UIColor(CustomColor.surface)
+		sc.selectedSegmentTintColor = UIColor(CustomColor.primary)
+		sc.setTitleTextAttributes([.foregroundColor: UIColor(CustomColor.onBackground)], for: .selected)
+		sc.setTitleTextAttributes([.foregroundColor: UIColor(CustomColor.onSurfaceVariant)], for: .normal)
 		sc.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
 		sc.translatesAutoresizingMaskIntoConstraints = false
 		return sc
@@ -73,7 +78,7 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	private let headerStackView: UIStackView = {
 		let stack = UIStackView()
 		stack.axis = .vertical
-		stack.spacing = 8
+		stack.spacing = CustomSpacing.base
 		stack.translatesAutoresizingMaskIntoConstraints = false
 		return stack
 	}()
@@ -82,7 +87,7 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 		let label = UILabel()
 		label.text = "GLOBAL MOMENTUM"
 		label.font = .systemFont(ofSize: 12, weight: .semibold)
-		label.textColor = UIColor.white.withAlphaComponent(0.62)
+		label.textColor = UIColor(CustomColor.onSurfaceVariant)
 		return label
 	}()
 
@@ -90,13 +95,14 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 		let label = UILabel()
 		label.text = "지금 가장 뜨거운\n트랙과 아티스트"
 		label.font = .systemFont(ofSize: 30, weight: .heavy)
-		label.textColor = .white
+		label.textColor = UIColor(CustomColor.onBackground)
 		label.numberOfLines = 2
 		return label
 	}()
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
+		self.view.backgroundColor = UIColor(CustomColor.background)
 		setupUI()
 		configureDataSource()
 		self.currentSegmentIndex = self.segmentControl.selectedSegmentIndex
@@ -105,7 +111,6 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
-		self.backgroundGradientLayer.frame = self.view.bounds
 	}
 
 	func updateSegment(to index: Int) {
@@ -151,20 +156,12 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	}
 
 	private func setupUI() {
-		self.backgroundGradientLayer.colors = [
-			UIColor(red: 0.02, green: 0.03, blue: 0.09, alpha: 1.0).cgColor,
-			UIColor(red: 0.10, green: 0.09, blue: 0.21, alpha: 1.0).cgColor,
-			UIColor(red: 0.09, green: 0.17, blue: 0.23, alpha: 1.0).cgColor
-		]
-		self.backgroundGradientLayer.startPoint = CGPoint(x: 0, y: 0)
-		self.backgroundGradientLayer.endPoint = CGPoint(x: 1, y: 1)
-		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
 		navigationItem.title = "Chart"
 		self.navigationController?.navigationBar.tintColor = .white
 
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
-		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+		appearance.titleTextAttributes = [.foregroundColor: UIColor(CustomColor.onBackground)]
 		self.navigationController?.navigationBar.standardAppearance = appearance
 		self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
 
@@ -177,16 +174,16 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 		view.addSubview(loadingIndicator)
 
 		NSLayoutConstraint.activate([
-			self.headerStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 12),
-			self.headerStackView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 20),
-			self.headerStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20),
+			self.headerStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: CustomSpacing.stackMd),
+			self.headerStackView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: CustomSpacing.containerMargin),
+			self.headerStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -CustomSpacing.containerMargin),
 
-			segmentControl.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 18),
-			segmentControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-			segmentControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+			segmentControl.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: CustomSpacing.stackMd),
+			segmentControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: CustomSpacing.containerMargin),
+			segmentControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -CustomSpacing.containerMargin),
 			segmentControl.heightAnchor.constraint(equalToConstant: 38),
 
-			collectionView.topAnchor.constraint(equalTo: segmentControl.bottomAnchor, constant: 10),
+			collectionView.topAnchor.constraint(equalTo: segmentControl.bottomAnchor, constant: CustomSpacing.stackSm),
 			collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
 			collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 			collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -236,13 +233,13 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 			switch section {
 			case .podium:
 				let podiumHeight = min(max(env.container.effectiveContentSize.height * 0.42, 280), 320)
-				let verticalInset = max((env.container.effectiveContentSize.height - podiumHeight) / 2, 12)
+				let verticalInset = max((env.container.effectiveContentSize.height - podiumHeight) / 2, CustomSpacing.base)
 				let itemSize = NSCollectionLayoutSize(
 					widthDimension: .fractionalWidth(1.0 / 3.0),
 					heightDimension: .fractionalHeight(1.0)
 				)
 				let item = NSCollectionLayoutItem(layoutSize: itemSize)
-				item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 6, bottom: 0, trailing: 6)
+				item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4)
 				let groupSize = NSCollectionLayoutSize(
 					widthDimension: .fractionalWidth(1.0),
 					heightDimension: .absolute(podiumHeight)
@@ -251,9 +248,9 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 				let sectionLayout = NSCollectionLayoutSection(group: group)
 				sectionLayout.contentInsets = NSDirectionalEdgeInsets(
 					top: verticalInset,
-					leading: 14,
+					leading: CustomSpacing.stackSm,
 					bottom: verticalInset,
-					trailing: 14
+					trailing: CustomSpacing.stackSm
 				)
 				return sectionLayout
 

@@ -4,6 +4,7 @@ import MSDomain
 import FeatureMusicDigging
 import FeatureMusicDiggingInterface
 import MSUtil
+import MusicDiggingDomain
 
 @MainActor
 final class ExampleAppComponent: MusicDiggingDependency {

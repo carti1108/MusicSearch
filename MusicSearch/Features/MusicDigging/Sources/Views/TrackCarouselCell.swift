@@ -6,16 +6,17 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MSDomain
 import MSUtil
 
 final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 	private let cardView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.06)
-		view.layer.cornerRadius = 20
+		view.backgroundColor = .clear
 		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
+		view.layer.cornerRadius = 16
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -43,26 +44,29 @@ final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 	private let titleLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 11, weight: .bold)
-		label.textColor = .white
+		label.textColor = UIColor(CustomColor.onSurface)
 		label.textAlignment = .left
-		label.numberOfLines = 2
-		label.lineBreakMode = .byTruncatingTail
+		label.numberOfLines = 0
+		
 		return label
 	}()
 
 	private let artistLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 9, weight: .medium)
-		label.textColor = .white.withAlphaComponent(0.7)
+		label.textColor = UIColor(CustomColor.onSurfaceVariant)
 		label.textAlignment = .left
-		label.numberOfLines = 1
-		label.lineBreakMode = .byTruncatingTail
+		label.numberOfLines = 0
+		
 		return label
 	}()
 
 	private let spacerView: UIView = {
 		let view = UIView()
 		view.backgroundColor = .clear
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
+		view.layer.cornerRadius = 16
 		view.setContentHuggingPriority(.defaultLow, for: .vertical)
 		view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 		return view

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MSDesignSystem
 
 final class RankListCell: UICollectionViewCell {
 	static let identifier = "RankListCell"
@@ -41,25 +42,25 @@ final class RankListCell: UICollectionViewCell {
 
 	private func setupUI() {
 		self.contentView.backgroundColor = .clear
-		self.cardView.backgroundColor = UIColor.white.withAlphaComponent(0.06)
-		self.cardView.layer.cornerRadius = 20
+		self.cardView.backgroundColor = .clear
 		self.cardView.layer.borderWidth = 1
-		self.cardView.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		self.cardView.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
+		self.cardView.layer.cornerRadius = 16
 		self.cardView.translatesAutoresizingMaskIntoConstraints = false
 		self.contentView.addSubview(self.cardView)
 
 		self.rankLabel.font = .boldSystemFont(ofSize: 16)
-		self.rankLabel.textColor = UIColor.white.withAlphaComponent(0.62)
+		self.rankLabel.textColor = UIColor(CustomColor.primary)
 		self.rankLabel.textAlignment = .center
 
 		self.titleLabel.font = .systemFont(ofSize: 16, weight: .bold)
-		self.titleLabel.textColor = .white
+		self.titleLabel.textColor = UIColor(CustomColor.onSurface)
 		self.titleLabel.numberOfLines = 1
 		self.titleLabel.lineBreakMode = .byTruncatingTail
 		self.titleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
 		self.subtitleLabel.font = .systemFont(ofSize: 13, weight: .regular)
-		self.subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.58)
+		self.subtitleLabel.textColor = UIColor(CustomColor.onSurfaceVariant)
 		self.subtitleLabel.numberOfLines = 1
 		self.subtitleLabel.lineBreakMode = .byTruncatingTail
 		self.subtitleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
@@ -103,7 +104,7 @@ final class RankListCell: UICollectionViewCell {
 
 		self.imageView.setRemoteImage(item.imageURL, targetSize: CGSize(width: 40, height: 40))
 
-		self.imageView.layer.cornerRadius = (item.type == .artists) ? 20 : 8
+		self.imageView.layer.cornerRadius = (item.type == .artists) ? 20 : 0
 	}
 
 	private static func rankColor(_ rank: Int) -> UIColor {

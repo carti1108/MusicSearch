@@ -2,6 +2,7 @@ import Foundation
 import MicroRIBs
 import MSDomain
 import MSUtil
+import WeatherRecommendationDomain
 
 @MainActor
 public protocol WeatherRecommendationBuildable: Buildable {

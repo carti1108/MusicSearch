@@ -9,7 +9,6 @@ import UIKit
 import MicroRIBs
 import FeatureTrackSearchInterface
 import FeatureMusicDiggingInterface
-import FeatureMusicDigging
 import MSDomain
 
 @MainActor

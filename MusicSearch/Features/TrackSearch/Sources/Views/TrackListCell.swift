@@ -6,16 +6,17 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MSDomain
 import MSUtil
 
 final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 	private let cardView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.06)
-		view.layer.cornerRadius = 22
+		view.backgroundColor = .clear
 		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
+		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
+		view.layer.cornerRadius = 16
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -42,9 +43,9 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 	private let titleLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 17, weight: .bold)
-		label.textColor = .white
-		label.numberOfLines = 1
-		label.lineBreakMode = .byTruncatingTail
+		label.textColor = UIColor(CustomColor.onSurface)
+		label.numberOfLines = 0
+		
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()
@@ -52,9 +53,9 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 	private let artistLabel: UILabel = {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 14, weight: .regular)
-		label.textColor = UIColor.white.withAlphaComponent(0.62)
-		label.numberOfLines = 1
-		label.lineBreakMode = .byTruncatingTail
+		label.textColor = UIColor(CustomColor.onSurfaceVariant)
+		label.numberOfLines = 0
+		
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()

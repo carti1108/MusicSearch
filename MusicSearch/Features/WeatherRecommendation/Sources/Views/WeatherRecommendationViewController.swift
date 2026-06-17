@@ -6,9 +6,11 @@
 //
 
 import UIKit
+import MSDesignSystem
 import MicroRIBs
 import MSDomain
 import MSUtil
+import WeatherRecommendationDomain
 
 @MainActor
 final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, WeatherRecommendationPresentable, WeatherRecommendationViewControllable, ErrorPresentable {
@@ -21,14 +23,14 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let topGlowView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor(red: 0.45, green: 0.87, blue: 0.97, alpha: 0.22)
+		view.backgroundColor = .clear
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
 
 	private let bottomGlowView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor(red: 0.49, green: 0.40, blue: 0.98, alpha: 0.18)
+		view.backgroundColor = .clear
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -64,14 +66,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let weatherContainerView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.white.withAlphaComponent(0.12)
-		view.layer.cornerRadius = 32
-		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor.white.withAlphaComponent(0.14).cgColor
-		view.layer.shadowColor = UIColor.black.cgColor
-		view.layer.shadowOpacity = 0.28
-		view.layer.shadowOffset = CGSize(width: 0, height: 22)
-		view.layer.shadowRadius = 40
+		view.backgroundColor = .clear
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -119,9 +114,17 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "오늘 날씨와 어울리는 선곡 🎧"
+		let attributedString = NSMutableAttributedString(string: "오늘 날씨와 어울리는 선곡 ")
+		let attachment = NSTextAttachment()
+		attachment.image = UIImage(systemName: "headphones")?.withTintColor(UIColor(CustomColor.onSurface), renderingMode: .alwaysOriginal)
+		let bounds = CGRect(x: 0, y: -4, width: 24, height: 24)
+		attachment.bounds = bounds
+		attributedString.append(NSAttributedString(attachment: attachment))
+		label.attributedText = attributedString
 		label.font = .systemFont(ofSize: 24, weight: .heavy)
-		label.textColor = .white
+		label.textColor = UIColor(CustomColor.onSurface)
+		label.numberOfLines = 0
+		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
@@ -150,6 +153,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		cv.showsVerticalScrollIndicator = false
 		cv.showsHorizontalScrollIndicator = false
 		cv.isScrollEnabled = false
+		cv.clipsToBounds = false
 		cv.register(TrackCardCell.self, forCellWithReuseIdentifier: TrackCardCell.reuseIdentifier)
 		cv.delegate = self
 		cv.translatesAutoresizingMaskIntoConstraints = false
@@ -195,7 +199,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.weatherIconImageView.image = UIImage(systemName: self.iconName(for: weather.condition))
 
 		self.backgroundGradientLayer.colors = self.gradientColors(for: weather.condition).map(\.cgColor)
-		self.weatherContainerView.backgroundColor = UIColor.white.withAlphaComponent(0.12)
+		self.weatherContainerView.backgroundColor = .clear
 
 		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
 		snapshot.appendSections([.main])
@@ -246,50 +250,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	private func gradientColors(for condition: WeatherCondition) -> [UIColor] {
-		switch condition {
-		case .thunderstorm:
-			return [
-				UIColor(red: 0.06, green: 0.08, blue: 0.16, alpha: 1.0),
-				UIColor(red: 0.17, green: 0.17, blue: 0.31, alpha: 1.0),
-				UIColor(red: 0.09, green: 0.11, blue: 0.21, alpha: 1.0)
-			]
-		case .drizzle, .rain:
-			return [
-				UIColor(red: 0.04, green: 0.10, blue: 0.20, alpha: 1.0),
-				UIColor(red: 0.08, green: 0.25, blue: 0.38, alpha: 1.0),
-				UIColor(red: 0.03, green: 0.16, blue: 0.27, alpha: 1.0)
-			]
-		case .snow:
-			return [
-				UIColor(red: 0.18, green: 0.25, blue: 0.34, alpha: 1.0),
-				UIColor(red: 0.43, green: 0.55, blue: 0.64, alpha: 1.0),
-				UIColor(red: 0.16, green: 0.20, blue: 0.27, alpha: 1.0)
-			]
-		case .atmosphere:
-			return [
-				UIColor(red: 0.12, green: 0.12, blue: 0.18, alpha: 1.0),
-				UIColor(red: 0.26, green: 0.26, blue: 0.34, alpha: 1.0),
-				UIColor(red: 0.10, green: 0.10, blue: 0.16, alpha: 1.0)
-			]
-		case .clear:
-			return [
-				UIColor(red: 0.04, green: 0.09, blue: 0.20, alpha: 1.0),
-				UIColor(red: 0.10, green: 0.39, blue: 0.65, alpha: 1.0),
-				UIColor(red: 0.31, green: 0.59, blue: 0.85, alpha: 1.0)
-			]
-		case .clouds:
-			return [
-				UIColor(red: 0.08, green: 0.11, blue: 0.18, alpha: 1.0),
-				UIColor(red: 0.24, green: 0.28, blue: 0.40, alpha: 1.0),
-				UIColor(red: 0.14, green: 0.17, blue: 0.24, alpha: 1.0)
-			]
-		case .unknown:
-			return [
-				UIColor(red: 0.09, green: 0.11, blue: 0.16, alpha: 1.0),
-				UIColor(red: 0.18, green: 0.22, blue: 0.32, alpha: 1.0),
-				UIColor(red: 0.10, green: 0.12, blue: 0.20, alpha: 1.0)
-			]
-		}
+		return [UIColor(CustomColor.background), UIColor(CustomColor.background)]
 	}
 
 	private func setupView() {
@@ -297,6 +258,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.backgroundGradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
 		self.backgroundGradientLayer.colors = self.gradientColors(for: .unknown).map(\.cgColor)
 		self.view.layer.insertSublayer(self.backgroundGradientLayer, at: 0)
+		self.view.backgroundColor = UIColor(CustomColor.background)
 
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
@@ -385,7 +347,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 			self.collectionView.topAnchor.constraint(equalTo: self.sectionTitleLabel.bottomAnchor, constant: 20),
 			self.collectionView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.collectionView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-			self.collectionView.heightAnchor.constraint(equalToConstant: 380),
+			self.collectionView.heightAnchor.constraint(equalToConstant: 450),
 			self.collectionView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -20)
 		])
 	}

@@ -10,6 +10,7 @@ import MicroRIBs
 import MSDomain
 import MSUtil
 import FeatureChartInterface
+import ChartDomain
 
 @MainActor
 protocol ChartPresentableListener: AnyObject {

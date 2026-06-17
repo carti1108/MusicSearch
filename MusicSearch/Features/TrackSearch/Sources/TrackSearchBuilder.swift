@@ -9,14 +9,15 @@ import UIKit
 import MicroRIBs
 import FeatureTrackSearchInterface
 import FeatureMusicDiggingInterface
-import FeatureMusicDigging
 import MSDomain
 import MSUtil
+import TrackSearchDomain
+import MusicDiggingDomain
 
 
 
 @MainActor
-final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchDependency, MusicDiggingDependency {
+final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchDependency {
 	var searchTracksUseCase: SearchTracksUseCase {
 		self.dependency.searchTracksUseCase
 	}
@@ -36,6 +37,10 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 	var urlOpener: URLOpening {
 		self.dependency.urlOpener
 	}
+    
+    var musicDiggingBuilder: MusicDiggingBuildable {
+        self.dependency.musicDiggingBuilder
+    }
 }
 
 
@@ -58,12 +63,11 @@ public final class TrackSearchBuilder: Builder<TrackSearchDependency>, TrackSear
 		)
 		interactor.listener = listener
 		
-		let musicDiggingBuilder = MusicDiggingBuilder(dependency: component)
 		return TrackSearchRouter(
 			interactor: interactor,
 			viewController: viewController,
 			navigationController: navigationController,
-			musicDiggingBuilder: musicDiggingBuilder
+			musicDiggingBuilder: component.musicDiggingBuilder
 		)
 	}
 }

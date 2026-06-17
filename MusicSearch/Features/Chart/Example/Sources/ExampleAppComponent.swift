@@ -3,6 +3,7 @@ import MSDomain
 import FeatureChart
 import FeatureChartInterface
 import MSUtil
+import ChartDomain
 
 @MainActor
 final class ExampleAppComponent: ChartDependency {

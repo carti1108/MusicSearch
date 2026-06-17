@@ -4,6 +4,7 @@ import MicroRIBs
 import MSDomain
 import MSUtil
 import FeatureChartInterface
+import ChartDomain
 
 @MainActor
 public final class MockFetchChartTopTracksUseCase: FetchChartTopTracksUseCase {
@@ -33,7 +34,7 @@ public final class MockFetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase 
 
 @MainActor
 public final class MockChartListener: ChartListener {
-    public init() {}
+	public init() {}
 }
 
 @MainActor
@@ -47,11 +48,22 @@ public final class MockChartDependency: ChartDependency {
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
-		urlOpener: URLOpening
+		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
 		self.urlOpener = urlOpener
+	}
+}
+
+public final class MockURLOpener: URLOpening {
+	public var openedURLs: [URL] = []
+
+	public init() {}
+
+	@MainActor
+	public func open(_ url: URL) {
+		self.openedURLs.append(url)
 	}
 }

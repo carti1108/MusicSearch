@@ -15,9 +15,14 @@ import FeatureTrackSearch
 import FeatureTrackSearchInterface
 import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
+import FeatureArchive
+import FeatureArchiveInterface
+import FeatureSettings
+import FeatureSettingsInterface
+import WeatherRecommendationDomain
 
 @MainActor
-protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener {
+protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener, ArchiveListener, SettingsListener {
 	var router: RootRouting? { get set }
 	var listener: RootListener? { get set }
 }
@@ -32,21 +37,29 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 	private let weatherRecommendationBuilder: WeatherRecommendationBuildable
 	private let trackSearchBuilder: TrackSearchBuildable
 	private let chartBuilder: ChartBuildable
+	private let archiveBuilder: ArchiveBuildable
+	private let settingsBuilder: SettingsBuildable
 
 	private var weatherRecommendationRouter: WeatherRecommendationRouting?
 	private var trackSearchRouter: TrackSearchRouting?
 	private var chartRouter: ChartRouting?
+	private var archiveRouter: ArchiveRouting?
+	private var settingsRouter: SettingsRouting?
 
 	init(
 		interactor: RootInteractable,
 		viewController: RootViewControllable,
 		weatherRecommendationBuilder: WeatherRecommendationBuildable,
 		trackSearchBuilder: TrackSearchBuildable,
-		chartBuilder: ChartBuildable
+		chartBuilder: ChartBuildable,
+		archiveBuilder: ArchiveBuildable,
+		settingsBuilder: SettingsBuildable
 	) {
 		self.weatherRecommendationBuilder = weatherRecommendationBuilder
 		self.trackSearchBuilder = trackSearchBuilder
 		self.chartBuilder = chartBuilder
+		self.archiveBuilder = archiveBuilder
+		self.settingsBuilder = settingsBuilder
 		super.init(interactor: interactor, viewController: viewController)
 		interactor.router = self
 	}
@@ -91,10 +104,34 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 			selectedImage: nil
 		)
 
+		let archiveRouter = self.archiveBuilder.build(withListener: self.interactor)
+		self.attachChild(archiveRouter)
+		self.archiveRouter = archiveRouter
+
+		let archiveNavigationController = UINavigationController(rootViewController: archiveRouter.viewControllable.uiViewController)
+		archiveNavigationController.tabBarItem = UITabBarItem(
+			title: "Archive",
+			image: UIImage(systemName: "folder.fill"),
+			selectedImage: nil
+		)
+
+		let settingsRouter = self.settingsBuilder.build(withListener: self.interactor)
+		self.attachChild(settingsRouter)
+		self.settingsRouter = settingsRouter
+
+		let settingsNavigationController = UINavigationController(rootViewController: settingsRouter.viewControllable.uiViewController)
+		settingsNavigationController.tabBarItem = UITabBarItem(
+			title: "Settings",
+			image: UIImage(systemName: "gearshape.fill"),
+			selectedImage: nil
+		)
+
 		self.viewController.setTabs([
 			weatherRecommendationNavigationController,
 			trackSearchNavigationController,
-			chartNavigationController
+			archiveNavigationController,
+			chartNavigationController,
+			settingsNavigationController
 		])
 	}
 }

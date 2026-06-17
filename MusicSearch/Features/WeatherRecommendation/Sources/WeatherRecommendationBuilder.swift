@@ -9,6 +9,7 @@ import MicroRIBs
 import MSDomain
 import MSUtil
 import FeatureWeatherRecommendationInterface
+import WeatherRecommendationDomain
 
 
 
