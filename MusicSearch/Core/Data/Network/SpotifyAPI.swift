@@ -14,6 +14,7 @@ public protocol SpotifyAPIConfiguration: Sendable {
 	var clientId: String { get }
 	var clientSecret: String { get }
 	var tokenRefreshLeeway: TimeInterval { get }
+	var redirectURI: String { get }
 }
 
 public struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
@@ -26,74 +27,89 @@ public struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
 		Bundle.main.object(forInfoDictionaryKey: "SPOTIFY_CLIENT_SECRET") as? String ?? ""
 	}
 	public var tokenRefreshLeeway: TimeInterval { 60 }
+	public var redirectURI: String { "musicsearch://spotify-login-callback" }
 
 	public init() {}
 }
 
-enum SpotifyAPI {
+public enum SpotifyAPI {
 	case token(config: SpotifyAPIConfiguration)
+	case exchangeToken(code: String, config: SpotifyAPIConfiguration)
 	case search(query: String, type: String, token: String, config: SpotifyAPIConfiguration)
 	case artistSearch(query: String, token: String, limit: Int, config: SpotifyAPIConfiguration)
+	case me(token: String, config: SpotifyAPIConfiguration)
 }
 
 extension SpotifyAPI: Requestable {
+	public 
 	var cachePolicy: CachePolicy {
 		switch self {
-		case .token:
+		case .token, .exchangeToken:
 			return .memory
-		case .search, .artistSearch:
+		case .search, .artistSearch, .me:
 			return .memory
 		}
 	}
 
-	var baseURL: URL {
+	public var baseURL: URL {
 		switch self {
-		case .token(let config):
+		case .token(let config), .exchangeToken(_, let config):
 			return URL(string: config.accountsBaseURL)!
-		case .search(_, _, _, let config), .artistSearch(_, _, _, let config):
+		case .search(_, _, _, let config), .artistSearch(_, _, _, let config), .me(_, let config):
 			return URL(string: config.apiBaseURL)!
 		}
 	}
 
-	var path: String {
+	public var path: String {
 		switch self {
-		case .token:
+		case .token, .exchangeToken:
 			return "/api/token"
 		case .search, .artistSearch:
 			return "/v1/search"
+		case .me:
+			return "/v1/me"
 		}
 	}
 
-	var method: HTTPMethod {
+	public var method: HTTPMethod {
 		switch self {
-		case .token:
+		case .token, .exchangeToken:
 			return .post
-		case .search, .artistSearch:
+		case .search, .artistSearch, .me:
 			return .get
 		}
 	}
 
-	var headers: [HTTPHeader.Field: String]? {
+	public var headers: [HTTPHeader.Field: String]? {
 		switch self {
-		case .token(let config):
+		case .token(let config), .exchangeToken(_, let config):
 			let credentialData = "\(config.clientId):\(config.clientSecret)".data(using: .utf8)!
 			let base64Credentials = credentialData.base64EncodedString()
 			return [
 				.authorization: "Basic \(base64Credentials)",
 				.contentType: "application/x-www-form-urlencoded"
 			]
-		case .search(_, _, let token, _), .artistSearch(_, let token, _, _):
+		case .search(_, _, let token, _), .artistSearch(_, let token, _, _), .me(let token, _):
 			return [
 				.authorization: "Bearer \(token)"
 			]
 		}
 	}
 
-	var task: RequestTask {
+	public var task: RequestTask {
 		switch self {
 		case .token:
 			return .requestParameters(
 				parameters: ["grant_type": "client_credentials"],
+				encoding: URLFormEncoder()
+			)
+		case .exchangeToken(let code, let config):
+			return .requestParameters(
+				parameters: [
+					"grant_type": "authorization_code",
+					"code": code,
+					"redirect_uri": config.redirectURI
+				],
 				encoding: URLFormEncoder()
 			)
 		case .search(let query, let type, _, _):
@@ -114,6 +130,8 @@ extension SpotifyAPI: Requestable {
 				],
 				encoding: URLQueryEncoder()
 			)
+		case .me:
+			return .requestPlain
 		}
 	}
 }
