@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 import ArchiveDomain
 
+@MainActor
 public final class ArchiveRepositoryImpl: ArchiveRepository {
 	private let modelContext: ModelContext
 
