@@ -2,10 +2,13 @@ import MicroRIBs
 import ArchiveDomain
 import Foundation
 import FeatureAddArchiveInterface
+import MSDomain
+import TrackSearchDomain
 
 public protocol AddArchivePresentable: Presentable {
 	var listener: AddArchivePresentableListener? { get set }
 	func update(genres: [String])
+	func populate(with track: Track)
 }
 
 public final class AddArchiveInteractor: PresentableInteractor<AddArchivePresentable>, AddArchiveInteractable, AddArchivePresentableListener {
@@ -13,10 +16,12 @@ public final class AddArchiveInteractor: PresentableInteractor<AddArchivePresent
 	public weak var router: AddArchiveRouting?
 	public weak var listener: AddArchiveListener?
 
-		private let archiveRepository: ArchiveRepository
+	private let archiveRepository: ArchiveRepository
+	private let searchTracksUseCase: SearchTracksUseCase
 
-	public init(presenter: AddArchivePresentable, archiveRepository: ArchiveRepository) {
+	public init(presenter: AddArchivePresentable, archiveRepository: ArchiveRepository, searchTracksUseCase: SearchTracksUseCase) {
 		self.archiveRepository = archiveRepository
+		self.searchTracksUseCase = searchTracksUseCase
 		super.init(presenter: presenter)
 		presenter.listener = self
 	}
@@ -34,7 +39,6 @@ public final class AddArchiveInteractor: PresentableInteractor<AddArchivePresent
 			let customGenres = Array(Set(tracks.map { $0.genre })).sorted()
 			let predefined = PredefinedGenre.allCases.map { $0.rawValue }
 			
-			// Combine predefined + custom, removing duplicates, keeping predefined first
 			var combined = predefined
 			for custom in customGenres {
 				if !combined.contains(custom) {
@@ -57,8 +61,15 @@ public final class AddArchiveInteractor: PresentableInteractor<AddArchivePresent
 	public func closeTapped() {
 		listener?.didCloseAddArchive()
 	}
-	public func saveTapped(title: String, artist: String, genre: String, label: String, rating: Double, memo: String, releaseDate: Date?, listenDate: Date, coverImageData: Data?) {
+	public func searchTapped() {
+		router?.routeToSearch(searchTracksUseCase: searchTracksUseCase) { [weak self] track in
+			self?.presenter.populate(with: track)
+		}
+	}
+	
+	public func saveTapped(title: String, artist: String, genre: String, label: String, rating: Double, memo: String, releaseDate: Date?, listenDate: Date, coverImageData: Data?, albumTitle: String, distributor: String, albumType: String, isIntroGood: Bool, isGoodUntilMiddle: Bool, isGoodUntilEnd: Bool, platformIDs: [String: String]) {
 		let track = ArchivedTrack(
+			platformIDs: platformIDs,
 			coverImageData: coverImageData,
 			title: title,
 			artist: artist,
@@ -67,7 +78,13 @@ public final class AddArchiveInteractor: PresentableInteractor<AddArchivePresent
 			releaseDate: releaseDate,
 			listenDate: listenDate,
 			rating: rating,
-			memo: memo
+			memo: memo,
+			albumTitle: albumTitle,
+			distributor: distributor,
+			albumType: albumType,
+			isIntroGood: isIntroGood,
+			isGoodUntilMiddle: isGoodUntilMiddle,
+			isGoodUntilEnd: isGoodUntilEnd
 		)
 		
 		Task {

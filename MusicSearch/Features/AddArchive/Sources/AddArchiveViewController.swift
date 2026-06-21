@@ -4,10 +4,12 @@ import MicroRIBs
 import ArchiveDomain
 import PhotosUI
 import MSDesignSystem
+import MSDomain
 
 public protocol AddArchivePresentableListener: AnyObject {
 	func closeTapped()
-	func saveTapped(title: String, artist: String, genre: String, label: String, rating: Double, memo: String, releaseDate: Date?, listenDate: Date, coverImageData: Data?)
+	func searchTapped()
+	func saveTapped(title: String, artist: String, genre: String, label: String, rating: Double, memo: String, releaseDate: Date?, listenDate: Date, coverImageData: Data?, albumTitle: String, distributor: String, albumType: String, isIntroGood: Bool, isGoodUntilMiddle: Bool, isGoodUntilEnd: Bool, platformIDs: [String: String])
 }
 
 public final class AddArchiveViewController: UIViewController, AddArchivePresentable, AddArchiveViewControllable {
@@ -21,8 +23,11 @@ public final class AddArchiveViewController: UIViewController, AddArchivePresent
 			onClose: { [weak self] in
 				self?.listener?.closeTapped()
 			},
-			onSave: { [weak self] title, artist, genre, label, rating, memo, releaseDate, listenDate, coverImageData in
-				self?.listener?.saveTapped(title: title, artist: artist, genre: genre, label: label, rating: rating, memo: memo, releaseDate: releaseDate, listenDate: listenDate, coverImageData: coverImageData)
+			onSearch: { [weak self] in
+				self?.listener?.searchTapped()
+			},
+			onSave: { [weak self] title, artist, genre, label, rating, memo, releaseDate, listenDate, coverImageData, albumTitle, distributor, albumType, isIntroGood, isGoodUntilMiddle, isGoodUntilEnd, platformIDs in
+				self?.listener?.saveTapped(title: title, artist: artist, genre: genre, label: label, rating: rating, memo: memo, releaseDate: releaseDate, listenDate: listenDate, coverImageData: coverImageData, albumTitle: albumTitle, distributor: distributor, albumType: albumType, isIntroGood: isIntroGood, isGoodUntilMiddle: isGoodUntilMiddle, isGoodUntilEnd: isGoodUntilEnd, platformIDs: platformIDs)
 			}
 		)
 		let controller = UIHostingController(rootView: view)
@@ -40,6 +45,10 @@ public final class AddArchiveViewController: UIViewController, AddArchivePresent
 
 	public func update(genres: [String]) {
 		viewModel.availableGenres = genres
+	}
+	
+	public func populate(with track: Track) {
+		viewModel.selectedTrack = track
 	}
 
 	
@@ -74,12 +83,19 @@ public final class AddArchiveViewController: UIViewController, AddArchivePresent
 public struct AddArchiveView: View {
 	@ObservedObject var viewModel: AddArchiveViewModel
 	var onClose: () -> Void
-	var onSave: (String, String, String, String, Double, String, Date?, Date, Data?) -> Void
+	var onSearch: () -> Void
+	var onSave: (String, String, String, String, Double, String, Date?, Date, Data?, String, String, String, Bool, Bool, Bool, [String: String]) -> Void
 
 	@State private var title: String = ""
 	@State private var artist: String = ""
 	@State private var genre: String = ""
 	@State private var label: String = ""
+	@State private var albumTitle: String = ""
+	@State private var distributor: String = ""
+	@State private var albumType: String = "정규"
+	@State private var isIntroGood: Bool = false
+	@State private var isGoodUntilMiddle: Bool = false
+	@State private var isGoodUntilEnd: Bool = false
 	@State private var rating: Double = 3.0
 	@State private var memo: String = ""
 	
@@ -91,11 +107,11 @@ public struct AddArchiveView: View {
 	@State private var coverImageData: Data?
 	
 	@State private var isGenreExpanded: Bool = false
+	@State private var platformIDs: [String: String] = [:]
 
 	public var body: some View {
 		NavigationView {
 			Form {
-				// Cover Image Section
 				Section {
 					HStack {
 						Spacer()
@@ -133,10 +149,26 @@ public struct AddArchiveView: View {
 					.listRowBackground(Color.clear)
 				}
 				
-				// Track Info Section
 				Section(header: Text("기본 정보")) {
+					Button(action: onSearch) {
+						HStack {
+							Image(systemName: "magnifyingglass")
+							Text("노래 검색하여 자동 입력하기")
+						}
+						.foregroundColor(CustomColor.primary)
+						.padding(.vertical, 4)
+					}
+					
 					TextField("노래 제목", text: $title)
 					TextField("아티스트", text: $artist)
+					TextField("앨범명", text: $albumTitle)
+					
+					Picker("앨범 유형", selection: $albumType) {
+						Text("정규").tag("정규")
+						Text("싱글").tag("싱글")
+						Text("EP").tag("EP")
+						Text("기타").tag("기타")
+					}
 					
 					DisclosureGroup("장르 (선택: \(genre.isEmpty ? "없음" : genre))", isExpanded: $isGenreExpanded) {
 						TextField("장르 직접 입력", text: $genre)
@@ -158,10 +190,16 @@ public struct AddArchiveView: View {
 						}
 					}
 					
-					TextField("발매사/레이블", text: $label)
+					TextField("유통사", text: $distributor)
+					TextField("레이블", text: $label)
 				}
 				
-				// Dates Section
+				Section(header: Text("곡 전개 평가")) {
+					Toggle("인트로가 좋았는가", isOn: $isIntroGood)
+					Toggle("중반부까지 좋았는가", isOn: $isGoodUntilMiddle)
+					Toggle("끝까지 좋았는가", isOn: $isGoodUntilEnd)
+				}
+				
 				Section(header: Text("날짜")) {
 					Toggle("발매일 입력", isOn: $hasReleaseDate)
 					if hasReleaseDate {
@@ -170,13 +208,11 @@ public struct AddArchiveView: View {
 					DatePicker("청취일", selection: $listenDate, displayedComponents: .date)
 				}
 				
-				// Rating Section
 				Section(header: Text("나의 평점: \(String(format: "%.1f", rating))")) {
 					Slider(value: $rating, in: 0...5, step: 0.5)
 						.tint(CustomColor.tertiary)
 				}
 				
-				// Memo Section
 				Section(header: Text("메모")) {
 					TextEditor(text: $memo)
 						.frame(height: 100)
@@ -195,11 +231,47 @@ public struct AddArchiveView: View {
 				}
 				ToolbarItem(placement: .navigationBarTrailing) {
 					Button("저장") {
-						onSave(title, artist, genre, label, rating, memo, hasReleaseDate ? releaseDate : nil, listenDate, coverImageData)
+						onSave(title, artist, genre, label, rating, memo, hasReleaseDate ? releaseDate : nil, listenDate, coverImageData, albumTitle, distributor, albumType, isIntroGood, isGoodUntilMiddle, isGoodUntilEnd, platformIDs)
 					}
 					.fontWeight(.bold)
 					.foregroundColor(title.isEmpty || artist.isEmpty ? CustomColor.outline : CustomColor.primary)
 					.disabled(title.isEmpty || artist.isEmpty)
+				}
+			}
+			.onReceive(viewModel.$selectedTrack) { track in
+				guard let track = track else { return }
+				self.title = track.title
+				self.artist = track.artist
+				self.albumTitle = track.albumTitle ?? ""
+				
+				if let type = track.albumType {
+					if type.lowercased() == "single" {
+						self.albumType = "싱글"
+					} else if type.lowercased() == "ep" || type.lowercased() == "ep/single" {
+						self.albumType = "EP"
+					} else {
+						self.albumType = "정규"
+					}
+				}
+				
+				if let date = track.releaseDate {
+					self.hasReleaseDate = true
+					self.releaseDate = date
+				}
+				
+				self.platformIDs["spotify"] = track.id
+				
+				if let imageURL = track.imageURL {
+					Task {
+						do {
+							let (data, _) = try await URLSession.shared.data(from: imageURL)
+							await MainActor.run {
+								self.coverImageData = data
+							}
+						} catch {
+							print("Image load error: \(error)")
+						}
+					}
 				}
 			}
 		}

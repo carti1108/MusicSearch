@@ -1,8 +1,11 @@
+import MusicDiggingDomain
+
 import Foundation
 import MSDomain
 import MSUtil
 import FeatureTrackSearchInterface
 import TrackSearchDomain
+import FeatureMusicDiggingInterface
 
 @MainActor
 public final class MockSearchTracksUseCase: SearchTracksUseCase {
@@ -45,19 +48,22 @@ public final class MockTrackSearchDependency: TrackSearchDependency {
 	public let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
 	public let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
 	public let urlOpener: URLOpening
+	public let musicDiggingBuilder: MusicDiggingBuildable
 
 	public init(
 		searchTracksUseCase: SearchTracksUseCase,
 		fetchTracksByTagUseCase: FetchTracksByTagUseCase,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
 		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
-		urlOpener: URLOpening = MockURLOpener()
+		urlOpener: URLOpening? = nil,
+		musicDiggingBuilder: MusicDiggingBuildable? = nil
 	) {
 		self.searchTracksUseCase = searchTracksUseCase
 		self.fetchTracksByTagUseCase = fetchTracksByTagUseCase
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
 		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
-		self.urlOpener = urlOpener
+		self.urlOpener = urlOpener ?? MockURLOpener()
+		self.musicDiggingBuilder = musicDiggingBuilder ?? MockMusicDiggingBuildable()
 	}
 }
 
@@ -89,4 +95,11 @@ public final class MockFetchTracksByTagUseCase: FetchTracksByTagUseCase {
 public final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
     public init() {}
 	public func execute(targetTrack: Track) async throws -> [Track] { [] }
+}
+@MainActor
+public final class MockMusicDiggingBuildable: MusicDiggingBuildable {
+	public init() {}
+	public func build(withListener listener: FeatureMusicDiggingInterface.MusicDiggingListener, seedTrack: MSDomain.Track) -> FeatureMusicDiggingInterface.MusicDiggingRouting {
+		fatalError()
+	}
 }
