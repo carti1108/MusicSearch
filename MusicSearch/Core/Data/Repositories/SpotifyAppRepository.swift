@@ -73,6 +73,32 @@ public actor SpotifyAppRepository: MusicAppRepository {
 		}
 	}
 
+	public func searchSpotifyTracks(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
+		let token = try await self.getAccessToken()
+		do {
+			return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: token)
+		} catch SpotifyRepositoryError.unauthorized {
+			self.clearToken()
+			let refreshedToken = try await self.getAccessToken(forceRefresh: true)
+			return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: refreshedToken)
+		} catch let error as NetworkLayer.NetworkError {
+			if case .httpError(let code, _) = error, code == 401 {
+				self.clearToken()
+				let refreshedToken = try await self.getAccessToken(forceRefresh: true)
+				return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: refreshedToken)
+			}
+			throw error
+		}
+	}
+
+	private func performSearchSpotifyTracks(query: String, limit: Int, offset: Int, token: String) async throws -> (tracks: [Track], totalResults: Int) {
+		let api = SpotifyAPI.search(query: query, type: "track", limit: limit, offset: offset, token: token, config: self.configuration)
+		let result = try await self.networkManager.perform(with: api, as: SpotifyTrackSearchResponse.self)
+		
+		let tracks = result.tracks.items.map { $0.toDomain() }
+		return (tracks: tracks, totalResults: result.tracks.total ?? 0)
+	}
+
 	private func getAccessToken(forceRefresh: Bool = false) async throws -> String {
 		if !forceRefresh, self.isTokenValid, let token = self.accessToken {
 			return token
@@ -114,7 +140,7 @@ public actor SpotifyAppRepository: MusicAppRepository {
 	}
 
 	private func search(query: String, type: String, token: String) async throws -> String {
-		let api = SpotifyAPI.search(query: query, type: type, token: token, config: self.configuration)
+		let api = SpotifyAPI.search(query: query, type: type, limit: 1, offset: 0, token: token, config: self.configuration)
 
 		if type == "track" {
 			let result = try await self.networkManager.perform(with: api, as: SpotifyTrackSearchResponse.self)
@@ -129,7 +155,8 @@ public actor SpotifyAppRepository: MusicAppRepository {
 			if let spotifyURL = item.external_urls?.spotify {
 				return spotifyURL
 			}
-			return try self.convertToWebURL(uri: item.uri)
+			guard let uri = item.uri else { throw URLError(.resourceUnavailable) }
+			return try self.convertToWebURL(uri: uri)
 		}
 	}
 

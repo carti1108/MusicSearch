@@ -35,9 +35,11 @@ public struct DefaultSpotifyAPIConfiguration: SpotifyAPIConfiguration {
 public enum SpotifyAPI {
 	case token(config: SpotifyAPIConfiguration)
 	case exchangeToken(code: String, config: SpotifyAPIConfiguration)
-	case search(query: String, type: String, token: String, config: SpotifyAPIConfiguration)
+	case search(query: String, type: String, limit: Int, offset: Int, token: String, config: SpotifyAPIConfiguration)
 	case artistSearch(query: String, token: String, limit: Int, config: SpotifyAPIConfiguration)
 	case me(token: String, config: SpotifyAPIConfiguration)
+	case createPlaylist(userId: String, name: String, token: String, config: SpotifyAPIConfiguration)
+	case addItemsToPlaylist(playlistId: String, uris: [String], token: String, config: SpotifyAPIConfiguration)
 }
 
 extension SpotifyAPI: Requestable {
@@ -46,7 +48,7 @@ extension SpotifyAPI: Requestable {
 		switch self {
 		case .token, .exchangeToken:
 			return .memory
-		case .search, .artistSearch, .me:
+		case .search, .artistSearch, .me, .createPlaylist, .addItemsToPlaylist:
 			return .memory
 		}
 	}
@@ -55,7 +57,7 @@ extension SpotifyAPI: Requestable {
 		switch self {
 		case .token(let config), .exchangeToken(_, let config):
 			return URL(string: config.accountsBaseURL)!
-		case .search(_, _, _, let config), .artistSearch(_, _, _, let config), .me(_, let config):
+		case .search(_, _, _, _, _, let config), .artistSearch(_, _, _, let config), .me(_, let config), .createPlaylist(_, _, _, let config), .addItemsToPlaylist(_, _, _, let config):
 			return URL(string: config.apiBaseURL)!
 		}
 	}
@@ -68,6 +70,10 @@ extension SpotifyAPI: Requestable {
 			return "/v1/search"
 		case .me:
 			return "/v1/me"
+		case .createPlaylist(let userId, _, _, _):
+			return "/v1/users/\(userId)/playlists"
+		case .addItemsToPlaylist(let playlistId, _, _, _):
+			return "/v1/playlists/\(playlistId)/tracks"
 		}
 	}
 
@@ -77,6 +83,8 @@ extension SpotifyAPI: Requestable {
 			return .post
 		case .search, .artistSearch, .me:
 			return .get
+		case .createPlaylist, .addItemsToPlaylist:
+			return .post
 		}
 	}
 
@@ -89,7 +97,7 @@ extension SpotifyAPI: Requestable {
 				.authorization: "Basic \(base64Credentials)",
 				.contentType: "application/x-www-form-urlencoded"
 			]
-		case .search(_, _, let token, _), .artistSearch(_, let token, _, _), .me(let token, _):
+		case .search(_, _, _, _, let token, _), .artistSearch(_, let token, _, _), .me(let token, _), .createPlaylist(_, _, let token, _), .addItemsToPlaylist(_, _, let token, _):
 			return [
 				.authorization: "Bearer \(token)"
 			]
@@ -112,12 +120,13 @@ extension SpotifyAPI: Requestable {
 				],
 				encoding: URLFormEncoder()
 			)
-		case .search(let query, let type, _, _):
+		case .search(let query, let type, let limit, let offset, _, _):
 			return .requestParameters(
 				parameters: [
 					"q": query,
 					"type": type,
-					"limit": "1"
+					"limit": "\(limit)",
+					"offset": "\(offset)"
 				],
 				encoding: URLQueryEncoder()
 			)
@@ -132,6 +141,18 @@ extension SpotifyAPI: Requestable {
 			)
 		case .me:
 			return .requestPlain
+		case .createPlaylist(_, let name, _, _):
+			struct CreatePlaylistRequest: Encodable {
+				let name: String
+				let `public`: Bool
+				let description: String
+			}
+			return .requestJSONEncodable(CreatePlaylistRequest(name: name, public: false, description: "MusicSearch Archive Playlist"))
+		case .addItemsToPlaylist(_, let uris, _, _):
+			struct AddItemsRequest: Encodable {
+				let uris: [String]
+			}
+			return .requestJSONEncodable(AddItemsRequest(uris: uris))
 		}
 	}
 }
