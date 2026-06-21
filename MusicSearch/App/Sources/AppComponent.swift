@@ -33,6 +33,8 @@ import FeatureAddArchive
 import FeatureArchiveSearchInterface
 import FeatureArchiveSearch
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
+import FeatureArchiveFolderDetail
 import FeatureArchiveFolder
 import FeatureSettingsInterface
 import FeatureSettings
@@ -93,12 +95,31 @@ final class AppComponent {
 		do {
 			return try ModelContainer(for: SDArchivedTrack.self)
 		} catch {
-			fatalError("Could not initialize ModelContainer")
+			print("ModelContainer init failed, attempting to delete old store: \(error)")
+			let url = URL.applicationSupportDirectory.appending(path: "default.store")
+			try? FileManager.default.removeItem(at: url)
+			let shmUrl = URL.applicationSupportDirectory.appending(path: "default.store-shm")
+			try? FileManager.default.removeItem(at: shmUrl)
+			let walUrl = URL.applicationSupportDirectory.appending(path: "default.store-wal")
+			try? FileManager.default.removeItem(at: walUrl)
+			do {
+				return try ModelContainer(for: SDArchivedTrack.self)
+			} catch {
+				fatalError("Could not initialize ModelContainer even after deleting store: \(error)")
+			}
 		}
 	}()
 
 	private lazy var archiveRepositoryInstance: ArchiveRepository = {
 		ArchiveRepositoryImpl(modelContext: self.modelContainer.mainContext)
+	}()
+
+	private lazy var spotifyRepositoryInstance: SpotifyRepository = {
+		SpotifyRepositoryImpl(networkManager: self.networkManager)
+	}()
+
+	private lazy var exportToSpotifyUseCaseInstance: ExportToSpotifyUseCase = {
+		ExportToSpotifyUseCaseImpl(spotifyRepository: self.spotifyRepositoryInstance)
 	}()
 
 	
@@ -114,12 +135,20 @@ final class AppComponent {
 		ArchiveFolderBuilder(dependency: self)
 	}
 	
+	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
+		ArchiveFolderDetailBuilder(dependency: self)
+	}
+	
 	var settingsBuilder: SettingsBuildable {
 		SettingsBuilder(dependency: self)
 	}
 
 	var archiveRepository: ArchiveRepository {
 		self.archiveRepositoryInstance
+	}
+
+	var exportToSpotifyUseCase: ExportToSpotifyUseCase {
+		self.exportToSpotifyUseCaseInstance
 	}
 
 	var locationRepository: LocationRepository {
@@ -155,6 +184,17 @@ final class AppComponent {
 		self.fetchArtistImageURLUseCaseInstance
 	}
 
+	private lazy var spotifyAuthRepositoryInstance: SpotifyAuthRepository = {
+		SpotifyAuthRepositoryImpl(networkManager: self.networkManager)
+	}()
+
+	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
+		ManageSpotifyAuthUseCaseImpl(authRepository: self.spotifyAuthRepositoryInstance)
+	}
+
+	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
+		FetchSpotifyProfileUseCaseImpl(authRepository: self.spotifyAuthRepositoryInstance)
+	}
 	init(
 		networkManager: NetworkRequesting = NetworkManager.shared,
 		locationManager: LocationManaging = CLLocationManager(),
@@ -223,6 +263,9 @@ extension AppComponent: ArchiveSearchDependency {}
 
 @MainActor
 extension AppComponent: ArchiveFolderDependency {}
+
+@MainActor
+extension AppComponent: ArchiveFolderDetailDependency {}
 
 @MainActor
 extension AppComponent: SettingsDependency {}

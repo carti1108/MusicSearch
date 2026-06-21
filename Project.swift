@@ -65,6 +65,7 @@ let projectTargets: [Target] = {
 			sources: ["MusicSearch/Core/Data/**"],
 			dependencies: [
 				.target(name: "MSDomain"),
+				.target(name: "ArchiveDomain"),
 				.package(product: "NetworkLayer")
 			],
 			settings: projectSettings
@@ -161,11 +162,14 @@ let projectTargets: [Target] = {
 		testingDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "TrackSearchDomain"),
+			.target(name: "MusicDiggingDomain"),
+			.target(name: "FeatureMusicDiggingInterface"),
 			.target(name: "MSUtil")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
-			.target(name: "TrackSearchDomain")
+			.target(name: "TrackSearchDomain"),
+			.target(name: "MusicDiggingDomain")
 		],
 		exampleDependencies: [
 			.target(name: "MSDomain"),
@@ -216,6 +220,8 @@ let projectTargets: [Target] = {
 			.target(name: "FeatureAddArchiveInterface"),
 			.target(name: "FeatureArchiveSearchInterface"),
 			.target(name: "FeatureArchiveFolderInterface"),
+				.target(name: "FeatureArchiveFolderDetail"),
+				.target(name: "FeatureArchiveFolderDetailInterface"),
 			.target(name: "FeatureSettingsInterface"),
 			.package(product: "MicroRIBs")
 		],
@@ -226,6 +232,8 @@ let projectTargets: [Target] = {
 			.target(name: "FeatureAddArchiveInterface"),
 			.target(name: "FeatureArchiveSearchInterface"),
 			.target(name: "FeatureArchiveFolderInterface"),
+				.target(name: "FeatureArchiveFolderDetail"),
+				.target(name: "FeatureArchiveFolderDetailInterface"),
 			.target(name: "FeatureSettingsInterface")
 		],
 		testingDependencies: [
@@ -243,10 +251,8 @@ let projectTargets: [Target] = {
 			.target(name: "MSUtil")
 		]
 	))
-
-	
 	targets.append(contentsOf: Target.microFeatureTargets(
-		name: "AddArchive",
+		name: "ArchiveFolderDetail",
 		bundlePrefix: bundlePrefix,
 		deploymentTarget: deploymentTarget,
 		settings: projectSettings,
@@ -260,6 +266,7 @@ let projectTargets: [Target] = {
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
+			.target(name: "FeatureArchiveFolderDetailInterface"),
 			.package(product: "NetworkLayer")
 		],
 		testingDependencies: [
@@ -274,6 +281,49 @@ let projectTargets: [Target] = {
 		exampleDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
+			.target(name: "MSUtil")
+		]
+	))
+
+
+	
+	targets.append(contentsOf: Target.microFeatureTargets(
+		name: "AddArchive",
+		bundlePrefix: bundlePrefix,
+		deploymentTarget: deploymentTarget,
+		settings: projectSettings,
+		interfaceDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain"),
+			.package(product: "MicroRIBs")
+		],
+		implementationDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain"),
+			.target(name: "MSDesignSystem"),
+			.target(name: "MSData"),
+			.target(name: "FeatureArchiveFolderDetailInterface"),
+			.package(product: "NetworkLayer")
+		],
+		testingDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain"),
+			.target(name: "FeatureTrackSearchTesting"),
+			.target(name: "MSDesignSystem"),
+			.target(name: "MSUtil")
+		],
+		testsDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain")
+		],
+		exampleDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain"),
 			.target(name: "MSUtil")
 		]
 	))
@@ -293,6 +343,7 @@ let projectTargets: [Target] = {
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
+			.target(name: "FeatureArchiveFolderDetailInterface"),
 			.package(product: "NetworkLayer")
 		],
 		testingDependencies: [
@@ -326,6 +377,7 @@ let projectTargets: [Target] = {
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
+			.target(name: "FeatureArchiveFolderDetailInterface"),
 			.package(product: "NetworkLayer")
 		],
 		testingDependencies: [
@@ -359,6 +411,7 @@ let projectTargets: [Target] = {
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
+			.target(name: "FeatureArchiveFolderDetailInterface"),
 			.package(product: "NetworkLayer")
 		],
 		testingDependencies: [
@@ -426,6 +479,8 @@ let projectTargets: [Target] = {
 				.target(name: "FeatureAddArchiveInterface"),
 				.target(name: "FeatureArchiveFolder"),
 				.target(name: "FeatureArchiveFolderInterface"),
+				.target(name: "FeatureArchiveFolderDetail"),
+				.target(name: "FeatureArchiveFolderDetailInterface"),
 				.target(name: "FeatureArchiveSearch"),
 				.target(name: "FeatureArchiveSearchInterface"),
 				.target(name: "FeatureSettings"),

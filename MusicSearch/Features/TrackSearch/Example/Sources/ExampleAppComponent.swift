@@ -64,16 +64,6 @@ final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-final class MockMusicDiggingBuildable: MusicDiggingBuildable {
-    func build(
-        withListener listener: MusicDiggingListener,
-        seedTrack: Track
-    ) -> MusicDiggingRouting {
-        MockMusicDiggingRouting(
-            interactor: MockMusicDiggingInteractor(),
-            viewControllable: MockViewControllable()
-        )
-    }
 }
 
 @MainActor

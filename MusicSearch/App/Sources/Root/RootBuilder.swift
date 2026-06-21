@@ -23,6 +23,7 @@ import FeatureArchiveSearch
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolder
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
 import FeatureSettings
 import FeatureSettingsInterface
 import MSDomain
@@ -39,6 +40,7 @@ protocol RootDependency: Dependency, WeatherRecommendationDependency, TrackSearc
 
 @MainActor
 final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, SettingsDependency {
+	
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
 	}
@@ -92,6 +94,14 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 		self.dependency.archiveRepository
 	}
 
+	var musicAppRepository: any MusicAppRepository {
+		self.dependency.musicAppRepository
+	}
+	
+	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
+		dependency.archiveFolderDetailBuilder
+	}
+
 	var addArchiveBuilder: AddArchiveBuildable {
 		AddArchiveBuilder(dependency: self)
 	}
@@ -112,8 +122,12 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 		ArchiveBuilder(dependency: self)
 	}
 
-	var networkManager: NetworkRequesting {
-		self.dependency.networkManager
+	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
+		self.dependency.manageSpotifyAuthUseCase
+	}
+
+	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
+		self.dependency.fetchSpotifyProfileUseCase
 	}
 }
 
