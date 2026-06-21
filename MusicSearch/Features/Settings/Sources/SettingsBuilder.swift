@@ -1,10 +1,11 @@
 import MicroRIBs
 import FeatureSettingsInterface
-import NetworkLayer
+import MSDomain
 
 @MainActor
 public protocol SettingsDependency: Dependency {
-    var networkManager: NetworkRequesting { get }
+    var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase { get }
+    var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase { get }
 }
 
 final class SettingsComponent: Component<SettingsDependency> {
@@ -20,7 +21,11 @@ public final class SettingsBuilder: Builder<SettingsDependency>, SettingsBuildab
         let component = SettingsComponent(dependency: dependency)
         let viewModel = SettingsViewModel()
         let viewController = SettingsViewController(viewModel: viewModel)
-        let interactor = SettingsInteractor(presenter: viewController, networkManager: component.dependency.networkManager)
+        let interactor = SettingsInteractor(
+            presenter: viewController,
+            manageSpotifyAuthUseCase: component.dependency.manageSpotifyAuthUseCase,
+            fetchSpotifyProfileUseCase: component.dependency.fetchSpotifyProfileUseCase
+        )
         interactor.listener = listener
         return SettingsRouter(interactor: interactor, viewController: viewController)
     }

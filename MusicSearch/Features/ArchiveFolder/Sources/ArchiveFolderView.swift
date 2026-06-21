@@ -1,23 +1,24 @@
 import SwiftUI
 import MSDesignSystem
+import ArchiveDomain
 
-public struct FolderItem: Identifiable {
-    public let id = UUID()
-    public let title: String
-    public let subtitle: String
-}
+
+
+
 
 public final class ArchiveFolderViewModel: ObservableObject {
     @Published var selectedTab: Int = 0
-    @Published var customFolders: [FolderItem] = []
-    @Published var yearFolders: [FolderItem] = []
+    @Published var releaseYearFolders: [FolderItem] = []
+    @Published var listenYearFolders: [FolderItem] = []
     @Published var genreFolders: [FolderItem] = []
     @Published var ratingFolders: [FolderItem] = []
     
     public init() {}
     
-    func addCustomFolder() {
-        // Handle adding custom folder
+    var onFolderTapped: ((FolderItem) -> Void)?
+    
+    func folderTapped(_ folder: FolderItem) {
+        onFolderTapped?(folder)
     }
 }
 
@@ -30,8 +31,8 @@ public struct ArchiveFolderView: View {
     
     private var currentFolders: [FolderItem] {
         switch viewModel.selectedTab {
-        case 0: return viewModel.customFolders
-        case 1: return viewModel.yearFolders
+        case 0: return viewModel.releaseYearFolders
+        case 1: return viewModel.listenYearFolders
         case 2: return viewModel.genreFolders
         case 3: return viewModel.ratingFolders
         default: return []
@@ -39,13 +40,12 @@ public struct ArchiveFolderView: View {
     }
     
     public var body: some View {
-        NavigationView {
-            ZStack {
+        ZStack {
                 CustomColor.background.ignoresSafeArea()
                 VStack(spacing: 0) {
                     Picker("Folders", selection: $viewModel.selectedTab) {
-                        Text("내 폴더").tag(0)
-                        Text("연도별").tag(1)
+                        Text("발매연도").tag(0)
+                        Text("청취연도").tag(1)
                         Text("장르별").tag(2)
                         Text("별점별").tag(3)
                     }
@@ -69,6 +69,10 @@ public struct ArchiveFolderView: View {
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CustomSpacing.gutter) {
                                 ForEach(currentFolders) { folder in
                                     FolderTile(title: folder.title, subtitle: folder.subtitle)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.folderTapped(folder)
+                                        }
                                 }
                             }
                             .padding(.horizontal, CustomSpacing.containerMargin)
@@ -76,18 +80,7 @@ public struct ArchiveFolderView: View {
                     }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if viewModel.selectedTab == 0 {
-                        Button(action: viewModel.addCustomFolder) {
-                            Image(systemName: "plus")
-                                .foregroundColor(CustomColor.primary)
-                        }
-                    }
-                }
-            }
-        }
+
     }
 }
 

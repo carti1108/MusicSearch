@@ -4,7 +4,11 @@ public protocol ArchiveFolderBuildable: Buildable {
     func build(withListener listener: ArchiveFolderListener) -> ArchiveFolderRouting
 }
 
+import ArchiveDomain
+
 public protocol ArchiveFolderRouting: ViewableRouting {
+    func routeToFolderDetail(folderItem: FolderItem)
+    func detachFolderDetail()
 }
 
 public protocol ArchiveFolderListener: AnyObject {

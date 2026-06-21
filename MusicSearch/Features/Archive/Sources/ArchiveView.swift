@@ -19,7 +19,6 @@ public enum ArchiveViewAction {
 	case onAddTapped
 	case onSearchTapped
 	case onFolderTapped
-	case onViewAllTapped
 	case onDeleteTapped(track: ArchivedTrack)
 }
 
@@ -61,9 +60,21 @@ public protocol ArchivePresentableListener: AnyObject {
 // MARK: - Model (데이터 주입용)
 public struct ArchiveView: View {
 	@ObservedObject public var viewModel: ArchiveViewModel
+	@State private var showFilterSheet = false
+	@State private var filterIntroGood = false
+	@State private var filterMiddleGood = false
+	@State private var filterEndGood = false
 
 	public init(viewModel: ArchiveViewModel) {
 		self.viewModel = viewModel
+	}
+	
+	private var filteredTracks: [ArchivedTrack] {
+		viewModel.state.recentTracks.filter { track in
+			(!filterIntroGood || track.isIntroGood) &&
+			(!filterMiddleGood || track.isGoodUntilMiddle) &&
+			(!filterEndGood || track.isGoodUntilEnd)
+		}
 	}
 
 	public var body: some View {
@@ -82,9 +93,9 @@ public struct ArchiveView: View {
 							.customText(.headlineMd)
 							.foregroundColor(CustomColor.onBackground)
 						Spacer()
-						Button(action: { viewModel.request(action: .onViewAllTapped) }) {
-							Text("전체보기")
-								.customText(.labelSm)
+						Button(action: { showFilterSheet = true }) {
+							Image(systemName: "line.3.horizontal.decrease.circle")
+								.font(.system(size: 20))
 								.foregroundColor(CustomColor.primary)
 						}
 					}
@@ -97,7 +108,7 @@ public struct ArchiveView: View {
 				.listRowSeparator(.hidden)
 				.listRowInsets(EdgeInsets())
 
-				ForEach(viewModel.state.recentTracks) { track in
+				ForEach(filteredTracks) { track in
 					TrackRowItem(track: track)
 						.listRowBackground(Color.clear)
 						.listRowSeparator(.hidden)
@@ -131,6 +142,41 @@ public struct ArchiveView: View {
 					.buttonStyle(BouncyButtonStyle())
 					.padding(.trailing, CustomSpacing.containerMargin)
 					.padding(.bottom, CustomSpacing.containerMargin)
+				}
+			}
+		}
+		.sheet(isPresented: $showFilterSheet) {
+			filterSheet
+				.presentationDetents([.height(300)])
+				.presentationDragIndicator(.visible)
+		}
+	}
+	
+	private var filterSheet: some View {
+		NavigationView {
+			Form {
+				Section(header: Text("곡 전개 평가 필터")) {
+					Toggle("인트로가 좋음", isOn: $filterIntroGood)
+					Toggle("중반부까지 좋음", isOn: $filterMiddleGood)
+					Toggle("끝까지 좋음", isOn: $filterEndGood)
+				}
+				
+				Button(action: {
+					filterIntroGood = false
+					filterMiddleGood = false
+					filterEndGood = false
+				}) {
+					Text("필터 초기화")
+						.foregroundColor(.red)
+				}
+			}
+			.navigationTitle("필터")
+			.navigationBarTitleDisplayMode(.inline)
+			.toolbar {
+				ToolbarItem(placement: .navigationBarTrailing) {
+					Button("완료") {
+						showFilterSheet = false
+					}
 				}
 			}
 		}
@@ -239,7 +285,6 @@ public struct TrackRowItem: View {
 
 			Spacer()
 
-			// Tags and Rating
 			VStack(alignment: .trailing, spacing: 6) {
 				Text(track.genre)
 					.customText(.monoLabel)

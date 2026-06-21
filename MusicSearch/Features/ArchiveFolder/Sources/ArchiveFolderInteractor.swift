@@ -1,9 +1,11 @@
 import MicroRIBs
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
+import ArchiveDomain
 import ArchiveDomain
 import Foundation
 
-protocol ArchiveFolderInteractable: Interactable {
+protocol ArchiveFolderInteractable: Interactable, ArchiveFolderDetailListener {
     var router: ArchiveFolderRouting? { get set }
     var listener: ArchiveFolderListener? { get set }
 }
@@ -34,33 +36,40 @@ final class ArchiveFolderInteractor: PresentableInteractor<ArchiveFolderPresenta
         do {
             let tracks = try await archiveRepository.fetchArchivedTracks()
             
-            // Group by Year
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy"
-            let groupedByYear = Dictionary(grouping: tracks, by: { track -> String in
+            
+            let releaseGrouped = Dictionary(grouping: tracks.filter { $0.releaseDate != nil }, by: { track -> String in
                 if let date = track.releaseDate {
                     return formatter.string(from: date)
                 }
-                return "Unknown"
+                return ""
             })
-            let yearFolders = groupedByYear.keys.sorted(by: >).map { year in
-                FolderItem(title: year + "년", subtitle: "\(groupedByYear[year]?.count ?? 0) 곡")
+            let releaseYearFolders = releaseGrouped.keys.sorted(by: >).map { year in
+                FolderItem(title: year + "년 발매", subtitle: "\(releaseGrouped[year]?.count ?? 0) 곡", type: .releaseYear(year: year))
             }
             
-            // Group by Genre
+            let listenGrouped = Dictionary(grouping: tracks, by: { track -> String in
+                return formatter.string(from: track.listenDate)
+            })
+            let listenYearFolders = listenGrouped.keys.sorted(by: >).map { year in
+                FolderItem(title: year + "년 청취", subtitle: "\(listenGrouped[year]?.count ?? 0) 곡", type: .listenYear(year: year))
+            }
+            
             let groupedByGenre = Dictionary(grouping: tracks, by: { $0.genre })
             let genreFolders = groupedByGenre.keys.sorted().map { genre in
-                FolderItem(title: genre, subtitle: "\(groupedByGenre[genre]?.count ?? 0) 곡")
+                FolderItem(title: genre, subtitle: "\(groupedByGenre[genre]?.count ?? 0) 곡", type: .genre(name: genre))
             }
             
-            // Group by Rating
             let groupedByRating = Dictionary(grouping: tracks, by: { Int($0.rating) })
             let ratingFolders = groupedByRating.keys.sorted(by: >).map { rating in
-                FolderItem(title: "별점 \(rating)점대", subtitle: "\(groupedByRating[rating]?.count ?? 0) 곡")
+                let stars = String(repeating: "★", count: rating) + String(repeating: "☆", count: max(0, 5 - rating))
+                return FolderItem(title: stars, subtitle: "\(groupedByRating[rating]?.count ?? 0) 곡", type: .rating(value: rating))
             }
             
             await MainActor.run {
-                self.viewModel.yearFolders = yearFolders
+                self.viewModel.releaseYearFolders = releaseYearFolders
+                self.viewModel.listenYearFolders = listenYearFolders
                 self.viewModel.genreFolders = genreFolders
                 self.viewModel.ratingFolders = ratingFolders
             }
@@ -73,7 +82,15 @@ final class ArchiveFolderInteractor: PresentableInteractor<ArchiveFolderPresenta
         super.willResignActive()
     }
     
-    func didTapClose() {
+        func didTapClose() {
         listener?.archiveFolderDidTapClose()
+    }
+    
+    func archiveFolderDetailDidTapClose() {
+        router?.detachFolderDetail()
+    }
+    
+    func didTapFolder(_ folder: FolderItem) {
+        router?.routeToFolderDetail(folderItem: folder)
     }
 }

@@ -1,9 +1,7 @@
 import MicroRIBs
 import FeatureSettingsInterface
-import NetworkLayer
 import Foundation
-import MSUtil
-import MSData
+import MSDomain
 
 protocol SettingsInteractable: Interactable {
     var router: SettingsRouting? { get set }
@@ -14,10 +12,16 @@ final class SettingsInteractor: PresentableInteractor<SettingsPresentable>, Sett
 
     weak var router: SettingsRouting?
     weak var listener: SettingsListener?
-    private let networkManager: NetworkRequesting
+    private let manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase
+    private let fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase
 
-    init(presenter: SettingsPresentable, networkManager: NetworkRequesting) {
-        self.networkManager = networkManager
+    init(
+        presenter: SettingsPresentable,
+        manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase,
+        fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase
+    ) {
+        self.manageSpotifyAuthUseCase = manageSpotifyAuthUseCase
+        self.fetchSpotifyProfileUseCase = fetchSpotifyProfileUseCase
         super.init(presenter: presenter)
         presenter.listener = self
     }
@@ -34,25 +38,18 @@ final class SettingsInteractor: PresentableInteractor<SettingsPresentable>, Sett
     }
     
     private func fetchUserProfileIfNeeded() async {
-        guard let token = KeychainManager.shared.loadString(forKey: "SpotifyAccessToken") else {
+        guard manageSpotifyAuthUseCase.getAccessToken() != nil else {
             await MainActor.run { presenter.update(state: SettingsViewState(spotifyState: .disconnected)) }
             return
         }
         
         do {
-            let api = SpotifyAPI.me(token: token, config: DefaultSpotifyAPIConfiguration())
-            let response = try await networkManager.perform(with: api, as: SpotifyUserProfileResponse.self)
-            
-            let name = response.display_name ?? "Spotify User"
-            let urlString = response.images?.first?.url
-            let imageURL = urlString != nil ? URL(string: urlString!) : nil
-            
+            let profile = try await fetchSpotifyProfileUseCase.execute()
             await MainActor.run {
-                presenter.update(state: SettingsViewState(spotifyState: .connected(name: name, imageURL: imageURL)))
+                presenter.update(state: SettingsViewState(spotifyState: .connected(name: profile.name, imageURL: profile.imageURL)))
             }
         } catch {
             print("Failed to fetch Spotify User Profile: \(error)")
-            // If token is expired/invalid, we could handle refresh here. For now just set disconnected
             await MainActor.run { presenter.update(state: SettingsViewState(spotifyState: .disconnected)) }
         }
     }
@@ -62,29 +59,14 @@ final class SettingsInteractor: PresentableInteractor<SettingsPresentable>, Sett
         case .onSpotifyLoginTapped:
             Task {
                 do {
-                    let config = DefaultSpotifyAPIConfiguration()
-                    let code = try await SpotifyAuthManager.shared.authorize(config: config)
-                    print("Spotify Auth Code received: \(code)")
-                    
-                    let response = try await SpotifyAuthManager.shared.exchangeToken(code: code, config: config, networkManager: networkManager)
-                    
-                    _ = KeychainManager.shared.saveString(response.access_token, forKey: "SpotifyAccessToken")
-                    if let refreshToken = response.refresh_token {
-                        _ = KeychainManager.shared.saveString(refreshToken, forKey: "SpotifyRefreshToken")
-                    }
-                    
-                    UserDefaults.standard.set(Date().addingTimeInterval(TimeInterval(response.expires_in)), forKey: "SpotifyTokenExpiry")
-                    print("Successfully logged into Spotify and saved tokens!")
-                    
+                    try await manageSpotifyAuthUseCase.authorize()
                     await fetchUserProfileIfNeeded()
                 } catch {
                     print("Spotify Auth failed: \(error)")
                 }
             }
         case .onSpotifyDisconnectTapped:
-            _ = KeychainManager.shared.delete(forKey: "SpotifyAccessToken")
-            _ = KeychainManager.shared.delete(forKey: "SpotifyRefreshToken")
-            UserDefaults.standard.removeObject(forKey: "SpotifyTokenExpiry")
+            manageSpotifyAuthUseCase.disconnect()
             Task {
                 await MainActor.run { presenter.update(state: SettingsViewState(spotifyState: .disconnected)) }
             }

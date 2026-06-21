@@ -29,7 +29,6 @@ public struct ArchiveSearchView: View {
         ZStack {
             CustomColor.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 24) {
-                // Search Bar Section
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(CustomColor.outline)
@@ -46,7 +45,6 @@ public struct ArchiveSearchView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
-                        // Recent Searches
                         if !viewModel.recentSearches.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
@@ -84,7 +82,6 @@ public struct ArchiveSearchView: View {
                             }
                         }
                         
-                        // Search Results
                         if !viewModel.recommendedTracks.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("검색 결과")

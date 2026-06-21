@@ -42,7 +42,6 @@ public final class SettingsViewModel: ObservableObject {
     }
     
     func resetData() {
-        // Handle data reset
     }
 }
 

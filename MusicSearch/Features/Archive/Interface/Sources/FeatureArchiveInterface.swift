@@ -4,6 +4,7 @@ import ArchiveDomain
 import FeatureAddArchiveInterface
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
 
 
 @MainActor
@@ -12,7 +13,7 @@ public protocol ArchiveDependency: Dependency {
 	var addArchiveBuilder: AddArchiveBuildable { get }
 	var archiveSearchBuilder: ArchiveSearchBuildable { get }
 	var archiveFolderBuilder: ArchiveFolderBuildable { get }
-	
+	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable { get }
 }
 
 public protocol ArchiveBuildable: Buildable {

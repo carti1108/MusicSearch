@@ -63,7 +63,6 @@ public final class SettingsViewController: UIViewController, SettingsPresentable
     }
     
     @objc private func backButtonTapped() {
-        // Left empty since it's a root tab now
     }
 
     private func setupUI() {

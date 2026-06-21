@@ -81,16 +81,12 @@ public final class ArchiveInteractor: PresentableInteractor<ArchivePresentable>,
 	public func request(action: ArchiveViewAction) {
 		switch action {
 		case .onAddTapped:
-			print("Add button tapped")
 			router?.routeToAddArchive()
 		case .onSearchTapped:
-			print("Search button tapped")
 			router?.routeToSearch()
 		case .onFolderTapped:
-			print("Folder button tapped")
 			router?.routeToFolder()
-		case .onViewAllTapped:
-			print("View all button tapped")
+
 		case .onDeleteTapped(let track):
 			Task {
 				do {

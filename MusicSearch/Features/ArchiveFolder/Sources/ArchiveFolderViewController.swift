@@ -2,9 +2,12 @@ import UIKit
 import SwiftUI
 import MicroRIBs
 import MSDesignSystem
+import ArchiveDomain
 import FeatureArchiveFolderInterface
 
 public protocol ArchiveFolderViewControllable: ViewControllable {
+    func push(viewController: ViewControllable, animated: Bool)
+    func pop(animated: Bool)
 }
 
 public protocol ArchiveFolderPresentable: Presentable {
@@ -13,6 +16,7 @@ public protocol ArchiveFolderPresentable: Presentable {
 
 public protocol ArchiveFolderPresentableListener: AnyObject {
     func didTapClose()
+    func didTapFolder(_ folder: FolderItem)
 }
 
 public final class ArchiveFolderViewController: UIViewController, ArchiveFolderPresentable, ArchiveFolderViewControllable {
@@ -29,6 +33,10 @@ public final class ArchiveFolderViewController: UIViewController, ArchiveFolderP
     public init(viewModel: ArchiveFolderViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+        
+        self.viewModel.onFolderTapped = { [weak self] folder in
+            self?.listener?.didTapFolder(folder)
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -79,5 +87,13 @@ public final class ArchiveFolderViewController: UIViewController, ArchiveFolderP
         ])
         
         hostingController.didMove(toParent: self)
+    }
+
+    public func push(viewController: ViewControllable, animated: Bool) {
+        self.navigationController?.pushViewController(viewController.uiviewController, animated: animated)
+    }
+
+    public func pop(animated: Bool) {
+        self.navigationController?.popViewController(animated: animated)
     }
 }

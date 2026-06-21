@@ -6,6 +6,7 @@ import SwiftUI
 import UIKit
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
 
 
 public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable {
@@ -51,8 +52,12 @@ final class ArchiveComponent: Component<ArchiveDependency>, ArchiveDependency {
 	}
 	
 	var archiveFolderBuilder: ArchiveFolderBuildable {
-		dependency.archiveFolderBuilder
-	}
+        dependency.archiveFolderBuilder
+    }
+    
+    var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
+        dependency.archiveFolderDetailBuilder
+    }
 	
 
 
