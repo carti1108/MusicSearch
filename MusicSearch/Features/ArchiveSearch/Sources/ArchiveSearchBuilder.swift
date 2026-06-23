@@ -1,14 +1,52 @@
+import Foundation
+import UIKit
+import SwiftUI
+import ComposableArchitecture
 import MicroRIBs
 import FeatureArchiveSearchInterface
 import ArchiveDomain
-import FeatureArchiveSearchInterface
 
 @MainActor
-public protocol ArchiveSearchDependency: Dependency {
+public protocol ArchiveSearchDependency: MicroRIBs.Dependency {
     var archiveRepository: ArchiveRepository { get }
 }
 
 final class ArchiveSearchComponent: Component<ArchiveSearchDependency> {
+}
+
+public protocol ArchiveSearchInteractable: Interactable {
+    var router: ArchiveSearchRouting? { get set }
+    var listener: ArchiveSearchListener? { get set }
+}
+
+public final class ArchiveSearchWrapperInteractor: Interactor, ArchiveSearchInteractable {
+    public weak var router: ArchiveSearchRouting?
+    public weak var listener: ArchiveSearchListener?
+}
+
+public final class ArchiveSearchHostingController: UIHostingController<ArchiveSearchView>, ViewControllable {
+    public var uiviewController: UIViewController { self }
+    private weak var interactor: ArchiveSearchWrapperInteractor?
+    
+    init(rootView: ArchiveSearchView, interactor: ArchiveSearchWrapperInteractor) {
+        self.interactor = interactor
+        super.init(rootView: rootView)
+        self.view.backgroundColor = .clear
+    }
+    
+    @MainActor required dynamic init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if isMovingFromParent {
+            interactor?.listener?.archiveSearchDidTapClose()
+        }
+    }
+}
+
+public final class ArchiveSearchWrapperRouter: ViewableRouter<ArchiveSearchInteractable, ViewControllable>, ArchiveSearchRouting {
 }
 
 public final class ArchiveSearchBuilder: Builder<ArchiveSearchDependency>, ArchiveSearchBuildable {
@@ -19,10 +57,23 @@ public final class ArchiveSearchBuilder: Builder<ArchiveSearchDependency>, Archi
 
     public func build(withListener listener: ArchiveSearchListener) -> ArchiveSearchRouting {
         let component = ArchiveSearchComponent(dependency: dependency)
-        let viewModel = ArchiveSearchViewModel()
-        let viewController = ArchiveSearchViewController(viewModel: viewModel)
-        let interactor = ArchiveSearchInteractor(presenter: viewController, archiveRepository: component.dependency.archiveRepository, viewModel: viewModel)
+        
+        let interactor = ArchiveSearchWrapperInteractor()
         interactor.listener = listener
-        return ArchiveSearchRouter(interactor: interactor, viewController: viewController)
+        
+        let store = Store(initialState: ArchiveSearchFeature.State()) {
+            ArchiveSearchFeature(archiveRepository: component.dependency.archiveRepository)
+        }
+        
+        let view = ArchiveSearchView(store: store)
+        let viewController = ArchiveSearchHostingController(rootView: view, interactor: interactor)
+        
+        let router = ArchiveSearchWrapperRouter(
+            interactor: interactor,
+            viewController: viewController
+        )
+        interactor.router = router
+        
+        return router
     }
 }

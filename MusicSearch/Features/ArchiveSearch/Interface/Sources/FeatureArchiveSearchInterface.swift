@@ -7,6 +7,7 @@ public protocol ArchiveSearchBuildable: Buildable {
 public protocol ArchiveSearchRouting: ViewableRouting {
 }
 
+@MainActor
 public protocol ArchiveSearchListener: AnyObject {
     func archiveSearchDidTapClose()
 }

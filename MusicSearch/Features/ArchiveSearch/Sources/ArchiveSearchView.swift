@@ -1,28 +1,13 @@
 import SwiftUI
+import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
 
-public final class ArchiveSearchViewModel: ObservableObject {
-    @Published var searchText: String = ""
-    @Published var recentSearches: [String] = []
-    @Published var recommendedTracks: [ArchivedTrack] = []
-    
-    public init() {}
-    
-    func clearRecentSearches() {
-        recentSearches.removeAll()
-    }
-    
-    func removeRecentSearch(_ term: String) {
-        recentSearches.removeAll { $0 == term }
-    }
-}
-
 public struct ArchiveSearchView: View {
-    @ObservedObject var viewModel: ArchiveSearchViewModel
+    @Bindable var store: StoreOf<ArchiveSearchFeature>
     
-    public init(viewModel: ArchiveSearchViewModel) {
-        self.viewModel = viewModel
+    public init(store: StoreOf<ArchiveSearchFeature>) {
+        self.store = store
     }
     
     public var body: some View {
@@ -32,7 +17,7 @@ public struct ArchiveSearchView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(CustomColor.outline)
-                    TextField("곡명, 아티스트 또는 장르 검색", text: $viewModel.searchText)
+                    TextField("곡명, 아티스트 또는 장르 검색", text: $store.searchText)
                         .customText(.bodyMd)
                         .foregroundColor(CustomColor.onSurface)
                 }
@@ -45,14 +30,16 @@ public struct ArchiveSearchView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
-                        if !viewModel.recentSearches.isEmpty {
+                        if !store.recentSearches.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
                                     Text("최근 검색어")
                                         .customText(.headlineMd)
                                         .foregroundColor(CustomColor.onSurface)
                                     Spacer()
-                                    Button(action: viewModel.clearRecentSearches) {
+                                    Button(action: {
+                                        store.send(.clearRecentSearches)
+                                    }) {
                                         Text("지우기")
                                             .customText(.labelSm)
                                             .foregroundColor(CustomColor.primary)
@@ -61,7 +48,7 @@ public struct ArchiveSearchView: View {
                                 }
                                 
                                 VStack(spacing: 16) {
-                                    ForEach(viewModel.recentSearches, id: \.self) { term in
+                                    ForEach(store.recentSearches, id: \.self) { term in
                                         HStack {
                                             Image(systemName: "clock")
                                                 .foregroundColor(CustomColor.outlineVariant)
@@ -69,7 +56,7 @@ public struct ArchiveSearchView: View {
                                                 .customText(.bodyLg)
                                                 .foregroundColor(CustomColor.onSurface)
                                             Spacer()
-                                            Button(action: { viewModel.removeRecentSearch(term) }) {
+                                            Button(action: { store.send(.removeRecentSearch(term)) }) {
                                                 Image(systemName: "xmark")
                                                     .foregroundColor(CustomColor.outlineVariant)
                                                     .padding(8)
@@ -82,14 +69,14 @@ public struct ArchiveSearchView: View {
                             }
                         }
                         
-                        if !viewModel.recommendedTracks.isEmpty {
+                        if !store.recommendedTracks.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("검색 결과")
                                     .customText(.headlineMd)
                                     .foregroundColor(CustomColor.onSurface)
                                 
                                 VStack(spacing: 16) {
-                                    ForEach(viewModel.recommendedTracks, id: \.id) { track in
+                                    ForEach(store.recommendedTracks, id: \.id) { track in
                                         HStack(spacing: 16) {
                                             Group {
                                                 if let data = track.coverImageData, let uiImage = UIImage(data: data) {
@@ -123,7 +110,7 @@ public struct ArchiveSearchView: View {
                                     }
                                 }
                             }
-                        } else if !viewModel.searchText.isEmpty {
+                        } else if !store.searchText.isEmpty {
                             Text("검색 결과가 없습니다.")
                                 .customText(.bodyMd)
                                 .foregroundColor(CustomColor.outline)
@@ -134,6 +121,9 @@ public struct ArchiveSearchView: View {
                     .padding(.bottom, 80)
                 }
             }
+        }
+        .onAppear {
+            store.send(.onAppear)
         }
     }
 }

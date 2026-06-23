@@ -1,64 +1,23 @@
 import SwiftUI
+import ComposableArchitecture
 import MSDesignSystem
 
-public enum SettingsViewAction {
-    case onSpotifyLoginTapped
-    case onSpotifyDisconnectTapped
-}
-
-public protocol SettingsPresentableListener: AnyObject {
-    func request(action: SettingsViewAction)
-}
-
-public enum SpotifyConnectionState {
-    case disconnected
-    case connected(name: String, imageURL: URL?)
-}
-
-public struct SettingsViewState {
-    public var spotifyState: SpotifyConnectionState
-    
-    public init(spotifyState: SpotifyConnectionState = .disconnected) {
-        self.spotifyState = spotifyState
-    }
-}
-
-public final class SettingsViewModel: ObservableObject {
-    public weak var listener: SettingsPresentableListener?
-    @Published public var state: SettingsViewState = SettingsViewState()
-    
-    public init() {}
-    
-    public func update(state: SettingsViewState) {
-        self.state = state
-    }
-    
-    func loginWithSpotify() {
-        listener?.request(action: .onSpotifyLoginTapped)
-    }
-    
-    func disconnectSpotify() {
-        listener?.request(action: .onSpotifyDisconnectTapped)
-    }
-    
-    func resetData() {
-    }
-}
-
 public struct SettingsView: View {
-    @ObservedObject var viewModel: SettingsViewModel
+    @Bindable var store: StoreOf<SettingsFeature>
     
-    public init(viewModel: SettingsViewModel) {
-        self.viewModel = viewModel
+    public init(store: StoreOf<SettingsFeature>) {
+        self.store = store
     }
     
     public var body: some View {
         NavigationView {
             List {
                 Section(header: Text("계정 연동")) {
-                    switch viewModel.state.spotifyState {
+                    switch store.spotifyState {
                     case .disconnected:
-                        Button(action: viewModel.loginWithSpotify) {
+                        Button(action: {
+                            store.send(.loginTapped)
+                        }) {
                             HStack {
                                 Image(systemName: "music.note")
                                     .foregroundColor(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
@@ -94,7 +53,7 @@ public struct SettingsView: View {
                                     HStack(spacing: 4) {
                                         Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
-                                            .font(.system(size: 12))
+                                        .font(.system(size: 12))
                                         Text("Connected")
                                             .customText(.labelSm)
                                     .foregroundColor(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
@@ -103,7 +62,9 @@ public struct SettingsView: View {
                                 Spacer()
                             }
                             
-                            Button(action: viewModel.disconnectSpotify) {
+                            Button(action: {
+                                store.send(.disconnectTapped)
+                            }) {
                                 Text("연동 해제")
                                     .customText(.bodyMd)
                                     .foregroundColor(CustomColor.error)
@@ -152,7 +113,9 @@ public struct SettingsView: View {
                 }
                 
                 Section(footer: Text("이 작업은 취소할 수 없습니다.")) {
-                    Button(action: viewModel.resetData) {
+                    Button(action: {
+                        store.send(.resetDataTapped)
+                    }) {
                         Text("모든 데이터 초기화")
                             .customText(.bodyLg)
                             .foregroundColor(CustomColor.error)
@@ -164,6 +127,9 @@ public struct SettingsView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(CustomColor.background.ignoresSafeArea())
+            .onAppear {
+                store.send(.onAppear)
+            }
         }
         .preferredColorScheme(.dark)
     }
