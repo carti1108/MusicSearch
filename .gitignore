@@ -68,3 +68,6 @@ ARCHITECTURE_RULES.md
 
 # Tuist
 Derived/
+*.log
+build_log*.txt
+graph.png

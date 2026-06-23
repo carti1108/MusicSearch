@@ -8,7 +8,9 @@ let teamId = "L8DVKD4NCR"
 let projectSettings: Settings = .settings(
     base: [
 		"DEVELOPMENT_TEAM": "\(teamId)",
-        "CODE_SIGN_STYLE": "Automatic"
+        "CODE_SIGN_STYLE": "Automatic",
+        "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
+        "CLANG_ENABLE_MODULE_VERIFIER": "YES"
     ],
     configurations: [
         .debug(name: "Debug", xcconfig: .relativeToRoot("Config.xcconfig")),
@@ -220,8 +222,7 @@ let projectTargets: [Target] = {
 			.target(name: "FeatureAddArchiveInterface"),
 			.target(name: "FeatureArchiveSearchInterface"),
 			.target(name: "FeatureArchiveFolderInterface"),
-				.target(name: "FeatureArchiveFolderDetail"),
-				.target(name: "FeatureArchiveFolderDetailInterface"),
+			.target(name: "FeatureArchiveFolderDetailInterface"),
 			.target(name: "FeatureSettingsInterface"),
 			.package(product: "MicroRIBs")
 		],
@@ -234,12 +235,14 @@ let projectTargets: [Target] = {
 			.target(name: "FeatureArchiveFolderInterface"),
 				.target(name: "FeatureArchiveFolderDetail"),
 				.target(name: "FeatureArchiveFolderDetailInterface"),
-			.target(name: "FeatureSettingsInterface")
+			.target(name: "FeatureSettingsInterface"),
+			.package(product: "ComposableArchitecture")
 		],
 		testingDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
-			.target(name: "MSUtil")
+			.target(name: "MSUtil"),
+			.package(product: "ComposableArchitecture")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
@@ -266,13 +269,14 @@ let projectTargets: [Target] = {
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
-			.target(name: "FeatureArchiveFolderDetailInterface"),
-			.package(product: "NetworkLayer")
+			.package(product: "NetworkLayer"),
+			.package(product: "ComposableArchitecture")
 		],
 		testingDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
-			.target(name: "MSUtil")
+			.target(name: "MSUtil"),
+			.package(product: "ComposableArchitecture")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
@@ -305,7 +309,8 @@ let projectTargets: [Target] = {
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
 			.target(name: "FeatureArchiveFolderDetailInterface"),
-			.package(product: "NetworkLayer")
+			.package(product: "NetworkLayer"),
+			.package(product: "ComposableArchitecture")
 		],
 		testingDependencies: [
 			.target(name: "MSDomain"),
@@ -313,7 +318,8 @@ let projectTargets: [Target] = {
 			.target(name: "TrackSearchDomain"),
 			.target(name: "FeatureTrackSearchTesting"),
 			.target(name: "MSDesignSystem"),
-			.target(name: "MSUtil")
+			.target(name: "MSUtil"),
+			.package(product: "ComposableArchitecture")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
@@ -344,12 +350,14 @@ let projectTargets: [Target] = {
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
 			.target(name: "FeatureArchiveFolderDetailInterface"),
-			.package(product: "NetworkLayer")
+			.package(product: "NetworkLayer"),
+			.package(product: "ComposableArchitecture")
 		],
 		testingDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
-			.target(name: "MSUtil")
+			.target(name: "MSUtil"),
+			.package(product: "ComposableArchitecture")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
@@ -378,12 +386,14 @@ let projectTargets: [Target] = {
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
 			.target(name: "FeatureArchiveFolderDetailInterface"),
-			.package(product: "NetworkLayer")
+			.package(product: "NetworkLayer"),
+			.package(product: "ComposableArchitecture")
 		],
 		testingDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
-			.target(name: "MSUtil")
+			.target(name: "MSUtil"),
+			.package(product: "ComposableArchitecture")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
@@ -412,12 +422,14 @@ let projectTargets: [Target] = {
 			.target(name: "MSDesignSystem"),
 			.target(name: "MSData"),
 			.target(name: "FeatureArchiveFolderDetailInterface"),
-			.package(product: "NetworkLayer")
+			.package(product: "NetworkLayer"),
+			.package(product: "ComposableArchitecture")
 		],
 		testingDependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
-			.target(name: "MSUtil")
+			.target(name: "MSUtil"),
+			.package(product: "ComposableArchitecture")
 		],
 		testsDependencies: [
 			.target(name: "MSDomain"),
@@ -505,7 +517,8 @@ let project = Project(
 	packages: [
 		.remote(url: "https://github.com/onevcat/Kingfisher.git", requirement: .upToNextMajor(from: "8.0.0")),
 		.remote(url: "https://github.com/carti1108/MicroRIBs", requirement: .branch("main")),
-		.remote(url: "https://github.com/carti1108/NetworkLayer.git", requirement: .branch("main"))
+		.remote(url: "https://github.com/carti1108/NetworkLayer.git", requirement: .branch("main")),
+		.remote(url: "https://github.com/pointfreeco/swift-composable-architecture.git", requirement: .upToNextMajor(from: "1.10.0"))
 	],
 	settings: projectSettings,
 	targets: projectTargets
