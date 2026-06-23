@@ -94,9 +94,6 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 		self.dependency.archiveRepository
 	}
 
-	var musicAppRepository: any MusicAppRepository {
-		self.dependency.musicAppRepository
-	}
 	
 	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
 		dependency.archiveFolderDetailBuilder
