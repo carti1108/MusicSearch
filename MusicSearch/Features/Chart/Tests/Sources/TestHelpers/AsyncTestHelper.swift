@@ -1,5 +1,4 @@
 import Foundation
-@testable import MusicSearch
 
 @MainActor
 enum AsyncTestHelper {

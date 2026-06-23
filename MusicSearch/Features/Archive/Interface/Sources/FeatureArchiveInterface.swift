@@ -22,6 +22,7 @@ public protocol ArchiveBuildable: Buildable {
 
 public protocol ArchiveRouting: ViewableRouting {
 	func routeToAddArchive()
+	func routeToEditArchive(track: ArchivedTrack)
 	func detachAddArchive()
 	
 	func routeToSearch()

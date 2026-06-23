@@ -34,6 +34,6 @@ extension UIView {
 @MainActor
 func flushMainQueue() async {
 	await Task.yield()
-	RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+	try? await Task.sleep(nanoseconds: 10_000_000)
 	await Task.yield()
 }

@@ -2,12 +2,6 @@ import UIKit
 import FeatureArchive
 import FeatureArchiveInterface
 
-final class ExampleArchiveComponent: ArchiveDependency {
-}
-
-final class MockArchiveListener: ArchiveListener {
-}
-
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 	var window: UIWindow?
 	private var router: ArchiveRouting?
@@ -21,13 +15,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		
 		let window = UIWindow(windowScene: windowScene)
 		
-		let component = ExampleArchiveComponent()
-		let builder = ArchiveBuilder(dependency: component)
-		let router = builder.build(withListener: MockArchiveListener())
-		self.router = router
-		
-		window.rootViewController = router.viewControllable.uiviewController
-		window.makeKeyAndVisible()
+		let component = ExampleAppComponent()
+        let builder = ArchiveBuilder(dependency: component)
+        let router = builder.build(withListener: MockArchiveListener())
+        
+        self.router = router
+        router.interactable.activate()
+        router.load()
+        
+        window.rootViewController = UINavigationController(rootViewController: router.viewControllable.uiviewController)
+        window.makeKeyAndVisible()
 		self.window = window
 	}
 }
+
+@MainActor
+final class MockArchiveListener: ArchiveListener {}

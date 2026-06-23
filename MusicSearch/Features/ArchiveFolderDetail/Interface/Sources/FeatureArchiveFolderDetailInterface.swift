@@ -7,13 +7,17 @@ public protocol ArchiveFolderDetailBuildable: Buildable {
     func build(withListener listener: ArchiveFolderDetailListener, folderItem: FolderItem) -> ArchiveFolderDetailRouting
 }
 
+@MainActor
 public protocol ArchiveFolderDetailRouting: ViewableRouting {
     func routeToFolderDetail(folderItem: FolderItem)
-    func detachFolderDetail()
+    func detachFolderDetail(popUI: Bool)
 }
 
+@MainActor
 public protocol ArchiveFolderDetailListener: AnyObject {
     func archiveFolderDetailDidTapClose()
+    func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem)
+    func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack)
 }
 
 

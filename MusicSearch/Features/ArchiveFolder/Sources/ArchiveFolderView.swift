@@ -1,86 +1,69 @@
 import SwiftUI
+import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
 
-
-
-
-
-public final class ArchiveFolderViewModel: ObservableObject {
-    @Published var selectedTab: Int = 0
-    @Published var releaseYearFolders: [FolderItem] = []
-    @Published var listenYearFolders: [FolderItem] = []
-    @Published var genreFolders: [FolderItem] = []
-    @Published var ratingFolders: [FolderItem] = []
-    
-    public init() {}
-    
-    var onFolderTapped: ((FolderItem) -> Void)?
-    
-    func folderTapped(_ folder: FolderItem) {
-        onFolderTapped?(folder)
-    }
-}
-
 public struct ArchiveFolderView: View {
-    @ObservedObject var viewModel: ArchiveFolderViewModel
+    @Bindable var store: StoreOf<ArchiveFolderFeature>
     
-    public init(viewModel: ArchiveFolderViewModel) {
-        self.viewModel = viewModel
+    public init(store: StoreOf<ArchiveFolderFeature>) {
+        self.store = store
     }
     
     private var currentFolders: [FolderItem] {
-        switch viewModel.selectedTab {
-        case 0: return viewModel.releaseYearFolders
-        case 1: return viewModel.listenYearFolders
-        case 2: return viewModel.genreFolders
-        case 3: return viewModel.ratingFolders
+        switch store.selectedTab {
+        case 0: return store.releaseYearFolders
+        case 1: return store.listenYearFolders
+        case 2: return store.genreFolders
+        case 3: return store.ratingFolders
         default: return []
         }
     }
     
     public var body: some View {
         ZStack {
-                CustomColor.background.ignoresSafeArea()
-                VStack(spacing: 0) {
-                    Picker("Folders", selection: $viewModel.selectedTab) {
-                        Text("발매연도").tag(0)
-                        Text("청취연도").tag(1)
-                        Text("장르별").tag(2)
-                        Text("별점별").tag(3)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, CustomSpacing.containerMargin)
-                    .padding(.top, CustomSpacing.base)
-                    .padding(.bottom, CustomSpacing.containerMargin)
-                    
-                    ScrollView {
-                        if currentFolders.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "folder")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(CustomColor.outline)
-                                Text("폴더가 없습니다.")
-                                    .customText(.bodyMd)
-                                    .foregroundColor(CustomColor.outline)
-                            }
-                            .padding(.top, 100)
-                        } else {
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CustomSpacing.gutter) {
-                                ForEach(currentFolders) { folder in
-                                    FolderTile(title: folder.title, subtitle: folder.subtitle)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            viewModel.folderTapped(folder)
-                                        }
-                                }
-                            }
-                            .padding(.horizontal, CustomSpacing.containerMargin)
+            CustomColor.background.ignoresSafeArea()
+            VStack(spacing: 0) {
+                Picker("Folders", selection: $store.selectedTab) {
+                    Text("발매연도").tag(0)
+                    Text("청취연도").tag(1)
+                    Text("장르별").tag(2)
+                    Text("별점별").tag(3)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, CustomSpacing.containerMargin)
+                .padding(.top, CustomSpacing.base)
+                .padding(.bottom, CustomSpacing.containerMargin)
+                
+                ScrollView {
+                    if currentFolders.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "folder")
+                                .font(.system(size: 40))
+                                .foregroundColor(CustomColor.outline)
+                            Text("폴더가 없습니다.")
+                                .customText(.bodyMd)
+                                .foregroundColor(CustomColor.outline)
                         }
+                        .padding(.top, 100)
+                    } else {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CustomSpacing.gutter) {
+                            ForEach(currentFolders) { folder in
+                                FolderTile(title: folder.title, subtitle: folder.subtitle)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        store.send(.folderTapped(folder))
+                                    }
+                            }
+                        }
+                        .padding(.horizontal, CustomSpacing.containerMargin)
                     }
                 }
             }
-
+        }
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 }
 

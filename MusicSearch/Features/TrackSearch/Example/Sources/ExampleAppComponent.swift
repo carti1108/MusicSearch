@@ -64,23 +64,19 @@ final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-}
-
-@MainActor
-final class MockMusicDiggingRouting: ViewableRouting {
-    var viewControllable: ViewControllable
-    var interactable: Interactable
-    var children: [Routing] = []
-    
-    init(interactor: Interactable, viewControllable: ViewControllable) {
-        self.interactable = interactor
-        self.viewControllable = viewControllable
+final class MockMusicDiggingBuildable: MusicDiggingBuildable {
+    func build(withListener listener: MusicDiggingListener, seedTrack: Track) -> MusicDiggingRouting {
+        return MockMusicDiggingRouting(
+            interactor: MockMusicDiggingInteractor(),
+            viewController: MockViewControllable()
+        )
     }
-    
-    func load() {}
-    func attachChild(_ child: Routing) {}
-    func detachChild(_ child: Routing) {}
-    var lifecycle: AnyPublisher<RouterLifecycle, Never> { Empty().eraseToAnyPublisher() }
+}
+@MainActor
+final class MockMusicDiggingRouting: ViewableRouter<Interactable, ViewControllable>, MusicDiggingRouting {
+    override init(interactor: Interactable, viewController: ViewControllable) {
+        super.init(interactor: interactor, viewController: viewController)
+    }
 }
 
 @MainActor

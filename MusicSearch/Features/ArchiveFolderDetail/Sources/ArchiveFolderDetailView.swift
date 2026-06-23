@@ -1,84 +1,36 @@
 import SwiftUI
+import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
 
-public enum ExportState: Equatable {
-    case idle
-    case exporting(progress: ExportProgress)
-    case completed(successCount: Int, failedCount: Int)
-    
-    public static func == (lhs: ExportState, rhs: ExportState) -> Bool {
-        switch (lhs, rhs) {
-        case (.idle, .idle): return true
-        case (.exporting(let p1), .exporting(let p2)): return p1.currentCount == p2.currentCount && p1.totalCount == p2.totalCount
-        case (.completed(let s1, let f1), .completed(let s2, let f2)): return s1 == s2 && f1 == f2
-        default: return false
-        }
-    }
-}
-
-public struct ArchiveFolderDetailViewState: Equatable {
-    public var title: String
-    public var folders: [FolderItem]? // If not nil, show folders grid
-    public var tracks: [ArchivedTrack]? // If not nil, show tracks list
-    public var exportState: ExportState = .idle
-    
-    public init(title: String, folders: [FolderItem]? = nil, tracks: [ArchivedTrack]? = nil, exportState: ExportState = .idle) {
-        self.title = title
-        self.folders = folders
-        self.tracks = tracks
-        self.exportState = exportState
-    }
-}
-
-public enum ArchiveFolderDetailViewAction {
-    case onFolderTapped(FolderItem)
-    case onTrackTapped(ArchivedTrack)
-    case onExportTapped
-}
-
-@MainActor
-public final class ArchiveFolderDetailViewModel: ObservableObject {
-    @Published public var state: ArchiveFolderDetailViewState
-    var onAction: ((ArchiveFolderDetailViewAction) -> Void)?
-    
-    public init(state: ArchiveFolderDetailViewState) {
-        self.state = state
-    }
-    
-    func request(action: ArchiveFolderDetailViewAction) {
-        onAction?(action)
-    }
-}
-
 public struct ArchiveFolderDetailView: View {
-    @ObservedObject var viewModel: ArchiveFolderDetailViewModel
+    @Bindable var store: StoreOf<ArchiveFolderDetailFeature>
     
     @State private var showingExportAlert = false
     @State private var exportResultMessage = ""
 
-    public init(viewModel: ArchiveFolderDetailViewModel) {
-        self.viewModel = viewModel
+    public init(store: StoreOf<ArchiveFolderDetailFeature>) {
+        self.store = store
     }
     
     public var body: some View {
         ZStack {
             CustomColor.background.ignoresSafeArea()
             
-            if let folders = viewModel.state.folders {
+            if let folders = store.folders {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CustomSpacing.gutter) {
                         ForEach(folders) { folder in
                             FolderTile(title: folder.title, subtitle: folder.subtitle)
                                 .onTapGesture {
-                                    viewModel.request(action: .onFolderTapped(folder))
+                                    store.send(.folderTapped(folder))
                                 }
                         }
                     }
                     .padding(.horizontal, CustomSpacing.containerMargin)
                     .padding(.top, CustomSpacing.base)
                 }
-            } else if let tracks = viewModel.state.tracks {
+            } else if let tracks = store.tracks {
                 List {
                     ForEach(tracks) { track in
                         DetailTrackRowItem(track: track)
@@ -86,7 +38,7 @@ public struct ArchiveFolderDetailView: View {
                             .listRowSeparator(Visibility.hidden)
                             .listRowInsets(EdgeInsets(top: 0, leading: CustomSpacing.containerMargin, bottom: CustomSpacing.gutter, trailing: CustomSpacing.containerMargin))
                             .onTapGesture {
-                                viewModel.request(action: .onTrackTapped(track))
+                                store.send(.trackTapped(track))
                             }
                     }
                 }
@@ -94,7 +46,7 @@ public struct ArchiveFolderDetailView: View {
                 .scrollContentBackground(.hidden)
             }
             
-            if case .exporting(let progress) = viewModel.state.exportState {
+            if case .exporting(let progress) = store.exportState {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 VStack(spacing: CustomSpacing.base) {
                     ProgressView()
@@ -115,7 +67,7 @@ public struct ArchiveFolderDetailView: View {
                 .shadow(radius: 10)
             }
         }
-        .onChange(of: viewModel.state.exportState) { _, newValue in
+        .onChange(of: store.exportState) { _, newValue in
             if case .completed(let success, let failed) = newValue {
                 exportResultMessage = "성공: \(success)곡, 실패: \(failed)곡"
                 showingExportAlert = true
@@ -127,6 +79,9 @@ public struct ArchiveFolderDetailView: View {
                 message: Text(exportResultMessage),
                 dismissButton: .default(Text("확인"))
             )
+        }
+        .onAppear {
+            store.send(.onAppear)
         }
     }
 }

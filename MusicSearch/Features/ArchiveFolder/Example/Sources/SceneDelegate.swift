@@ -1,11 +1,11 @@
 import UIKit
-import FeatureArchiveFolderDetail
-import FeatureArchiveFolderDetailInterface
-import ArchiveDomain
+import MicroRIBs
+import FeatureArchiveFolder
+import FeatureArchiveFolderInterface
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    private var router: ArchiveFolderDetailRouting?
+    private var router: ViewableRouting?
 
     func scene(
         _ scene: UIScene,
@@ -18,8 +18,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         
         let component = ExampleAppComponent()
-        let builder = ArchiveFolderDetailBuilder(dependency: component)
-        let router = builder.build(withListener: MockArchiveFolderDetailListener(), folderItem: FolderItem(title: "Example Folder", subtitle: "0", type: .custom))
+        let builder = ArchiveFolderBuilder(dependency: component)
+        let router = builder.build(withListener: MockArchiveFolderListener())
         
         self.router = router
         router.interactable.activate()
@@ -31,6 +31,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 
 @MainActor
-final class MockArchiveFolderDetailListener: ArchiveFolderDetailListener {
-    func archiveFolderDetailDidTapClose() {}
+final class MockArchiveFolderListener: ArchiveFolderListener {
+    func archiveFolderDidTapClose() {}
 }

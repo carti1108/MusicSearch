@@ -8,6 +8,7 @@ import MSUtil
 import FeatureTrackSearchInterface
 import TrackSearchDomain
 import FeatureTrackSearchTesting
+import MusicDiggingDomain
 
 @MainActor
 final class TrackSearchPresentableSpy: TrackSearchPresentable {
@@ -93,3 +94,32 @@ final class RouterMockSearchTracksUseCase: SearchTracksUseCase {
 
 @MainActor
 final class RouterMockTrackSearchViewController: UIViewController, TrackSearchViewControllable {}
+
+import FeatureMusicDiggingInterface
+
+@MainActor
+final class MusicDiggingBuilderSpy: MusicDiggingBuildable {
+    var buildCallCount = 0
+    var receivedListener: MusicDiggingListener?
+    var receivedSeedTrack: Track?
+    var buildHandler: ((MusicDiggingListener, Track) -> MusicDiggingRouting)?
+
+    func build(withListener listener: MusicDiggingListener, seedTrack: Track) -> MusicDiggingRouting {
+        buildCallCount += 1
+        receivedListener = listener
+        receivedSeedTrack = seedTrack
+        return buildHandler!(listener, seedTrack)
+    }
+}
+
+@MainActor
+final class MockMusicDiggingInteractable: Interactor {
+    weak var router: MusicDiggingRouting?
+    weak var listener: MusicDiggingListener?
+}
+
+@MainActor
+final class MockMusicDiggingViewController: UIViewController, ViewControllable {}
+
+@MainActor
+final class MusicDiggingRoutingSpy: ViewableRouter<MockMusicDiggingInteractable, MockMusicDiggingViewController>, MusicDiggingRouting {}

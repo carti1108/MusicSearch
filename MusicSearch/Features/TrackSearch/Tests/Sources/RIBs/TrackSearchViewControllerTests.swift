@@ -45,7 +45,7 @@ struct TrackSearchViewControllerTests {
 
 	@Test
 	func updateTracks를호출하면_중복트랙을제거해컬렉션에표시하는지() async throws {
-		let track = TestDataFactory.makeTrack(id: "same-id", title: "Track")
+		let track = Track(id: "same-id", title: "Track", artist: "Artist", imageURL: nil)
 		let viewController = TrackSearchViewController()
 		viewController.loadViewIfNeeded()
 
@@ -73,7 +73,7 @@ struct TrackSearchViewControllerTests {
 	func didSelectItemAt을호출하면_listener에선택한트랙을전달하는지() async throws {
 		let viewController = TrackSearchViewController()
 		let listener = TrackSearchListenerSpy()
-		let track = TestDataFactory.makeTrack(id: "1", title: "Track 1")
+		let track = Track(id: "1", title: "Track 1", artist: "Artist 1", imageURL: nil)
 		viewController.listener = listener
 		viewController.loadViewIfNeeded()
 		viewController.updateTracks([track])

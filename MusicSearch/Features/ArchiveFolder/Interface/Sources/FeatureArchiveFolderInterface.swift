@@ -8,9 +8,11 @@ import ArchiveDomain
 
 public protocol ArchiveFolderRouting: ViewableRouting {
     func routeToFolderDetail(folderItem: FolderItem)
-    func detachFolderDetail()
+    func detachFolderDetail(popUI: Bool)
 }
 
+@MainActor
 public protocol ArchiveFolderListener: AnyObject {
     func archiveFolderDidTapClose()
+    func archiveFolderDidTapTrack(_ track: ArchivedTrack)
 }

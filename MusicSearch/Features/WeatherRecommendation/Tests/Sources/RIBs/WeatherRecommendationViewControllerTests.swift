@@ -3,6 +3,7 @@ import UIKit
 import Testing
 @testable import FeatureWeatherRecommendation
 @testable import FeatureWeatherRecommendationTesting
+import WeatherRecommendationDomain
 
 @MainActor
 private final class WeatherRecommendationListenerSpy: WeatherRecommendationPresentableListener {
@@ -42,10 +43,10 @@ struct WeatherRecommendationViewControllerTests {
 		viewController.loadViewIfNeeded()
 
 		viewController.update(
-			weather: TestDataFactory.makeWeather(temperature: 18, condition: .rain, description: "비", cityName: "Seoul"),
+			weather: Weather(temperature: 18, condition: .rain, description: "비", iconCode: "09d", cityName: "Seoul"),
 			tracks: [
-				TestDataFactory.makeTrack(id: "1", title: "Track 1"),
-				TestDataFactory.makeTrack(id: "2", title: "Track 2")
+				Track(id: "1", title: "Track 1", artist: "A", imageURL: nil),
+				Track(id: "2", title: "Track 2", artist: "B", imageURL: nil)
 			]
 		)
 		await flushMainQueue()
@@ -67,10 +68,10 @@ struct WeatherRecommendationViewControllerTests {
 		viewController.listener = listener
 		viewController.loadViewIfNeeded()
 		viewController.update(
-			weather: TestDataFactory.makeWeather(),
+			weather: Weather(temperature: 20, condition: .clear, description: "맑음", iconCode: "01d", cityName: "Seoul"),
 			tracks: [
-				TestDataFactory.makeTrack(id: "1"),
-				TestDataFactory.makeTrack(id: "2")
+				Track(id: "1", title: "T", artist: "A", imageURL: nil),
+				Track(id: "2", title: "T", artist: "B", imageURL: nil)
 			]
 		)
 		await flushMainQueue()

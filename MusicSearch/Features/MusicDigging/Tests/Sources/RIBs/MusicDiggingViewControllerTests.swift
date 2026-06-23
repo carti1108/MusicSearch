@@ -4,6 +4,7 @@ import UIKit
 @testable import FeatureMusicDigging
 import FeatureMusicDiggingTesting
 import MusicDiggingDomain
+import MSDomain
 
 @MainActor
 private final class MusicDiggingListenerSpy: MusicDiggingPresentableListener {
@@ -74,7 +75,7 @@ struct MusicDiggingViewControllerTests {
         viewController.listener = listener
         viewController.loadViewIfNeeded()
         
-        let track = Track(id: "1", title: "Test", artist: "Artist", imageURL: nil, previewURL: nil, externalURL: nil)
+        let track = Track(id: "1", title: "Test", artist: "Artist", imageURL: nil)
         viewController.updateRecommendations([track])
         
         let collectionView = try #require(viewController.view.findSubview(ofType: UICollectionView.self))

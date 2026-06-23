@@ -20,12 +20,12 @@ final class ExampleAppComponent: WeatherRecommendationDependency {
 }
 
 final class MockFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
-    func execute() async throws -> (Weather, [Track]) {
-        let mockWeather = Weather(temperature: 24.5, description: "Clear Sky", iconCode: "01d")
+    func execute() async throws -> WeatherMusicCuration {
+        let mockWeather = Weather(temperature: 24.5, condition: .clear, description: "Clear Sky", iconCode: "01d", cityName: "Seoul")
         let mockTracks = [
             Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil)
         ]
-        return (mockWeather, mockTracks)
+        return WeatherMusicCuration(weather: mockWeather, moodTag: "Happy", tracks: mockTracks)
     }
 }
 
