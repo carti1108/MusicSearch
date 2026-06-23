@@ -24,4 +24,11 @@ public final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable
 		deleteArchivedTrackCallCount += 1
 		lastDeletedTrackId = id
 	}
+
+	public var updateArchivedTrackCallCount = 0
+	public var lastUpdatedTrack: ArchivedTrack?
+	public func updateArchivedTrack(_ track: ArchivedTrack) async throws {
+		updateArchivedTrackCallCount += 1
+		lastUpdatedTrack = track
+	}
 }

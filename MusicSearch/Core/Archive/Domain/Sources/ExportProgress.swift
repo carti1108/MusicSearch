@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ExportProgress: Sendable {
+public struct ExportProgress: Sendable, Equatable {
     public let totalCount: Int
     public let currentCount: Int
     public let failedTracks: [ArchivedTrack]
