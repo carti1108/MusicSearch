@@ -97,7 +97,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Tests",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Features/\(name)/Tests/Sources/**"],
+            sources: ["MusicSearch/Features/\(name)/Tests/**"],
             dependencies: testsDependencies + [.target(name: "Feature\(name)"), .target(name: "Feature\(name)Testing")],
             settings: settings
         )

@@ -23,6 +23,7 @@ import FeatureArchiveSearch
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolder
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetail
 import FeatureArchiveFolderDetailInterface
 import FeatureSettings
 import FeatureSettingsInterface
@@ -36,95 +37,105 @@ import MusicDiggingDomain
 import ArchiveDomain
 
 @MainActor
-protocol RootDependency: Dependency, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, SettingsDependency {}
+protocol RootDependency: Dependency {
+	// MARK: - UseCases
+	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase { get }
+	var fetchMusicAppDeepLinkUseCase: any FetchMusicAppDeepLinkUseCase { get }
+	var searchTracksUseCase: any SearchTracksUseCase { get }
+	var fetchTracksByTagUseCase: any FetchTracksByTagUseCase { get }
+	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase { get }
+	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase { get }
+	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase { get }
+	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase { get }
+	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase { get }
+	var exportToSpotifyUseCase: any ExportToSpotifyUseCase { get }
+	
+	// MARK: - Repositories
+	var archiveRepository: any ArchiveRepository { get }
+	var imageDownloadRepository: any ImageDownloadRepository { get }
+	
+	// MARK: - Utilities
+	var urlOpener: URLOpening { get }
+}
 
 @MainActor
-final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, SettingsDependency {
+final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, ArchiveFolderDetailDependency, SettingsDependency {
 	
+	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
 	}
-
 	var fetchMusicAppDeepLinkUseCase: any FetchMusicAppDeepLinkUseCase {
 		self.dependency.fetchMusicAppDeepLinkUseCase
 	}
+	var searchTracksUseCase: any SearchTracksUseCase {
+		self.dependency.searchTracksUseCase
+	}
+	var fetchTracksByTagUseCase: any FetchTracksByTagUseCase {
+		self.dependency.fetchTracksByTagUseCase
+	}
+	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase {
+		self.dependency.fetchSimilarTracksUseCase
+	}
+	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {
+		self.dependency.fetchChartTopTracksUseCase
+	}
+	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase {
+		self.dependency.fetchChartTopArtistsUseCase
+	}
+	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
+		self.dependency.manageSpotifyAuthUseCase
+	}
+	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
+		self.dependency.fetchSpotifyProfileUseCase
+	}
+	var exportToSpotifyUseCase: any ExportToSpotifyUseCase {
+		self.dependency.exportToSpotifyUseCase
+	}
 
+	// MARK: - Repositories
+	var archiveRepository: any ArchiveRepository {
+		self.dependency.archiveRepository
+	}
+	var imageDownloadRepository: any ImageDownloadRepository {
+		self.dependency.imageDownloadRepository
+	}
+
+	// MARK: - Utilities
 	var urlOpener: URLOpening {
 		self.dependency.urlOpener
 	}
 
-	var searchTracksUseCase: any SearchTracksUseCase {
-		self.dependency.searchTracksUseCase
-	}
-
-	var fetchTracksByTagUseCase: any FetchTracksByTagUseCase {
-		self.dependency.fetchTracksByTagUseCase
-	}
-
-	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase {
-		self.dependency.fetchSimilarTracksUseCase
-	}
-
-	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {
-		self.dependency.fetchChartTopTracksUseCase
-	}
-
-	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase {
-		self.dependency.fetchChartTopArtistsUseCase
-	}
-
+	// MARK: - Child Builders
 	var weatherRecommendationBuilder: WeatherRecommendationBuildable {
 		WeatherRecommendationBuilder(dependency: self)
 	}
-
 	var trackSearchBuilder: TrackSearchBuildable {
 		TrackSearchBuilder(dependency: self)
 	}
-
 	var chartBuilder: ChartBuildable {
 		ChartBuilder(dependency: self)
 	}
-
 	var musicDiggingBuilder: MusicDiggingBuildable {
 		MusicDiggingBuilder(dependency: self)
 	}
-
-	
-	var archiveRepository: any ArchiveRepository {
-		self.dependency.archiveRepository
-	}
-
-	
-	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
-		dependency.archiveFolderDetailBuilder
-	}
-
-	var addArchiveBuilder: AddArchiveBuildable {
-		AddArchiveBuilder(dependency: self)
-	}
-	
-	var archiveSearchBuilder: ArchiveSearchBuildable {
-		ArchiveSearchBuilder(dependency: self)
-	}
-	
-	var archiveFolderBuilder: ArchiveFolderBuildable {
-		ArchiveFolderBuilder(dependency: self)
-	}
-	
-	var settingsBuilder: SettingsBuildable {
-		SettingsBuilder(dependency: self)
-	}
-
 	var archiveBuilder: ArchiveBuildable {
 		ArchiveBuilder(dependency: self)
 	}
-
-	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
-		self.dependency.manageSpotifyAuthUseCase
+	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
+		ArchiveFolderDetailBuilder(dependency: self)
 	}
-
-	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
-		self.dependency.fetchSpotifyProfileUseCase
+	var addArchiveBuilder: AddArchiveBuildable {
+		AddArchiveBuilder(dependency: self)
+	}
+	var archiveSearchBuilder: ArchiveSearchBuildable {
+		ArchiveSearchBuilder(dependency: self)
+	}
+	var archiveFolderBuilder: ArchiveFolderBuildable {
+		ArchiveFolderBuilder(dependency: self)
+	}
+	var settingsBuilder: SettingsBuildable {
+		SettingsBuilder(dependency: self)
 	}
 }
 

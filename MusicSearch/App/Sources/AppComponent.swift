@@ -14,34 +14,16 @@ import MSUtil
 import ChartData
 import TrackSearchData
 import WeatherRecommendationData
-import FeatureChart
-import FeatureChartInterface
-import FeatureMusicDigging
-import FeatureMusicDiggingInterface
-import FeatureTrackSearch
-import FeatureTrackSearchInterface
-import FeatureWeatherRecommendation
-import FeatureWeatherRecommendationInterface
 import WeatherRecommendationDomain
 import TrackSearchDomain
 import ChartDomain
 import MusicDiggingDomain
 import ArchiveDomain
 import ArchiveData
-import FeatureAddArchiveInterface
-import FeatureAddArchive
-import FeatureArchiveSearchInterface
-import FeatureArchiveSearch
-import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetailInterface
-import FeatureArchiveFolderDetail
-import FeatureArchiveFolder
-import FeatureSettingsInterface
-import FeatureSettings
 import SwiftData
 
 @MainActor
-final class AppComponent {
+final class AppComponent: RootDependency {
 
 	let networkManager: NetworkRequesting
 	let locationManager: LocationManaging
@@ -52,7 +34,8 @@ final class AppComponent {
 	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
 		SpotifyAppRepository(
 			configuration: self.spotifyAPIConfiguration,
-			networkManager: self.networkManager
+			networkManager: self.networkManager,
+			authRepository: self.spotifyAuthRepositoryInstance
 		)
 	}()
 
@@ -63,12 +46,17 @@ final class AppComponent {
 	private lazy var artistImageRepositoryInstance: ArtistImageRepository = {
 		SpotifyArtistImageRepository(
 			configuration: self.spotifyAPIConfiguration,
-			networkManager: self.networkManager
+			networkManager: self.networkManager,
+			authRepository: self.spotifyAuthRepositoryInstance
 		)
 	}()
 
 	private lazy var fetchArtistImageURLUseCaseInstance: FetchArtistImageURLUseCase = {
 		FetchArtistImageURLUseCaseImpl(artistImageRepository: self.artistImageRepositoryInstance)
+	}()
+
+	private lazy var imageDownloadRepositoryInstance: ImageDownloadRepository = {
+		ImageDownloadRepositoryImpl()
 	}()
 
 	private lazy var locationRepositoryInstance: LocationRepository = {
@@ -95,23 +83,18 @@ final class AppComponent {
 		do {
 			return try ModelContainer(for: SDArchivedTrack.self)
 		} catch {
-			print("ModelContainer init failed, attempting to delete old store: \(error)")
-			let url = URL.applicationSupportDirectory.appending(path: "default.store")
-			try? FileManager.default.removeItem(at: url)
-			let shmUrl = URL.applicationSupportDirectory.appending(path: "default.store-shm")
-			try? FileManager.default.removeItem(at: shmUrl)
-			let walUrl = URL.applicationSupportDirectory.appending(path: "default.store-wal")
-			try? FileManager.default.removeItem(at: walUrl)
+			print("ModelContainer init failed, attempting in-memory fallback: \(error)")
 			do {
-				return try ModelContainer(for: SDArchivedTrack.self)
+				let config = ModelConfiguration(isStoredInMemoryOnly: true)
+				return try ModelContainer(for: SDArchivedTrack.self, configurations: config)
 			} catch {
-				fatalError("Could not initialize ModelContainer even after deleting store: \(error)")
+				fatalError("Could not initialize ModelContainer even in memory: \(error)")
 			}
 		}
 	}()
 
 	private lazy var archiveRepositoryInstance: ArchiveRepository = {
-		ArchiveRepositoryImpl(modelContext: self.modelContainer.mainContext)
+		ArchiveRepositoryImpl(modelContainer: self.modelContainer)
 	}()
 
 	private lazy var spotifyRepositoryInstance: SpotifyRepository = {
@@ -119,29 +102,11 @@ final class AppComponent {
 	}()
 
 	private lazy var exportToSpotifyUseCaseInstance: ExportToSpotifyUseCase = {
-		ExportToSpotifyUseCaseImpl(spotifyRepository: self.spotifyRepositoryInstance)
+		ExportToSpotifyUseCaseImpl(
+			spotifyRepository: self.spotifyRepositoryInstance,
+			authRepository: self.spotifyAuthRepositoryInstance
+		)
 	}()
-
-	
-	var addArchiveBuilder: AddArchiveBuildable {
-		AddArchiveBuilder(dependency: self)
-	}
-	
-	var archiveSearchBuilder: ArchiveSearchBuildable {
-		ArchiveSearchBuilder(dependency: self)
-	}
-	
-	var archiveFolderBuilder: ArchiveFolderBuildable {
-		ArchiveFolderBuilder(dependency: self)
-	}
-	
-	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
-		ArchiveFolderDetailBuilder(dependency: self)
-	}
-	
-	var settingsBuilder: SettingsBuildable {
-		SettingsBuilder(dependency: self)
-	}
 
 	var archiveRepository: ArchiveRepository {
 		self.archiveRepositoryInstance
@@ -169,6 +134,9 @@ final class AppComponent {
 	var artistImageRepository: ArtistImageRepository {
 		self.artistImageRepositoryInstance
 	}
+	var imageDownloadRepository: ImageDownloadRepository {
+		self.imageDownloadRepositoryInstance
+	}
 
 	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
 		FetchCurrentWeatherUseCaseImpl(
@@ -195,31 +163,14 @@ final class AppComponent {
 	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
 		FetchSpotifyProfileUseCaseImpl(authRepository: self.spotifyAuthRepositoryInstance)
 	}
-	init(
-		networkManager: NetworkRequesting = NetworkManager.shared,
-		locationManager: LocationManaging = CLLocationManager(),
-		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration(),
-		spotifyAPIConfiguration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
-		urlOpener: URLOpening = ApplicationURLOpener()
-	) {
-		self.networkManager = networkManager
-		self.locationManager = locationManager
-		self.weatherAPIConfiguration = weatherAPIConfiguration
-		self.spotifyAPIConfiguration = spotifyAPIConfiguration
-		self.urlOpener = urlOpener
-	}
-}
 
-extension AppComponent: WeatherRecommendationDependency {
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		FetchMusicForWeatherUseCaseImpl(
 			fetchCurrentWeatherUseCase: self.fetchCurrentWeatherUseCase,
 			fetchTracksByTagUseCase: self.fetchTracksByTagUseCase
 		)
 	}
-}
 
-extension AppComponent: TrackSearchDependency {
 	var searchTracksUseCase: any SearchTracksUseCase {
 		SearchTracksUseCaseImpl(trackRepository: self.trackRepository)
 	}
@@ -232,12 +183,6 @@ extension AppComponent: TrackSearchDependency {
 		FetchSimilarTracksUseCaseImpl(trackRepository: self.trackRepository)
 	}
 
-	var musicDiggingBuilder: any MusicDiggingBuildable {
-		MusicDiggingBuilder(dependency: self)
-	}
-}
-
-extension AppComponent: ChartDependency {
 	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {
 		FetchChartTopTracksUseCaseImpl(
 			chartRepository: self.chartRepository,
@@ -253,19 +198,18 @@ extension AppComponent: ChartDependency {
 			)
 		)
 	}
+
+	init(
+		networkManager: NetworkRequesting = NetworkManager.shared,
+		locationManager: LocationManaging = CLLocationManager(),
+		weatherAPIConfiguration: WeatherAPIConfiguration = DefaultWeatherAPIConfiguration(),
+		spotifyAPIConfiguration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
+		urlOpener: URLOpening = ApplicationURLOpener()
+	) {
+		self.networkManager = networkManager
+		self.locationManager = locationManager
+		self.weatherAPIConfiguration = weatherAPIConfiguration
+		self.spotifyAPIConfiguration = spotifyAPIConfiguration
+		self.urlOpener = urlOpener
+	}
 }
-
-@MainActor
-extension AppComponent: RootDependency {}
-
-@MainActor
-extension AppComponent: ArchiveSearchDependency {}
-
-@MainActor
-extension AppComponent: ArchiveFolderDependency {}
-
-@MainActor
-extension AppComponent: ArchiveFolderDetailDependency {}
-
-@MainActor
-extension AppComponent: SettingsDependency {}
