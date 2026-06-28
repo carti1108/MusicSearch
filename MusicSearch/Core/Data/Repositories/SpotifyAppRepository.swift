@@ -16,11 +16,9 @@ public actor SpotifyAppRepository: MusicAppRepository {
 		let type: String
 	}
 
-	private var accessToken: String?
-	private var accessTokenExpiry: Date?
-	private var accessTokenRequest: (id: UUID, task: Task<SpotifyTokenResponse, Error>)?
 	private let configuration: SpotifyAPIConfiguration
 	private let networkManager: NetworkRequesting
+	private let authRepository: SpotifyAuthRepository
 
 	private enum SpotifyRepositoryError: Error {
 		case unauthorized
@@ -30,10 +28,12 @@ public actor SpotifyAppRepository: MusicAppRepository {
 
 	public init(
 		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
-		networkManager: NetworkRequesting
+		networkManager: NetworkRequesting,
+		authRepository: SpotifyAuthRepository
 	) {
 		self.configuration = configuration
 		self.networkManager = networkManager
+		self.authRepository = authRepository
 	}
 
 	public func fetchDeepLink(for track: Track) async -> URL? {
@@ -57,38 +57,12 @@ public actor SpotifyAppRepository: MusicAppRepository {
 
 	private func searchWithRetry(query: String, type: String) async throws -> String {
 		let token = try await self.getAccessToken()
-		do {
-			return try await self.search(query: query, type: type, token: token)
-		} catch SpotifyRepositoryError.unauthorized {
-			self.clearToken()
-			let refreshedToken = try await self.getAccessToken(forceRefresh: true)
-			return try await self.search(query: query, type: type, token: refreshedToken)
-		} catch let error as NetworkLayer.NetworkError {
-			if case .httpError(let code, _) = error, code == 401 {
-				self.clearToken()
-				let refreshedToken = try await self.getAccessToken(forceRefresh: true)
-				return try await self.search(query: query, type: type, token: refreshedToken)
-			}
-			throw error
-		}
+		return try await self.search(query: query, type: type, token: token)
 	}
 
 	public func searchSpotifyTracks(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
 		let token = try await self.getAccessToken()
-		do {
-			return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: token)
-		} catch SpotifyRepositoryError.unauthorized {
-			self.clearToken()
-			let refreshedToken = try await self.getAccessToken(forceRefresh: true)
-			return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: refreshedToken)
-		} catch let error as NetworkLayer.NetworkError {
-			if case .httpError(let code, _) = error, code == 401 {
-				self.clearToken()
-				let refreshedToken = try await self.getAccessToken(forceRefresh: true)
-				return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: refreshedToken)
-			}
-			throw error
-		}
+		return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: token)
 	}
 
 	private func performSearchSpotifyTracks(query: String, limit: Int, offset: Int, token: String) async throws -> (tracks: [Track], totalResults: Int) {
@@ -99,44 +73,11 @@ public actor SpotifyAppRepository: MusicAppRepository {
 		return (tracks: tracks, totalResults: result.tracks.total ?? 0)
 	}
 
-	private func getAccessToken(forceRefresh: Bool = false) async throws -> String {
-		if !forceRefresh, self.isTokenValid, let token = self.accessToken {
-			return token
+	private func getAccessToken() async throws -> String {
+		guard let token = authRepository.getAccessToken() else {
+			throw SpotifyRepositoryError.unauthorized
 		}
-		if forceRefresh {
-			self.clearToken()
-		} else if let accessTokenRequest {
-			let tokenResponse = try await accessTokenRequest.task.value
-			self.storeTokenResponse(tokenResponse)
-			return tokenResponse.access_token
-		}
-
-		let api = SpotifyAPI.token(config: self.configuration)
-		let networkManager = self.networkManager
-		let requestID = UUID()
-		let requestTask = Task {
-			try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
-		}
-		self.accessTokenRequest = (requestID, requestTask)
-
-		do {
-			let tokenResponse = try await requestTask.value
-			self.storeTokenResponse(tokenResponse)
-			if self.accessTokenRequest?.id == requestID {
-				self.accessTokenRequest = nil
-			}
-			return tokenResponse.access_token
-		} catch {
-			if self.accessTokenRequest?.id == requestID {
-				self.accessTokenRequest = nil
-			}
-			throw error
-		}
-	}
-
-	private func storeTokenResponse(_ tokenResponse: SpotifyTokenResponse) {
-		self.accessToken = tokenResponse.access_token
-		self.accessTokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
+		return token
 	}
 
 	private func search(query: String, type: String, token: String) async throws -> String {
@@ -175,17 +116,7 @@ public actor SpotifyAppRepository: MusicAppRepository {
 		return url
 	}
 
-	private var isTokenValid: Bool {
-		guard let expiry = self.accessTokenExpiry else { return false }
-		return Date().addingTimeInterval(self.configuration.tokenRefreshLeeway) < expiry
-	}
 
-	private func clearToken() {
-		self.accessToken = nil
-		self.accessTokenExpiry = nil
-		self.accessTokenRequest?.task.cancel()
-		self.accessTokenRequest = nil
-	}
 
 	private func fallbackWebURL(query: String) -> URL? {
 		let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""

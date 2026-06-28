@@ -1,10 +1,11 @@
-import MSDomain
 //
 //  FetchChartTopArtistsUseCaseImpl.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 12/13/25.
 //
+
+import MSDomain
 
 public protocol FetchChartTopArtistsUseCase: Sendable {
 	func execute() async throws -> [Artist]

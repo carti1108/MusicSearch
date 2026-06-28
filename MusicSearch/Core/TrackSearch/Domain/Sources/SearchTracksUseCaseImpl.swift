@@ -1,5 +1,3 @@
-import MSDomain
-
 //
 //  SearchTracksUseCaseImpl.swift
 //  MusicSearch
@@ -7,6 +5,7 @@ import MSDomain
 //  Created by Kiseok on 12/7/25.
 //
 
+import MSDomain
 import Foundation
 
 public protocol SearchTracksUseCase: Sendable {

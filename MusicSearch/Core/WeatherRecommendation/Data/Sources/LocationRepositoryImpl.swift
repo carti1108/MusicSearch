@@ -1,10 +1,11 @@
-import MSData
 //
 //  LocationRepositoryImpl.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 12/5/25.
 //
+
+import MSData
 
 import Foundation
 import CoreLocation
@@ -52,6 +53,13 @@ public struct LocationRepositoryImpl: LocationRepository {
 
 		case .notDetermined:
 			self.locationManager.requestWhenInUseAuthorization()
+			while self.locationManager.authorizationStatus == .notDetermined {
+				try await Task.sleep(for: .milliseconds(500))
+			}
+			let newStatus = self.locationManager.authorizationStatus
+			if newStatus == .denied || newStatus == .restricted {
+				throw WeatherError.locationPermissionDenied
+			}
 
 		case .authorizedWhenInUse, .authorizedAlways:
 			break

@@ -2,12 +2,35 @@ import Foundation
 import UIKit
 import AuthenticationServices
 import NetworkLayer
+import CryptoKit
 
 @MainActor
 public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentationContextProviding {
     public static let shared = SpotifyAuthManager()
     
     private var pendingContinuation: CheckedContinuation<String, Error>?
+    private var pendingCodeVerifier: String?
+    private var authSession: ASWebAuthenticationSession?
+    
+    private func generateCodeVerifier() -> String {
+        var buffer = [UInt8](repeating: 0, count: 64)
+        _ = SecRandomCopyBytes(kSecRandomDefault, buffer.count, &buffer)
+        let data = Data(buffer)
+        return data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    private func generateCodeChallenge(verifier: String) -> String {
+        guard let data = verifier.data(using: .ascii) else { return "" }
+        let hash = SHA256.hash(data: data)
+        let hashData = Data(hash)
+        return hashData.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
     
     override init() {
         super.init()
@@ -21,11 +44,16 @@ public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentation
     }
     
     public func authorize(config: SpotifyAPIConfiguration) async throws -> String {
-        let authURLString = "\(config.accountsBaseURL)/authorize?client_id=\(config.clientId)&response_type=code&redirect_uri=\(config.redirectURI)&scope=playlist-modify-public%20playlist-modify-private%20user-read-private"
+        let verifier = generateCodeVerifier()
+        self.pendingCodeVerifier = verifier
+        let challenge = generateCodeChallenge(verifier: verifier)
+        
+        let authURLString = "\(config.accountsBaseURL)/authorize?client_id=\(config.clientId)&response_type=code&redirect_uri=\(config.redirectURI)&scope=playlist-modify-public%20playlist-modify-private%20user-read-private&code_challenge_method=S256&code_challenge=\(challenge)"
         guard let authURL = URL(string: authURLString) else { throw URLError(.badURL) }
         
         return try await withCheckedThrowingContinuation { continuation in
-            let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: "musicsearch") { callbackURL, error in
+            let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: "musicsearch") { [weak self] callbackURL, error in
+                self?.authSession = nil
                 if let error = error {
                     if (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
                         continuation.resume(throwing: URLError(.cancelled))
@@ -44,6 +72,7 @@ public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentation
             }
             session.presentationContextProvider = self
             session.prefersEphemeralWebBrowserSession = false
+            self.authSession = session
             session.start()
         }
     }
@@ -67,7 +96,12 @@ public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentation
     }
     
     public func exchangeToken(code: String, config: SpotifyAPIConfiguration, networkManager: NetworkRequesting) async throws -> SpotifyTokenResponse {
-        let api = SpotifyAPI.exchangeToken(code: code, config: config)
-        return try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
+        guard let verifier = pendingCodeVerifier else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        let api = SpotifyAPI.exchangeToken(code: code, codeVerifier: verifier, config: config)
+        let response = try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
+        self.pendingCodeVerifier = nil
+        return response
     }
 }

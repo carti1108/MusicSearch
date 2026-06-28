@@ -1,10 +1,11 @@
-import MSDomain
 //
 //  FetchChartTopTracksUseCaseImpl.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 12/13/25.
 //
+
+import MSDomain
 
 import Foundation
 import TrackSearchDomain
