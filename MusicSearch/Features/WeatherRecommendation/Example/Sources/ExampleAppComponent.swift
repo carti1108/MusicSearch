@@ -6,6 +6,10 @@ import FeatureWeatherRecommendationInterface
 import MSUtil
 import WeatherRecommendationDomain
 
+struct ExampleWeatherState {
+    static var currentCondition: WeatherCondition = .clear
+}
+
 @MainActor
 final class ExampleAppComponent: WeatherRecommendationDependency {
     var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
@@ -21,7 +25,7 @@ final class ExampleAppComponent: WeatherRecommendationDependency {
 
 final class MockFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
     func execute() async throws -> WeatherMusicCuration {
-        let mockWeather = Weather(temperature: 24.5, condition: .clear, description: "Clear Sky", iconCode: "01d", cityName: "Seoul")
+        let mockWeather = Weather(temperature: 24.5, condition: ExampleWeatherState.currentCondition, description: "Debug Weather", iconCode: "01d", cityName: "Seoul")
         let mockTracks = [
             Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil)
         ]

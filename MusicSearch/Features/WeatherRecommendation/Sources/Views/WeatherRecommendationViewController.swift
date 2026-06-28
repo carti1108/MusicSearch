@@ -198,7 +198,18 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.locationLabel.text = weather.cityName
 		self.weatherIconImageView.image = UIImage(systemName: self.iconName(for: weather.condition))
 
-		self.backgroundGradientLayer.colors = self.gradientColors(for: weather.condition).map(\.cgColor)
+		let newColors = self.gradientColors(for: weather.condition).map(\.cgColor)
+		if self.backgroundGradientLayer.colors as? [CGColor] != newColors {
+			let animation = CABasicAnimation(keyPath: "colors")
+			animation.fromValue = self.backgroundGradientLayer.colors
+			animation.toValue = newColors
+			animation.duration = 0.5
+			self.backgroundGradientLayer.add(animation, forKey: "colorsChange")
+			self.backgroundGradientLayer.colors = newColors
+		}
+
+		self.animateWeatherIcon(for: weather.condition)
+
 		self.weatherContainerView.backgroundColor = .clear
 
 		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
@@ -250,7 +261,51 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	private func gradientColors(for condition: WeatherCondition) -> [UIColor] {
-		return [UIColor(CustomColor.background), UIColor(CustomColor.background)]
+		switch condition {
+		case .clear:
+			return [UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1.0), UIColor(red: 0.1, green: 0.4, blue: 0.8, alpha: 1.0)]
+		case .clouds, .atmosphere:
+			return [UIColor(red: 0.4, green: 0.45, blue: 0.5, alpha: 1.0), UIColor(red: 0.2, green: 0.25, blue: 0.3, alpha: 1.0)]
+		case .rain, .drizzle:
+			return [UIColor(red: 0.2, green: 0.3, blue: 0.4, alpha: 1.0), UIColor(red: 0.1, green: 0.15, blue: 0.2, alpha: 1.0)]
+		case .thunderstorm:
+			return [UIColor(red: 0.2, green: 0.1, blue: 0.3, alpha: 1.0), UIColor(red: 0.05, green: 0.05, blue: 0.1, alpha: 1.0)]
+		case .snow:
+			return [UIColor(red: 0.5, green: 0.6, blue: 0.7, alpha: 1.0), UIColor(red: 0.3, green: 0.4, blue: 0.5, alpha: 1.0)]
+		case .unknown:
+			return [UIColor(CustomColor.background), UIColor(CustomColor.background)]
+		}
+	}
+
+	private func animateWeatherIcon(for condition: WeatherCondition) {
+		if #available(iOS 17.0, *) {
+			self.weatherIconImageView.removeAllSymbolEffects()
+
+			switch condition {
+			case .thunderstorm:
+				self.weatherIconImageView.addSymbolEffect(.pulse.byLayer, options: .repeating)
+				self.weatherIconImageView.addSymbolEffect(.bounce.byLayer, options: .repeating)
+
+			case .drizzle:
+				self.weatherIconImageView.addSymbolEffect(.variableColor.iterative.reversing, options: .repeating)
+
+			case .rain:
+				self.weatherIconImageView.addSymbolEffect(.variableColor.cumulative, options: .repeating)
+				self.weatherIconImageView.addSymbolEffect(.bounce.down, options: .repeating)
+
+			case .snow:
+				self.weatherIconImageView.addSymbolEffect(.bounce.down, options: .repeating.speed(0.5))
+
+			case .atmosphere:
+				self.weatherIconImageView.addSymbolEffect(.variableColor.iterative.reversing, options: .repeating)
+
+			case .clear:
+				self.weatherIconImageView.addSymbolEffect(.pulse, options: .repeating)
+
+			case .clouds, .unknown:
+				break
+			}
+		}
 	}
 
 	private func setupView() {
