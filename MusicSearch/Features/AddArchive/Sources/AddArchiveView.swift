@@ -148,6 +148,7 @@ public struct AddArchiveView: View {
 			.sheet(item: $store.scope(state: \.searchTrack, action: \.searchTrack)) { searchStore in
 				ArchiveTrackSearchView(store: searchStore)
 			}
+			.alert($store.scope(state: \.alert, action: \.alert))
 		}
 		.preferredColorScheme(.dark)
 	}

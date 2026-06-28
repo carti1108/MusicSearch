@@ -15,6 +15,9 @@ final class AddArchiveComponent: Component<AddArchiveDependency> {
 	fileprivate var searchTracksUseCase: SearchTracksUseCase {
 		return dependency.searchTracksUseCase
 	}
+	fileprivate var imageDownloadRepository: ImageDownloadRepository {
+		return dependency.imageDownloadRepository
+	}
 }
 
 public protocol AddArchiveInteractable: Interactable {
@@ -27,8 +30,23 @@ public final class AddArchiveWrapperInteractor: Interactor, AddArchiveInteractab
 	public weak var listener: AddArchiveListener?
 }
 
-public final class AddArchiveHostingController: UIHostingController<AddArchiveView>, ViewControllable {
+public final class AddArchiveHostingController: UIHostingController<AddArchiveView>, ViewControllable, UIAdaptivePresentationControllerDelegate {
 	public var uiviewController: UIViewController { self }
+	private weak var interactor: AddArchiveWrapperInteractor?
+
+	init(rootView: AddArchiveView, interactor: AddArchiveWrapperInteractor) {
+		self.interactor = interactor
+		super.init(rootView: rootView)
+		self.presentationController?.delegate = self
+	}
+	
+	@MainActor required dynamic init?(coder aDecoder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
+
+	public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+		interactor?.listener?.didCloseAddArchive()
+	}
 }
 
 public final class AddArchiveWrapperRouter: ViewableRouter<AddArchiveInteractable, ViewControllable>, AddArchiveRouting {
@@ -49,6 +67,7 @@ public final class AddArchiveBuilder: Builder<AddArchiveDependency>, AddArchiveB
 			AddArchiveFeature(
 				archiveRepository: component.archiveRepository,
 				searchTracksUseCase: component.searchTracksUseCase,
+				imageDownloadRepository: component.imageDownloadRepository,
 				onDelegate: { [weak interactor] action in
 					switch action {
 					case .didCloseAddArchive:
@@ -59,7 +78,7 @@ public final class AddArchiveBuilder: Builder<AddArchiveDependency>, AddArchiveB
 		}
 		
 		let view = AddArchiveView(store: store)
-		let viewController = AddArchiveHostingController(rootView: view)
+		let viewController = AddArchiveHostingController(rootView: view, interactor: interactor)
 		viewController.view.backgroundColor = .clear
 		
 		let router = AddArchiveWrapperRouter(

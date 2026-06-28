@@ -38,6 +38,8 @@ public struct AddArchiveFeature {
 		public var editTrackId: UUID?
 		public var isEditMode: Bool = false
 		
+		@Presents public var alert: AlertState<Alert>?
+		
 		public init(editTrack: ArchivedTrack? = nil) {
 			if let track = editTrack {
 				self.editTrackId = track.id
@@ -77,8 +79,11 @@ public struct AddArchiveFeature {
 		case genresLoaded(TaskResult<[String]>)
 		case trackSaved(TaskResult<Void>)
 		case searchTrack(PresentationAction<ArchiveTrackSearchFeature.Action>)
+		case alert(PresentationAction<Alert>)
 		case delegate(DelegateAction)
 	}
+	
+	public enum Alert: Equatable {}
 	
 	public enum DelegateAction {
 		case didCloseAddArchive
@@ -86,15 +91,18 @@ public struct AddArchiveFeature {
 	
 	private let archiveRepository: ArchiveRepository
 	private let searchTracksUseCase: SearchTracksUseCase
+	private let imageDownloadRepository: ImageDownloadRepository
 	private let onDelegate: (DelegateAction) -> Void
 	
 	public init(
 		archiveRepository: ArchiveRepository,
 		searchTracksUseCase: SearchTracksUseCase,
+		imageDownloadRepository: ImageDownloadRepository,
 		onDelegate: @escaping (DelegateAction) -> Void
 	) {
 		self.archiveRepository = archiveRepository
 		self.searchTracksUseCase = searchTracksUseCase
+		self.imageDownloadRepository = imageDownloadRepository
 		self.onDelegate = onDelegate
 	}
 	
@@ -169,7 +177,7 @@ public struct AddArchiveFeature {
 				if let imageURL = track.imageURL {
 					return .run { send in
 						do {
-							let (data, _) = try await URLSession.shared.data(from: imageURL)
+							let data = try await imageDownloadRepository.downloadImage(from: imageURL)
 							await send(.coverImageLoaded(data))
 						} catch {
 							await send(.coverImageLoaded(nil))
@@ -183,6 +191,19 @@ public struct AddArchiveFeature {
 				return .none
 				
 			case .saveButtonTapped:
+				if state.genre.trimmingCharacters(in: .whitespaces).isEmpty {
+					state.alert = AlertState { TextState("입력 오류") } message: { TextState("장르를 입력해주세요.") }
+					return .none
+				}
+				if state.memo.count > 500 {
+					state.alert = AlertState { TextState("입력 오류") } message: { TextState("메모는 500자를 초과할 수 없습니다.") }
+					return .none
+				}
+				if let imageData = state.coverImageData, imageData.count > 5 * 1024 * 1024 {
+					state.alert = AlertState { TextState("이미지 오류") } message: { TextState("이미지 크기는 5MB를 초과할 수 없습니다.") }
+					return .none
+				}
+				
 				let track = ArchivedTrack(
 					id: state.editTrackId ?? UUID(),
 					platformIDs: state.platformIDs,
@@ -217,14 +238,15 @@ public struct AddArchiveFeature {
 					onDelegate(.didCloseAddArchive)
 				}
 				
-			case .trackSaved(.failure):
+			case let .trackSaved(.failure(error)):
+				state.alert = AlertState { TextState("저장 실패") } message: { TextState("저장 중 문제가 발생했습니다: \(error.localizedDescription)") }
 				return .none
 				
 			case let .searchTrack(.presented(.delegate(.trackSelected(track)))):
 				state.searchTrack = nil
 				return .send(.trackSelected(track))
 				
-			case .searchTrack:
+			case .searchTrack, .alert:
 				return .none
 				
 			case let .delegate(delegateAction):
@@ -236,5 +258,6 @@ public struct AddArchiveFeature {
 		.ifLet(\.$searchTrack, action: \.searchTrack) {
 			ArchiveTrackSearchFeature(searchTracksUseCase: searchTracksUseCase)
 		}
+		.ifLet(\.$alert, action: \.alert)
 	}
 }
