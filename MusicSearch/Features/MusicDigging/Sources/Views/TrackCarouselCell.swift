@@ -64,9 +64,6 @@ final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 	private let spacerView: UIView = {
 		let view = UIView()
 		view.backgroundColor = .clear
-		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
-		view.layer.cornerRadius = 16
 		view.setContentHuggingPriority(.defaultLow, for: .vertical)
 		view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 		return view

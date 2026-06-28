@@ -33,10 +33,11 @@ public final class ArchiveFolderDetailWrapperInteractor: Interactor, ArchiveFold
     public var onExportButtonTapped: (() -> Void)?
     
     public func archiveFolderDetailDidTapClose() {
-        router?.detachFolderDetail(popUI: false)
+        listener?.archiveFolderDetailDidTapClose()
     }
     
     public func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem) {
+        listener?.archiveFolderDetailDidTapFolder(folderItem)
     }
     
     public func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {
@@ -120,31 +121,13 @@ public final class ArchiveFolderDetailHostingController: UIHostingController<Arc
 }
 
 public final class ArchiveFolderDetailWrapperRouter: ViewableRouter<ArchiveFolderDetailInteractable, ViewControllable>, ArchiveFolderDetailRouting {
-    private let detailBuilder: ArchiveFolderDetailBuildable
-    private var detailRouter: ArchiveFolderDetailRouting?
-    
-    init(interactor: ArchiveFolderDetailInteractable, viewController: ViewControllable, detailBuilder: ArchiveFolderDetailBuildable) {
-        self.detailBuilder = detailBuilder
+    override init(interactor: ArchiveFolderDetailInteractable, viewController: ViewControllable) {
         super.init(interactor: interactor, viewController: viewController)
         interactor.router = self
     }
     
-    public func routeToFolderDetail(folderItem: FolderItem) {
-        guard detailRouter == nil else { return }
-        let router = detailBuilder.build(withListener: interactor, folderItem: folderItem)
-        self.detailRouter = router
-        attachChild(router)
-        viewController.uiviewController.navigationController?.pushViewController(router.viewControllable.uiviewController, animated: true)
-    }
-    
-    public func detachFolderDetail(popUI: Bool) {
-        guard let router = detailRouter else { return }
-        if popUI {
-            viewController.uiviewController.navigationController?.popViewController(animated: true)
-        }
-        detachChild(router)
-        self.detailRouter = nil
-    }
+    public func routeToFolderDetail(folderItem: FolderItem) {}
+    public func detachFolderDetail(popUI: Bool) {}
 }
 
 public final class ArchiveFolderDetailBuilder: Builder<ArchiveFolderDetailDependency>, ArchiveFolderDetailBuildable {
@@ -168,20 +151,9 @@ public final class ArchiveFolderDetailBuilder: Builder<ArchiveFolderDetailDepend
                     case .didTapClose:
                         interactor?.listener?.archiveFolderDetailDidTapClose()
                     case let .didTapFolder(folderItem):
-                        interactor?.router?.routeToFolderDetail(folderItem: folderItem)
+                        interactor?.listener?.archiveFolderDetailDidTapFolder(folderItem)
                     case let .didTapTrack(track):
                         interactor?.listener?.archiveFolderDetailDidTapTrack(track)
-                    case .didTapLogin:
-                        Task {
-                            do {
-                                try await component.manageSpotifyAuthUseCase.authorize()
-                                await MainActor.run {
-                                    interactor?.onExportButtonTapped?()
-                                }
-                            } catch {
-                                print("Failed to authorize Spotify: \(error)")
-                            }
-                        }
                     case .showLoginPrompt:
                         interactor?.onShowLoginPrompt?()
                     }
@@ -198,8 +170,7 @@ public final class ArchiveFolderDetailBuilder: Builder<ArchiveFolderDetailDepend
         
         let router = ArchiveFolderDetailWrapperRouter(
             interactor: interactor,
-            viewController: viewController,
-            detailBuilder: self
+            viewController: viewController
         )
         interactor.router = router
         

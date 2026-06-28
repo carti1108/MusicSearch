@@ -39,11 +39,14 @@ public struct ArchiveFolderDetailFeature {
         case delegate(DelegateAction)
     }
     
+    private enum CancelID {
+        case export
+    }
+
     public enum DelegateAction {
         case didTapClose
         case didTapFolder(FolderItem)
         case didTapTrack(ArchivedTrack)
-        case didTapLogin
         case showLoginPrompt
     }
     
@@ -192,9 +195,12 @@ public struct ArchiveFolderDetailFeature {
                 }
                 
             case .closeButtonTapped:
-                return .run { @MainActor _ in
-                    onDelegate(.didTapClose)
-                }
+                return .merge(
+                    .cancel(id: CancelID.export),
+                    .run { @MainActor _ in
+                        onDelegate(.didTapClose)
+                    }
+                )
                 
             case .exportButtonTapped:
                 guard let tracks = state.tracks, !tracks.isEmpty else { return .none }
@@ -209,14 +215,25 @@ public struct ArchiveFolderDetailFeature {
                             await send(.exportProgress(progress))
                             if progress.isComplete {
                                 await send(.exportCompleted(successCount: progress.currentCount - progress.failedTracks.count, failedCount: progress.failedTracks.count))
+                                // Optionally handle fatalError here
+                                if progress.fatalError != nil {
+                                    // Log or handle fatal error
+                                    print("Fatal error during export: \(String(describing: progress.fatalError))")
+                                }
                             }
                         }
                     }
+                    .cancellable(id: CancelID.export)
                 }
                 
             case .loginPromptTapped:
-                return .run { @MainActor _ in
-                    onDelegate(.didTapLogin)
+                return .run { send in
+                    do {
+                        try await manageSpotifyAuthUseCase.authorize()
+                        await send(.exportButtonTapped)
+                    } catch {
+                        print("Failed to authorize Spotify: \(error)")
+                    }
                 }
                 
             case let .exportProgress(progress):

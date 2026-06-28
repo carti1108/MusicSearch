@@ -1,10 +1,11 @@
-import MSDomain
 //
 //  MusicDiggingRouterTests.swift
 //  MusicSearchTests
 //
 //  Created by Kiseok on 4/14/26.
 //
+
+import MSDomain
 
 import Testing
 import UIKit

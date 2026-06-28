@@ -1,10 +1,11 @@
-import MSDomain
 //
 //  WeatherRecommendationBuilderTests.swift
 //  MusicSearchTests
 //
 //  Created by Kiseok on 4/14/26.
 //
+
+import MSDomain
 
 import Foundation
 import Testing

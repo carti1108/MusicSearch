@@ -30,6 +30,7 @@ public final class ArchiveFolderWrapperInteractor: Interactor, ArchiveFolderInte
     }
     
     public func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem) {
+        router?.routeToFolderDetail(folderItem: folderItem)
     }
     
     public func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {
@@ -69,7 +70,7 @@ public final class ArchiveFolderHostingController: UIHostingController<ArchiveFo
 
 public final class ArchiveFolderWrapperRouter: ViewableRouter<ArchiveFolderInteractable, ViewControllable>, ArchiveFolderRouting {
     private let detailBuilder: ArchiveFolderDetailBuildable
-    private var detailRouter: ArchiveFolderDetailRouting?
+    private var detailRouters: [ArchiveFolderDetailRouting] = []
     
     init(interactor: ArchiveFolderInteractable, viewController: ViewControllable, detailBuilder: ArchiveFolderDetailBuildable) {
         self.detailBuilder = detailBuilder
@@ -78,20 +79,18 @@ public final class ArchiveFolderWrapperRouter: ViewableRouter<ArchiveFolderInter
     }
     
     public func routeToFolderDetail(folderItem: FolderItem) {
-        guard detailRouter == nil else { return }
         let router = detailBuilder.build(withListener: interactor, folderItem: folderItem)
-        self.detailRouter = router
+        detailRouters.append(router)
         attachChild(router)
         viewController.uiviewController.navigationController?.pushViewController(router.viewControllable.uiviewController, animated: true)
     }
     
     public func detachFolderDetail(popUI: Bool) {
-        guard let router = detailRouter else { return }
+        guard let router = detailRouters.popLast() else { return }
         if popUI {
             viewController.uiviewController.navigationController?.popViewController(animated: true)
         }
         detachChild(router)
-        self.detailRouter = nil
     }
 }
 
