@@ -13,9 +13,32 @@ public struct Track: Identifiable, Equatable, Sendable, Hashable {
 	public let title: String
 	public let artist: String
 	public let imageURL: URL?
+	public let thumbnailURL: URL?
 	public let albumTitle: String?
 	public let albumType: String?
 	public let releaseDate: Date?
+
+	public init(
+		id: String = UUID().uuidString,
+		mbid: String? = nil,
+		title: String,
+		artist: String,
+		imageURL: URL?,
+		thumbnailURL: URL? = nil,
+		albumTitle: String? = nil,
+		albumType: String? = nil,
+		releaseDate: Date? = nil
+	) {
+		self.id = id
+		self.mbid = mbid
+		self.title = title
+		self.artist = artist
+		self.imageURL = imageURL
+		self.thumbnailURL = thumbnailURL
+		self.albumTitle = albumTitle
+		self.albumType = albumType
+		self.releaseDate = releaseDate
+	}
 
 	public init(
 		id: String = UUID().uuidString,
@@ -32,6 +55,7 @@ public struct Track: Identifiable, Equatable, Sendable, Hashable {
 		self.title = title
 		self.artist = artist
 		self.imageURL = imageURL
+		self.thumbnailURL = nil
 		self.albumTitle = albumTitle
 		self.albumType = albumType
 		self.releaseDate = releaseDate

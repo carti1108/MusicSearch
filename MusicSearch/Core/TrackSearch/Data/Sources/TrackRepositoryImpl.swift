@@ -5,20 +5,21 @@
 //  Created by Kiseok on 12/13/25.
 //
 
-import MSData
-
 import Foundation
-import NetworkLayer
+import MSData
 import MSDomain
 import MSUtil
+import NetworkLayer
 import TrackSearchDomain
 
 public struct TrackRepositoryImpl: TrackRepository {
 
 	private let networkManager: NetworkRequesting
+	private let musicAppRepository: MusicAppRepository?
 
-	public init(networkManager: NetworkRequesting) {
+	public init(networkManager: NetworkRequesting, musicAppRepository: MusicAppRepository? = nil) {
 		self.networkManager = networkManager
+		self.musicAppRepository = musicAppRepository
 	}
 
 	public func searchTracks(
@@ -26,7 +27,19 @@ public struct TrackRepositoryImpl: TrackRepository {
 		limit: Int,
 		page: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
-		self.makeSearchResult(from: try await self.networkManager.perform(
+		if let musicAppRepository {
+			let offset = max(0, (page - 1) * limit)
+			do {
+				let result = try await musicAppRepository.searchSpotifyTracks(query: query, limit: limit, offset: offset)
+				if !result.tracks.isEmpty {
+					return result
+				}
+			} catch {
+				// Fallback to LastFM if Spotify search fails or returns nothing
+			}
+		}
+		
+		return self.makeSearchResult(from: try await self.networkManager.perform(
 			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
 			as: TrackSearchResponseDTO.self
 		))
@@ -49,11 +62,50 @@ public struct TrackRepositoryImpl: TrackRepository {
 	}
 
 	public func fetchTrackInfo(for track: Track) async throws -> Track {
-		let response: TrackInfoResponseDTO = try await self.networkManager.perform(
-			with: LastFMAPI.getTrackInfo(track: track),
-			as: TrackInfoResponseDTO.self
-		)
-		return self.merge(track: track, with: response)
+		if track.thumbnailURL != nil {
+			return track
+		}
+
+		if let musicAppRepository {
+			let sanitizedTitle = track.title.replacingOccurrences(of: "\"", with: "")
+			let sanitizedArtist = track.artist.replacingOccurrences(of: "\"", with: "")
+			var query = "track:\"\(sanitizedTitle)\" artist:\"\(sanitizedArtist)\""
+			
+			if let albumTitle = track.albumTitle {
+				let sanitizedAlbum = albumTitle.replacingOccurrences(of: "\"", with: "")
+				query += " album:\"\(sanitizedAlbum)\""
+			}
+
+			do {
+				let result = try await musicAppRepository.searchSpotifyTracks(query: query, limit: 1, offset: 0)
+				if let spotifyTrack = result.tracks.first {
+					return Track(
+						id: track.id,
+						mbid: track.mbid,
+						title: track.title,
+						artist: track.artist,
+						imageURL: spotifyTrack.imageURL,
+						thumbnailURL: spotifyTrack.thumbnailURL,
+						albumTitle: spotifyTrack.albumTitle ?? track.albumTitle,
+						albumType: spotifyTrack.albumType ?? track.albumType,
+						releaseDate: spotifyTrack.releaseDate ?? track.releaseDate
+					)
+				}
+			} catch {
+				// Fallback to LastFM if Spotify fails
+			}
+		}
+		
+		// Fallback to LastFM getTrackInfo
+		do {
+			let response: TrackInfoResponseDTO = try await self.networkManager.perform(
+				with: LastFMAPI.getTrackInfo(track: track),
+				as: TrackInfoResponseDTO.self
+			)
+			return self.merge(track: track, with: response)
+		} catch {
+			return track
+		}
 	}
 
 	private func makeSearchResult(
@@ -87,6 +139,11 @@ public struct TrackRepositoryImpl: TrackRepository {
 			  let url = URL(string: imageString) else {
 			return nil
 		}
+		
+		if imageString.contains("2a96cbd8b46e442fc41c2b86b821562f") {
+			return nil
+		}
+		
 		return url.forcedHTTPS
 	}
 }
