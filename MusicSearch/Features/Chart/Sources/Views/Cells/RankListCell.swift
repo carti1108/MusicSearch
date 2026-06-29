@@ -12,9 +12,27 @@ final class RankListCell: UICollectionViewCell {
 	static let identifier = "RankListCell"
 
 	private let cardView = UIView()
+	
+	private let blurBackgroundView: UIVisualEffectView = {
+		let blurEffect = UIBlurEffect(style: .systemThinMaterialDark)
+		let view = UIVisualEffectView(effect: blurEffect)
+		view.layer.cornerRadius = 16
+		view.clipsToBounds = true
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.15).cgColor
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
 	private let rankLabel = UILabel()
 	private let titleLabel = UILabel()
 	private let subtitleLabel = UILabel()
+	private let trendLabel: UILabel = {
+		let label = UILabel()
+		label.font = .systemFont(ofSize: 13, weight: .bold)
+		label.textAlignment = .right
+		return label
+	}()
 	private let imageView: UIImageView = {
 		let iv = UIImageView()
 		iv.contentMode = .scaleAspectFill
@@ -42,12 +60,9 @@ final class RankListCell: UICollectionViewCell {
 
 	private func setupUI() {
 		self.contentView.backgroundColor = .clear
-		self.cardView.backgroundColor = .clear
-		self.cardView.layer.borderWidth = 1
-		self.cardView.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
-		self.cardView.layer.cornerRadius = 16
 		self.cardView.translatesAutoresizingMaskIntoConstraints = false
 		self.contentView.addSubview(self.cardView)
+		self.cardView.addSubview(self.blurBackgroundView)
 
 		self.rankLabel.font = .boldSystemFont(ofSize: 16)
 		self.rankLabel.textColor = UIColor(CustomColor.primary)
@@ -65,7 +80,7 @@ final class RankListCell: UICollectionViewCell {
 		self.subtitleLabel.lineBreakMode = .byTruncatingTail
 		self.subtitleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
-		[self.rankLabel, self.imageView, self.titleLabel, self.subtitleLabel].forEach {
+		[self.rankLabel, self.imageView, self.titleLabel, self.subtitleLabel, self.trendLabel].forEach {
 			$0.translatesAutoresizingMaskIntoConstraints = false
 			self.cardView.addSubview($0)
 		}
@@ -76,6 +91,11 @@ final class RankListCell: UICollectionViewCell {
 			self.cardView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
 			self.cardView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -6),
 
+			self.blurBackgroundView.topAnchor.constraint(equalTo: self.cardView.topAnchor),
+			self.blurBackgroundView.leadingAnchor.constraint(equalTo: self.cardView.leadingAnchor),
+			self.blurBackgroundView.trailingAnchor.constraint(equalTo: self.cardView.trailingAnchor),
+			self.blurBackgroundView.bottomAnchor.constraint(equalTo: self.cardView.bottomAnchor),
+
 			self.rankLabel.leadingAnchor.constraint(equalTo: self.cardView.leadingAnchor, constant: 12),
 			self.rankLabel.centerYAnchor.constraint(equalTo: self.cardView.centerYAnchor),
 			self.rankLabel.widthAnchor.constraint(equalToConstant: 30),
@@ -85,9 +105,13 @@ final class RankListCell: UICollectionViewCell {
 			self.imageView.widthAnchor.constraint(equalToConstant: 40),
 			self.imageView.heightAnchor.constraint(equalToConstant: 40),
 
+			self.trendLabel.trailingAnchor.constraint(equalTo: self.cardView.trailingAnchor, constant: -16),
+			self.trendLabel.centerYAnchor.constraint(equalTo: self.cardView.centerYAnchor),
+			self.trendLabel.widthAnchor.constraint(equalToConstant: 40),
+
 			self.titleLabel.leadingAnchor.constraint(equalTo: self.imageView.trailingAnchor, constant: 12),
 			self.titleLabel.topAnchor.constraint(equalTo: self.cardView.topAnchor, constant: 10),
-			self.titleLabel.trailingAnchor.constraint(equalTo: self.cardView.trailingAnchor, constant: -20),
+			self.titleLabel.trailingAnchor.constraint(equalTo: self.trendLabel.leadingAnchor, constant: -10),
 
 			self.subtitleLabel.leadingAnchor.constraint(equalTo: self.titleLabel.leadingAnchor),
 			self.subtitleLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 2),
@@ -102,9 +126,19 @@ final class RankListCell: UICollectionViewCell {
 		self.subtitleLabel.text = item.subtitle
 		self.imageView.backgroundColor = Self.rankColor(item.rank)
 
-		self.imageView.setRemoteImage(item.imageURL, targetSize: CGSize(width: 40, height: 40))
+		let urlToLoad = item.thumbnailURL ?? item.imageURL
+		self.imageView.setRemoteImage(urlToLoad, targetSize: CGSize(width: 40, height: 40))
 
-		self.imageView.layer.cornerRadius = (item.type == .artists) ? 20 : 0
+		if item.trend > 0 {
+			self.trendLabel.text = "▲ \(item.trend)"
+			self.trendLabel.textColor = .systemGreen
+		} else if item.trend < 0 {
+			self.trendLabel.text = "▼ \(abs(item.trend))"
+			self.trendLabel.textColor = .systemRed
+		} else {
+			self.trendLabel.text = "-"
+			self.trendLabel.textColor = .systemGray
+		}
 	}
 
 	private static func rankColor(_ rank: Int) -> UIColor {

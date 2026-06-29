@@ -12,6 +12,18 @@ final class PodiumCell: UICollectionViewCell {
 	static let identifier = "PodiumCell"
 
 	private let containerView = UIView()
+	
+	private let blurBackgroundView: UIVisualEffectView = {
+		let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+		let view = UIVisualEffectView(effect: blurEffect)
+		view.layer.cornerRadius = 24
+		view.clipsToBounds = true
+		view.layer.borderWidth = 1
+		view.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
 	private var isArtist: Bool = false
 	private let contentStackView: UIStackView = {
 		let stack = UIStackView()
@@ -41,8 +53,15 @@ final class PodiumCell: UICollectionViewCell {
 		let label = UILabel()
 		label.font = .systemFont(ofSize: 14, weight: .bold)
 		label.textAlignment = .center
-		label.numberOfLines = 0
+		label.numberOfLines = 2
 		label.textColor = .white
+		return label
+	}()
+
+	private let trendLabel: UILabel = {
+		let label = UILabel()
+		label.font = .systemFont(ofSize: 12, weight: .bold)
+		label.textAlignment = .center
 		return label
 	}()
 
@@ -67,20 +86,17 @@ final class PodiumCell: UICollectionViewCell {
 
 	override func layoutSubviews() {
 		super.layoutSubviews()
-		if self.isArtist {
-			self.imageView.layer.cornerRadius = self.imageView.bounds.width / 2
-		} else {
-			self.imageView.layer.cornerRadius = 16
-		}
+		self.imageView.layer.cornerRadius = 16
 	}
 
 	private func setupUI() {
 		self.containerView.backgroundColor = .clear
 		self.contentView.addSubview(self.containerView)
 		self.containerView.translatesAutoresizingMaskIntoConstraints = false
+		self.containerView.addSubview(self.blurBackgroundView)
 		self.containerView.addSubview(self.contentStackView)
 
-		[self.imageView, self.titleLabel].forEach {
+		[self.imageView, self.titleLabel, self.trendLabel].forEach {
 			$0.translatesAutoresizingMaskIntoConstraints = false
 			self.contentStackView.addArrangedSubview($0)
 		}
@@ -88,23 +104,30 @@ final class PodiumCell: UICollectionViewCell {
 		self.containerView.addSubview(self.rankLabel)
 
 		self.contentStackView.alignment = .center
+		self.contentStackView.setCustomSpacing(4, after: self.titleLabel)
+
 		NSLayoutConstraint.activate([
 			self.containerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 12),
 			self.containerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.containerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
 			self.containerView.bottomAnchor.constraint(lessThanOrEqualTo: self.contentView.bottomAnchor, constant: -12),
 
-			self.contentStackView.topAnchor.constraint(equalTo: self.containerView.topAnchor, constant: 14),
+			self.blurBackgroundView.topAnchor.constraint(equalTo: self.containerView.topAnchor),
+			self.blurBackgroundView.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor),
+			self.blurBackgroundView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor),
+			self.blurBackgroundView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor),
+
+			self.contentStackView.topAnchor.constraint(equalTo: self.containerView.topAnchor, constant: 16),
 			self.contentStackView.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor, constant: 10),
 			self.contentStackView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor, constant: -10),
-			self.contentStackView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -14),
+			self.contentStackView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -16),
 
-			self.imageView.widthAnchor.constraint(equalTo: self.containerView.widthAnchor, multiplier: 0.85),
+			self.imageView.widthAnchor.constraint(equalTo: self.containerView.widthAnchor, multiplier: 0.75),
 			self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor),
 			self.titleLabel.widthAnchor.constraint(equalTo: self.contentStackView.widthAnchor),
 
-			self.rankLabel.topAnchor.constraint(equalTo: self.imageView.topAnchor, constant: -20),
-			self.rankLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: -15)
+			self.rankLabel.topAnchor.constraint(equalTo: self.imageView.topAnchor, constant: -15),
+			self.rankLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: -10)
 		])
 	}
 
@@ -149,6 +172,17 @@ final class PodiumCell: UICollectionViewCell {
 		]
 		self.rankLabel.attributedText = NSAttributedString(string: rankString, attributes: attributes)
 		self.containerView.transform = CGAffineTransform(translationX: 0, y: yOffset).scaledBy(x: scale, y: scale)
+
+		if item.trend > 0 {
+			self.trendLabel.text = "▲ \(item.trend)"
+			self.trendLabel.textColor = .systemGreen
+		} else if item.trend < 0 {
+			self.trendLabel.text = "▼ \(abs(item.trend))"
+			self.trendLabel.textColor = .systemRed
+		} else {
+			self.trendLabel.text = "-"
+			self.trendLabel.textColor = .systemGray
+		}
 	}
 
 	private static func rankColor(_ rank: Int) -> UIColor {

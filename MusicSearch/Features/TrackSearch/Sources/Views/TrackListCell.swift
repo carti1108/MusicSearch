@@ -14,8 +14,6 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 	private let cardView: UIView = {
 		let view = UIView()
 		view.backgroundColor = .clear
-		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
 		view.layer.cornerRadius = 16
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
@@ -103,6 +101,7 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 		self.titleLabel.text = track.title
 		self.artistLabel.text = track.artist
 
-		self.albumImageView.setRemoteImage(track.imageURL, targetSize: CGSize(width: 60, height: 60))
+		let urlToLoad = track.thumbnailURL ?? track.imageURL
+		self.albumImageView.setRemoteImage(urlToLoad, targetSize: CGSize(width: 60, height: 60))
 	}
 }

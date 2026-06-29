@@ -24,6 +24,7 @@ public extension UIImageView {
 		let resolvedSize = targetSize == .zero ? fallbackSize : targetSize
 		let processor = DownsamplingImageProcessor(size: resolvedSize)
 
+		let retryStrategy = DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(1))
 		self.kf.setImage(
 			with: url,
 			placeholder: nil,
@@ -31,7 +32,7 @@ public extension UIImageView {
 				.processor(processor),
 				.scaleFactor(UIScreen.main.scale),
 				.backgroundDecode,
-				.transition(.fade(transitionDuration))
+				.retryStrategy(retryStrategy)
 			]
 		)
 	}

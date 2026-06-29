@@ -12,55 +12,47 @@ import MSDomain
 final class SeedTrackView: UIView {
 	var onTap: (() -> Void)?
 
-	private let containerView: UIView = {
-		let view = UIView()
-		view.backgroundColor = .clear
-		view.layer.borderWidth = 1
-		view.layer.borderColor = UIColor(CustomColor.outlineVariant).cgColor
-		view.layer.cornerRadius = 16
-		view.translatesAutoresizingMaskIntoConstraints = false
-		return view
-	}()
-
-	private let contentStackView: UIStackView = {
-		let stack = UIStackView()
-		stack.axis = .vertical
-		stack.spacing = 16
-		stack.alignment = .fill
-		stack.distribution = .fill
-		stack.translatesAutoresizingMaskIntoConstraints = false
-		return stack
-	}()
-
 	private let albumImageView: UIImageView = {
 		let iv = UIImageView()
 		iv.contentMode = .scaleAspectFill
 		iv.backgroundColor = .systemGray5
 		iv.clipsToBounds = true
-		iv.layer.cornerRadius = 12
+		iv.layer.cornerRadius = 16
 		iv.translatesAutoresizingMaskIntoConstraints = false
 		return iv
 	}()
 
+	private let gradientLayer: CAGradientLayer = {
+		let layer = CAGradientLayer()
+		layer.colors = [UIColor.clear.cgColor, UIColor.black.withAlphaComponent(0.85).cgColor]
+		layer.locations = [0.4, 1.0]
+		return layer
+	}()
+
+	private let textStackView: UIStackView = {
+		let stack = UIStackView()
+		stack.axis = .vertical
+		stack.spacing = 4
+		stack.alignment = .leading
+		stack.translatesAutoresizingMaskIntoConstraints = false
+		return stack
+	}()
+
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 24, weight: .heavy)
+		label.font = .systemFont(ofSize: 18, weight: .heavy)
 		label.textColor = .white
-		label.textAlignment = .center
-		label.numberOfLines = 0
-		
-		label.translatesAutoresizingMaskIntoConstraints = false
+		label.textAlignment = .left
+		label.numberOfLines = 2
 		return label
 	}()
 
 	private let artistLabel: UILabel = {
 		let label = UILabel()
-		label.font = .systemFont(ofSize: 16, weight: .medium)
+		label.font = .systemFont(ofSize: 14, weight: .medium)
 		label.textColor = .white.withAlphaComponent(0.8)
-		label.textAlignment = .center
-		label.numberOfLines = 0
-		
-		label.translatesAutoresizingMaskIntoConstraints = false
+		label.textAlignment = .left
+		label.numberOfLines = 1
 		return label
 	}()
 
@@ -74,41 +66,39 @@ final class SeedTrackView: UIView {
 
 	override func layoutSubviews() {
 		super.layoutSubviews()
+		self.gradientLayer.frame = self.albumImageView.bounds
 	}
 
 	private func setupUI() {
-		self.addSubview(self.containerView)
-		self.containerView.addSubview(self.contentStackView)
+		self.addSubview(self.albumImageView)
+		self.albumImageView.layer.addSublayer(self.gradientLayer)
 
-		self.contentStackView.addArrangedSubview(self.albumImageView)
-		self.contentStackView.addArrangedSubview(self.titleLabel)
-		self.contentStackView.addArrangedSubview(self.artistLabel)
-
-		self.titleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
-		self.artistLabel.setContentCompressionResistancePriority(.required, for: .vertical)
-
-		self.albumImageView.setContentCompressionResistancePriority(.required, for: .vertical)
-		self.albumImageView.setContentHuggingPriority(.defaultHigh, for: .vertical)
+		self.addSubview(self.textStackView)
+		self.textStackView.addArrangedSubview(self.titleLabel)
+		self.textStackView.addArrangedSubview(self.artistLabel)
 
 		NSLayoutConstraint.activate([
-			self.containerView.topAnchor.constraint(equalTo: self.topAnchor, constant: 16),
-			self.containerView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 20),
-			self.containerView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -20),
-			self.containerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -16),
+			self.albumImageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 16),
+			self.albumImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 60),
+			self.albumImageView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -60),
+			self.albumImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -16),
+			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor),
 
-			self.contentStackView.topAnchor.constraint(equalTo: self.containerView.topAnchor, constant: 16),
-			self.contentStackView.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor, constant: 16),
-			self.contentStackView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor, constant: -16),
-			self.contentStackView.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -16),
-
-			self.albumImageView.heightAnchor.constraint(equalTo: self.albumImageView.widthAnchor)
+			self.textStackView.leadingAnchor.constraint(equalTo: self.albumImageView.leadingAnchor, constant: 16),
+			self.textStackView.trailingAnchor.constraint(equalTo: self.albumImageView.trailingAnchor, constant: -16),
+			self.textStackView.bottomAnchor.constraint(equalTo: self.albumImageView.bottomAnchor, constant: -16)
 		])
+		
+		self.layer.shadowColor = UIColor.black.cgColor
+		self.layer.shadowOffset = CGSize(width: 0, height: 6)
+		self.layer.shadowRadius = 10
+		self.layer.shadowOpacity = 0.4
 	}
 
 	private func setupActions() {
 		let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-		self.containerView.addGestureRecognizer(tapGesture)
-		self.containerView.isUserInteractionEnabled = true
+		self.addGestureRecognizer(tapGesture)
+		self.isUserInteractionEnabled = true
 	}
 
 	@objc
