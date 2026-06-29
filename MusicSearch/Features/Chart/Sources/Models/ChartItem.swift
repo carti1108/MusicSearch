@@ -13,5 +13,7 @@ struct ChartItem: Hashable {
 	let title: String
 	let subtitle: String
 	let imageURL: URL?
+	let thumbnailURL: URL?
 	let type: ChartType
+	let trend: Int
 }

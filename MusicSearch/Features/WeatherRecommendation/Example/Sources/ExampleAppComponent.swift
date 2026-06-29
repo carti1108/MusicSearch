@@ -27,7 +27,13 @@ final class MockFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
     func execute() async throws -> WeatherMusicCuration {
         let mockWeather = Weather(temperature: 24.5, condition: ExampleWeatherState.currentCondition, description: "Debug Weather", iconCode: "01d", cityName: "Seoul")
         let mockTracks = [
-            Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil)
+            Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil),
+			Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil),
+			Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil),
+			Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil),
+			Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil),
+			Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil),
+			Track(title: "Sunny Day Track", artist: "Sun Artist", imageURL: nil)
         ]
         return WeatherMusicCuration(weather: mockWeather, moodTag: "Happy", tracks: mockTracks)
     }

@@ -73,13 +73,13 @@ struct ChartViewControllerTests {
 
 		viewController.update(
 			podiumItems: [
-				ChartItem(id: "1", rank: 2, title: "Track 2", subtitle: "Artist 2", imageURL: nil, type: .tracks),
-				ChartItem(id: "2", rank: 1, title: "Track 1", subtitle: "Artist 1", imageURL: nil, type: .tracks),
-				ChartItem(id: "3", rank: 3, title: "Track 3", subtitle: "Artist 3", imageURL: nil, type: .tracks)
+				ChartItem(id: "1", rank: 2, title: "Track 2", subtitle: "Artist 2", imageURL: nil, thumbnailURL: nil, type: .tracks),
+				ChartItem(id: "2", rank: 1, title: "Track 1", subtitle: "Artist 1", imageURL: nil, thumbnailURL: nil, type: .tracks),
+				ChartItem(id: "3", rank: 3, title: "Track 3", subtitle: "Artist 3", imageURL: nil, thumbnailURL: nil, type: .tracks)
 			],
 			listItems: [
-				ChartItem(id: "4", rank: 4, title: "Track 4", subtitle: "Artist 4", imageURL: nil, type: .tracks),
-				ChartItem(id: "5", rank: 5, title: "Track 5", subtitle: "Artist 5", imageURL: nil, type: .tracks)
+				ChartItem(id: "4", rank: 4, title: "Track 4", subtitle: "Artist 4", imageURL: nil, thumbnailURL: nil, type: .tracks),
+				ChartItem(id: "5", rank: 5, title: "Track 5", subtitle: "Artist 5", imageURL: nil, thumbnailURL: nil, type: .tracks)
 			]
 		)
 		await flushMainQueue()
@@ -98,9 +98,9 @@ struct ChartViewControllerTests {
 		viewController.loadViewIfNeeded()
 		viewController.update(
 			podiumItems: [
-				ChartItem(id: "1", rank: 2, title: "Track 2", subtitle: "Artist 2", imageURL: nil, type: .tracks),
-				ChartItem(id: "2", rank: 1, title: "Track 1", subtitle: "Artist 1", imageURL: nil, type: .tracks),
-				ChartItem(id: "3", rank: 3, title: "Track 3", subtitle: "Artist 3", imageURL: nil, type: .tracks)
+				ChartItem(id: "1", rank: 2, title: "Track 2", subtitle: "Artist 2", imageURL: nil, thumbnailURL: nil, type: .tracks),
+				ChartItem(id: "2", rank: 1, title: "Track 1", subtitle: "Artist 1", imageURL: nil, thumbnailURL: nil, type: .tracks),
+				ChartItem(id: "3", rank: 3, title: "Track 3", subtitle: "Artist 3", imageURL: nil, thumbnailURL: nil, type: .tracks)
 			],
 			listItems: []
 		)

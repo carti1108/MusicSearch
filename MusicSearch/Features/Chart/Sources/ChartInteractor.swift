@@ -184,13 +184,16 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 	private func makeItems(from tracks: [Track]) -> [ChartItem] {
 		tracks.enumerated().map { index, track in
 			let rank = index + 1
+			let mockTrend = (rank == 1) ? 0 : Int.random(in: -5...5)
 			return ChartItem(
 				id: "\(ChartType.tracks.rawValue)-\(rank)",
 				rank: rank,
 				title: track.title,
 				subtitle: track.artist,
 				imageURL: track.imageURL,
-				type: .tracks
+				thumbnailURL: track.thumbnailURL,
+				type: .tracks,
+				trend: mockTrend
 			)
 		}
 	}
@@ -199,13 +202,16 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 		artists.enumerated().map { index, artist in
 			let rank = index + 1
 			let subtitle = artist.listeners.flatMap { $0.isEmpty ? nil : $0 }.map { "Listeners: \($0)" } ?? ""
+			let mockTrend = (rank == 1) ? 0 : Int.random(in: -5...5)
 			return ChartItem(
 				id: "\(ChartType.artists.rawValue)-\(rank)",
 				rank: rank,
 				title: artist.name,
 				subtitle: subtitle,
 				imageURL: artist.imageURL,
-				type: .artists
+				thumbnailURL: nil,
+				type: .artists,
+				trend: mockTrend
 			)
 		}
 	}
