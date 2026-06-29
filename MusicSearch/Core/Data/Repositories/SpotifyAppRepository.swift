@@ -74,10 +74,15 @@ public actor SpotifyAppRepository: MusicAppRepository {
 	}
 
 	private func getAccessToken() async throws -> String {
-		guard let token = authRepository.getAccessToken() else {
+		if let token = authRepository.getAccessToken() {
+			return token
+		}
+		
+		do {
+			return try await authRepository.getClientCredentialsToken()
+		} catch {
 			throw SpotifyRepositoryError.unauthorized
 		}
-		return token
 	}
 
 	private func search(query: String, type: String, token: String) async throws -> String {

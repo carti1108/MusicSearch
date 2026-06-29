@@ -70,6 +70,8 @@ extension SpotifyTrackDTO {
 		let artistName = self.artists.map { $0.name }.joined(separator: ", ")
 		let imageString = self.album?.images?.first?.url
 		let imageURL = imageString.flatMap { URL(string: $0) }
+		let thumbnailString = self.album?.images?.last?.url
+		let thumbnailURL = thumbnailString.flatMap { URL(string: $0) }
 		
 		var parsedReleaseDate: Date? = nil
 		if let releaseDateString = self.album?.release_date {
@@ -88,6 +90,7 @@ extension SpotifyTrackDTO {
 			title: self.name,
 			artist: artistName,
 			imageURL: imageURL,
+			thumbnailURL: thumbnailURL,
 			albumTitle: self.album?.name,
 			albumType: self.album?.album_type,
 			releaseDate: parsedReleaseDate

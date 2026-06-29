@@ -470,6 +470,7 @@ let appTargets: [Target] = [
 			"OPENWEATHERMAP_API_KEY": "$(OPENWEATHERMAP_API_KEY)",
 			"LASTFM_API_KEY": "$(LASTFM_API_KEY)",
 			"SPOTIFY_CLIENT_ID": "$(SPOTIFY_CLIENT_ID)",
+			"SPOTIFY_CLIENT_SECRET": "$(SPOTIFY_CLIENT_SECRET)",
 			"NSLocationWhenInUseUsageDescription": "현재 위치의 날씨 정보를 제공하기 위해 위치 권한이 필요합니다.",
 			"UILaunchStoryboardName": "LaunchScreen",
 			"LSApplicationQueriesSchemes": ["spotify"],

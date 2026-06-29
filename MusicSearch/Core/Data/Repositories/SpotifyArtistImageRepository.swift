@@ -37,10 +37,15 @@ public actor SpotifyArtistImageRepository: ArtistImageRepository {
 	}
 
 	private func getAccessToken() async throws -> String {
-		guard let token = authRepository.getAccessToken() else {
+		if let token = authRepository.getAccessToken() {
+			return token
+		}
+		
+		do {
+			return try await authRepository.getClientCredentialsToken()
+		} catch {
 			throw SpotifyRepositoryError.unauthorized
 		}
-		return token
 	}
 
 	private func fetchImageURL(artistName: String, token: String) async throws -> URL? {

@@ -71,7 +71,10 @@ final class AppComponent: RootDependency {
 	}()
 
 	private lazy var trackRepositoryInstance: TrackRepository = {
-		TrackRepositoryImpl(networkManager: self.networkManager)
+		TrackRepositoryImpl(
+			networkManager: self.networkManager,
+			musicAppRepository: self.musicAppRepositoryInstance
+		)
 	}()
 
 	private lazy var chartRepositoryInstance: ChartRepository = {

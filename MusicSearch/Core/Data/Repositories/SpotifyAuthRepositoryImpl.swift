@@ -34,6 +34,25 @@ public final class SpotifyAuthRepositoryImpl: SpotifyAuthRepository {
         UserDefaults.standard.removeObject(forKey: "SpotifyTokenExpiry")
     }
     
+    public func getClientCredentialsToken() async throws -> String {
+        let now = Date()
+        if let token = UserDefaults.standard.string(forKey: "SpotifyClientToken"),
+           let expiry = UserDefaults.standard.object(forKey: "SpotifyClientTokenExpiry") as? Date,
+           now < expiry {
+            return token
+        }
+        
+        let config = DefaultSpotifyAPIConfiguration()
+        let api = SpotifyAPI.clientCredentialsToken(config: config)
+        let response = try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
+        
+        UserDefaults.standard.set(response.access_token, forKey: "SpotifyClientToken")
+        // Subtract a bit of time (e.g. 60 seconds leeway) for safety
+        UserDefaults.standard.set(now.addingTimeInterval(TimeInterval(response.expires_in - 60)), forKey: "SpotifyClientTokenExpiry")
+        
+        return response.access_token
+    }
+    
     public func fetchUserProfile() async throws -> (name: String, imageURL: URL?) {
         guard let token = getAccessToken() else {
             throw URLError(.userAuthenticationRequired)
