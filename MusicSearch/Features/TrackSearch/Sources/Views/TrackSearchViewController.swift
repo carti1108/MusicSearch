@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 import MSDesignSystem
 import MicroRIBs
 import MSDomain
@@ -73,27 +74,23 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 
 	private let eyebrowLabel: UILabel = {
 		let label = UILabel()
-		label.text = "DISCOVER"
-		label.font = .systemFont(ofSize: 12, weight: .semibold)
-		label.textColor = UIColor(CustomColor.onSurfaceVariant)
+		label.text = ""
+		label.isHidden = true
 		return label
 	}()
 
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "원하는 곡을 찾고\n바로 Digging 해보세요"
-		label.font = .systemFont(ofSize: 30, weight: .heavy)
+		label.text = "Discover"
+		label.font = .systemFont(ofSize: 36, weight: .heavy)
 		label.textColor = UIColor(CustomColor.onSurface)
-		label.numberOfLines = 2
 		return label
 	}()
 
 	private let subtitleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "아티스트나 트랙명을 검색한 뒤 비슷한 곡 흐름으로 이어서 탐색할 수 있어요."
-		label.font = .systemFont(ofSize: 15, weight: .medium)
-		label.textColor = UIColor.white.withAlphaComponent(0.68)
-		label.numberOfLines = 0
+		label.text = ""
+		label.isHidden = true
 		return label
 	}()
 
@@ -109,6 +106,7 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 		super.viewDidLoad()
 		self.setupUI()
 		self.configureDataSource()
+		self.collectionView.prefetchDataSource = self
 	}
 
 	override func viewDidLayoutSubviews() {
@@ -225,5 +223,25 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 		if offsetY > contentHeight - (height * 2) {
 			self.listener?.didReachListBottom()
 		}
+	}
+}
+
+
+
+extension TrackSearchViewController: UICollectionViewDataSourcePrefetching {
+	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let track = self.dataSource.itemIdentifier(for: indexPath) else { return nil }
+			return track.thumbnailURL ?? track.imageURL
+		}
+		ImagePrefetcher(urls: urls).start()
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let track = self.dataSource.itemIdentifier(for: indexPath) else { return nil }
+			return track.thumbnailURL ?? track.imageURL
+		}
+		ImagePrefetcher(urls: urls).stop()
 	}
 }

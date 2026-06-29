@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 import MSDesignSystem
 import MicroRIBs
 import MSDomain
@@ -36,38 +37,50 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	private let seedTrackView = SeedTrackView()
 
+	private let backgroundImageView: UIImageView = {
+		let iv = UIImageView()
+		iv.contentMode = .scaleAspectFill
+		iv.clipsToBounds = true
+		iv.translatesAutoresizingMaskIntoConstraints = false
+		return iv
+	}()
+
+	private let blurEffectView: UIVisualEffectView = {
+		let blurEffect = UIBlurEffect(style: .dark)
+		let view = UIVisualEffectView(effect: blurEffect)
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
+	private let darkOverlayView: UIView = {
+		let view = UIView()
+		// 글씨와 썸네일이 잘 보이도록 블러 위에 살짝 어두운 막을 씌웁니다.
+		view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
 	private let eyebrowLabel: UILabel = {
 		let label = UILabel()
-		label.text = "DIGGING MODE"
-		label.font = .systemFont(ofSize: 12, weight: .semibold)
-		label.textColor = UIColor.white.withAlphaComponent(0.64)
+		label.text = ""
+		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
 
 	private let titleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "한 곡에서 시작해\n취향의 결을 따라가기"
-		label.font = .systemFont(ofSize: 30, weight: .heavy)
+		label.text = "Digging"
+		label.font = .systemFont(ofSize: 36, weight: .heavy)
 		label.textColor = .white
-		label.numberOfLines = 2
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
 
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
-		let attributedString = NSMutableAttributedString(string: "이 곡과 비슷한 무드 ")
-		let attachment = NSTextAttachment()
-		attachment.image = UIImage(systemName: "music.note")?.withTintColor(UIColor(CustomColor.onSurface), renderingMode: .alwaysOriginal)
-		let bounds = CGRect(x: 0, y: -4, width: 24, height: 24)
-		attachment.bounds = bounds
-		attributedString.append(NSAttributedString(attachment: attachment))
-		label.attributedText = attributedString
-		label.font = .systemFont(ofSize: 24, weight: .heavy)
-		label.textColor = UIColor(CustomColor.onSurface)
-		label.numberOfLines = 0
-		label.setContentCompressionResistancePriority(.required, for: .vertical)
+		label.text = ""
+		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
@@ -108,6 +121,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 		self.setupView()
 		self.setupConstraints()
 		self.configureDataSource()
+		self.collectionView.prefetchDataSource = self
 	}
 
 	override func viewDidLayoutSubviews() {
@@ -122,6 +136,10 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 	func updateSeedTrack(_ track: Track) {
 		UIView.transition(with: self.seedTrackView, duration: 0.3, options: .transitionCrossDissolve) {
 			self.seedTrackView.configure(with: track)
+		}
+		
+		UIView.transition(with: self.backgroundImageView, duration: 0.5, options: .transitionCrossDissolve) {
+			self.backgroundImageView.setRemoteImage(track.imageURL, targetSize: UIScreen.main.bounds.size)
 		}
 	}
 
@@ -150,6 +168,11 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	private func setupView() {
 		self.view.backgroundColor = UIColor(CustomColor.background)
+		
+		self.view.insertSubview(self.backgroundImageView, at: 0)
+		self.view.insertSubview(self.blurEffectView, aboveSubview: self.backgroundImageView)
+		self.view.insertSubview(self.darkOverlayView, aboveSubview: self.blurEffectView)
+
 		let appearance = UINavigationBarAppearance()
 		appearance.configureWithTransparentBackground()
 		appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
@@ -177,6 +200,21 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 		let screenWidth = UIScreen.main.bounds.width
 
 		NSLayoutConstraint.activate([
+			self.backgroundImageView.topAnchor.constraint(equalTo: self.view.topAnchor),
+			self.backgroundImageView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+			self.backgroundImageView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+			self.backgroundImageView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+
+			self.blurEffectView.topAnchor.constraint(equalTo: self.view.topAnchor),
+			self.blurEffectView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+			self.blurEffectView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+			self.blurEffectView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+
+			self.darkOverlayView.topAnchor.constraint(equalTo: self.view.topAnchor),
+			self.darkOverlayView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+			self.darkOverlayView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+			self.darkOverlayView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+
 			self.scrollView.topAnchor.constraint(equalTo: self.view.topAnchor),
 			self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
 			self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
@@ -207,7 +245,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 			self.collectionView.topAnchor.constraint(equalTo: self.sectionTitleLabel.bottomAnchor, constant: 16),
 			self.collectionView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
 			self.collectionView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-			self.collectionView.heightAnchor.constraint(equalToConstant: screenWidth * 0.4 + 72),
+			self.collectionView.heightAnchor.constraint(equalToConstant: screenWidth * 0.6 * 1.2),
 			self.collectionView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -20),
 
 			self.loadingIndicator.centerXAnchor.constraint(equalTo: self.collectionView.centerXAnchor),
@@ -223,8 +261,8 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 			)
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-			let groupWidth = env.container.contentSize.width * 0.4
-			let groupHeight = groupWidth + 72
+			let groupWidth = env.container.contentSize.width * 0.6
+			let groupHeight = groupWidth * 1.2
 			let groupSize = NSCollectionLayoutSize(
 				widthDimension: .absolute(groupWidth),
 				heightDimension: .absolute(groupHeight)
@@ -232,9 +270,41 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 			let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
 			let section = NSCollectionLayoutSection(group: group)
-			section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
-			section.interGroupSpacing = 12
-			section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
+			// 중앙을 기준으로 페이징되도록 변경
+			section.orthogonalScrollingBehavior = .groupPagingCentered
+			// 셀 간격을 살짝 겹치게 하여 Wrap 느낌 강조
+			section.interGroupSpacing = -10
+			section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+
+			// 스크롤 시 각 셀의 위치를 기반으로 3D 회전 및 스케일 변화 적용
+			section.visibleItemsInvalidationHandler = { items, offset, environment in
+				let containerWidth = environment.container.contentSize.width
+				let centerX = offset.x + (containerWidth / 2.0)
+
+				items.forEach { item in
+					// 중심점으로부터의 거리
+					let distanceFromCenter = abs(item.frame.midX - centerX)
+					let progress = min(distanceFromCenter / (containerWidth / 2.0), 1.0)
+
+					// 크기 조절 (가운데는 1.0, 양옆은 0.75까지 축소)
+					let scale = 1.0 - (progress * 0.25)
+					
+					// 회전 각도 조절 (양옆 셀들이 가운데를 바라보도록)
+					let isLeft = item.frame.midX < centerX
+					let angle = progress * (CGFloat.pi / 4.5) * (isLeft ? 1 : -1)
+
+					var transform = CATransform3DIdentity
+					transform.m34 = -1.0 / 500.0 // 3D 원근감
+					transform = CATransform3DRotate(transform, angle, 0, 1, 0) // Y축 회전
+					transform = CATransform3DScale(transform, scale, scale, 1) // 스케일 축소
+					
+					item.transform3D = transform
+					item.alpha = 1.0 - (progress * 0.5)
+					
+					// 중심에 가까울수록 가장 위에 오도록 zIndex 설정
+					item.zIndex = Int((1.0 - progress) * 100)
+				}
+			}
 			return section
 		}
 	}
@@ -259,5 +329,25 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 extension MusicDiggingViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		self.listener?.didSelectRecommendation(at: indexPath)
+	}
+}
+
+
+
+extension MusicDiggingViewController: UICollectionViewDataSourcePrefetching {
+	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let track = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
+			return track.imageURL
+		}
+		ImagePrefetcher(urls: urls).start()
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let track = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
+			return track.imageURL
+		}
+		ImagePrefetcher(urls: urls).stop()
 	}
 }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 import MSDesignSystem
 import MicroRIBs
 import MSDomain
@@ -37,29 +38,25 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let eyebrowLabel: UILabel = {
 		let label = UILabel()
-		label.text = "SOUNDTRACK FOR RIGHT NOW"
-		label.font = .systemFont(ofSize: 12, weight: .semibold)
-		label.textColor = UIColor.white.withAlphaComponent(0.72)
+		label.text = ""
+		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
 
 	private let heroTitleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "오늘의 공기와\n어울리는 플레이리스트"
-		label.font = .systemFont(ofSize: 32, weight: .heavy)
+		label.text = "Atmosphere"
+		label.font = .systemFont(ofSize: 36, weight: .heavy)
 		label.textColor = .white
-		label.numberOfLines = 2
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
 
 	private let heroSubtitleLabel: UILabel = {
 		let label = UILabel()
-		label.text = "날씨와 무드를 바탕으로 바로 재생할 수 있는 곡을 골라드려요."
-		label.font = .systemFont(ofSize: 15, weight: .medium)
-		label.textColor = UIColor.white.withAlphaComponent(0.72)
-		label.numberOfLines = 0
+		label.text = ""
+		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
@@ -114,17 +111,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
-		let attributedString = NSMutableAttributedString(string: "오늘 날씨와 어울리는 선곡 ")
-		let attachment = NSTextAttachment()
-		attachment.image = UIImage(systemName: "headphones")?.withTintColor(UIColor(CustomColor.onSurface), renderingMode: .alwaysOriginal)
-		let bounds = CGRect(x: 0, y: -4, width: 24, height: 24)
-		attachment.bounds = bounds
-		attributedString.append(NSAttributedString(attachment: attachment))
-		label.attributedText = attributedString
-		label.font = .systemFont(ofSize: 24, weight: .heavy)
-		label.textColor = UIColor(CustomColor.onSurface)
-		label.numberOfLines = 0
-		label.setContentCompressionResistancePriority(.required, for: .vertical)
+		label.text = ""
 		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
@@ -181,6 +168,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 		self.setupView()
 		self.setupConstraints()
 		self.configureDataSource()
+		self.collectionView.prefetchDataSource = self
 		self.listener?.viewDidLoad()
 	}
 
@@ -192,7 +180,6 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	}
 
 	func update(weather: Weather, tracks: [Track]) {
-		self.sectionTitleLabel.isHidden = false
 		self.tempLabel.text = "\(Int(weather.temperature))°"
 		self.descriptionLabel.text = weather.description
 		self.locationLabel.text = weather.cityName
@@ -430,8 +417,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 				heightDimension: .fractionalHeight(1.0)
 			)
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
-			let groupWidth = env.container.contentSize.width * 0.75
+			let groupWidth = env.container.contentSize.width * 0.65
 			let groupSize = NSCollectionLayoutSize(
 				widthDimension: .absolute(groupWidth),
 				heightDimension: .fractionalHeight(1.0)
@@ -440,7 +426,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 			let section = NSCollectionLayoutSection(group: group)
 			section.orthogonalScrollingBehavior = .groupPagingCentered
-			section.interGroupSpacing = 20
+			section.interGroupSpacing = -40
 
 			section.visibleItemsInvalidationHandler = { items, offset, environment in
 				let containerWidth = environment.container.contentSize.width
@@ -448,10 +434,19 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 				items.forEach { item in
 					let distanceFromCenter = abs(item.frame.midX - centerX)
-					let progress = min(distanceFromCenter / containerWidth, 1.0)
-					let yOffset = progress * 18
-					item.transform = CGAffineTransform(translationX: 0, y: yOffset)
-					item.alpha = max(0.75, 1 - (progress * 0.35))
+					let progress = min(distanceFromCenter / (containerWidth / 2.0), 1.0)
+					let scale = 1.0 - (progress * 0.25)
+					let isLeft = item.frame.midX < centerX
+					let angle = progress * (CGFloat.pi / 4.5) * (isLeft ? 1 : -1)
+
+					var transform = CATransform3DIdentity
+					transform.m34 = -1.0 / 500.0
+					transform = CATransform3DRotate(transform, angle, 0, 1, 0)
+					transform = CATransform3DScale(transform, scale, scale, 1)
+					
+					item.transform3D = transform
+					item.alpha = 1.0 - (progress * 0.5)
+					item.zIndex = Int((1.0 - progress) * 100)
 				}
 			}
 			return section
@@ -462,5 +457,25 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 extension WeatherRecommendationViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		self.listener?.didSelectTrack(at: indexPath.item)
+	}
+}
+
+
+
+extension WeatherRecommendationViewController: UICollectionViewDataSourcePrefetching {
+	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let track = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
+			return track.imageURL
+		}
+		ImagePrefetcher(urls: urls).start()
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let track = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
+			return track.imageURL
+		}
+		ImagePrefetcher(urls: urls).stop()
 	}
 }

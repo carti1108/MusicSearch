@@ -28,6 +28,28 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	private var hasPrimedInitialCrossfade = false
 	private var imagePrefetcher: ImagePrefetcher?
 
+	private let backgroundImageView: UIImageView = {
+		let iv = UIImageView()
+		iv.contentMode = .scaleAspectFill
+		iv.clipsToBounds = true
+		iv.translatesAutoresizingMaskIntoConstraints = false
+		return iv
+	}()
+
+	private let blurEffectView: UIVisualEffectView = {
+		let blurEffect = UIBlurEffect(style: .dark)
+		let view = UIVisualEffectView(effect: blurEffect)
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
+	private let darkOverlayView: UIView = {
+		let view = UIView()
+		view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+		view.translatesAutoresizingMaskIntoConstraints = false
+		return view
+	}()
+
 	private let loadingIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .large)
 		indicator.hidesWhenStopped = true
@@ -54,7 +76,7 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 		sc.selectedSegmentIndex = 0
 		sc.backgroundColor = UIColor(CustomColor.surface)
 		sc.selectedSegmentTintColor = UIColor(CustomColor.primary)
-		sc.setTitleTextAttributes([.foregroundColor: UIColor(CustomColor.onBackground)], for: .selected)
+		sc.setTitleTextAttributes([.foregroundColor: UIColor(CustomColor.onPrimary)], for: .selected)
 		sc.setTitleTextAttributes([.foregroundColor: UIColor(CustomColor.onSurfaceVariant)], for: .normal)
 		sc.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
 		sc.translatesAutoresizingMaskIntoConstraints = false
@@ -103,8 +125,9 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		self.view.backgroundColor = UIColor(CustomColor.background)
-		setupUI()
-		configureDataSource()
+		self.setupUI()
+		self.configureDataSource()
+		self.collectionView.prefetchDataSource = self
 		self.currentSegmentIndex = self.segmentControl.selectedSegmentIndex
 		self.listener?.viewDidLoad()
 	}
@@ -125,6 +148,14 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	}
 
 	func update(podiumItems: [ChartItem], listItems: [ChartItem]) {
+		if podiumItems.count > 1 {
+			// podiumItems는 [2위, 1위, 3위] 순서로 정렬되어 있으므로 1위는 인덱스 1입니다.
+			let firstPlace = podiumItems[1]
+			UIView.transition(with: self.backgroundImageView, duration: 0.5, options: .transitionCrossDissolve) {
+				self.backgroundImageView.setRemoteImage(firstPlace.imageURL, targetSize: UIScreen.main.bounds.size)
+			}
+		}
+
 		var snapshot = NSDiffableDataSourceSnapshot<Section, ChartItem>()
 		snapshot.appendSections([.podium])
 		snapshot.appendItems(podiumItems, toSection: .podium)
@@ -168,12 +199,31 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 		self.headerStackView.addArrangedSubview(self.eyebrowLabel)
 		self.headerStackView.addArrangedSubview(self.titleLabel)
 
+		self.view.insertSubview(self.backgroundImageView, at: 0)
+		self.view.insertSubview(self.blurEffectView, aboveSubview: self.backgroundImageView)
+		self.view.insertSubview(self.darkOverlayView, aboveSubview: self.blurEffectView)
+
 		view.addSubview(headerStackView)
 		view.addSubview(segmentControl)
 		view.addSubview(collectionView)
 		view.addSubview(loadingIndicator)
 
 		NSLayoutConstraint.activate([
+			backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+			backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+			backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+			backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+			blurEffectView.topAnchor.constraint(equalTo: view.topAnchor),
+			blurEffectView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+			blurEffectView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+			blurEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+			darkOverlayView.topAnchor.constraint(equalTo: view.topAnchor),
+			darkOverlayView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+			darkOverlayView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+			darkOverlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
 			self.headerStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: CustomSpacing.stackMd),
 			self.headerStackView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: CustomSpacing.containerMargin),
 			self.headerStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -CustomSpacing.containerMargin),
@@ -349,19 +399,18 @@ extension ChartViewController: UICollectionViewDelegate {
 extension ChartViewController: UICollectionViewDataSourcePrefetching {
 	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
-			guard indexPath.section == Section.list.rawValue else { return nil }
-			return self.dataSource.itemIdentifier(for: indexPath)?.imageURL
+			// Chart의 dataSource 구조에 따라 안전하게 접근
+			guard let item = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
+			return item.thumbnailURL ?? item.imageURL
 		}
-
-		guard !urls.isEmpty else { return }
-		self.imagePrefetcher?.stop()
-		let prefetcher = ImagePrefetcher(urls: urls)
-		self.imagePrefetcher = prefetcher
-		prefetcher.start()
+		ImagePrefetcher(urls: urls).start()
 	}
-
+	
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
-		self.imagePrefetcher?.stop()
-		self.imagePrefetcher = nil
+		let urls = indexPaths.compactMap { indexPath -> URL? in
+			guard let item = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
+			return item.thumbnailURL ?? item.imageURL
+		}
+		ImagePrefetcher(urls: urls).stop()
 	}
 }
