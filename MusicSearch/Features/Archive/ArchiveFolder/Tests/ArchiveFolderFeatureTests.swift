@@ -38,7 +38,6 @@ final class ArchiveFolderFeatureTests: XCTestCase {
             $0.isAddFolderAlertPresented = false
         }
         
-        // Following confirm, it triggers a fetch
         await store.receive(\.onAppear)
         await store.receive(\.loadDataResponse)
         
@@ -59,8 +58,6 @@ final class ArchiveFolderFeatureTests: XCTestCase {
         
         await store.send(.folderTapped(folder))
         
-        // Enums with associated values are trickier to compare natively if not Equatable without pattern matching,
-        // but let's assert count and assume correctness for simple test
         XCTAssertEqual(delegatedActions.count, 1)
     }
 }

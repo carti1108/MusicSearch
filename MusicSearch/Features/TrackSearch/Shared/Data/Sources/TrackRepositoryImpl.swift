@@ -35,7 +35,6 @@ public struct TrackRepositoryImpl: TrackRepository {
 					return result
 				}
 			} catch {
-				// Fallback to LastFM if Spotify search fails or returns nothing
 			}
 		}
 		
@@ -92,11 +91,9 @@ public struct TrackRepositoryImpl: TrackRepository {
 					)
 				}
 			} catch {
-				// Fallback to LastFM if Spotify fails
 			}
 		}
 		
-		// Fallback to LastFM getTrackInfo
 		do {
 			let response: TrackInfoResponseDTO = try await self.networkManager.perform(
 				with: LastFMAPI.getTrackInfo(track: track),

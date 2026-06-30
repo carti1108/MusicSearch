@@ -45,7 +45,6 @@ final class ArchiveSearchFeatureTests: XCTestCase {
             $0.recommendedTracks = [allTracks[0]]
         }
         
-        // Test clear
         await store.send(.binding(.set(\.searchText, ""))) {
             $0.searchText = ""
             $0.recommendedTracks = []

@@ -47,7 +47,6 @@ public final class SpotifyAuthRepositoryImpl: SpotifyAuthRepository {
         let response = try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
         
         UserDefaults.standard.set(response.access_token, forKey: "SpotifyClientToken")
-        // Subtract a bit of time (e.g. 60 seconds leeway) for safety
         UserDefaults.standard.set(now.addingTimeInterval(TimeInterval(response.expires_in - 60)), forKey: "SpotifyClientTokenExpiry")
         
         return response.access_token

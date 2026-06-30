@@ -97,7 +97,6 @@ public struct ArchiveFolderFeature {
                             rating: ratingFolders
                         ))
                     } catch {
-                        // ignore error
                     }
                 }
                 

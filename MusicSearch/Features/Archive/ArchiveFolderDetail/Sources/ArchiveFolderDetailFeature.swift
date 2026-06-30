@@ -175,7 +175,6 @@ public struct ArchiveFolderDetailFeature {
                         
                         await send(.loadDataResponse(folders: isMonthGroup ? foldersToDisplay : nil, tracks: isMonthGroup ? nil : filteredTracks))
                     } catch {
-                        // ignore error
                     }
                 }
                 
@@ -227,7 +226,6 @@ public struct ArchiveFolderDetailFeature {
                         try await manageSpotifyAuthUseCase.authorize()
                         await send(.exportButtonTapped)
                     } catch {
-                        // ignore error
                     }
                 }
                 

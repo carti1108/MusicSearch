@@ -63,7 +63,6 @@ public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
                     continuation.finish()
                     
                 } catch is CancellationError {
-                    // Task was cancelled, exit cleanly
                     continuation.finish()
                 } catch {
                     continuation.yield(ExportProgress(totalCount: totalCount, currentCount: currentCount, failedTracks: failedTracks, isComplete: true, fatalError: .playlistCreationFailed))

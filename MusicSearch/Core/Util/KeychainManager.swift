@@ -50,7 +50,6 @@ public final class KeychainManager {
         return status == errSecSuccess || status == errSecItemNotFound
     }
     
-    // Convenience for String
     public func saveString(_ string: String, forKey key: String) -> Bool {
         guard let data = string.data(using: .utf8) else { return false }
         return save(data, forKey: key)

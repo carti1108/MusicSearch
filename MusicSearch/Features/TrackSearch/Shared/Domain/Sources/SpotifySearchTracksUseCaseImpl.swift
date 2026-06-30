@@ -19,8 +19,6 @@ public struct SpotifySearchTracksUseCaseImpl: SearchTracksUseCase {
 			return ([], 0)
 		}
 
-		// Calculate offset from page
-		// Spotify uses offset = (page - 1) * limit
 		let offset = max(0, (page - 1) * limit)
 
 		return try await self.spotifyRepository.searchSpotifyTracks(

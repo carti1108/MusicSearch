@@ -40,7 +40,6 @@ public actor ArchiveRepositoryImpl: ArchiveRepository {
 			
 			try modelContext.save()
 		} else {
-			// If it doesn't exist, insert it
 			try addArchivedTrack(track)
 		}
 	}

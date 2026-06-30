@@ -52,7 +52,6 @@ public struct ArchiveFeature {
                         let tracks = try await archiveRepository.fetchArchivedTracks()
                         await send(.loadDataResponse(tracks: tracks))
                     } catch {
-                        // ignore error
                     }
                 }
                 
@@ -98,7 +97,6 @@ public struct ArchiveFeature {
                         try await archiveRepository.deleteArchivedTrack(id: track.id)
                         await send(.onAppear)
                     } catch {
-                        // ignore error
                     }
                 }
                 
