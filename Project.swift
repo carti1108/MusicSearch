@@ -95,15 +95,15 @@ let coreTargets: [Target] = [
 
 // 2. 도메인 및 데이터 계층 생성 (Helper 메서드 사용)
 let domainDataTargets: [Target] = [
-	Target.domainTargets(name: "Chart", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain"), .target(name: "TrackSearchDomain")]),
-	Target.dataTargets(name: "Chart", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "ChartDomain"), .target(name: "MSData")]),
-	Target.domainTargets(name: "TrackSearch", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain")]),
-	Target.dataTargets(name: "TrackSearch", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "TrackSearchDomain"), .target(name: "MSData")]),
-	Target.domainTargets(name: "MusicDigging", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain"), .target(name: "TrackSearchDomain")]),
-	Target.domainTargets(name: "WeatherRecommendation", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain"), .target(name: "MusicDiggingDomain")]),
-	Target.dataTargets(name: "WeatherRecommendation", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "WeatherRecommendationDomain"), .target(name: "MSData")]),
-	Target.domainTargets(name: "Archive", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain")]),
-	Target.dataTargets(name: "Archive", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "ArchiveDomain"), .target(name: "MSData")])
+	Target.domainTargets(name: "Chart", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain"), .target(name: "TrackSearchDomain")], basePath: "MusicSearch/Features/Chart/Shared"),
+	Target.dataTargets(name: "Chart", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "ChartDomain"), .target(name: "MSData")], basePath: "MusicSearch/Features/Chart/Shared"),
+	Target.domainTargets(name: "TrackSearch", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain")], basePath: "MusicSearch/Features/TrackSearch/Shared"),
+	Target.dataTargets(name: "TrackSearch", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "TrackSearchDomain"), .target(name: "MSData")], basePath: "MusicSearch/Features/TrackSearch/Shared"),
+	Target.domainTargets(name: "MusicDigging", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain"), .target(name: "TrackSearchDomain")], basePath: "MusicSearch/Features/MusicDigging/Shared"),
+	Target.domainTargets(name: "WeatherRecommendation", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain"), .target(name: "MusicDiggingDomain")], basePath: "MusicSearch/Features/WeatherRecommendation/Shared"),
+	Target.dataTargets(name: "WeatherRecommendation", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "WeatherRecommendationDomain"), .target(name: "MSData")], basePath: "MusicSearch/Features/WeatherRecommendation/Shared"),
+	Target.domainTargets(name: "Archive", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "MSDomain")], basePath: "MusicSearch/Features/Archive/Shared"),
+	Target.dataTargets(name: "Archive", bundlePrefix: bundlePrefix, deploymentTarget: deploymentTarget, settings: projectSettings, dependencies: [.target(name: "ArchiveDomain"), .target(name: "MSData")], basePath: "MusicSearch/Features/Archive/Shared")
 ]
 
 // 3. UI 및 비즈니스 로직 계층 (MicroFeature) 생성
@@ -136,7 +136,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "ChartDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/Chart",
+		folderName: "Feature"
 	),
 	Target.microFeatureTargets(
 		name: "MusicDigging",
@@ -166,7 +168,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "MusicDiggingDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/MusicDigging",
+		folderName: "Feature"
 	),
 	Target.microFeatureTargets(
 		name: "TrackSearch",
@@ -200,7 +204,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "TrackSearchDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/TrackSearch",
+		folderName: "Feature"
 	),
 	Target.microFeatureTargets(
 		name: "WeatherRecommendation",
@@ -230,7 +236,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "WeatherRecommendationDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/WeatherRecommendation",
+		folderName: "Feature"
 	),
 	Target.microFeatureTargets(
 		name: "Archive",
@@ -273,7 +281,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/Archive",
+		folderName: "ArchiveMain"
 	),
 	Target.microFeatureTargets(
 		name: "ArchiveFolderDetail",
@@ -307,7 +317,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/Archive",
+		folderName: "ArchiveFolderDetail"
 	),
 	Target.microFeatureTargets(
 		name: "AddArchive",
@@ -318,6 +330,7 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
 			.target(name: "TrackSearchDomain"),
+			.target(name: "FeatureArchiveTrackSearchInterface"),
 			.package(product: "MicroRIBs")
 		],
 		implementationDependencies: [
@@ -349,7 +362,9 @@ let featureTargets: [Target] = [
 			.target(name: "ArchiveDomain"),
 			.target(name: "TrackSearchDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/Archive",
+		folderName: "AddArchive"
 	),
 	Target.microFeatureTargets(
 		name: "ArchiveFolder",
@@ -384,7 +399,9 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/Archive",
+		folderName: "ArchiveFolder"
 	),
 	Target.microFeatureTargets(
 		name: "ArchiveSearch",
@@ -419,7 +436,43 @@ let featureTargets: [Target] = [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
 			.target(name: "MSUtil")
-		]
+		],
+		basePath: "MusicSearch/Features/Archive",
+		folderName: "ArchiveSearch"
+	),
+	Target.microFeatureTargets(
+		name: "ArchiveTrackSearch",
+		bundlePrefix: bundlePrefix,
+		deploymentTarget: deploymentTarget,
+		settings: projectSettings,
+		interfaceDependencies: [
+			.target(name: "MSDomain"),
+			.package(product: "MicroRIBs")
+		],
+		implementationDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain"),
+			.target(name: "MSDesignSystem"),
+			.package(product: "ComposableArchitecture")
+		],
+		testingDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain")
+		],
+		testsDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain")
+		],
+		exampleDependencies: [
+			.target(name: "MSDomain"),
+			.target(name: "ArchiveDomain"),
+			.target(name: "TrackSearchDomain")
+		],
+		basePath: "MusicSearch/Features/Archive",
+		folderName: "ArchiveTrackSearch"
 	),
 	Target.microFeatureTargets(
 		name: "Settings",
@@ -513,6 +566,8 @@ let appTargets: [Target] = [
 			.target(name: "FeatureArchiveFolderDetailInterface"),
 			.target(name: "FeatureArchiveSearch"),
 			.target(name: "FeatureArchiveSearchInterface"),
+			.target(name: "FeatureArchiveTrackSearch"),
+			.target(name: "FeatureArchiveTrackSearchInterface"),
 			.target(name: "FeatureSettings"),
 			.target(name: "FeatureSettingsInterface"),
 			.target(name: "MSDesignSystem"),

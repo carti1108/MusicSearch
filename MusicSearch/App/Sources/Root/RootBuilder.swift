@@ -25,6 +25,8 @@ import FeatureArchiveFolder
 import FeatureArchiveFolderInterface
 import FeatureArchiveFolderDetail
 import FeatureArchiveFolderDetailInterface
+import FeatureArchiveTrackSearch
+import FeatureArchiveTrackSearchInterface
 import FeatureSettings
 import FeatureSettingsInterface
 import MSDomain
@@ -59,7 +61,7 @@ protocol RootDependency: Dependency {
 }
 
 @MainActor
-final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, ArchiveFolderDetailDependency, SettingsDependency {
+final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, ArchiveFolderDetailDependency, ArchiveTrackSearchDependency, SettingsDependency {
 	
 	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
@@ -133,6 +135,9 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	}
 	var archiveFolderBuilder: ArchiveFolderBuildable {
 		ArchiveFolderBuilder(dependency: self)
+	}
+	var archiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
+		ArchiveTrackSearchBuilder(dependency: self)
 	}
 	var settingsBuilder: SettingsBuildable {
 		SettingsBuilder(dependency: self)
