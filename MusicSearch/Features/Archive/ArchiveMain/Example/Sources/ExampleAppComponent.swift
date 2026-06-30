@@ -76,6 +76,8 @@ final class MockArchiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
 
 final class MockAddArchiveRouter: ViewableRouter<Interactable, ViewControllable>, AddArchiveRouting {
     init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
+    func routeToArchiveTrackSearch() {}
+    func detachArchiveTrackSearch() {}
 }
 
 final class MockArchiveSearchRouter: ViewableRouter<Interactable, ViewControllable>, ArchiveSearchRouting {
@@ -85,13 +87,13 @@ final class MockArchiveSearchRouter: ViewableRouter<Interactable, ViewControllab
 final class MockArchiveFolderRouter: ViewableRouter<Interactable, ViewControllable>, ArchiveFolderRouting {
     init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
     func routeToFolderDetail(folderItem: FolderItem) {}
-    func detachFolderDetail() {}
+    func detachFolderDetail(popUI: Bool) {}
 }
 
 final class MockArchiveFolderDetailRouter: ViewableRouter<Interactable, ViewControllable>, ArchiveFolderDetailRouting {
     init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
     func routeToFolderDetail(folderItem: FolderItem) {}
-    func detachFolderDetail() {}
+    func detachFolderDetail(popUI: Bool) {}
 }
 
 final class MockViewControllable: ViewControllable {

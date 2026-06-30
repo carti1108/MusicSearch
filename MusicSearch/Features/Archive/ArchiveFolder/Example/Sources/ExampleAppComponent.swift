@@ -38,7 +38,7 @@ final class MockArchiveFolderDetailRouter: ViewableRouter<Interactable, ViewCont
         super.init(interactor: MockInteractable(), viewController: MockViewControllable())
     }
     func routeToFolderDetail(folderItem: FolderItem) {}
-    func detachFolderDetail() {}
+    func detachFolderDetail(popUI: Bool) {}
 }
 
 @MainActor

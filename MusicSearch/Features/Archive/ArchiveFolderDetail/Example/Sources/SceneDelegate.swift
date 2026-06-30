@@ -33,4 +33,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 @MainActor
 final class MockArchiveFolderDetailListener: ArchiveFolderDetailListener {
     func archiveFolderDetailDidTapClose() {}
+    func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem) {}
+    func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {}
 }

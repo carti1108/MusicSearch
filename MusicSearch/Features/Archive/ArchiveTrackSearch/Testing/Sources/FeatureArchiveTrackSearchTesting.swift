@@ -1,7 +1,10 @@
 import Foundation
+import UIKit
+import Combine
 import MicroRIBs
 @testable import FeatureArchiveTrackSearchInterface
 
+@MainActor
 public final class ArchiveTrackSearchBuildableMock: ArchiveTrackSearchBuildable {
 	public init() {}
 	public var buildCallCount = 0
@@ -11,13 +14,20 @@ public final class ArchiveTrackSearchBuildableMock: ArchiveTrackSearchBuildable 
 	}
 }
 
-public final class ArchiveTrackSearchRoutingMock: ViewableRouting {
-	public var interactable: Interactable { InteractableMock() }
-	public var children: [Routing] = []
-	public var viewControllable: ViewControllable { ViewControllableMock() }
-	public init() {}
-	public func load() {}
-	public func attachChild(_ child: Routing) {}
-	public func detachChild(_ child: Routing) {}
-	public var lifecycle: Observable<RouterLifecycle> { .empty() }
+@MainActor
+public final class ArchiveTrackSearchRoutingMock: ViewableRouter<Interactable, ViewControllable>, ArchiveTrackSearchRouting {
+	public init() {
+		super.init(interactor: InteractableMock(), viewController: ViewControllableMock())
+	}
+}
+
+@MainActor
+public final class InteractableMock: Interactor {
+    public override init() { super.init() }
+}
+
+@MainActor
+public final class ViewControllableMock: UIViewController, ViewControllable {
+    public init() { super.init(nibName: nil, bundle: nil) }
+    public required init?(coder: NSCoder) { fatalError() }
 }

@@ -2,6 +2,7 @@ import UIKit
 import MicroRIBs
 import FeatureArchiveTrackSearch
 import FeatureArchiveTrackSearchInterface
+import MSDomain
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -19,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let component = ExampleAppComponent()
         let builder = ArchiveTrackSearchBuilder(dependency: component)
-        let router = builder.build(withListener: MockArchiveTrackSearchListener(), editTrack: nil)
+        let router = builder.build(withListener: MockArchiveTrackSearchListener())
         
         self.router = router
         router.interactable.activate()
@@ -32,5 +33,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 @MainActor
 final class MockArchiveTrackSearchListener: ArchiveTrackSearchListener {
-    func didCloseArchiveTrackSearch() {}
+    func archiveTrackSearchDidClose() {}
+    func archiveTrackSearchDidSelectTrack(_ track: Track) {}
 }

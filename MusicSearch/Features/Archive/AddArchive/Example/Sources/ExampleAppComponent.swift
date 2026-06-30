@@ -5,8 +5,10 @@ import MicroRIBs
 import MSDomain
 import ArchiveDomain
 import TrackSearchDomain
+import TrackSearchDomain
 import FeatureAddArchive
 import FeatureAddArchiveInterface
+import FeatureArchiveTrackSearchInterface
 
 @MainActor
 final class ExampleAppComponent: AddArchiveDependency {
@@ -15,6 +17,12 @@ final class ExampleAppComponent: AddArchiveDependency {
     }
     var searchTracksUseCase: SearchTracksUseCase {
         MockSearchTracksUseCase()
+    }
+    var imageDownloadRepository: ImageDownloadRepository {
+        MockImageDownloadRepository()
+    }
+    var archiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
+        MockArchiveTrackSearchBuilder()
     }
 }
 
@@ -30,5 +38,16 @@ final class MockArchiveRepository: ArchiveRepository {
 final class MockSearchTracksUseCase: SearchTracksUseCase {
     func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
         return ([], 0)
+    }
+}
+
+final class MockImageDownloadRepository: ImageDownloadRepository {
+    func downloadImage(from url: URL) async throws -> Data { return Data() }
+    func clearCache() { }
+}
+
+final class MockArchiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
+    func build(withListener listener: FeatureArchiveTrackSearchInterface.ArchiveTrackSearchListener) -> FeatureArchiveTrackSearchInterface.ArchiveTrackSearchRouting {
+        fatalError()
     }
 }

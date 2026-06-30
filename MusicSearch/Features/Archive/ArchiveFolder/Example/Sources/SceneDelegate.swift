@@ -2,6 +2,7 @@ import UIKit
 import MicroRIBs
 import FeatureArchiveFolder
 import FeatureArchiveFolderInterface
+import ArchiveDomain
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -33,4 +34,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 @MainActor
 final class MockArchiveFolderListener: ArchiveFolderListener {
     func archiveFolderDidTapClose() {}
+    func archiveFolderDidTapTrack(_ track: ArchivedTrack) {}
 }
