@@ -175,7 +175,7 @@ public struct ArchiveFolderDetailFeature {
                         
                         await send(.loadDataResponse(folders: isMonthGroup ? foldersToDisplay : nil, tracks: isMonthGroup ? nil : filteredTracks))
                     } catch {
-                        print("Error loading details: \(error)")
+                        // ignore error
                     }
                 }
                 
@@ -215,11 +215,6 @@ public struct ArchiveFolderDetailFeature {
                             await send(.exportProgress(progress))
                             if progress.isComplete {
                                 await send(.exportCompleted(successCount: progress.currentCount - progress.failedTracks.count, failedCount: progress.failedTracks.count))
-                                // Optionally handle fatalError here
-                                if progress.fatalError != nil {
-                                    // Log or handle fatal error
-                                    print("Fatal error during export: \(String(describing: progress.fatalError))")
-                                }
                             }
                         }
                     }
@@ -232,7 +227,7 @@ public struct ArchiveFolderDetailFeature {
                         try await manageSpotifyAuthUseCase.authorize()
                         await send(.exportButtonTapped)
                     } catch {
-                        print("Failed to authorize Spotify: \(error)")
+                        // ignore error
                     }
                 }
                 

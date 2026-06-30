@@ -97,7 +97,7 @@ public struct ArchiveFolderFeature {
                             rating: ratingFolders
                         ))
                     } catch {
-                        print("Failed to fetch tracks in folder: \(error)")
+                        // ignore error
                     }
                 }
                 

@@ -86,7 +86,6 @@ final class AppComponent: RootDependency {
 		do {
 			return try ModelContainer(for: SDArchivedTrack.self)
 		} catch {
-			print("ModelContainer init failed, attempting in-memory fallback: \(error)")
 			do {
 				let config = ModelConfiguration(isStoredInMemoryOnly: true)
 				return try ModelContainer(for: SDArchivedTrack.self, configurations: config)

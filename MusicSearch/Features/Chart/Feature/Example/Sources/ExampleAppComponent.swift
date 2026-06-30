@@ -75,6 +75,5 @@ final class MockFetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 
 final class MockURLOpener: URLOpening {
     func open(_ url: URL) {
-        print("Opened URL: \(url)")
     }
 }
