@@ -20,7 +20,6 @@ public protocol ArchiveFolderDetailListener: AnyObject {
     func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack)
 }
 
-
 @MainActor
 public protocol ArchiveFolderDetailDependency: Dependency {
     var archiveRepository: ArchiveRepository { get }

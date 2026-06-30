@@ -32,14 +32,14 @@ public protocol AddArchiveInteractable: Interactable, ArchiveTrackSearchListener
 public final class AddArchiveWrapperInteractor: Interactor, AddArchiveInteractable {
 	public weak var router: AddArchiveRouting?
 	public weak var listener: AddArchiveListener?
-	
+
 	var onTrackSelected: ((Track) -> Void)?
-	
+
 	// MARK: - ArchiveTrackSearchListener
 	public func archiveTrackSearchDidClose() {
 		router?.detachArchiveTrackSearch()
 	}
-	
+
 	public func archiveTrackSearchDidSelectTrack(_ track: Track) {
 		onTrackSelected?(track)
 		router?.detachArchiveTrackSearch()
@@ -55,7 +55,7 @@ public final class AddArchiveHostingController: UIHostingController<AddArchiveVi
 		super.init(rootView: rootView)
 		self.presentationController?.delegate = self
 	}
-	
+
 	@MainActor required dynamic init?(coder aDecoder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
@@ -101,10 +101,10 @@ public final class AddArchiveBuilder: Builder<AddArchiveDependency>, AddArchiveB
 
 	public func build(withListener listener: AddArchiveListener, editTrack: ArchivedTrack? = nil) -> AddArchiveRouting {
 		let component = AddArchiveComponent(dependency: dependency)
-		
+
 		let interactor = AddArchiveWrapperInteractor()
 		interactor.listener = listener
-		
+
 		let store = Store(initialState: AddArchiveFeature.State(editTrack: editTrack)) {
 			AddArchiveFeature(
 				archiveRepository: component.archiveRepository,
@@ -120,22 +120,22 @@ public final class AddArchiveBuilder: Builder<AddArchiveDependency>, AddArchiveB
 				}
 			)
 		}
-		
+
 		interactor.onTrackSelected = { track in
 			store.send(.trackSelected(track))
 		}
-		
+
 		let view = AddArchiveView(store: store)
 		let viewController = AddArchiveHostingController(rootView: view, interactor: interactor)
 		viewController.view.backgroundColor = .clear
-		
+
 		let router = AddArchiveWrapperRouter(
 			interactor: interactor,
 			viewController: viewController,
 			archiveTrackSearchBuilder: component.archiveTrackSearchBuilder
 		)
 		interactor.router = router
-		
+
 		return router
 	}
 }

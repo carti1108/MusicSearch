@@ -37,7 +37,7 @@ public final class ArchiveTrackSearchHostingController: UIHostingController<Arch
 		super.init(rootView: rootView)
 		self.presentationController?.delegate = self
 	}
-	
+
 	@MainActor required dynamic init?(coder aDecoder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
@@ -57,10 +57,10 @@ public final class ArchiveTrackSearchBuilder: Builder<ArchiveTrackSearchDependen
 
 	public func build(withListener listener: ArchiveTrackSearchListener) -> ArchiveTrackSearchRouting {
 		let component = ArchiveTrackSearchComponent(dependency: dependency)
-		
+
 		let interactor = ArchiveTrackSearchWrapperInteractor()
 		interactor.listener = listener
-		
+
 		let store = Store(initialState: ArchiveTrackSearchFeature.State()) {
 			ArchiveTrackSearchFeature(
 				searchTracksUseCase: component.searchTracksUseCase,
@@ -72,17 +72,17 @@ public final class ArchiveTrackSearchBuilder: Builder<ArchiveTrackSearchDependen
 				}
 			)
 		}
-		
+
 		let view = ArchiveTrackSearchView(store: store)
 		let viewController = ArchiveTrackSearchHostingController(rootView: view, interactor: interactor)
 		viewController.view.backgroundColor = .clear
-		
+
 		let router = ArchiveTrackSearchWrapperRouter(
 			interactor: interactor,
 			viewController: viewController
 		)
 		interactor.router = router
-		
+
 		return router
 	}
 }

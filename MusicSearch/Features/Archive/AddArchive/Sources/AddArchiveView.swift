@@ -50,7 +50,7 @@ public struct AddArchiveView: View {
 					.padding(.vertical, 16)
 					.listRowBackground(Color.clear)
 				}
-				
+
 				Section(header: Text("기본 정보")) {
 					if !store.isEditMode {
 						Button(action: { store.send(.searchButtonTapped) }) {
@@ -62,18 +62,18 @@ public struct AddArchiveView: View {
 							.padding(.vertical, 4)
 						}
 					}
-					
+
 					TextField("노래 제목", text: $store.title)
 					TextField("아티스트", text: $store.artist)
 					TextField("앨범명", text: $store.albumTitle)
-					
+
 					Picker("앨범 유형", selection: $store.albumType) {
 						Text("정규").tag("정규")
 						Text("싱글").tag("싱글")
 						Text("EP").tag("EP")
 						Text("기타").tag("기타")
 					}
-					
+
 					DisclosureGroup("장르 (선택: \(store.genre.isEmpty ? "없음" : store.genre))", isExpanded: $store.isGenreExpanded) {
 						TextField("장르 직접 입력", text: $store.genre)
 						ForEach(store.availableGenres, id: \.self) { genreName in
@@ -93,17 +93,17 @@ public struct AddArchiveView: View {
 							.foregroundColor(CustomColor.onSurface)
 						}
 					}
-					
+
 					TextField("유통사", text: $store.distributor)
 					TextField("레이블", text: $store.label)
 				}
-				
+
 				Section(header: Text("곡 전개 평가")) {
 					Toggle("인트로가 좋았는가", isOn: $store.isIntroGood)
 					Toggle("중반부까지 좋았는가", isOn: $store.isGoodUntilMiddle)
 					Toggle("끝까지 좋았는가", isOn: $store.isGoodUntilEnd)
 				}
-				
+
 				Section(header: Text("날짜")) {
 					Toggle("발매일 입력", isOn: $store.hasReleaseDate)
 					if store.hasReleaseDate {
@@ -111,12 +111,12 @@ public struct AddArchiveView: View {
 					}
 					DatePicker("청취일", selection: $store.listenDate, displayedComponents: .date)
 				}
-				
+
 				Section(header: Text("나의 평점: \(String(format: "%.1f", store.rating))")) {
 					Slider(value: $store.rating, in: 0...5, step: 0.5)
 						.tint(CustomColor.tertiary)
 				}
-				
+
 				Section(header: Text("메모")) {
 					TextEditor(text: $store.memo)
 						.frame(height: 100)

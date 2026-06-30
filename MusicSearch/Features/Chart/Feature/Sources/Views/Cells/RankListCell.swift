@@ -12,7 +12,7 @@ final class RankListCell: UICollectionViewCell {
 	static let identifier = "RankListCell"
 
 	private let cardView = UIView()
-	
+
 	private let blurBackgroundView: UIVisualEffectView = {
 		let blurEffect = UIBlurEffect(style: .systemThinMaterialDark)
 		let view = UIVisualEffectView(effect: blurEffect)

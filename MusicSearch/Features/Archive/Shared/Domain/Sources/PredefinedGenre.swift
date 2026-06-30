@@ -14,9 +14,9 @@ public enum PredefinedGenre: String, CaseIterable, Identifiable {
     case citypop = "City Pop"
     case acoustic = "Acoustic"
     case ambient = "Ambient"
-    
+
     public var id: String { rawValue }
-    
+
     public var iconName: String {
         switch self {
         case .pop: return "star.fill"

@@ -12,7 +12,7 @@ final class PodiumCell: UICollectionViewCell {
 	static let identifier = "PodiumCell"
 
 	private let containerView = UIView()
-	
+
 	private let blurBackgroundView: UIVisualEffectView = {
 		let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
 		let view = UIVisualEffectView(effect: blurEffect)

@@ -9,8 +9,6 @@ import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
 import FeatureArchiveFolderDetailInterface
 
-
-
 public final class ArchiveComponent: Component<ArchiveDependency> {
     fileprivate var archiveRepository: ArchiveRepository {
         dependency.archiveRepository
@@ -35,22 +33,22 @@ public final class ArchiveWrapperInteractor: Interactor, ArchiveInteractable {
     public weak var router: ArchiveRouting?
     public weak var listener: ArchiveListener?
     public var onRefresh: (() -> Void)?
-    
+
     public func didCloseAddArchive() {
         router?.detachAddArchive()
         onRefresh?()
     }
-    
+
     public func archiveSearchDidTapClose() {
         router?.detachSearch()
         onRefresh?()
     }
-    
+
     public func archiveFolderDidTapClose() {
         router?.detachFolder()
         onRefresh?()
     }
-    
+
     public func archiveFolderDidTapTrack(_ track: ArchivedTrack) {
         router?.routeToEditArchive(track: track)
     }
@@ -60,30 +58,30 @@ public final class ArchiveHostingController: UIHostingController<ArchiveView>, V
     public var uiviewController: UIViewController { self }
     private weak var interactor: ArchiveWrapperInteractor?
     private let store: StoreOf<ArchiveFeature>
-    
+
     init(rootView: ArchiveView, store: StoreOf<ArchiveFeature>, interactor: ArchiveWrapperInteractor) {
         self.store = store
         self.interactor = interactor
         super.init(rootView: rootView)
         self.view.backgroundColor = .clear
     }
-    
+
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.title = "나의 보관함"
         self.tabBarItem.title = "Archive"
         self.tabBarItem.image = UIImage(systemName: "archivebox")
     }
-    
+
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         store.send(.onAppear)
     }
-    
+
     public func push(viewController: ViewControllable, animated: Bool) {
         self.navigationController?.pushViewController(viewController.uiviewController, animated: animated)
     }
@@ -102,13 +100,13 @@ public final class ArchiveWrapperRouter: ViewableRouter<ArchiveInteractable, Arc
 
     private let addArchiveBuilder: AddArchiveBuildable
     private var addArchiveRouting: ViewableRouting?
-    
+
     private let archiveSearchBuilder: ArchiveSearchBuildable
     private var archiveSearchRouting: ViewableRouting?
-    
+
     private let archiveFolderBuilder: ArchiveFolderBuildable
     private var archiveFolderRouting: ViewableRouting?
-    
+
     public init(
         interactor: ArchiveInteractable,
         viewController: ArchiveViewControllable,
@@ -145,7 +143,7 @@ public final class ArchiveWrapperRouter: ViewableRouter<ArchiveInteractable, Arc
         detachChild(routing)
         self.addArchiveRouting = nil
     }
-    
+
     public func routeToSearch() {
         guard archiveSearchRouting == nil else { return }
         let routing = archiveSearchBuilder.build(withListener: interactor)
@@ -160,7 +158,7 @@ public final class ArchiveWrapperRouter: ViewableRouter<ArchiveInteractable, Arc
         detachChild(routing)
         self.archiveSearchRouting = nil
     }
-    
+
     public func routeToFolder() {
         guard archiveFolderRouting == nil else { return }
         let routing = archiveFolderBuilder.build(withListener: interactor)
@@ -184,10 +182,10 @@ public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable 
 
     public func build(withListener listener: ArchiveListener) -> ArchiveRouting {
         let component = ArchiveComponent(dependency: dependency)
-        
+
         let interactor = ArchiveWrapperInteractor()
         interactor.listener = listener
-        
+
         let store = Store(initialState: ArchiveFeature.State()) {
             ArchiveFeature(
                 archiveRepository: component.archiveRepository,
@@ -205,18 +203,18 @@ public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable 
                 }
             )
         }
-        
+
         interactor.onRefresh = { [weak store] in
             store?.send(.onAppear)
         }
-        
+
         let view = ArchiveView(store: store)
         let viewController = ArchiveHostingController(
             rootView: view,
             store: store,
             interactor: interactor
         )
-        
+
         let router = ArchiveWrapperRouter(
             interactor: interactor,
             viewController: viewController,
@@ -225,7 +223,7 @@ public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable 
             archiveFolderBuilder: component.archiveFolderBuilder
         )
         interactor.router = router
-        
+
         return router
     }
 }

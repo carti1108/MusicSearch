@@ -8,61 +8,61 @@ final class SettingsFeatureTests: XCTestCase {
     func testOnAppearWithToken() async {
         let mockFetch = MockFetchSpotifyProfileUseCase(profile: ("Test User", nil))
         let mockManage = MockManageSpotifyAuthUseCase(token: "token")
-        
+
         let store = TestStore(initialState: SettingsFeature.State()) {
             SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
         }
-        
+
         await store.send(.onAppear)
         await store.receive(\.fetchProfileResponse.success) {
             $0.spotifyState = .connected(name: "Test User", imageURL: nil)
         }
     }
-    
+
     func testOnAppearWithoutToken() async {
         let mockFetch = MockFetchSpotifyProfileUseCase(profile: nil)
         let mockManage = MockManageSpotifyAuthUseCase(token: nil)
-        
+
         let store = TestStore(initialState: SettingsFeature.State()) {
             SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
         }
-        
+
         await store.send(.onAppear)
         await store.receive(\.fetchProfileResponse.success) {
             $0.spotifyState = .disconnected
         }
     }
-    
+
     func testLoginTapped() async {
         let mockFetch = MockFetchSpotifyProfileUseCase(profile: ("Test User", nil))
         let mockManage = MockManageSpotifyAuthUseCase(token: nil)
-        
+
         let store = TestStore(initialState: SettingsFeature.State()) {
             SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
         }
-        
+
         await store.send(.loginTapped)
         await store.receive(\.authResponse.success)
-        
+
         mockManage.token = "token"
         await store.receive(\.onAppear)
-        
+
         await store.receive(\.fetchProfileResponse.success) {
             $0.spotifyState = .connected(name: "Test User", imageURL: nil)
         }
     }
-    
+
     func testDisconnectTapped() async {
         let mockFetch = MockFetchSpotifyProfileUseCase(profile: nil)
         let mockManage = MockManageSpotifyAuthUseCase(token: "token")
-        
+
         var state = SettingsFeature.State()
         state.spotifyState = .connected(name: "Test User", imageURL: nil)
-        
+
         let store = TestStore(initialState: state) {
             SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
         }
-        
+
         await store.send(.disconnectTapped) {
             $0.spotifyState = .disconnected
         }

@@ -443,7 +443,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 					transform.m34 = -1.0 / 500.0
 					transform = CATransform3DRotate(transform, angle, 0, 1, 0)
 					transform = CATransform3DScale(transform, scale, scale, 1)
-					
+
 					item.transform3D = transform
 					item.alpha = 1.0 - (progress * 0.5)
 					item.zIndex = Int((1.0 - progress) * 100)
@@ -460,8 +460,6 @@ extension WeatherRecommendationViewController: UICollectionViewDelegate {
 	}
 }
 
-
-
 extension WeatherRecommendationViewController: UICollectionViewDataSourcePrefetching {
 	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
@@ -470,7 +468,7 @@ extension WeatherRecommendationViewController: UICollectionViewDataSourcePrefetc
 		}
 		ImagePrefetcher(urls: urls).start()
 	}
-	
+
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
 			guard let track = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }

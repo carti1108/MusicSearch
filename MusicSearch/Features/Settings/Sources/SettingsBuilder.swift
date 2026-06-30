@@ -40,27 +40,27 @@ public final class SettingsBuilder: Builder<SettingsDependency>, SettingsBuildab
 
     public func build(withListener listener: SettingsListener) -> SettingsRouting {
         let component = SettingsComponent(dependency: dependency)
-        
+
         let interactor = SettingsWrapperInteractor()
         interactor.listener = listener
-        
+
         let store = Store(initialState: SettingsFeature.State()) {
             SettingsFeature(
                 manageSpotifyAuthUseCase: component.dependency.manageSpotifyAuthUseCase,
                 fetchSpotifyProfileUseCase: component.dependency.fetchSpotifyProfileUseCase
             )
         }
-        
+
         let view = SettingsView(store: store)
         let viewController = SettingsHostingController(rootView: view)
         viewController.view.backgroundColor = .clear
-        
+
         let router = SettingsWrapperRouter(
             interactor: interactor,
             viewController: viewController
         )
         interactor.router = router
-        
+
         return router
     }
 }

@@ -81,7 +81,6 @@ final class AppComponent: RootDependency {
 		ChartRepositoryImpl(networkManager: self.networkManager)
 	}()
 
-
 	private lazy var modelContainer: ModelContainer = {
 		do {
 			return try ModelContainer(for: SDArchivedTrack.self)

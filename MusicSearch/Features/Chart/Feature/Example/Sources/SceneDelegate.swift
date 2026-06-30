@@ -13,18 +13,18 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        
+
         let component = ExampleAppComponent()
         let builder = ChartBuilder(dependency: component)
         let router = builder.build(withListener: MockChartListener())
-        
+
         self.chartRouter = router
         router.interactable.activate()
         router.load()
-        
+
         window.rootViewController = router.viewControllable.uiviewController
         window.makeKeyAndVisible()
     }

@@ -37,7 +37,7 @@ public actor ArchiveRepositoryImpl: ArchiveRepository {
 			existingTrack.isIntroGood = track.isIntroGood
 			existingTrack.isGoodUntilMiddle = track.isGoodUntilMiddle
 			existingTrack.isGoodUntilEnd = track.isGoodUntilEnd
-			
+
 			try modelContext.save()
 		} else {
 			try addArchivedTrack(track)

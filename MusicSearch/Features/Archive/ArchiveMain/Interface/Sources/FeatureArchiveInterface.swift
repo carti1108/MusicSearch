@@ -6,7 +6,6 @@ import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
 import FeatureArchiveFolderDetailInterface
 
-
 @MainActor
 public protocol ArchiveDependency: Dependency {
 	var archiveRepository: ArchiveRepository { get }
@@ -24,10 +23,10 @@ public protocol ArchiveRouting: ViewableRouting {
 	func routeToAddArchive()
 	func routeToEditArchive(track: ArchivedTrack)
 	func detachAddArchive()
-	
+
 	func routeToSearch()
 	func detachSearch()
-	
+
 	func routeToFolder()
 	func detachFolder()
 }

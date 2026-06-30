@@ -4,11 +4,11 @@ import MSDesignSystem
 
 public struct SettingsView: View {
     @Bindable var store: StoreOf<SettingsFeature>
-    
+
     public init(store: StoreOf<SettingsFeature>) {
         self.store = store
     }
-    
+
     public var body: some View {
         NavigationView {
             List {
@@ -45,7 +45,7 @@ public struct SettingsView: View {
                                         .frame(width: 50, height: 50)
                                         .overlay(Text(String(name.prefix(1))).foregroundColor(.white))
                                 }
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(name)
                                         .customText(.headlineMd)
@@ -61,7 +61,7 @@ public struct SettingsView: View {
                                 }
                                 Spacer()
                             }
-                            
+
                             Button(action: {
                                 store.send(.disconnectTapped)
                             }) {
@@ -77,7 +77,6 @@ public struct SettingsView: View {
                         .padding(.vertical, 8)
                     }
                 }
-                
 
             }
             .navigationTitle("설정")

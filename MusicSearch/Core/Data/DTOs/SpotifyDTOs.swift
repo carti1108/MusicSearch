@@ -72,7 +72,7 @@ extension SpotifyTrackDTO {
 		let imageURL = imageString.flatMap { URL(string: $0) }
 		let thumbnailString = self.album?.images?.last?.url
 		let thumbnailURL = thumbnailString.flatMap { URL(string: $0) }
-		
+
 		var parsedReleaseDate: Date? = nil
 		if let releaseDateString = self.album?.release_date {
 			let formatter = DateFormatter()

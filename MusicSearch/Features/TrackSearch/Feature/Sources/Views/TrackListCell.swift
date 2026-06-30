@@ -43,7 +43,7 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 		label.font = .systemFont(ofSize: 17, weight: .bold)
 		label.textColor = UIColor(CustomColor.onSurface)
 		label.numberOfLines = 0
-		
+
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()
@@ -53,7 +53,7 @@ final class TrackListCell: UICollectionViewCell, ReuseIdentifiable {
 		label.font = .systemFont(ofSize: 14, weight: .regular)
 		label.textColor = UIColor(CustomColor.onSurfaceVariant)
 		label.numberOfLines = 0
-		
+
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		return label
 	}()

@@ -5,11 +5,11 @@ import ArchiveDomain
 
 public struct ArchiveSearchView: View {
     @Bindable var store: StoreOf<ArchiveSearchFeature>
-    
+
     public init(store: StoreOf<ArchiveSearchFeature>) {
         self.store = store
     }
-    
+
     public var body: some View {
         ZStack {
             CustomColor.background.ignoresSafeArea()
@@ -27,7 +27,7 @@ public struct ArchiveSearchView: View {
                 .cornerRadius(10)
                 .padding(.horizontal, CustomSpacing.containerMargin)
                 .padding(.top, CustomSpacing.containerMargin)
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
                         if !store.recentSearches.isEmpty {
@@ -46,7 +46,7 @@ public struct ArchiveSearchView: View {
                                     }
                                     .buttonStyle(BouncyButtonStyle())
                                 }
-                                
+
                                 VStack(spacing: 16) {
                                     ForEach(store.recentSearches, id: \.self) { term in
                                         HStack {
@@ -68,13 +68,13 @@ public struct ArchiveSearchView: View {
                                 }
                             }
                         }
-                        
+
                         if !store.recommendedTracks.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("검색 결과")
                                     .customText(.headlineMd)
                                     .foregroundColor(CustomColor.onSurface)
-                                
+
                                 VStack(spacing: 16) {
                                     ForEach(store.recommendedTracks, id: \.id) { track in
                                         HStack(spacing: 16) {
@@ -94,7 +94,7 @@ public struct ArchiveSearchView: View {
                                             }
                                             .frame(width: 56, height: 56)
                                             .cornerRadius(6)
-                                            
+
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(track.title)
                                                     .customText(.bodyLg)
@@ -103,7 +103,7 @@ public struct ArchiveSearchView: View {
                                                     .customText(.bodyMd)
                                                     .foregroundColor(CustomColor.outline)
                                             }
-                                            
+
                                             Spacer()
                                         }
                                         .background(Color.black.opacity(0.001))

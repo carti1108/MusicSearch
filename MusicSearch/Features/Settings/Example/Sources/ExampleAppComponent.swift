@@ -10,7 +10,7 @@ final class ExampleAppComponent: SettingsDependency {
     var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
         MockManageSpotifyAuthUseCase()
     }
-    
+
     var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
         MockFetchSpotifyProfileUseCase()
     }

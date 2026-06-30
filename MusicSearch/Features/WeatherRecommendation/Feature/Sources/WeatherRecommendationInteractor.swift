@@ -12,8 +12,6 @@ import MSUtil
 import FeatureWeatherRecommendationInterface
 import WeatherRecommendationDomain
 
-
-
 @MainActor
 protocol WeatherRecommendationPresentableListener: AnyObject {
 	func viewDidLoad()
@@ -28,8 +26,6 @@ protocol WeatherRecommendationPresentable: Presentable {
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)
 }
-
-
 
 @MainActor
 final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecommendationPresentable>, WeatherRecommendationInteractable, WeatherRecommendationPresentableListener {

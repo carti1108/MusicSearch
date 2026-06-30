@@ -11,11 +11,11 @@ final class FeatureArchiveFolderDetailTests: XCTestCase {
         let tracks = [
             ArchivedTrack(id: UUID(), title: "A", artist: "B", genre: "Pop", label: "", rating: 0)
         ]
-        
+
         let store = TestStore(initialState: ArchiveFolderDetailFeature.State(folderItem: folder)) {
             ArchiveFolderDetailFeature(archiveRepository: MockArchiveRepository(tracks: tracks), exportToSpotifyUseCase: MockExport(), manageSpotifyAuthUseCase: MockAuth(), onDelegate: { _ in })
         }
-        
+
         await store.send(ArchiveFolderDetailFeature.Action.onAppear)
         await store.receive({
             if case .loadDataResponse = $0 { return true }

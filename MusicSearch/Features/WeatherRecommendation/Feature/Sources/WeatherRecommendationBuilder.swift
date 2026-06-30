@@ -11,8 +11,6 @@ import MSUtil
 import FeatureWeatherRecommendationInterface
 import WeatherRecommendationDomain
 
-
-
 @MainActor
 final class WeatherRecommendationComponent: Component<WeatherRecommendationDependency> {
 	fileprivate var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
@@ -22,13 +20,11 @@ final class WeatherRecommendationComponent: Component<WeatherRecommendationDepen
 	fileprivate var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
 		self.dependency.fetchMusicAppDeepLinkUseCase
 	}
-	
+
 	fileprivate var urlOpener: URLOpening {
 		self.dependency.urlOpener
 	}
 }
-
-
 
 @MainActor
 public final class WeatherRecommendationBuilder: Builder<WeatherRecommendationDependency>, WeatherRecommendationBuildable {

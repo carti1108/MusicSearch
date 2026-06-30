@@ -24,15 +24,15 @@ public protocol ArchiveFolderInteractable: Interactable, ArchiveFolderDetailList
 public final class ArchiveFolderWrapperInteractor: Interactor, ArchiveFolderInteractable {
     public weak var router: ArchiveFolderRouting?
     public weak var listener: ArchiveFolderListener?
-    
+
     public func archiveFolderDetailDidTapClose() {
         router?.detachFolderDetail(popUI: false)
     }
-    
+
     public func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem) {
         router?.routeToFolderDetail(folderItem: folderItem)
     }
-    
+
     public func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {
         listener?.archiveFolderDidTapTrack(track)
     }
@@ -41,50 +41,48 @@ public final class ArchiveFolderWrapperInteractor: Interactor, ArchiveFolderInte
 public final class ArchiveFolderHostingController: UIHostingController<ArchiveFolderView>, ViewControllable {
     public var uiviewController: UIViewController { self }
     private weak var interactor: ArchiveFolderWrapperInteractor?
-    
+
     init(rootView: ArchiveFolderView, interactor: ArchiveFolderWrapperInteractor) {
         self.interactor = interactor
         super.init(rootView: rootView)
         self.view.backgroundColor = .clear
     }
-    
+
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "보관함 폴더"
     }
-    
+
     public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if isMovingFromParent {
             interactor?.listener?.archiveFolderDidTapClose()
         }
     }
-    
 
-    
 }
 
 public final class ArchiveFolderWrapperRouter: ViewableRouter<ArchiveFolderInteractable, ViewControllable>, ArchiveFolderRouting {
     private let detailBuilder: ArchiveFolderDetailBuildable
     private var detailRouters: [ArchiveFolderDetailRouting] = []
-    
+
     init(interactor: ArchiveFolderInteractable, viewController: ViewControllable, detailBuilder: ArchiveFolderDetailBuildable) {
         self.detailBuilder = detailBuilder
         super.init(interactor: interactor, viewController: viewController)
         interactor.router = self
     }
-    
+
     public func routeToFolderDetail(folderItem: FolderItem) {
         let router = detailBuilder.build(withListener: interactor, folderItem: folderItem)
         detailRouters.append(router)
         attachChild(router)
         viewController.uiviewController.navigationController?.pushViewController(router.viewControllable.uiviewController, animated: true)
     }
-    
+
     public func detachFolderDetail(popUI: Bool) {
         guard let router = detailRouters.popLast() else { return }
         if popUI {
@@ -102,10 +100,10 @@ public final class ArchiveFolderBuilder: Builder<ArchiveFolderDependency>, Archi
 
     public func build(withListener listener: ArchiveFolderListener) -> ArchiveFolderRouting {
         let component = ArchiveFolderComponent(dependency: dependency)
-        
+
         let interactor = ArchiveFolderWrapperInteractor()
         interactor.listener = listener
-        
+
         let store = Store(initialState: ArchiveFolderFeature.State()) {
             ArchiveFolderFeature(
                 archiveRepository: component.dependency.archiveRepository,
@@ -119,20 +117,20 @@ public final class ArchiveFolderBuilder: Builder<ArchiveFolderDependency>, Archi
                 }
             )
         }
-        
+
         let view = ArchiveFolderView(store: store)
         let viewController = ArchiveFolderHostingController(
             rootView: view,
             interactor: interactor
         )
-        
+
         let router = ArchiveFolderWrapperRouter(
             interactor: interactor,
             viewController: viewController,
             detailBuilder: component.dependency.archiveFolderDetailBuilder
         )
         interactor.router = router
-        
+
         return router
     }
 }

@@ -68,7 +68,7 @@ final class TrackCardCell: UICollectionViewCell, ReuseIdentifiable {
 		label.textColor = UIColor(CustomColor.onSurfaceVariant)
 		label.textAlignment = .center
 		label.numberOfLines = 0
-		
+
 		label.setContentCompressionResistancePriority(.required, for: .vertical)
 		label.setContentHuggingPriority(.required, for: .vertical)
 		return label

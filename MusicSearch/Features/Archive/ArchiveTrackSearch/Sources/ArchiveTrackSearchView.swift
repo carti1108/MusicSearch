@@ -6,11 +6,11 @@ import MSDomain
 public struct ArchiveTrackSearchView: View {
 	@Bindable var store: StoreOf<ArchiveTrackSearchFeature>
 	@Environment(\.dismiss) var dismiss
-	
+
 	public init(store: StoreOf<ArchiveTrackSearchFeature>) {
 		self.store = store
 	}
-	
+
 	public var body: some View {
 		NavigationView {
 			VStack(spacing: 0) {
@@ -21,7 +21,7 @@ public struct ArchiveTrackSearchView: View {
 						.foregroundColor(CustomColor.onBackground)
 						.autocapitalization(.none)
 						.disableAutocorrection(true)
-					
+
 					if !store.query.isEmpty {
 						Button(action: {
 							store.send(.clearQueryTapped)
@@ -35,7 +35,7 @@ public struct ArchiveTrackSearchView: View {
 				.background(CustomColor.surfaceContainer)
 				.cornerRadius(10)
 				.padding()
-				
+
 				if store.isLoading {
 					ProgressView()
 						.padding()
@@ -74,7 +74,7 @@ public struct ArchiveTrackSearchView: View {
                                                 .frame(width: 48, height: 48)
                                                 .clipShape(RoundedRectangle(cornerRadius: 6))
                                         }
-                                        
+
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(track.title)
                                                 .font(.system(size: 16, weight: .bold))

@@ -88,7 +88,7 @@ final class SeedTrackView: UIView {
 			self.textStackView.trailingAnchor.constraint(equalTo: self.albumImageView.trailingAnchor, constant: -16),
 			self.textStackView.bottomAnchor.constraint(equalTo: self.albumImageView.bottomAnchor, constant: -16)
 		])
-		
+
 		self.layer.shadowColor = UIColor.black.cgColor
 		self.layer.shadowOffset = CGSize(width: 0, height: 6)
 		self.layer.shadowRadius = 10

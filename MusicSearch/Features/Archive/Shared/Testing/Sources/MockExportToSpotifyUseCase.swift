@@ -6,14 +6,14 @@ public final class MockExportToSpotifyUseCase: ExportToSpotifyUseCase, @unchecke
     public var lastTracks: [ArchivedTrack]?
     public var lastPlaylistName: String?
     public var executeResult: [ExportProgress] = []
-    
+
     public init() {}
-    
+
     public func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
         executeCallCount += 1
         lastTracks = tracks
         lastPlaylistName = playlistName
-        
+
         return AsyncStream { continuation in
             Task {
                 for progress in executeResult {

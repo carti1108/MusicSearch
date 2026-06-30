@@ -5,11 +5,11 @@ import ArchiveDomain
 
 public struct ArchiveFolderView: View {
     @Bindable var store: StoreOf<ArchiveFolderFeature>
-    
+
     public init(store: StoreOf<ArchiveFolderFeature>) {
         self.store = store
     }
-    
+
     private var currentFolders: [FolderItem] {
         switch store.selectedTab {
         case 0: return store.releaseYearFolders
@@ -19,7 +19,7 @@ public struct ArchiveFolderView: View {
         default: return []
         }
     }
-    
+
     public var body: some View {
         ZStack {
             CustomColor.background.ignoresSafeArea()
@@ -34,7 +34,7 @@ public struct ArchiveFolderView: View {
                 .padding(.horizontal, CustomSpacing.containerMargin)
                 .padding(.top, CustomSpacing.base)
                 .padding(.bottom, CustomSpacing.containerMargin)
-                
+
                 ScrollView {
                     if currentFolders.isEmpty {
                         VStack(spacing: 12) {
@@ -70,7 +70,7 @@ public struct ArchiveFolderView: View {
 struct FolderTile: View {
     let title: String
     let subtitle: String
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: CustomSpacing.base) {
             Rectangle()
@@ -82,7 +82,7 @@ struct FolderTile: View {
                         .font(.system(size: 32))
                         .foregroundColor(CustomColor.surfaceContainerHigh)
                 )
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .customText(.bodyMd)

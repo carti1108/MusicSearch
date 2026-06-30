@@ -403,7 +403,7 @@ extension ChartViewController: UICollectionViewDataSourcePrefetching {
 		}
 		ImagePrefetcher(urls: urls).start()
 	}
-	
+
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
 			guard let item = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }

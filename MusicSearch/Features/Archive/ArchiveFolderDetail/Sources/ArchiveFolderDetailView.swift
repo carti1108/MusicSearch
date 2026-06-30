@@ -5,18 +5,18 @@ import ArchiveDomain
 
 public struct ArchiveFolderDetailView: View {
     @Bindable var store: StoreOf<ArchiveFolderDetailFeature>
-    
+
     @State private var showingExportAlert = false
     @State private var exportResultMessage = ""
 
     public init(store: StoreOf<ArchiveFolderDetailFeature>) {
         self.store = store
     }
-    
+
     public var body: some View {
         ZStack {
             CustomColor.background.ignoresSafeArea()
-            
+
             if let folders = store.folders {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CustomSpacing.gutter) {
@@ -45,18 +45,18 @@ public struct ArchiveFolderDetailView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
             }
-            
+
             if case .exporting(let progress) = store.exportState {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 VStack(spacing: CustomSpacing.base) {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: CustomColor.primary))
                         .scaleEffect(1.5)
-                    
+
                     Text("Spotify로 내보내는 중...")
                         .customText(.bodyLg)
                         .foregroundColor(CustomColor.onSurface)
-                    
+
                     Text("\(progress.currentCount) / \(progress.totalCount) 곡 처리 완료")
                         .customText(.bodyMd)
                         .foregroundColor(CustomColor.onSurfaceVariant)
@@ -89,7 +89,7 @@ public struct ArchiveFolderDetailView: View {
 struct FolderTile: View {
     let title: String
     let subtitle: String
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: CustomSpacing.base) {
             Rectangle()
@@ -101,7 +101,7 @@ struct FolderTile: View {
                         .font(.system(size: 32))
                         .foregroundColor(CustomColor.surfaceContainerHigh)
                 )
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .customText(.bodyMd)
@@ -143,7 +143,7 @@ struct DetailTrackRowItem: View {
                     .customText(.bodyLg)
                     .foregroundColor(CustomColor.onSurface)
                     .lineLimit(1)
-                
+
                 Text(track.artist)
                     .customText(.bodyMd)
                     .foregroundColor(CustomColor.onSurfaceVariant)

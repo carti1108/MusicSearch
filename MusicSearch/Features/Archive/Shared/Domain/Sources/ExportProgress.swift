@@ -11,7 +11,7 @@ public enum ExportError: Error, Sendable, Equatable {
 public struct ExportFailure: Sendable, Equatable {
     public let track: ArchivedTrack?
     public let error: ExportError
-    
+
     public init(track: ArchivedTrack?, error: ExportError) {
         self.track = track
         self.error = error
@@ -24,7 +24,7 @@ public struct ExportProgress: Sendable, Equatable {
     public let failedTracks: [ExportFailure]
     public let isComplete: Bool
     public let fatalError: ExportError?
-    
+
     public init(totalCount: Int, currentCount: Int, failedTracks: [ExportFailure], isComplete: Bool = false, fatalError: ExportError? = nil) {
         self.totalCount = totalCount
         self.currentCount = currentCount

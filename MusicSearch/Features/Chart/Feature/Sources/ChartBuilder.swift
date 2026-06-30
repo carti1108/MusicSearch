@@ -35,7 +35,7 @@ public final class ChartBuilder: Builder<ChartDependency>, ChartBuildable {
 	public override init(dependency: ChartDependency) {
 		super.init(dependency: dependency)
 	}
-	
+
 	public func build(withListener listener: ChartListener) -> ChartRouting {
 		let component = ChartComponent(dependency: self.dependency)
 		let viewController = ChartViewController()

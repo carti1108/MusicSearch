@@ -5,7 +5,7 @@ import ArchiveDomain
 
 public struct ArchiveView: View {
     @Bindable var store: StoreOf<ArchiveFeature>
-    
+
     @State private var showFilterSheet = false
     @State private var filterIntroGood = false
     @State private var filterMiddleGood = false
@@ -14,7 +14,7 @@ public struct ArchiveView: View {
     public init(store: StoreOf<ArchiveFeature>) {
         self.store = store
     }
-    
+
     private var filteredTracks: [ArchivedTrack] {
         store.recentTracks.filter { track in
             (!filterIntroGood || track.isIntroGood) &&
@@ -43,7 +43,7 @@ public struct ArchiveView: View {
             List {
                 VStack(spacing: CustomSpacing.containerMargin) {
                     headerView
-                    
+
                     dashboardCards
 
                     HStack(alignment: .bottom) {
@@ -117,7 +117,7 @@ public struct ArchiveView: View {
             store.send(.onAppear)
         }
     }
-    
+
     private var filterSheet: some View {
         NavigationView {
             Form {
@@ -126,7 +126,7 @@ public struct ArchiveView: View {
                     Toggle("중반부까지 좋음", isOn: $filterMiddleGood)
                     Toggle("끝까지 좋음", isOn: $filterEndGood)
                 }
-                
+
                 Button(action: {
                     filterIntroGood = false
                     filterMiddleGood = false
@@ -169,7 +169,7 @@ public struct ArchiveView: View {
                         .background(CustomColor.surfaceContainer)
                         .clipShape(Circle())
                 }
-                
+
                 Button(action: { store.send(.onFolderTapped) }) {
                     Image(systemName: "folder.fill")
                         .symbolRenderingMode(.hierarchical)
@@ -233,7 +233,7 @@ public struct TrackRowItem: View {
                     .customText(.bodyLg)
                     .foregroundColor(CustomColor.onSurface)
                     .lineLimit(1)
-                
+
                 Text(track.artist)
                     .customText(.bodyMd)
                     .foregroundColor(CustomColor.onSurfaceVariant)

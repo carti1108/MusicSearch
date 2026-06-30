@@ -16,19 +16,19 @@ final class ExampleAppComponent: ArchiveDependency {
     var archiveRepository: ArchiveRepository {
         MockArchiveRepository()
     }
-    
+
     var addArchiveBuilder: AddArchiveBuildable {
         MockAddArchiveBuilder()
     }
-    
+
     var archiveSearchBuilder: ArchiveSearchBuildable {
         MockArchiveSearchBuilder()
     }
-    
+
     var archiveFolderBuilder: ArchiveFolderBuildable {
         MockArchiveFolderBuilder()
     }
-    
+
     var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
         MockArchiveFolderDetailBuilder()
     }
@@ -42,11 +42,11 @@ final class MockArchiveRepository: ArchiveRepository {
             ArchivedTrack(id: UUID(), title: "Test Track", artist: "Test Artist", genre: "Pop", label: "", rating: 0)
         ]
     }
-    
+
     func addArchivedTrack(_ track: ArchivedTrack) async throws { }
-    
+
     func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    
+
     func deleteArchivedTrack(id: UUID) async throws { }
 }
 

@@ -7,22 +7,22 @@ import MSDomain
 
 @MainActor
 final class AddArchiveFeatureTests: XCTestCase {
-    
+
     func testMemoInput() async {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
             AddArchiveFeature(archiveRepository: MockArchiveRepository(), searchTracksUseCase: MockSearchTracksUseCase(), onDelegate: { _ in })
         }
-        
+
         await store.send(.binding(.set(\.memo, "Great track"))) {
             $0.memo = "Great track"
         }
     }
-    
+
     func testCloseTapped() async {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
             AddArchiveFeature(archiveRepository: MockArchiveRepository(), searchTracksUseCase: MockSearchTracksUseCase(), onDelegate: { _ in })
         }
-        
+
         await store.send(.closeButtonTapped)
     }
 }

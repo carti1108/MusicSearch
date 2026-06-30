@@ -136,7 +136,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 		UIView.transition(with: self.seedTrackView, duration: 0.3, options: .transitionCrossDissolve) {
 			self.seedTrackView.configure(with: track)
 		}
-		
+
 		UIView.transition(with: self.backgroundImageView, duration: 0.5, options: .transitionCrossDissolve) {
 			self.backgroundImageView.setRemoteImage(track.imageURL, targetSize: UIScreen.main.bounds.size)
 		}
@@ -167,7 +167,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	private func setupView() {
 		self.view.backgroundColor = UIColor(CustomColor.background)
-		
+
 		self.view.insertSubview(self.backgroundImageView, at: 0)
 		self.view.insertSubview(self.blurEffectView, aboveSubview: self.backgroundImageView)
 		self.view.insertSubview(self.darkOverlayView, aboveSubview: self.blurEffectView)
@@ -282,7 +282,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 					let progress = min(distanceFromCenter / (containerWidth / 2.0), 1.0)
 
 					let scale = 1.0 - (progress * 0.25)
-					
+
 					let isLeft = item.frame.midX < centerX
 					let angle = progress * (CGFloat.pi / 4.5) * (isLeft ? 1 : -1)
 
@@ -290,10 +290,10 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 					transform.m34 = -1.0 / 500.0
 					transform = CATransform3DRotate(transform, angle, 0, 1, 0)
 					transform = CATransform3DScale(transform, scale, scale, 1)
-					
+
 					item.transform3D = transform
 					item.alpha = 1.0 - (progress * 0.5)
-					
+
 					item.zIndex = Int((1.0 - progress) * 100)
 				}
 			}
@@ -324,8 +324,6 @@ extension MusicDiggingViewController: UICollectionViewDelegate {
 	}
 }
 
-
-
 extension MusicDiggingViewController: UICollectionViewDataSourcePrefetching {
 	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
@@ -334,7 +332,7 @@ extension MusicDiggingViewController: UICollectionViewDataSourcePrefetching {
 		}
 		ImagePrefetcher(urls: urls).start()
 	}
-	
+
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
 			guard let track = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }

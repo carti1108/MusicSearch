@@ -51,18 +51,18 @@ protocol RootDependency: Dependency {
 	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase { get }
 	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase { get }
 	var exportToSpotifyUseCase: any ExportToSpotifyUseCase { get }
-	
+
 	// MARK: - Repositories
 	var archiveRepository: any ArchiveRepository { get }
 	var imageDownloadRepository: any ImageDownloadRepository { get }
-	
+
 	// MARK: - Utilities
 	var urlOpener: URLOpening { get }
 }
 
 @MainActor
 final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, ArchiveFolderDetailDependency, ArchiveTrackSearchDependency, SettingsDependency {
-	
+
 	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase

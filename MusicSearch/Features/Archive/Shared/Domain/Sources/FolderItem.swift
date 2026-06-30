@@ -17,13 +17,13 @@ public struct FolderItem: Identifiable, Equatable {
     public let title: String
     public let subtitle: String
     public let type: FolderType
-    
+
     public init(title: String, subtitle: String, type: FolderType) {
         self.title = title
         self.subtitle = subtitle
         self.type = type
     }
-    
+
     public static func == (lhs: FolderItem, rhs: FolderItem) -> Bool {
         return lhs.id == rhs.id
     }

@@ -5,16 +5,16 @@ import MSDomain
 
 @Reducer
 public struct ArchiveTrackSearchFeature {
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public var query: String = ""
 		public var results: [Track] = []
 		public var isLoading: Bool = false
-		
+
 		public init() {}
 	}
-	
+
 	public enum Action: BindableAction {
 		case binding(BindingAction<State>)
 		case onAppear
@@ -24,7 +24,7 @@ public struct ArchiveTrackSearchFeature {
 		case searchResponse(TaskResult<TrackSearchResponse>)
 		case delegate(DelegateAction)
 	}
-	
+
 	public struct TrackSearchResponse: Equatable {
 		public let tracks: [Track]
 		public let totalResults: Int
@@ -33,15 +33,15 @@ public struct ArchiveTrackSearchFeature {
 			self.totalResults = totalResults
 		}
 	}
-	
+
 	public enum DelegateAction {
 		case trackSelected(Track)
 	}
-	
+
 	private let searchTracksUseCase: SearchTracksUseCase
 	private let onDelegate: (DelegateAction) -> Void
 	private enum CancelID { case search }
-	
+
 	public init(
 		searchTracksUseCase: SearchTracksUseCase,
 		onDelegate: @escaping (DelegateAction) -> Void
@@ -49,10 +49,10 @@ public struct ArchiveTrackSearchFeature {
 		self.searchTracksUseCase = searchTracksUseCase
 		self.onDelegate = onDelegate
 	}
-	
+
 	public var body: some ReducerOf<Self> {
 		BindingReducer()
-		
+
 		Reduce { state, action in
 			switch action {
 			case .binding(\.query):
@@ -61,7 +61,7 @@ public struct ArchiveTrackSearchFeature {
 					state.results = []
 					return .cancel(id: CancelID.search)
 				}
-				
+
 				state.isLoading = true
 				return .run { send in
 					try await self.clock.sleep(for: .milliseconds(500))
@@ -71,33 +71,33 @@ public struct ArchiveTrackSearchFeature {
 					}))
 				}
 				.cancellable(id: CancelID.search, cancelInFlight: true)
-				
+
 			case .binding:
 				return .none
-				
+
 			case .onAppear:
 				return .none
-				
+
 			case .clearQueryTapped:
 				state.query = ""
 				state.results = []
 				return .cancel(id: CancelID.search)
-				
+
 			case let .searchResponse(.success(response)):
 				state.isLoading = false
 				state.results = response.tracks
 				return .none
-				
+
 			case .searchResponse(.failure):
 				state.isLoading = false
 				return .none
-				
+
 			case let .trackSelected(track):
 				return .send(.delegate(.trackSelected(track)))
-				
+
 			case .closeButtonTapped:
 				return .none
-				
+
 			case let .delegate(delegateAction):
 				return .run { @MainActor _ in
 					onDelegate(delegateAction)
@@ -105,6 +105,6 @@ public struct ArchiveTrackSearchFeature {
 			}
 		}
 	}
-	
+
 	@Dependency(\.continuousClock) var clock
 }

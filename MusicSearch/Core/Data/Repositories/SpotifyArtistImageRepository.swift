@@ -40,7 +40,7 @@ public actor SpotifyArtistImageRepository: ArtistImageRepository {
 		if let token = authRepository.getAccessToken() {
 			return token
 		}
-		
+
 		do {
 			return try await authRepository.getClientCredentialsToken()
 		} catch {
@@ -84,6 +84,5 @@ public actor SpotifyArtistImageRepository: ArtistImageRepository {
 		}
 		return url.forcedHTTPS
 	}
-
 
 }

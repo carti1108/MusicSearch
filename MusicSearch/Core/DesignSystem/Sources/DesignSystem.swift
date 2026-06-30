@@ -139,11 +139,11 @@ public struct CustomTypographyModifier: ViewModifier {
 // MARK: - Modifiers
 public struct LiquidGlassModifier: ViewModifier {
     let cornerRadius: CGFloat
-    
+
     public init(cornerRadius: CGFloat) {
         self.cornerRadius = cornerRadius
     }
-    
+
     public func body(content: Content) -> some View {
         content
             .background(
@@ -199,7 +199,7 @@ public extension View {
 // MARK: - Button Styles
 public struct BouncyButtonStyle: ButtonStyle {
 	public init() {}
-	
+
 	public func makeBody(configuration: Configuration) -> some View {
 		configuration.label
 			.scaleEffect(configuration.isPressed ? 0.95 : 1.0)

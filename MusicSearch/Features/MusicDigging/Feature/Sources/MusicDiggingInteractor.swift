@@ -12,8 +12,6 @@ import MSUtil
 import FeatureMusicDiggingInterface
 import MusicDiggingDomain
 
-
-
 @MainActor
 protocol MusicDiggingPresentableListener: AnyObject {
 	func viewDidAppear()
@@ -30,8 +28,6 @@ protocol MusicDiggingPresentable: Presentable {
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)
 }
-
-
 
 @MainActor
 final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentable>, MusicDiggingInteractable, MusicDiggingPresentableListener {

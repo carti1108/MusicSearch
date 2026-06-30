@@ -19,7 +19,6 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 	weak var listener: TrackSearchPresentableListener?
 	var lastPresentedErrorMessage: String?
 
-
 	private var dataSource: UICollectionViewDiffableDataSource<Section, Track>!
 
 	private let searchController: UISearchController = {
@@ -226,8 +225,6 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 	}
 }
 
-
-
 extension TrackSearchViewController: UICollectionViewDataSourcePrefetching {
 	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
@@ -236,7 +233,7 @@ extension TrackSearchViewController: UICollectionViewDataSourcePrefetching {
 		}
 		ImagePrefetcher(urls: urls).start()
 	}
-	
+
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
 			guard let track = self.dataSource.itemIdentifier(for: indexPath) else { return nil }

@@ -13,7 +13,7 @@ public protocol URLOpening {
 }
 
 public struct ApplicationURLOpener: URLOpening {
-	
+
 	public init() {}
 
 	@MainActor
