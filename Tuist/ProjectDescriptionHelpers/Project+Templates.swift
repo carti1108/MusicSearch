@@ -7,8 +7,13 @@ public extension Target {
         bundlePrefix: String,
         deploymentTarget: DeploymentTargets,
         settings: Settings,
-        dependencies: [TargetDependency] = []
+        dependencies: [TargetDependency] = [],
+        basePath: String? = nil,
+        folderName: String? = nil
     ) -> Target {
+        let path = basePath ?? "MusicSearch/Core/\(name)"
+        let folder = folderName ?? "Domain"
+        
         return Target.target(
             name: "\(name)Domain",
             destinations: [.iPhone],
@@ -16,7 +21,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).\(name)Domain",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Core/\(name)/Domain/Sources/**"],
+            sources: ["\(path)/\(folder)/Sources/**"],
             dependencies: dependencies,
             settings: settings
         )
@@ -27,8 +32,13 @@ public extension Target {
         bundlePrefix: String,
         deploymentTarget: DeploymentTargets,
         settings: Settings,
-        dependencies: [TargetDependency] = []
+        dependencies: [TargetDependency] = [],
+        basePath: String? = nil,
+        folderName: String? = nil
     ) -> Target {
+        let path = basePath ?? "MusicSearch/Core/\(name)"
+        let folder = folderName ?? "Data"
+        
         return Target.target(
             name: "\(name)Data",
             destinations: [.iPhone],
@@ -36,7 +46,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).\(name)Data",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Core/\(name)/Data/Sources/**"],
+            sources: ["\(path)/\(folder)/Sources/**"],
             dependencies: dependencies,
             settings: settings
         )
@@ -51,8 +61,14 @@ public extension Target {
         implementationDependencies: [TargetDependency] = [],
         testingDependencies: [TargetDependency] = [],
         testsDependencies: [TargetDependency] = [],
-        exampleDependencies: [TargetDependency] = []
+        exampleDependencies: [TargetDependency] = [],
+        basePath: String? = nil,
+        folderName: String? = nil
     ) -> [Target] {
+        let path = basePath ?? "MusicSearch/Features/\(name)"
+        let folder = folderName ?? ""
+        let resolvedPath = folder.isEmpty ? path : "\(path)/\(folder)"
+        
         
         let interfaceTarget = Target.target(
             name: "Feature\(name)Interface",
@@ -61,7 +77,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Interface",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Features/\(name)/Interface/Sources/**"],
+            sources: ["\(resolvedPath)/Interface/Sources/**"],
             dependencies: interfaceDependencies,
             settings: settings
         )
@@ -73,7 +89,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Features/\(name)/Sources/**"],
+            sources: ["\(resolvedPath)/Sources/**"],
             dependencies: implementationDependencies + [.target(name: "Feature\(name)Interface")],
             settings: settings
         )
@@ -85,7 +101,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Testing",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Features/\(name)/Testing/Sources/**"],
+            sources: ["\(resolvedPath)/Testing/Sources/**"],
             dependencies: testingDependencies + [.target(name: "Feature\(name)Interface")],
             settings: settings
         )
@@ -97,7 +113,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Tests",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["MusicSearch/Features/\(name)/Tests/**"],
+            sources: ["\(resolvedPath)/Tests/**"],
             dependencies: testsDependencies + [.target(name: "Feature\(name)"), .target(name: "Feature\(name)Testing")],
             settings: settings
         )
@@ -122,7 +138,7 @@ public extension Target {
                     ]
                 ]
             ]),
-            sources: ["MusicSearch/Features/\(name)/Example/Sources/**"],
+            sources: ["\(resolvedPath)/Example/Sources/**"],
             dependencies: exampleDependencies + [
                 .target(name: "Feature\(name)"),
                 .target(name: "Feature\(name)Interface"),
