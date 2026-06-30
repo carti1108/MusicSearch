@@ -8,6 +8,7 @@
 import Foundation
 import NetworkLayer
 import MSDomain
+import OSLog
 
 public actor SpotifyAppRepository: MusicAppRepository {
 
@@ -51,6 +52,8 @@ public actor SpotifyAppRepository: MusicAppRepository {
 			let urlString = try await self.searchWithRetry(query: request.query, type: request.type)
 			return try self.makeURL(from: urlString)
 		} catch {
+			Logger(subsystem: "MusicSearch", category: "SpotifyAppRepository")
+				.error("fetchAppRedirectURL failed: \(error.localizedDescription). Returning fallback Web URL.")
 			return self.fallbackWebURL(query: query)
 		}
 	}
@@ -68,7 +71,7 @@ public actor SpotifyAppRepository: MusicAppRepository {
 	private func performSearchSpotifyTracks(query: String, limit: Int, offset: Int, token: String) async throws -> (tracks: [Track], totalResults: Int) {
 		let api = SpotifyAPI.search(query: query, type: "track", limit: limit, offset: offset, token: token, config: self.configuration)
 		let result = try await self.networkManager.perform(with: api, as: SpotifyTrackSearchResponse.self)
-		
+
 		let tracks = result.tracks.items.map { $0.toDomain() }
 		return (tracks: tracks, totalResults: result.tracks.total ?? 0)
 	}
@@ -77,7 +80,7 @@ public actor SpotifyAppRepository: MusicAppRepository {
 		if let token = authRepository.getAccessToken() {
 			return token
 		}
-		
+
 		do {
 			return try await authRepository.getClientCredentialsToken()
 		} catch {
@@ -120,8 +123,6 @@ public actor SpotifyAppRepository: MusicAppRepository {
 		}
 		return url
 	}
-
-
 
 	private func fallbackWebURL(query: String) -> URL? {
 		let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""

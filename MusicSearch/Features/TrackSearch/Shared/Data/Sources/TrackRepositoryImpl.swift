@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 import MSData
 import MSDomain
 import MSUtil
@@ -35,9 +36,11 @@ public struct TrackRepositoryImpl: TrackRepository {
 					return result
 				}
 			} catch {
+				Logger(subsystem: "MusicSearch", category: "TrackRepository")
+					.error("Spotify App search failed: \(error.localizedDescription). Falling back to LastFM.")
 			}
 		}
-		
+
 		return self.makeSearchResult(from: try await self.networkManager.perform(
 			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
 			as: TrackSearchResponseDTO.self
@@ -69,7 +72,7 @@ public struct TrackRepositoryImpl: TrackRepository {
 			let sanitizedTitle = track.title.replacingOccurrences(of: "\"", with: "")
 			let sanitizedArtist = track.artist.replacingOccurrences(of: "\"", with: "")
 			var query = "track:\"\(sanitizedTitle)\" artist:\"\(sanitizedArtist)\""
-			
+
 			if let albumTitle = track.albumTitle {
 				let sanitizedAlbum = albumTitle.replacingOccurrences(of: "\"", with: "")
 				query += " album:\"\(sanitizedAlbum)\""
@@ -91,9 +94,11 @@ public struct TrackRepositoryImpl: TrackRepository {
 					)
 				}
 			} catch {
+				Logger(subsystem: "MusicSearch", category: "TrackRepository")
+					.error("Spotify App track info search failed: \(error.localizedDescription).")
 			}
 		}
-		
+
 		do {
 			let response: TrackInfoResponseDTO = try await self.networkManager.perform(
 				with: LastFMAPI.getTrackInfo(track: track),
@@ -101,6 +106,8 @@ public struct TrackRepositoryImpl: TrackRepository {
 			)
 			return self.merge(track: track, with: response)
 		} catch {
+			Logger(subsystem: "MusicSearch", category: "TrackRepository")
+				.error("Track info fetch failed: \(error.localizedDescription). Returning original track.")
 			return track
 		}
 	}
@@ -136,11 +143,11 @@ public struct TrackRepositoryImpl: TrackRepository {
 			  let url = URL(string: imageString) else {
 			return nil
 		}
-		
+
 		if imageString.contains("2a96cbd8b46e442fc41c2b86b821562f") {
 			return nil
 		}
-		
+
 		return url.forcedHTTPS
 	}
 }

@@ -2,16 +2,17 @@ import Foundation
 import ComposableArchitecture
 import ArchiveDomain
 import MSDomain
+import OSLog
 
 @Reducer
 public struct ArchiveFolderDetailFeature {
-    
+
     public enum ExportState: Equatable {
         case idle
         case exporting(progress: ExportProgress)
         case completed(successCount: Int, failedCount: Int)
     }
-    
+
     @ObservableState
     public struct State: Equatable {
         public var folderItem: FolderItem
@@ -19,13 +20,13 @@ public struct ArchiveFolderDetailFeature {
         public var folders: [FolderItem]?
         public var tracks: [ArchivedTrack]?
         public var exportState: ExportState = .idle
-        
+
         public init(folderItem: FolderItem) {
             self.folderItem = folderItem
             self.title = folderItem.title
         }
     }
-    
+
     public enum Action {
         case onAppear
         case loadDataResponse(folders: [FolderItem]?, tracks: [ArchivedTrack]?)
@@ -38,7 +39,7 @@ public struct ArchiveFolderDetailFeature {
         case exportCompleted(successCount: Int, failedCount: Int)
         case delegate(DelegateAction)
     }
-    
+
     private enum CancelID {
         case export
     }
@@ -49,12 +50,12 @@ public struct ArchiveFolderDetailFeature {
         case didTapTrack(ArchivedTrack)
         case showLoginPrompt
     }
-    
+
     private let archiveRepository: ArchiveRepository
     private let exportToSpotifyUseCase: ExportToSpotifyUseCase
     private let manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase
     private let onDelegate: (DelegateAction) -> Void
-    
+
     public init(
         archiveRepository: ArchiveRepository,
         exportToSpotifyUseCase: ExportToSpotifyUseCase,
@@ -66,7 +67,7 @@ public struct ArchiveFolderDetailFeature {
         self.manageSpotifyAuthUseCase = manageSpotifyAuthUseCase
         self.onDelegate = onDelegate
     }
-    
+
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
@@ -75,11 +76,11 @@ public struct ArchiveFolderDetailFeature {
                     do {
                         let allTracks = try await archiveRepository.fetchArchivedTracks()
                         let formatter = DateFormatter()
-                        
+
                         var filteredTracks: [ArchivedTrack] = []
                         var isMonthGroup = false
                         var foldersToDisplay: [FolderItem]? = nil
-                        
+
                         switch folderItem.type {
                         case .releaseYear(let year):
                             isMonthGroup = true
@@ -90,7 +91,7 @@ public struct ArchiveFolderDetailFeature {
                                 }
                                 return false
                             }
-                            
+
                             formatter.dateFormat = "MM"
                             let grouped = Dictionary(grouping: filteredTracks, by: { track -> String in
                                 if let date = track.releaseDate { return formatter.string(from: date) }
@@ -99,14 +100,14 @@ public struct ArchiveFolderDetailFeature {
                             foldersToDisplay = grouped.keys.filter { !$0.isEmpty }.sorted(by: <).map { month in
                                 FolderItem(title: month + "월", subtitle: "\(grouped[month]?.count ?? 0) 곡", type: .releaseMonth(year: year, month: month))
                             }
-                            
+
                         case .listenYear(let year):
                             isMonthGroup = true
                             formatter.dateFormat = "yyyy"
                             filteredTracks = allTracks.filter { track in
                                 return formatter.string(from: track.listenDate) == year
                             }
-                            
+
                             formatter.dateFormat = "MM"
                             let grouped = Dictionary(grouping: filteredTracks, by: { track -> String in
                                 return formatter.string(from: track.listenDate)
@@ -114,7 +115,7 @@ public struct ArchiveFolderDetailFeature {
                             foldersToDisplay = grouped.keys.sorted(by: <).map { month in
                                 FolderItem(title: month + "월", subtitle: "\(grouped[month]?.count ?? 0) 곡", type: .listenMonth(year: year, month: month))
                             }
-                            
+
                         case .releaseMonth(let year, let month):
                             isMonthGroup = true
                             formatter.dateFormat = "yyyy-MM"
@@ -124,7 +125,7 @@ public struct ArchiveFolderDetailFeature {
                                 }
                                 return false
                             }
-                            
+
                             let calendar = Calendar.current
                             let grouped = Dictionary(grouping: filteredTracks, by: { track -> Int in
                                 if let date = track.releaseDate { return calendar.component(.weekOfMonth, from: date) }
@@ -133,14 +134,14 @@ public struct ArchiveFolderDetailFeature {
                             foldersToDisplay = grouped.keys.filter { $0 > 0 }.sorted(by: <).map { week in
                                 FolderItem(title: "\(week)주차", subtitle: "\(grouped[week]?.count ?? 0) 곡", type: .releaseWeek(year: year, month: month, week: "\(week)"))
                             }
-                            
+
                         case .listenMonth(let year, let month):
                             isMonthGroup = true
                             formatter.dateFormat = "yyyy-MM"
                             filteredTracks = allTracks.filter { track in
                                 return formatter.string(from: track.listenDate) == "\(year)-\(month)"
                             }
-                            
+
                             let calendar = Calendar.current
                             let grouped = Dictionary(grouping: filteredTracks, by: { track -> Int in
                                 return calendar.component(.weekOfMonth, from: track.listenDate)
@@ -148,7 +149,7 @@ public struct ArchiveFolderDetailFeature {
                             foldersToDisplay = grouped.keys.sorted(by: <).map { week in
                                 FolderItem(title: "\(week)주차", subtitle: "\(grouped[week]?.count ?? 0) 곡", type: .listenWeek(year: year, month: month, week: "\(week)"))
                             }
-                            
+
                         case .releaseWeek(let year, let month, let week):
                             formatter.dateFormat = "yyyy-MM"
                             let calendar = Calendar.current
@@ -158,7 +159,7 @@ public struct ArchiveFolderDetailFeature {
                                 }
                                 return false
                             }
-                            
+
                         case .listenWeek(let year, let month, let week):
                             formatter.dateFormat = "yyyy-MM"
                             let calendar = Calendar.current
@@ -172,27 +173,28 @@ public struct ArchiveFolderDetailFeature {
                         case .custom:
                             break
                         }
-                        
+
                         await send(.loadDataResponse(folders: isMonthGroup ? foldersToDisplay : nil, tracks: isMonthGroup ? nil : filteredTracks))
                     } catch {
+                        Logger(subsystem: "MusicSearch", category: "ArchiveFolderDetailFeature").error("Failed to fetch folder tracks: \(error.localizedDescription)")
                     }
                 }
-                
+
             case let .loadDataResponse(folders, tracks):
                 state.folders = folders
                 state.tracks = tracks
                 return .none
-                
+
             case let .folderTapped(folder):
                 return .run { @MainActor _ in
                     onDelegate(.didTapFolder(folder))
                 }
-                
+
             case let .trackTapped(track):
                 return .run { @MainActor _ in
                     onDelegate(.didTapTrack(track))
                 }
-                
+
             case .closeButtonTapped:
                 return .merge(
                     .cancel(id: CancelID.export),
@@ -200,7 +202,7 @@ public struct ArchiveFolderDetailFeature {
                         onDelegate(.didTapClose)
                     }
                 )
-                
+
             case .exportButtonTapped:
                 guard let tracks = state.tracks, !tracks.isEmpty else { return .none }
                 if manageSpotifyAuthUseCase.getAccessToken() == nil {
@@ -219,24 +221,25 @@ public struct ArchiveFolderDetailFeature {
                     }
                     .cancellable(id: CancelID.export)
                 }
-                
+
             case .loginPromptTapped:
                 return .run { send in
                     do {
                         try await manageSpotifyAuthUseCase.authorize()
                         await send(.exportButtonTapped)
                     } catch {
+                        Logger(subsystem: "MusicSearch", category: "ArchiveFolderDetailFeature").error("Spotify authorization failed: \(error.localizedDescription)")
                     }
                 }
-                
+
             case let .exportProgress(progress):
                 state.exportState = .exporting(progress: progress)
                 return .none
-                
+
             case let .exportCompleted(success, failed):
                 state.exportState = .completed(successCount: success, failedCount: failed)
                 return .none
-                
+
             case .delegate:
                 return .none
             }

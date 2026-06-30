@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 public protocol ArtistImageEnrichmentService: Sendable {
 	func enrich(_ artists: [Artist]) async -> [Artist]
@@ -76,6 +77,7 @@ public final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentServic
 		} catch is CancellationError {
 			return artists
 		} catch {
+			Logger(subsystem: "MusicSearch", category: "ArtistImageEnrichmentService").error("Enrichment failed: \(error.localizedDescription)")
 			return updatedArtists
 		}
 
@@ -94,6 +96,7 @@ public final class ArtistImageEnrichmentServiceImpl: ArtistImageEnrichmentServic
 		} catch is CancellationError {
 			throw CancellationError()
 		} catch {
+			Logger(subsystem: "MusicSearch", category: "ArtistImageEnrichmentService").error("Fetch image for artist failed: \(error.localizedDescription)")
 			return (offset, nil)
 		}
 	}

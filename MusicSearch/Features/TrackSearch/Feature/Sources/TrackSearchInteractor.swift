@@ -7,13 +7,12 @@
 
 import Combine
 import Foundation
+import OSLog
 import MicroRIBs
 import FeatureTrackSearchInterface
 import FeatureMusicDiggingInterface
 import MSDomain
 import TrackSearchDomain
-
-
 
 @MainActor
 protocol TrackSearchPresentableListener: AnyObject {
@@ -30,8 +29,6 @@ protocol TrackSearchPresentable: Presentable {
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)
 }
-
-
 
 @MainActor
 final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>, TrackSearchInteractable, TrackSearchPresentableListener {
@@ -203,6 +200,8 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 			} catch is CancellationError {
 				return
 			} catch {
+				Logger(subsystem: "MusicSearch", category: "TrackSearchInteractor")
+					.error("loadMore failed: \(error.localizedDescription)")
 				return
 			}
 		}

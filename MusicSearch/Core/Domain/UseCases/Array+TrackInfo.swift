@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 public extension Array where Element == Track {
 	func enrichingTrackInfo(
@@ -43,6 +44,7 @@ public extension Array where Element == Track {
 		} catch is CancellationError {
 			return self
 		} catch {
+			Logger(subsystem: "MusicSearch", category: "Array+TrackInfo").error("Parallel fetch failed: \(error.localizedDescription)")
 			return enrichedTracks
 		}
 
@@ -59,6 +61,7 @@ public extension Array where Element == Track {
 		} catch is CancellationError {
 			throw CancellationError()
 		} catch {
+			Logger(subsystem: "MusicSearch", category: "Array+TrackInfo").error("Fetch individual track failed: \(error.localizedDescription)")
 			return (entry.offset, nil)
 		}
 	}
