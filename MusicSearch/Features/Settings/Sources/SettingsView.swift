@@ -78,50 +78,7 @@ public struct SettingsView: View {
                     }
                 }
                 
-                Section(header: Text("앱 정보")) {
-                    HStack {
-                        Text("버전 정보")
-                            .customText(.bodyLg)
-                            .foregroundColor(CustomColor.onSurface)
-                        Spacer()
-                        Text("1.0.0")
-                            .customText(.bodyMd)
-                            .foregroundColor(CustomColor.outline)
-                    }
-                    
-                    Button(action: {}) {
-                        HStack {
-                            Text("데이터 백업")
-                                .customText(.bodyLg)
-                                .foregroundColor(CustomColor.onSurface)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(CustomColor.outline)
-                        }
-                    }
-                    
-                    Button(action: {}) {
-                        HStack {
-                            Text("문의하기")
-                                .customText(.bodyLg)
-                                .foregroundColor(CustomColor.onSurface)
-                            Spacer()
-                            Image(systemName: "envelope")
-                                .foregroundColor(CustomColor.outline)
-                        }
-                    }
-                }
-                
-                Section(footer: Text("이 작업은 취소할 수 없습니다.")) {
-                    Button(action: {
-                        store.send(.resetDataTapped)
-                    }) {
-                        Text("모든 데이터 초기화")
-                            .customText(.bodyLg)
-                            .foregroundColor(CustomColor.error)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
+
             }
             .navigationTitle("설정")
             .listStyle(.insetGrouped)

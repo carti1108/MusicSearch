@@ -21,7 +21,6 @@ public struct SettingsFeature {
 		case onAppear
 		case loginTapped
 		case disconnectTapped
-		case resetDataTapped
 		
 		case fetchProfileResponse(TaskResult<SpotifyUserProfile?>)
 		case authResponse(TaskResult<Void>)
@@ -75,8 +74,6 @@ public struct SettingsFeature {
 				state.spotifyState = .disconnected
 				return .none
 				
-			case .resetDataTapped:
-				return .none
 				
 			case let .fetchProfileResponse(.success(profile)):
 				if let profile = profile {
