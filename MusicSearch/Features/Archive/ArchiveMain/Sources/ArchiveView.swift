@@ -25,8 +25,20 @@ public struct ArchiveView: View {
 
     public var body: some View {
         ZStack(alignment: .bottom) {
-            CustomColor.background
-                .ignoresSafeArea()
+            ZStack {
+                CustomColor.background
+                Circle()
+                    .fill(CustomColor.surfaceContainerHighest.opacity(0.4))
+                    .frame(width: 400, height: 400)
+                    .blur(radius: 120)
+                    .offset(x: -150, y: -200)
+                Circle()
+                    .fill(CustomColor.surfaceContainer.opacity(0.5))
+                    .frame(width: 350, height: 350)
+                    .blur(radius: 100)
+                    .offset(x: 200, y: 150)
+            }
+            .ignoresSafeArea()
 
             List {
                 VStack(spacing: CustomSpacing.containerMargin) {
@@ -60,7 +72,7 @@ public struct ArchiveView: View {
                     }) {
                         TrackRowItem(track: track)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(BouncyButtonStyle())
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 0, leading: CustomSpacing.containerMargin, bottom: CustomSpacing.gutter, trailing: CustomSpacing.containerMargin))
@@ -172,7 +184,6 @@ public struct ArchiveView: View {
         .padding(.horizontal, CustomSpacing.containerMargin)
         .padding(.top, CustomSpacing.containerMargin)
         .padding(.bottom, 8)
-        .background(CustomColor.background)
         .buttonStyle(BouncyButtonStyle())
     }
 
@@ -250,9 +261,9 @@ public struct TrackRowItem: View {
                 }
             }
         }
-        .padding(.vertical, 8)
-        .background(Color.black.opacity(0.001))
-        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .padding(12)
+        .liquidGlass(cornerRadius: 16)
+        .scaleEffect(isPressed ? 0.96 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
         .onLongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity, pressing: { pressing in
             isPressed = pressing

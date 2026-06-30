@@ -54,7 +54,6 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	private let darkOverlayView: UIView = {
 		let view = UIView()
-		// 글씨와 썸네일이 잘 보이도록 블러 위에 살짝 어두운 막을 씌웁니다.
 		view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
@@ -270,38 +269,31 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 			let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
 			let section = NSCollectionLayoutSection(group: group)
-			// 중앙을 기준으로 페이징되도록 변경
 			section.orthogonalScrollingBehavior = .groupPagingCentered
-			// 셀 간격을 살짝 겹치게 하여 Wrap 느낌 강조
 			section.interGroupSpacing = -10
 			section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
 
-			// 스크롤 시 각 셀의 위치를 기반으로 3D 회전 및 스케일 변화 적용
 			section.visibleItemsInvalidationHandler = { items, offset, environment in
 				let containerWidth = environment.container.contentSize.width
 				let centerX = offset.x + (containerWidth / 2.0)
 
 				items.forEach { item in
-					// 중심점으로부터의 거리
 					let distanceFromCenter = abs(item.frame.midX - centerX)
 					let progress = min(distanceFromCenter / (containerWidth / 2.0), 1.0)
 
-					// 크기 조절 (가운데는 1.0, 양옆은 0.75까지 축소)
 					let scale = 1.0 - (progress * 0.25)
 					
-					// 회전 각도 조절 (양옆 셀들이 가운데를 바라보도록)
 					let isLeft = item.frame.midX < centerX
 					let angle = progress * (CGFloat.pi / 4.5) * (isLeft ? 1 : -1)
 
 					var transform = CATransform3DIdentity
-					transform.m34 = -1.0 / 500.0 // 3D 원근감
-					transform = CATransform3DRotate(transform, angle, 0, 1, 0) // Y축 회전
-					transform = CATransform3DScale(transform, scale, scale, 1) // 스케일 축소
+					transform.m34 = -1.0 / 500.0
+					transform = CATransform3DRotate(transform, angle, 0, 1, 0)
+					transform = CATransform3DScale(transform, scale, scale, 1)
 					
 					item.transform3D = transform
 					item.alpha = 1.0 - (progress * 0.5)
 					
-					// 중심에 가까울수록 가장 위에 오도록 zIndex 설정
 					item.zIndex = Int((1.0 - progress) * 100)
 				}
 			}

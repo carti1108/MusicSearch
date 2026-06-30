@@ -136,12 +136,64 @@ public struct CustomTypographyModifier: ViewModifier {
 	}
 }
 
+// MARK: - Modifiers
+public struct LiquidGlassModifier: ViewModifier {
+    let cornerRadius: CGFloat
+    
+    public init(cornerRadius: CGFloat) {
+        self.cornerRadius = cornerRadius
+    }
+    
+    public func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.15),
+                                        Color.white.opacity(0.0),
+                                        Color.white.opacity(0.05)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.4),
+                                Color.white.opacity(0.1),
+                                Color.white.opacity(0.0),
+                                Color.white.opacity(0.1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            )
+            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+}
+
 // MARK: - View Extensions
 public extension View {
 	func customText(_ style: CustomTextStyle) -> some View {
 		self.modifier(CustomTypographyModifier(style: style))
 	}
 
+    func liquidGlass(cornerRadius: CGFloat = CustomRadius.xl) -> some View {
+        self.modifier(LiquidGlassModifier(cornerRadius: cornerRadius))
+    }
 }
 
 // MARK: - Button Styles

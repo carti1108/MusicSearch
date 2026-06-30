@@ -93,7 +93,6 @@ final class TrackCarouselCell: UICollectionViewCell, ReuseIdentifiable {
 			self.textStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -16)
 		])
 		
-		// 넷플릭스 썸네일 느낌의 깊은 그림자 효과
 		self.contentView.layer.shadowColor = UIColor.black.cgColor
 		self.contentView.layer.shadowOffset = CGSize(width: 0, height: 6)
 		self.contentView.layer.shadowRadius = 10

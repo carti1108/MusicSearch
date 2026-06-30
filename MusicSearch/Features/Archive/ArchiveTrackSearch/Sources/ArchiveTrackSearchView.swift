@@ -46,54 +46,74 @@ public struct ArchiveTrackSearchView: View {
 						.padding()
 					Spacer()
 				} else {
-					List {
-						ForEach(store.results, id: \.id) { track in
-							Button(action: {
-								store.send(.trackSelected(track))
-							}) {
-								HStack(spacing: 12) {
-									if let url = track.imageURL {
-										AsyncImage(url: url) { phase in
-											switch phase {
-											case .empty:
-												Rectangle().fill(CustomColor.surfaceContainerHigh)
-											case .success(let image):
-												image.resizable().aspectRatio(contentMode: .fill)
-											case .failure:
-												Rectangle().fill(CustomColor.surfaceContainerHigh)
-											@unknown default:
-												Rectangle().fill(CustomColor.surfaceContainerHigh)
-											}
-										}
-										.frame(width: 48, height: 48)
-										.clipShape(RoundedRectangle(cornerRadius: 6))
-									} else {
-										Rectangle()
-											.fill(CustomColor.surfaceContainerHigh)
-											.frame(width: 48, height: 48)
-											.clipShape(RoundedRectangle(cornerRadius: 6))
-									}
-									
-									VStack(alignment: .leading, spacing: 4) {
-										Text(track.title)
-											.font(.system(size: 16, weight: .medium))
-											.foregroundColor(CustomColor.onBackground)
-											.lineLimit(1)
-										Text(track.artist)
-											.font(.system(size: 14))
-											.foregroundColor(CustomColor.outline)
-											.lineLimit(1)
-									}
-									Spacer()
-								}
-								.padding(.vertical, 4)
-							}
-						}
-					}
-					.listStyle(PlainListStyle())
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(store.results, id: \.id) { track in
+                                Button(action: {
+                                    store.send(.trackSelected(track))
+                                }) {
+                                    HStack(spacing: 12) {
+                                        if let url = track.imageURL {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .empty:
+                                                    Rectangle().fill(CustomColor.surfaceContainerHigh)
+                                                case .success(let image):
+                                                    image.resizable().aspectRatio(contentMode: .fill)
+                                                case .failure:
+                                                    Rectangle().fill(CustomColor.surfaceContainerHigh)
+                                                @unknown default:
+                                                    Rectangle().fill(CustomColor.surfaceContainerHigh)
+                                                }
+                                            }
+                                            .frame(width: 48, height: 48)
+                                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                                        } else {
+                                            Rectangle()
+                                                .fill(CustomColor.surfaceContainerHigh)
+                                                .frame(width: 48, height: 48)
+                                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(track.title)
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .lineLimit(1)
+                                            Text(track.artist)
+                                                .font(.system(size: 14))
+                                                .foregroundColor(Color.white.opacity(0.7))
+                                                .lineLimit(1)
+                                        }
+                                        Spacer()
+                                    }
+                                    .padding(12)
+                                    .liquidGlass(cornerRadius: 16)
+                                }
+                                .buttonStyle(BouncyButtonStyle())
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 24)
+                    }
 				}
 			}
-			.background(CustomColor.background.edgesIgnoringSafeArea(.all))
+            .background(
+                ZStack {
+                    CustomColor.background.edgesIgnoringSafeArea(.all)
+                    Circle()
+                        .fill(CustomColor.surfaceContainerHigh.opacity(0.6))
+                        .frame(width: 300, height: 300)
+                        .blur(radius: 100)
+                        .offset(x: -100, y: -200)
+                    Circle()
+                        .fill(CustomColor.surfaceContainer.opacity(0.5))
+                        .frame(width: 400, height: 400)
+                        .blur(radius: 120)
+                        .offset(x: 150, y: 300)
+                }
+                .edgesIgnoringSafeArea(.all)
+            )
 			.navigationBarTitle("곡 검색", displayMode: .inline)
 			.navigationBarItems(leading: Button("취소", action: {
 				store.send(.closeButtonTapped)

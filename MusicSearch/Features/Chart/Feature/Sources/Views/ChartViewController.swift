@@ -37,7 +37,7 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 	}()
 
 	private let blurEffectView: UIVisualEffectView = {
-		let blurEffect = UIBlurEffect(style: .dark)
+		let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
 		let view = UIVisualEffectView(effect: blurEffect)
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
@@ -45,7 +45,7 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 
 	private let darkOverlayView: UIView = {
 		let view = UIView()
-		view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+		view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
 		view.translatesAutoresizingMaskIntoConstraints = false
 		return view
 	}()
@@ -149,7 +149,6 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 
 	func update(podiumItems: [ChartItem], listItems: [ChartItem]) {
 		if podiumItems.count > 1 {
-			// podiumItems는 [2위, 1위, 3위] 순서로 정렬되어 있으므로 1위는 인덱스 1입니다.
 			let firstPlace = podiumItems[1]
 			UIView.transition(with: self.backgroundImageView, duration: 0.5, options: .transitionCrossDissolve) {
 				self.backgroundImageView.setRemoteImage(firstPlace.imageURL, targetSize: UIScreen.main.bounds.size)
@@ -399,7 +398,6 @@ extension ChartViewController: UICollectionViewDelegate {
 extension ChartViewController: UICollectionViewDataSourcePrefetching {
 	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
 		let urls = indexPaths.compactMap { indexPath -> URL? in
-			// Chart의 dataSource 구조에 따라 안전하게 접근
 			guard let item = self.dataSource?.itemIdentifier(for: indexPath) else { return nil }
 			return item.thumbnailURL ?? item.imageURL
 		}
