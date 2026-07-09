@@ -4,6 +4,7 @@ import ArchiveDomain
 import TrackSearchDomain
 import MSDomain
 import OSLog
+import Kingfisher
 
 @Reducer
 public struct AddArchiveFeature {
@@ -90,18 +91,15 @@ public struct AddArchiveFeature {
 
 	private let archiveRepository: ArchiveRepository
 	private let searchTracksUseCase: SearchTracksUseCase
-	private let imageDownloadRepository: ImageDownloadRepository
 	private let onDelegate: (DelegateAction) -> Void
 
 	public init(
 		archiveRepository: ArchiveRepository,
 		searchTracksUseCase: SearchTracksUseCase,
-		imageDownloadRepository: ImageDownloadRepository,
 		onDelegate: @escaping (DelegateAction) -> Void
 	) {
 		self.archiveRepository = archiveRepository
 		self.searchTracksUseCase = searchTracksUseCase
-		self.imageDownloadRepository = imageDownloadRepository
 		self.onDelegate = onDelegate
 	}
 
@@ -177,7 +175,20 @@ public struct AddArchiveFeature {
 				if let imageURL = track.imageURL {
 					return .run { send in
 						do {
-							let data = try await imageDownloadRepository.downloadImage(from: imageURL)
+							let data = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
+								KingfisherManager.shared.retrieveImage(with: imageURL) { result in
+									switch result {
+									case .success(let value):
+										if let imgData = value.image.pngData() {
+											continuation.resume(returning: imgData)
+										} else {
+											continuation.resume(throwing: URLError(.cannotDecodeRawData))
+										}
+									case .failure(let error):
+										continuation.resume(throwing: error)
+									}
+								}
+							}
 							await send(.coverImageLoaded(data))
 						} catch {
 							Logger(subsystem: "MusicSearch", category: "AddArchiveFeature").error("Fetch cover image failed: \(error.localizedDescription)")

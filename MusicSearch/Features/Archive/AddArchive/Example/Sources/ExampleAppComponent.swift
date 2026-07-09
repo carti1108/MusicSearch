@@ -18,9 +18,7 @@ final class ExampleAppComponent: AddArchiveDependency {
     var searchTracksUseCase: SearchTracksUseCase {
         MockSearchTracksUseCase()
     }
-    var imageDownloadRepository: ImageDownloadRepository {
-        MockImageDownloadRepository()
-    }
+
     var archiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
         MockArchiveTrackSearchBuilder()
     }
@@ -41,10 +39,7 @@ final class MockSearchTracksUseCase: SearchTracksUseCase {
     }
 }
 
-final class MockImageDownloadRepository: ImageDownloadRepository {
-    func downloadImage(from url: URL) async throws -> Data { return Data() }
-    func clearCache() { }
-}
+
 
 final class MockArchiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
     func build(withListener listener: FeatureArchiveTrackSearchInterface.ArchiveTrackSearchListener) -> FeatureArchiveTrackSearchInterface.ArchiveTrackSearchRouting {

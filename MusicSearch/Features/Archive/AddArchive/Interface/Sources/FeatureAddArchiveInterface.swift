@@ -9,7 +9,6 @@ import FeatureArchiveTrackSearchInterface
 public protocol AddArchiveDependency: Dependency {
 	var archiveRepository: ArchiveRepository { get }
 	var searchTracksUseCase: SearchTracksUseCase { get }
-	var imageDownloadRepository: ImageDownloadRepository { get }
 	var archiveTrackSearchBuilder: ArchiveTrackSearchBuildable { get }
 }
 

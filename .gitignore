@@ -71,3 +71,4 @@ Derived/
 *.log
 build_log*.txt
 graph.png
+build_temp/

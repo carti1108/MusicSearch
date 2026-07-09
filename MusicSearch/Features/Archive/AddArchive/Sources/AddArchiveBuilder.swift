@@ -16,9 +16,7 @@ final class AddArchiveComponent: Component<AddArchiveDependency> {
 	fileprivate var searchTracksUseCase: SearchTracksUseCase {
 		return dependency.searchTracksUseCase
 	}
-	fileprivate var imageDownloadRepository: ImageDownloadRepository {
-		return dependency.imageDownloadRepository
-	}
+
 	fileprivate var archiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
 		return dependency.archiveTrackSearchBuilder
 	}
@@ -109,7 +107,7 @@ public final class AddArchiveBuilder: Builder<AddArchiveDependency>, AddArchiveB
 			AddArchiveFeature(
 				archiveRepository: component.archiveRepository,
 				searchTracksUseCase: component.searchTracksUseCase,
-				imageDownloadRepository: component.imageDownloadRepository,
+
 				onDelegate: { [weak interactor] action in
 					switch action {
 					case .didCloseAddArchive:
