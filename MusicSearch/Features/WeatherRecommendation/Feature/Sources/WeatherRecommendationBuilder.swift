@@ -17,8 +17,8 @@ final class WeatherRecommendationComponent: Component<WeatherRecommendationDepen
 		self.dependency.fetchMusicForWeatherUseCase
 	}
 
-	fileprivate var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-		self.dependency.fetchMusicAppDeepLinkUseCase
+	fileprivate var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
+		self.dependency.fetchTrackDeepLinkUseCase
 	}
 
 	fileprivate var urlOpener: URLOpening {
@@ -38,7 +38,7 @@ public final class WeatherRecommendationBuilder: Builder<WeatherRecommendationDe
 		let interactor = WeatherRecommendationInteractor(
 			presenter: viewController,
 			fetchMusicForWeatherUseCase: component.fetchMusicForWeatherUseCase,
-			fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase,
+			fetchTrackDeepLinkUseCase: component.fetchTrackDeepLinkUseCase,
 			urlOpener: component.urlOpener
 		)
 		interactor.listener = listener

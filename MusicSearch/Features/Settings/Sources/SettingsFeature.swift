@@ -35,15 +35,17 @@ public struct SettingsFeature {
 		}
 	}
 
-	private let manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase
-	private let fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase
+	private let getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase, disconnectMusicUseCase: DisconnectMusicUseCase
+	private let fetchUserProfileUseCase: FetchUserProfileUseCase
 
 	public init(
-		manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase,
-		fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase
+		getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase, disconnectMusicUseCase: DisconnectMusicUseCase,
+		fetchUserProfileUseCase: FetchUserProfileUseCase
 	) {
-		self.manageSpotifyAuthUseCase = manageSpotifyAuthUseCase
-		self.fetchSpotifyProfileUseCase = fetchSpotifyProfileUseCase
+		self.getMusicAccessTokenUseCase = getMusicAccessTokenUseCase
+        self.authorizeMusicUseCase = authorizeMusicUseCase
+        self.disconnectMusicUseCase = disconnectMusicUseCase
+		self.fetchUserProfileUseCase = fetchUserProfileUseCase
 	}
 
 	public var body: some ReducerOf<Self> {
@@ -51,13 +53,13 @@ public struct SettingsFeature {
 			switch action {
 			case .onAppear:
 				return .run { send in
-					guard manageSpotifyAuthUseCase.getAccessToken() != nil else {
+					guard getMusicAccessTokenUseCase.execute() != nil else {
 						await send(.fetchProfileResponse(.success(nil)))
 						return
 					}
 
 					await send(.fetchProfileResponse(TaskResult {
-						let result = try await fetchSpotifyProfileUseCase.execute()
+						let result = try await fetchUserProfileUseCase.execute()
 						return SpotifyUserProfile(name: result.name, imageURL: result.imageURL)
 					}))
 				}
@@ -65,12 +67,12 @@ public struct SettingsFeature {
 			case .loginTapped:
 				return .run { send in
 					await send(.authResponse(TaskResult {
-						try await manageSpotifyAuthUseCase.authorize()
+						try await authorizeMusicUseCase.execute()
 					}))
 				}
 
 			case .disconnectTapped:
-				manageSpotifyAuthUseCase.disconnect()
+				disconnectMusicUseCase.execute()
 				state.spotifyState = .disconnected
 				return .none
 

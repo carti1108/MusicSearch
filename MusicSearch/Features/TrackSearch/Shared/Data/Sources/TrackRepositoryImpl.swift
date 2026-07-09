@@ -16,11 +16,11 @@ import TrackSearchDomain
 public struct TrackRepositoryImpl: TrackRepository {
 
 	private let networkManager: NetworkRequesting
-	private let musicAppRepository: MusicAppRepository?
+	private let musicAppService: MusicAppService?
 
-	public init(networkManager: NetworkRequesting, musicAppRepository: MusicAppRepository? = nil) {
+	public init(networkManager: NetworkRequesting, musicAppService: MusicAppService? = nil) {
 		self.networkManager = networkManager
-		self.musicAppRepository = musicAppRepository
+		self.musicAppService = musicAppService
 	}
 
 	public func searchTracks(
@@ -28,10 +28,10 @@ public struct TrackRepositoryImpl: TrackRepository {
 		limit: Int,
 		page: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
-		if let musicAppRepository {
+		if let musicAppService {
 			let offset = max(0, (page - 1) * limit)
 			do {
-				let result = try await musicAppRepository.searchSpotifyTracks(query: query, limit: limit, offset: offset)
+				let result = try await musicAppService.searchSpotifyTracks(query: query, limit: limit, offset: offset)
 				if !result.tracks.isEmpty {
 					return result
 				}
@@ -68,7 +68,7 @@ public struct TrackRepositoryImpl: TrackRepository {
 			return track
 		}
 
-		if let musicAppRepository {
+		if let musicAppService {
 			let sanitizedTitle = track.title.replacingOccurrences(of: "\"", with: "")
 			let sanitizedArtist = track.artist.replacingOccurrences(of: "\"", with: "")
 			var query = "track:\"\(sanitizedTitle)\" artist:\"\(sanitizedArtist)\""
@@ -79,7 +79,7 @@ public struct TrackRepositoryImpl: TrackRepository {
 			}
 
 			do {
-				let result = try await musicAppRepository.searchSpotifyTracks(query: query, limit: 1, offset: 0)
+				let result = try await musicAppService.searchSpotifyTracks(query: query, limit: 1, offset: 0)
 				if let spotifyTrack = result.tracks.first {
 					return Track(
 						id: track.id,

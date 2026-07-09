@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol SpotifyAuthRepository: Sendable {
+public protocol MusicAuthService: Sendable {
     func getAccessToken() -> String?
     func getClientCredentialsToken() async throws -> String
     func authorize() async throws

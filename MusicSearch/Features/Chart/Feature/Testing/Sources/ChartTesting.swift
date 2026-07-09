@@ -41,18 +41,19 @@ public final class MockChartListener: ChartListener {
 public final class MockChartDependency: ChartDependency {
 	public let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	public let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
-	public let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	public let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase
 	public let urlOpener: URLOpening
 
 	public init(
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase,
 		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
+		self.fetchArtistDeepLinkUseCase = fetchArtistDeepLinkUseCase
 		self.urlOpener = urlOpener
 	}
 }

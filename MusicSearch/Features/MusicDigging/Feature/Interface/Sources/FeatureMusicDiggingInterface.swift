@@ -21,6 +21,6 @@ public protocol MusicDiggingListener: AnyObject {}
 @MainActor
 public protocol MusicDiggingDependency: Dependency {
 	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
-	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase { get }
 	var urlOpener: URLOpening { get }
 }

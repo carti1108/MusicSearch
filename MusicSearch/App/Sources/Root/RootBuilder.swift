@@ -42,19 +42,22 @@ import ArchiveDomain
 protocol RootDependency: Dependency {
 	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase { get }
-	var fetchMusicAppDeepLinkUseCase: any FetchMusicAppDeepLinkUseCase { get }
+	var fetchTrackDeepLinkUseCase: any FetchTrackDeepLinkUseCase { get }
+	var fetchArtistDeepLinkUseCase: any FetchArtistDeepLinkUseCase { get }
 	var searchTracksUseCase: any SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: any FetchTracksByTagUseCase { get }
 	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase { get }
 	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase { get }
 	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase { get }
-	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase { get }
-	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase { get }
-	var exportToSpotifyUseCase: any ExportToSpotifyUseCase { get }
+	var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase { get }
+	var authorizeMusicUseCase: AuthorizeMusicUseCase { get }
+	var disconnectMusicUseCase: DisconnectMusicUseCase { get }
+	var fetchUserProfileUseCase: FetchUserProfileUseCase { get }
+	var exportPlaylistUseCase: any ExportPlaylistUseCase { get }
 
 	// MARK: - Repositories
 	var archiveRepository: any ArchiveRepository { get }
-	var imageDownloadRepository: any ImageDownloadRepository { get }
+
 
 	// MARK: - Utilities
 	var urlOpener: URLOpening { get }
@@ -67,8 +70,11 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
 		self.dependency.fetchMusicForWeatherUseCase
 	}
-	var fetchMusicAppDeepLinkUseCase: any FetchMusicAppDeepLinkUseCase {
-		self.dependency.fetchMusicAppDeepLinkUseCase
+	var fetchTrackDeepLinkUseCase: any FetchTrackDeepLinkUseCase {
+		self.dependency.fetchTrackDeepLinkUseCase
+	}
+	var fetchArtistDeepLinkUseCase: any FetchArtistDeepLinkUseCase {
+		self.dependency.fetchArtistDeepLinkUseCase
 	}
 	var searchTracksUseCase: any SearchTracksUseCase {
 		self.dependency.searchTracksUseCase
@@ -85,23 +91,27 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase {
 		self.dependency.fetchChartTopArtistsUseCase
 	}
-	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
-		self.dependency.manageSpotifyAuthUseCase
+	var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
+		self.dependency.getMusicAccessTokenUseCase
 	}
-	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
-		self.dependency.fetchSpotifyProfileUseCase
+	var authorizeMusicUseCase: AuthorizeMusicUseCase {
+		self.dependency.authorizeMusicUseCase
 	}
-	var exportToSpotifyUseCase: any ExportToSpotifyUseCase {
-		self.dependency.exportToSpotifyUseCase
+	var disconnectMusicUseCase: DisconnectMusicUseCase {
+		self.dependency.disconnectMusicUseCase
+	}
+	var fetchUserProfileUseCase: FetchUserProfileUseCase {
+		self.dependency.fetchUserProfileUseCase
+	}
+	var exportPlaylistUseCase: any ExportPlaylistUseCase {
+		self.dependency.exportPlaylistUseCase
 	}
 
 	// MARK: - Repositories
 	var archiveRepository: any ArchiveRepository {
 		self.dependency.archiveRepository
 	}
-	var imageDownloadRepository: any ImageDownloadRepository {
-		self.dependency.imageDownloadRepository
-	}
+
 
 	// MARK: - Utilities
 	var urlOpener: URLOpening {

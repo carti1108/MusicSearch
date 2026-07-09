@@ -12,16 +12,16 @@ public final class MockMusicDiggingListener: MusicDiggingListener {
 @MainActor
 public final class MockMusicDiggingDependency: MusicDiggingDependency {
 	public let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
-	public let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	public let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase
 	public let urlOpener: URLOpening
 
 	public init(
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase,
 		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
 		self.urlOpener = urlOpener
 	}
 }
@@ -38,10 +38,10 @@ public final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-public final class MockFetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+public final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
     public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	public func execute(artist: String) async -> URL? { nil }
+	public 
 }
 
 @MainActor

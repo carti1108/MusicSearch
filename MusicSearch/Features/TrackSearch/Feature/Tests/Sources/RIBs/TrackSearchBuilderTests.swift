@@ -23,7 +23,7 @@ struct TrackSearchBuilderTests {
 			searchTracksUseCase: MockSearchTracksUseCaseForBuilder(),
 			fetchTracksByTagUseCase: MockFetchTracksByTagUseCaseForTrackSearchBuilder(),
 			fetchSimilarTracksUseCase: MockFetchSimilarTracksUseCaseForTrackSearchBuilder(),
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForTrackSearchBuilder()
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForTrackSearchBuilder()
 		)
 		let builder = TrackSearchBuilder(dependency: dependency)
 		let navigationController = UINavigationController()

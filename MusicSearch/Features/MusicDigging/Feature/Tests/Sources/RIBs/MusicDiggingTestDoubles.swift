@@ -85,9 +85,9 @@ final class MockFetchSimilarTracksUseCaseForInteractor: FetchSimilarTracksUseCas
 }
 
 @MainActor
-final class MockFetchMusicAppDeepLinkUseCaseForMusicDiggingInteractor: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCaseForMusicDiggingInteractor: FetchMusicAppDeepLinkUseCase {
 	func execute(track: Track) async -> URL? { nil }
-	func execute(artist: String) async -> URL? { nil }
+	
 }
 
 @MainActor
@@ -105,9 +105,9 @@ final class MockFetchSimilarTracksUseCaseForBuilder: FetchSimilarTracksUseCase {
 }
 
 @MainActor
-final class MockFetchMusicAppDeepLinkUseCaseForMusicDiggingBuilder: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCaseForMusicDiggingBuilder: FetchMusicAppDeepLinkUseCase {
 	func execute(track: Track) async -> URL? { nil }
-	func execute(artist: String) async -> URL? { nil }
+	
 }
 
 @MainActor

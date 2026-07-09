@@ -13,7 +13,7 @@ final class FeatureArchiveFolderDetailTests: XCTestCase {
         ]
 
         let store = TestStore(initialState: ArchiveFolderDetailFeature.State(folderItem: folder)) {
-            ArchiveFolderDetailFeature(archiveRepository: MockArchiveRepository(tracks: tracks), exportToSpotifyUseCase: MockExport(), manageSpotifyAuthUseCase: MockAuth(), onDelegate: { _ in })
+            ArchiveFolderDetailFeature(archiveRepository: MockArchiveRepository(tracks: tracks), exportPlaylistUseCase: MockExport(), getMusicAccessTokenUseCase: MockGetMusicAccessTokenUseCase(), authorizeMusicUseCase: MockAuthorizeMusicUseCase(), onDelegate: { _ in })
         }
 
         await store.send(ArchiveFolderDetailFeature.Action.onAppear)
@@ -34,7 +34,7 @@ final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
     func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
     func deleteArchivedTrack(id: UUID) async throws { }
 }
-final class MockExport: ExportToSpotifyUseCase {
+final class MockExport: ExportPlaylistUseCase {
     func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
         return AsyncStream { continuation in
             continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
@@ -42,8 +42,11 @@ final class MockExport: ExportToSpotifyUseCase {
         }
     }
 }
-final class MockAuth: ManageSpotifyAuthUseCase {
-    func getAccessToken() -> String? { return "token" }
-    func authorize() async throws {}
-    func disconnect() {}
+
+final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
+    func execute() -> String? { return "token" }
 }
+final class MockAuthorizeMusicUseCase: AuthorizeMusicUseCase {
+    func execute() async throws {}
+}
+

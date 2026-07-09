@@ -12,12 +12,12 @@ final class ExampleAppComponent: ArchiveFolderDetailDependency {
         MockArchiveRepository()
     }
 
-    var exportToSpotifyUseCase: ExportToSpotifyUseCase {
-        MockExportToSpotifyUseCase()
+    var exportPlaylistUseCase: ExportPlaylistUseCase {
+        MockExportPlaylistUseCase()
     }
 
-    var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
-        MockManageSpotifyAuthUseCase()
+    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase {
+        MockManageMusicAuthUseCase()
     }
 }
 
@@ -37,7 +37,7 @@ final class MockArchiveRepository: ArchiveRepository {
     func deleteArchivedTrack(id: UUID) async throws { }
 }
 
-final class MockExportToSpotifyUseCase: ExportToSpotifyUseCase {
+final class MockExportPlaylistUseCase: ExportPlaylistUseCase {
     func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
         return AsyncStream { continuation in
             continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
@@ -46,7 +46,7 @@ final class MockExportToSpotifyUseCase: ExportToSpotifyUseCase {
     }
 }
 
-final class MockManageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
+final class MockManageMusicAuthUseCase: ManageMusicAuthUseCase {
     func getAccessToken() -> String? { return "token" }
     func authorize() async throws { }
     func disconnect() { }

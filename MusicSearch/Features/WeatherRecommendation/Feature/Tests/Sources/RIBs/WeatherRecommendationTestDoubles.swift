@@ -56,9 +56,9 @@ final class MockFetchMusicForWeatherUseCaseForInteractor: FetchMusicForWeatherUs
 }
 
 @MainActor
-final class MockFetchMusicAppDeepLinkUseCaseForWeatherRecommendationInteractor: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCaseForWeatherRecommendationInteractor: FetchMusicAppDeepLinkUseCase {
 	func execute(track: Track) async -> URL? { nil }
-	func execute(artist: String) async -> URL? { nil }
+	
 }
 
 @MainActor

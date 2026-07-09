@@ -33,7 +33,7 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	weak var listener: WeatherRecommendationListener?
 
 	private let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
-	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	private let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase
 	private let urlOpener: URLOpening
 	private var loadTask: Task<Void, Never>?
 
@@ -49,11 +49,11 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	init(
 		presenter: WeatherRecommendationPresentable,
 		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase,
 		urlOpener: URLOpening
 	) {
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
 		self.urlOpener = urlOpener
 		super.init(presenter: presenter)
 		presenter.listener = self
@@ -107,10 +107,10 @@ final class WeatherRecommendationInteractor: PresentableInteractor<WeatherRecomm
 	}
 
 	private func openMusicApp(for track: Track) {
-		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let fetchTrackDeepLinkUseCase = self.fetchTrackDeepLinkUseCase
 		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			guard let url = await fetchTrackDeepLinkUseCase.execute(track: track) else { return }
 			urlOpener.open(url)
 		}
 	}

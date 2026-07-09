@@ -23,7 +23,7 @@ struct ChartBuilderTests {
 		let dependency = MockChartDependency(
 			fetchChartTopTracksUseCase: fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: MockFetchChartTopArtistsUseCaseForBuilder(),
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForChartBuilder(),
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForChartBuilder(),
 			urlOpener: MockURLOpener()
 		)
 		let builder = ChartBuilder(dependency: dependency)

@@ -28,8 +28,8 @@ final class TrackSearchComponent: Component<TrackSearchDependency>, TrackSearchD
 		self.dependency.fetchSimilarTracksUseCase
 	}
 
-	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-		self.dependency.fetchMusicAppDeepLinkUseCase
+	var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
+		self.dependency.fetchTrackDeepLinkUseCase
 	}
 
 	var urlOpener: URLOpening {

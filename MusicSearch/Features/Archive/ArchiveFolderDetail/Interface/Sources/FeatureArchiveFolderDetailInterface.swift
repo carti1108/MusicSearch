@@ -23,6 +23,7 @@ public protocol ArchiveFolderDetailListener: AnyObject {
 @MainActor
 public protocol ArchiveFolderDetailDependency: Dependency {
     var archiveRepository: ArchiveRepository { get }
-    var exportToSpotifyUseCase: ExportToSpotifyUseCase { get }
-    var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase { get }
+    var exportPlaylistUseCase: ExportPlaylistUseCase { get }
+    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase { get }
+    var authorizeMusicUseCase: AuthorizeMusicUseCase { get }
 }

@@ -15,7 +15,7 @@ final class ExampleAppComponent: ChartDependency {
         MockFetchChartTopArtistsUseCase()
     }
 
-    var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+    var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase {
         MockFetchMusicAppDeepLinkUseCase()
     }
 

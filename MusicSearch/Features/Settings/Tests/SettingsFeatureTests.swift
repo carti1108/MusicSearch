@@ -6,11 +6,13 @@ import MSDomain
 @MainActor
 final class SettingsFeatureTests: XCTestCase {
     func testOnAppearWithToken() async {
-        let mockFetch = MockFetchSpotifyProfileUseCase(profile: ("Test User", nil))
-        let mockManage = MockManageSpotifyAuthUseCase(token: "token")
+        let mockFetch = MockFetchUserProfileUseCase(profile: ("Test User", nil))
+        let mockGet = MockGetMusicAccessTokenUseCase(token: "token")
+        let mockAuth = MockAuthorizeMusicUseCase()
+        let mockDisconnect = MockDisconnectMusicUseCase()
 
         let store = TestStore(initialState: SettingsFeature.State()) {
-            SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
+            SettingsFeature(getMusicAccessTokenUseCase: mockGet, authorizeMusicUseCase: mockAuth, disconnectMusicUseCase: mockDisconnect, fetchUserProfileUseCase: mockFetch)
         }
 
         await store.send(.onAppear)
@@ -20,11 +22,13 @@ final class SettingsFeatureTests: XCTestCase {
     }
 
     func testOnAppearWithoutToken() async {
-        let mockFetch = MockFetchSpotifyProfileUseCase(profile: nil)
-        let mockManage = MockManageSpotifyAuthUseCase(token: nil)
+        let mockFetch = MockFetchUserProfileUseCase(profile: nil)
+        let mockGet = MockGetMusicAccessTokenUseCase(token: nil)
+        let mockAuth = MockAuthorizeMusicUseCase()
+        let mockDisconnect = MockDisconnectMusicUseCase()
 
         let store = TestStore(initialState: SettingsFeature.State()) {
-            SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
+            SettingsFeature(getMusicAccessTokenUseCase: mockGet, authorizeMusicUseCase: mockAuth, disconnectMusicUseCase: mockDisconnect, fetchUserProfileUseCase: mockFetch)
         }
 
         await store.send(.onAppear)
@@ -34,17 +38,19 @@ final class SettingsFeatureTests: XCTestCase {
     }
 
     func testLoginTapped() async {
-        let mockFetch = MockFetchSpotifyProfileUseCase(profile: ("Test User", nil))
-        let mockManage = MockManageSpotifyAuthUseCase(token: nil)
+        let mockFetch = MockFetchUserProfileUseCase(profile: ("Test User", nil))
+        let mockGet = MockGetMusicAccessTokenUseCase(token: nil)
+        let mockAuth = MockAuthorizeMusicUseCase()
+        let mockDisconnect = MockDisconnectMusicUseCase()
 
         let store = TestStore(initialState: SettingsFeature.State()) {
-            SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
+            SettingsFeature(getMusicAccessTokenUseCase: mockGet, authorizeMusicUseCase: mockAuth, disconnectMusicUseCase: mockDisconnect, fetchUserProfileUseCase: mockFetch)
         }
 
         await store.send(.loginTapped)
         await store.receive(\.authResponse.success)
 
-        mockManage.token = "token"
+        mockGet.token = "token"
         await store.receive(\.onAppear)
 
         await store.receive(\.fetchProfileResponse.success) {
@@ -53,32 +59,43 @@ final class SettingsFeatureTests: XCTestCase {
     }
 
     func testDisconnectTapped() async {
-        let mockFetch = MockFetchSpotifyProfileUseCase(profile: nil)
-        let mockManage = MockManageSpotifyAuthUseCase(token: "token")
+        let mockFetch = MockFetchUserProfileUseCase(profile: nil)
+        let mockGet = MockGetMusicAccessTokenUseCase(token: "token")
+        let mockAuth = MockAuthorizeMusicUseCase()
+        let mockDisconnect = MockDisconnectMusicUseCase()
 
         var state = SettingsFeature.State()
         state.spotifyState = .connected(name: "Test User", imageURL: nil)
 
         let store = TestStore(initialState: state) {
-            SettingsFeature(manageSpotifyAuthUseCase: mockManage, fetchSpotifyProfileUseCase: mockFetch)
+            SettingsFeature(getMusicAccessTokenUseCase: mockGet, authorizeMusicUseCase: mockAuth, disconnectMusicUseCase: mockDisconnect, fetchUserProfileUseCase: mockFetch)
         }
 
         await store.send(.disconnectTapped) {
             $0.spotifyState = .disconnected
         }
-        XCTAssertNil(mockManage.getAccessToken())
+        XCTAssertTrue(mockDisconnect.disconnectCalled)
     }
 }
 
-final class MockManageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
+
+final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
     var token: String?
     init(token: String?) { self.token = token }
-    func getAccessToken() -> String? { return token }
-    func authorize() async throws { token = "token" }
-    func disconnect() { token = nil }
+    func execute() -> String? { return token }
 }
 
-final class MockFetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
+final class MockAuthorizeMusicUseCase: AuthorizeMusicUseCase {
+    func execute() async throws { }
+}
+
+final class MockDisconnectMusicUseCase: DisconnectMusicUseCase {
+    var disconnectCalled = false
+    func execute() { disconnectCalled = true }
+}
+
+
+final class MockFetchUserProfileUseCase: FetchUserProfileUseCase {
     var profile: (String, URL?)?
     init(profile: (String, URL?)?) { self.profile = profile }
     func execute() async throws -> (name: String, imageURL: URL?) {

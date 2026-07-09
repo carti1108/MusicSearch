@@ -28,7 +28,7 @@ public protocol TrackSearchDependency: Dependency {
 	var searchTracksUseCase: SearchTracksUseCase { get }
 	var fetchTracksByTagUseCase: FetchTracksByTagUseCase { get }
 	var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase { get }
-	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase { get }
 	var urlOpener: URLOpening { get }
 	var musicDiggingBuilder: MusicDiggingBuildable { get }
 }

@@ -43,16 +43,16 @@ public final class MockWeatherRecommendationListener: WeatherRecommendationListe
 @MainActor
 public final class MockWeatherRecommendationDependency: WeatherRecommendationDependency {
 	public let fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase
-	public let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	public let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase
 	public let urlOpener: URLOpening
 
 	public init(
 		fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase,
 		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchMusicForWeatherUseCase = fetchMusicForWeatherUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
 		self.urlOpener = urlOpener
 	}
 }
@@ -69,8 +69,8 @@ public final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-public final class MockFetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+public final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
     public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	public func execute(artist: String) async -> URL? { nil }
+	public 
 }

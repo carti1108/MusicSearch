@@ -31,33 +31,27 @@ final class AppComponent: RootDependency {
 	let spotifyAPIConfiguration: SpotifyAPIConfiguration
 	let urlOpener: URLOpening
 
-	private lazy var musicAppRepositoryInstance: MusicAppRepository = {
-		SpotifyAppRepository(
+	private lazy var musicAppServiceInstance: MusicAppService = {
+		SpotifyAppService(
 			configuration: self.spotifyAPIConfiguration,
 			networkManager: self.networkManager,
-			authRepository: self.spotifyAuthRepositoryInstance
+			authService: self.musicAuthServiceInstance
 		)
 	}()
 
-	private lazy var fetchMusicAppDeepLinkUseCaseInstance: FetchMusicAppDeepLinkUseCase = {
-		FetchMusicAppDeepLinkUseCaseImpl(musicAppRepository: self.musicAppRepositoryInstance)
-	}()
 
-	private lazy var artistImageRepositoryInstance: ArtistImageRepository = {
-		SpotifyArtistImageRepository(
+	private lazy var artistImageServiceInstance: ArtistImageService = {
+		SpotifyArtistImageService(
 			configuration: self.spotifyAPIConfiguration,
 			networkManager: self.networkManager,
-			authRepository: self.spotifyAuthRepositoryInstance
+			authService: self.musicAuthServiceInstance
 		)
 	}()
 
 	private lazy var fetchArtistImageURLUseCaseInstance: FetchArtistImageURLUseCase = {
-		FetchArtistImageURLUseCaseImpl(artistImageRepository: self.artistImageRepositoryInstance)
+		FetchArtistImageURLUseCaseImpl(artistImageService: self.artistImageServiceInstance)
 	}()
 
-	private lazy var imageDownloadRepositoryInstance: ImageDownloadRepository = {
-		ImageDownloadRepositoryImpl()
-	}()
 
 	private lazy var locationRepositoryInstance: LocationRepository = {
 		LocationRepositoryImpl(locationManager: self.locationManager)
@@ -73,7 +67,7 @@ final class AppComponent: RootDependency {
 	private lazy var trackRepositoryInstance: TrackRepository = {
 		TrackRepositoryImpl(
 			networkManager: self.networkManager,
-			musicAppRepository: self.musicAppRepositoryInstance
+			musicAppService: self.musicAppServiceInstance
 		)
 	}()
 
@@ -98,14 +92,14 @@ final class AppComponent: RootDependency {
 		ArchiveRepositoryImpl(modelContainer: self.modelContainer)
 	}()
 
-	private lazy var spotifyRepositoryInstance: SpotifyRepository = {
-		SpotifyRepositoryImpl(networkManager: self.networkManager)
+	private lazy var playlistExportServiceInstance: PlaylistExportService = {
+		SpotifyPlaylistExportService(networkManager: self.networkManager)
 	}()
 
-	private lazy var exportToSpotifyUseCaseInstance: ExportToSpotifyUseCase = {
-		ExportToSpotifyUseCaseImpl(
-			spotifyRepository: self.spotifyRepositoryInstance,
-			authRepository: self.spotifyAuthRepositoryInstance
+	private lazy var exportPlaylistUseCaseInstance: ExportPlaylistUseCase = {
+		ExportPlaylistUseCaseImpl(
+			playlistExportService: self.playlistExportServiceInstance,
+			authService: self.musicAuthServiceInstance
 		)
 	}()
 
@@ -113,8 +107,8 @@ final class AppComponent: RootDependency {
 		self.archiveRepositoryInstance
 	}
 
-	var exportToSpotifyUseCase: ExportToSpotifyUseCase {
-		self.exportToSpotifyUseCaseInstance
+	var exportPlaylistUseCase: ExportPlaylistUseCase {
+		self.exportPlaylistUseCaseInstance
 	}
 
 	var locationRepository: LocationRepository {
@@ -129,14 +123,11 @@ final class AppComponent: RootDependency {
 	var chartRepository: ChartRepository {
 		self.chartRepositoryInstance
 	}
-	var musicAppRepository: MusicAppRepository {
-		self.musicAppRepositoryInstance
+	var musicAppService: MusicAppService {
+		self.musicAppServiceInstance
 	}
-	var artistImageRepository: ArtistImageRepository {
-		self.artistImageRepositoryInstance
-	}
-	var imageDownloadRepository: ImageDownloadRepository {
-		self.imageDownloadRepositoryInstance
+	var artistImageService: ArtistImageService {
+		self.artistImageServiceInstance
 	}
 
 	var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase {
@@ -146,23 +137,32 @@ final class AppComponent: RootDependency {
 		)
 	}
 
-	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-		self.fetchMusicAppDeepLinkUseCaseInstance
+	var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
+		FetchTrackDeepLinkUseCaseImpl(musicAppService: self.musicAppServiceInstance)
+	}
+	var fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase {
+		FetchArtistDeepLinkUseCaseImpl(musicAppService: self.musicAppServiceInstance)
 	}
 	var fetchArtistImageURLUseCase: FetchArtistImageURLUseCase {
 		self.fetchArtistImageURLUseCaseInstance
 	}
 
-	private lazy var spotifyAuthRepositoryInstance: SpotifyAuthRepository = {
-		SpotifyAuthRepositoryImpl(networkManager: self.networkManager)
+	private lazy var musicAuthServiceInstance: MusicAuthService = {
+		SpotifyAuthServiceImpl(networkManager: self.networkManager)
 	}()
 
-	var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
-		ManageSpotifyAuthUseCaseImpl(authRepository: self.spotifyAuthRepositoryInstance)
+	var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
+		GetMusicAccessTokenUseCaseImpl(authService: self.musicAuthServiceInstance)
+	}
+	var authorizeMusicUseCase: AuthorizeMusicUseCase {
+		AuthorizeMusicUseCaseImpl(authService: self.musicAuthServiceInstance)
+	}
+	var disconnectMusicUseCase: DisconnectMusicUseCase {
+		DisconnectMusicUseCaseImpl(authService: self.musicAuthServiceInstance)
 	}
 
-	var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
-		FetchSpotifyProfileUseCaseImpl(authRepository: self.spotifyAuthRepositoryInstance)
+	var fetchUserProfileUseCase: FetchUserProfileUseCase {
+		FetchUserProfileUseCaseImpl(authService: self.musicAuthServiceInstance)
 	}
 
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {

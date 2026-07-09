@@ -23,7 +23,7 @@ struct WeatherRecommendationInteractorTests {
 		let interactor = WeatherRecommendationInteractor(
 			presenter: presenter,
 			fetchMusicForWeatherUseCase: fetchMusicForWeatherUseCase,
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForWeatherRecommendationInteractor(),
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForWeatherRecommendationInteractor(),
 			urlOpener: MockURLOpener()
 		)
 

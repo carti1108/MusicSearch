@@ -30,7 +30,7 @@ struct MusicDiggingInteractorTests {
 			seedTrack: seedTrack,
 			presenter: presenter,
 			fetchSimilarTracksUseCase: fetchSimilarTracksUseCase,
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForMusicDiggingInteractor(),
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForMusicDiggingInteractor(),
 			urlOpener: MockURLOpener()
 		)
 
@@ -68,7 +68,7 @@ struct MusicDiggingInteractorTests {
 			seedTrack: seedTrack,
 			presenter: presenter,
 			fetchSimilarTracksUseCase: fetchSimilarTracksUseCase,
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForMusicDiggingInteractor(),
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForMusicDiggingInteractor(),
 			urlOpener: MockURLOpener()
 		)
 

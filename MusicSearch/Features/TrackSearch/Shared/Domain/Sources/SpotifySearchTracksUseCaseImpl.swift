@@ -3,9 +3,9 @@ import Foundation
 
 public struct SpotifySearchTracksUseCaseImpl: SearchTracksUseCase {
 
-	private let spotifyRepository: MusicAppRepository
+	private let spotifyRepository: MusicAppService
 
-	public init(spotifyRepository: MusicAppRepository) {
+	public init(spotifyRepository: MusicAppService) {
 		self.spotifyRepository = spotifyRepository
 	}
 

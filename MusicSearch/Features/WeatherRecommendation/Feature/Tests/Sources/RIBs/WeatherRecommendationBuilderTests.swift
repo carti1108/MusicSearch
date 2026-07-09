@@ -20,10 +20,10 @@ struct WeatherRecommendationBuilderTests {
 	func buildWiresListenerPresenterAndDependencies() async {
 		// Given
 		let fetchMusicForWeatherUseCase = MockFetchMusicForWeatherUseCase()
-		let fetchMusicAppDeepLinkUseCase = MockFetchMusicAppDeepLinkUseCase()
+		let fetchTrackDeepLinkUseCase = MockFetchTrackDeepLinkUseCase()
 		let dependency = MockWeatherRecommendationDependency(
 			fetchMusicForWeatherUseCase: fetchMusicForWeatherUseCase,
-			fetchMusicAppDeepLinkUseCase: fetchMusicAppDeepLinkUseCase
+			fetchTrackDeepLinkUseCase: fetchMusicAppDeepLinkUseCase
 		)
 		let builder = WeatherRecommendationBuilder(dependency: dependency)
 		let listener = MockWeatherRecommendationListener()

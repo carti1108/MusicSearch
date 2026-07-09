@@ -18,6 +18,6 @@ public protocol WeatherRecommendationListener: AnyObject {}
 @MainActor
 public protocol WeatherRecommendationDependency: Dependency {
 	var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase { get }
-	var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+	var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase { get }
 	var urlOpener: URLOpening { get }
 }

@@ -38,7 +38,7 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 
 	private let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	private let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
-	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	private let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase
 	private let urlOpener: URLOpening
 
 	private var loadTask: Task<Void, Never>?
@@ -51,12 +51,13 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 		presenter: ChartPresentable,
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase,
 		urlOpener: URLOpening
 	) {
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase
 		self.fetchChartTopArtistsUseCase = fetchChartTopArtistsUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
+		self.fetchArtistDeepLinkUseCase = fetchArtistDeepLinkUseCase
 		self.urlOpener = urlOpener
 		super.init(presenter: presenter)
 		presenter.listener = self
@@ -217,19 +218,19 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 	}
 
 	private func openMusicApp(for track: Track) {
-		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let fetchTrackDeepLinkUseCase = self.fetchTrackDeepLinkUseCase
 		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			guard let url = await fetchTrackDeepLinkUseCase.execute(track: track) else { return }
 			urlOpener.open(url)
 		}
 	}
 
 	private func openMusicApp(for artist: String) {
-		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let fetchTrackDeepLinkUseCase = self.fetchTrackDeepLinkUseCase
 		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await fetchMusicAppDeepLinkUseCase.execute(artist: artist) else { return }
+			guard let url = await fetchArtistDeepLinkUseCase.execute(artist: artist) else { return }
 			urlOpener.open(url)
 		}
 	}

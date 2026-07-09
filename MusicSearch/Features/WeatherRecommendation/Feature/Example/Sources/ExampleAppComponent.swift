@@ -15,8 +15,8 @@ final class ExampleAppComponent: WeatherRecommendationDependency {
     var fetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
         MockFetchMusicForWeatherUseCase()
     }
-    var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-        MockFetchMusicAppDeepLinkUseCase()
+    var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
+        MockFetchTrackDeepLinkUseCase()
     }
     var urlOpener: URLOpening {
         MockURLOpener()
@@ -39,9 +39,9 @@ final class MockFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
     }
 }
 
-final class MockFetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
     func execute(track: Track) async -> URL? { nil }
-    func execute(artist: String) async -> URL? { nil }
+    
 }
 
 final class MockURLOpener: URLOpening {

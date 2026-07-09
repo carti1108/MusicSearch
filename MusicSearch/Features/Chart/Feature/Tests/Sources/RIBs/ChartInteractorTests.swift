@@ -31,7 +31,7 @@ struct ChartInteractorTests {
 			presenter: presenter,
 			fetchChartTopTracksUseCase: fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: MockFetchChartTopArtistsUseCase(),
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForChartInteractor(),
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForChartInteractor(),
 			urlOpener: MockURLOpener()
 		)
 
@@ -66,7 +66,7 @@ struct ChartInteractorTests {
 			presenter: presenter,
 			fetchChartTopTracksUseCase: MockFetchChartTopTracksUseCase(),
 			fetchChartTopArtistsUseCase: fetchChartTopArtistsUseCase,
-			fetchMusicAppDeepLinkUseCase: MockFetchMusicAppDeepLinkUseCaseForChartInteractor(),
+			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForChartInteractor(),
 			urlOpener: MockURLOpener()
 		)
 

@@ -52,19 +52,20 @@ public struct ArchiveFolderDetailFeature {
     }
 
     private let archiveRepository: ArchiveRepository
-    private let exportToSpotifyUseCase: ExportToSpotifyUseCase
-    private let manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase
+    private let exportPlaylistUseCase: ExportPlaylistUseCase
+    private let getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase
     private let onDelegate: (DelegateAction) -> Void
 
     public init(
         archiveRepository: ArchiveRepository,
-        exportToSpotifyUseCase: ExportToSpotifyUseCase,
-        manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase,
+        exportPlaylistUseCase: ExportPlaylistUseCase,
+        getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase,
         onDelegate: @escaping (DelegateAction) -> Void
     ) {
         self.archiveRepository = archiveRepository
-        self.exportToSpotifyUseCase = exportToSpotifyUseCase
-        self.manageSpotifyAuthUseCase = manageSpotifyAuthUseCase
+        self.exportPlaylistUseCase = exportPlaylistUseCase
+        self.getMusicAccessTokenUseCase = getMusicAccessTokenUseCase
+        self.authorizeMusicUseCase = authorizeMusicUseCase
         self.onDelegate = onDelegate
     }
 
@@ -205,14 +206,14 @@ public struct ArchiveFolderDetailFeature {
 
             case .exportButtonTapped:
                 guard let tracks = state.tracks, !tracks.isEmpty else { return .none }
-                if manageSpotifyAuthUseCase.getAccessToken() == nil {
+                if getMusicAccessTokenUseCase.execute() == nil {
                     return .run { @MainActor _ in
                         onDelegate(.showLoginPrompt)
                     }
                 } else {
                     return .run { [title = state.title] send in
                         let playlistName = "MusicSearch Archive - \(title)"
-                        for await progress in exportToSpotifyUseCase.execute(tracks: tracks, playlistName: playlistName) {
+                        for await progress in exportPlaylistUseCase.execute(tracks: tracks, playlistName: playlistName) {
                             await send(.exportProgress(progress))
                             if progress.isComplete {
                                 await send(.exportCompleted(successCount: progress.currentCount - progress.failedTracks.count, failedCount: progress.failedTracks.count))
@@ -225,7 +226,7 @@ public struct ArchiveFolderDetailFeature {
             case .loginPromptTapped:
                 return .run { send in
                     do {
-                        try await manageSpotifyAuthUseCase.authorize()
+                        try await authorizeMusicUseCase.execute()
                         await send(.exportButtonTapped)
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFolderDetailFeature").error("Spotify authorization failed: \(error.localizedDescription)")

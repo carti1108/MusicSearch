@@ -11,11 +11,14 @@ public final class ArchiveFolderDetailComponent: Component<ArchiveFolderDetailDe
     fileprivate var archiveRepository: ArchiveRepository {
         return dependency.archiveRepository
     }
-    fileprivate var exportToSpotifyUseCase: ExportToSpotifyUseCase {
-        return dependency.exportToSpotifyUseCase
+    fileprivate var exportPlaylistUseCase: ExportPlaylistUseCase {
+        return dependency.exportPlaylistUseCase
     }
-    fileprivate var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
-        return dependency.manageSpotifyAuthUseCase
+    fileprivate var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
+        return dependency.getMusicAccessTokenUseCase
+    }
+    fileprivate var authorizeMusicUseCase: AuthorizeMusicUseCase {
+        return dependency.authorizeMusicUseCase
     }
 }
 
@@ -142,8 +145,9 @@ public final class ArchiveFolderDetailBuilder: Builder<ArchiveFolderDetailDepend
         let store = Store(initialState: ArchiveFolderDetailFeature.State(folderItem: folderItem)) {
             ArchiveFolderDetailFeature(
                 archiveRepository: component.archiveRepository,
-                exportToSpotifyUseCase: component.exportToSpotifyUseCase,
-                manageSpotifyAuthUseCase: component.manageSpotifyAuthUseCase,
+                exportPlaylistUseCase: component.exportPlaylistUseCase,
+                getMusicAccessTokenUseCase: component.getMusicAccessTokenUseCase,
+                authorizeMusicUseCase: component.authorizeMusicUseCase,
                 onDelegate: { [weak interactor] action in
                     switch action {
                     case .didTapClose:

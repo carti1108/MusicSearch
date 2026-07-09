@@ -8,8 +8,10 @@ import MSDomain
 
 @MainActor
 public protocol SettingsDependency: MicroRIBs.Dependency {
-    var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase { get }
-    var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase { get }
+    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase { get }
+    var authorizeMusicUseCase: AuthorizeMusicUseCase { get }
+    var disconnectMusicUseCase: DisconnectMusicUseCase { get }
+    var fetchUserProfileUseCase: FetchUserProfileUseCase { get }
 }
 
 final class SettingsComponent: Component<SettingsDependency> {
@@ -46,8 +48,10 @@ public final class SettingsBuilder: Builder<SettingsDependency>, SettingsBuildab
 
         let store = Store(initialState: SettingsFeature.State()) {
             SettingsFeature(
-                manageSpotifyAuthUseCase: component.dependency.manageSpotifyAuthUseCase,
-                fetchSpotifyProfileUseCase: component.dependency.fetchSpotifyProfileUseCase
+                getMusicAccessTokenUseCase: component.dependency.getMusicAccessTokenUseCase,
+                authorizeMusicUseCase: component.dependency.authorizeMusicUseCase,
+                disconnectMusicUseCase: component.dependency.disconnectMusicUseCase,
+                fetchUserProfileUseCase: component.dependency.fetchUserProfileUseCase
             )
         }
 

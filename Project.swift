@@ -70,7 +70,13 @@ let coreTargets: [Target] = [
 		bundleId: "\(bundlePrefix).MSDomain",
 		deploymentTargets: deploymentTarget,
 		infoPlist: .default,
-		sources: ["MusicSearch/Core/Domain/**"],
+		sources: [
+			"MusicSearch/Core/Domain/Entities/**",
+			"MusicSearch/Core/Domain/Interfaces/**",
+			"MusicSearch/Core/Domain/Services/**",
+			"MusicSearch/Core/Domain/UseCases/**",
+			"MusicSearch/Core/Domain/Sources/**"
+		],
 		dependencies: [
 			.target(name: "MSUtil")
 		],
@@ -83,11 +89,43 @@ let coreTargets: [Target] = [
 		bundleId: "\(bundlePrefix).MSData",
 		deploymentTargets: deploymentTarget,
 		infoPlist: .default,
-		sources: ["MusicSearch/Core/Data/**"],
+		sources: [
+			"MusicSearch/Core/Data/DTOs/**",
+			"MusicSearch/Core/Data/Network/**",
+			"MusicSearch/Core/Data/Repositories/**",
+			"MusicSearch/Core/Infrastructure/**"
+		],
 		dependencies: [
 			.target(name: "MSDomain"),
 			.target(name: "ArchiveDomain"),
 			.package(product: "NetworkLayer")
+		],
+		settings: projectSettings
+	),
+	.target(
+		name: "MSDomainTests",
+		destinations: [.iPhone],
+		product: .unitTests,
+		bundleId: "\(bundlePrefix).MSDomainTests",
+		deploymentTargets: deploymentTarget,
+		infoPlist: .default,
+		sources: ["MusicSearch/Core/Domain/Tests/**"],
+		dependencies: [
+			.target(name: "MSDomain")
+		],
+		settings: projectSettings
+	),
+	.target(
+		name: "MSDataTests",
+		destinations: [.iPhone],
+		product: .unitTests,
+		bundleId: "\(bundlePrefix).MSDataTests",
+		deploymentTargets: deploymentTarget,
+		infoPlist: .default,
+		sources: ["MusicSearch/Core/Data/Tests/**"],
+		dependencies: [
+			.target(name: "MSData"),
+			.target(name: "MSDomain")
 		],
 		settings: projectSettings
 	)

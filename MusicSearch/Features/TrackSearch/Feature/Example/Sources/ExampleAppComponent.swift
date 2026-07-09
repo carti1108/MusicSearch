@@ -21,8 +21,8 @@ final class ExampleAppComponent: TrackSearchDependency {
     var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
         MockFetchSimilarTracksUseCase()
     }
-    var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-        MockFetchMusicAppDeepLinkUseCase()
+    var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
+        MockFetchTrackDeepLinkUseCase()
     }
     var urlOpener: URLOpening {
         MockURLOpener()
@@ -54,9 +54,9 @@ final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
     func execute(targetTrack: Track) async throws -> [Track] { return [] }
 }
 
-final class MockFetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
     func execute(track: Track) async -> URL? { nil }
-    func execute(artist: String) async -> URL? { nil }
+    
 }
 
 final class MockURLOpener: URLOpening {

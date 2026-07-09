@@ -7,24 +7,24 @@ import FeatureSettingsInterface
 
 @MainActor
 final class ExampleAppComponent: SettingsDependency {
-    var manageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
-        MockManageSpotifyAuthUseCase()
+    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase, disconnectMusicUseCase: DisconnectMusicUseCase {
+        MockManageMusicAuthUseCase()
     }
 
-    var fetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
-        MockFetchSpotifyProfileUseCase()
+    var fetchUserProfileUseCase: FetchUserProfileUseCase {
+        MockFetchUserProfileUseCase()
     }
 }
 
 // MARK: - Mocks
 
-final class MockManageSpotifyAuthUseCase: ManageSpotifyAuthUseCase {
+final class MockManageMusicAuthUseCase: ManageMusicAuthUseCase {
     func getAccessToken() -> String? { return nil }
     func authorize() async throws { }
     func disconnect() { }
 }
 
-final class MockFetchSpotifyProfileUseCase: FetchSpotifyProfileUseCase {
+final class MockFetchUserProfileUseCase: FetchUserProfileUseCase {
     func execute() async throws -> (name: String, imageURL: URL?) {
         return (name: "Test User", imageURL: nil)
     }

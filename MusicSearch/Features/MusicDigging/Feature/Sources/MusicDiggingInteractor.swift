@@ -35,7 +35,7 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 	weak var listener: MusicDiggingListener?
 
 	private let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
-	private let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	private let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase
 	private let urlOpener: URLOpening
 	private var loadTask: Task<Void, Never>?
 
@@ -46,12 +46,12 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 		seedTrack: Track,
 		presenter: MusicDiggingPresentable,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase,
 		urlOpener: URLOpening
 	) {
 		self.currentSeedTrack = seedTrack
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
 		self.urlOpener = urlOpener
 		super.init(presenter: presenter)
 		presenter.listener = self
@@ -116,10 +116,10 @@ final class MusicDiggingInteractor: PresentableInteractor<MusicDiggingPresentabl
 	}
 
 	private func openMusicApp(for track: Track) {
-		let fetchMusicAppDeepLinkUseCase = self.fetchMusicAppDeepLinkUseCase
+		let fetchTrackDeepLinkUseCase = self.fetchTrackDeepLinkUseCase
 		let urlOpener = self.urlOpener
 		Task {
-			guard let url = await fetchMusicAppDeepLinkUseCase.execute(track: track) else { return }
+			guard let url = await fetchTrackDeepLinkUseCase.execute(track: track) else { return }
 			urlOpener.open(url)
 		}
 	}

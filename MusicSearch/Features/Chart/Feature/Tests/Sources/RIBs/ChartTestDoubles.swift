@@ -38,8 +38,12 @@ final class ChartPresentableSpy: ChartPresentable {
 }
 
 @MainActor
-final class MockFetchMusicAppDeepLinkUseCaseForChartInteractor: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCaseForChartInteractor: FetchTrackDeepLinkUseCase {
 	func execute(track: Track) async -> URL? { nil }
+}
+
+@MainActor
+final class MockFetchArtistDeepLinkUseCaseForChartInteractor: FetchArtistDeepLinkUseCase {
 	func execute(artist: String) async -> URL? { nil }
 }
 
@@ -72,8 +76,12 @@ final class MockFetchChartTopArtistsUseCaseForBuilder: FetchChartTopArtistsUseCa
 }
 
 @MainActor
-final class MockFetchMusicAppDeepLinkUseCaseForChartBuilder: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCaseForChartBuilder: FetchTrackDeepLinkUseCase {
 	func execute(track: Track) async -> URL? { nil }
+}
+
+@MainActor
+final class MockFetchArtistDeepLinkUseCaseForChartBuilder: FetchArtistDeepLinkUseCase {
 	func execute(artist: String) async -> URL? { nil }
 }
 

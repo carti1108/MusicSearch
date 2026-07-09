@@ -8,7 +8,8 @@ import ChartDomain
 public protocol ChartDependency: Dependency {
     var fetchChartTopTracksUseCase: FetchChartTopTracksUseCase { get }
     var fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase { get }
-    var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase { get }
+    var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase { get }
+    var fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase { get }
     var urlOpener: URLOpening { get }
 }
 

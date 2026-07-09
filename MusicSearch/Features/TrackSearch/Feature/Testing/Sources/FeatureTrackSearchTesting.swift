@@ -46,7 +46,7 @@ public final class MockTrackSearchDependency: TrackSearchDependency {
 	public let searchTracksUseCase: SearchTracksUseCase
 	public let fetchTracksByTagUseCase: FetchTracksByTagUseCase
 	public let fetchSimilarTracksUseCase: FetchSimilarTracksUseCase
-	public let fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase
+	public let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase
 	public let urlOpener: URLOpening
 	public let musicDiggingBuilder: MusicDiggingBuildable
 
@@ -54,14 +54,14 @@ public final class MockTrackSearchDependency: TrackSearchDependency {
 		searchTracksUseCase: SearchTracksUseCase,
 		fetchTracksByTagUseCase: FetchTracksByTagUseCase,
 		fetchSimilarTracksUseCase: FetchSimilarTracksUseCase,
-		fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase,
 		urlOpener: URLOpening? = nil,
 		musicDiggingBuilder: MusicDiggingBuildable? = nil
 	) {
 		self.searchTracksUseCase = searchTracksUseCase
 		self.fetchTracksByTagUseCase = fetchTracksByTagUseCase
 		self.fetchSimilarTracksUseCase = fetchSimilarTracksUseCase
-		self.fetchMusicAppDeepLinkUseCase = fetchMusicAppDeepLinkUseCase
+		self.fetchTrackDeepLinkUseCase = fetchTrackDeepLinkUseCase
 		self.urlOpener = urlOpener ?? MockURLOpener()
 		self.musicDiggingBuilder = musicDiggingBuilder ?? MockMusicDiggingBuildable()
 	}
@@ -79,10 +79,10 @@ public final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-public final class MockFetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+public final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
     public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	public func execute(artist: String) async -> URL? { nil }
+	public 
 }
 
 @MainActor

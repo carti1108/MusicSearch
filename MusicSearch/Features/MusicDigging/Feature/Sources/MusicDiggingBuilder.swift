@@ -25,7 +25,7 @@ public final class MusicDiggingBuilder: Builder<MusicDiggingDependency>, MusicDi
 			seedTrack: seedTrack,
 			presenter: viewController,
 			fetchSimilarTracksUseCase: self.dependency.fetchSimilarTracksUseCase,
-			fetchMusicAppDeepLinkUseCase: self.dependency.fetchMusicAppDeepLinkUseCase,
+			fetchTrackDeepLinkUseCase: self.dependency.fetchTrackDeepLinkUseCase,
 			urlOpener: self.dependency.urlOpener
 		)
 		interactor.listener = listener

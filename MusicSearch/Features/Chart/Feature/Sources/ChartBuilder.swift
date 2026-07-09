@@ -21,8 +21,12 @@ final class ChartComponent: Component<ChartDependency> {
 		self.dependency.fetchChartTopArtistsUseCase
 	}
 
-	fileprivate var fetchMusicAppDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-		self.dependency.fetchMusicAppDeepLinkUseCase
+	fileprivate var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
+		self.dependency.fetchTrackDeepLinkUseCase
+	}
+
+	fileprivate var fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase {
+		self.dependency.fetchArtistDeepLinkUseCase
 	}
 
 	fileprivate var urlOpener: URLOpening {
@@ -43,7 +47,8 @@ public final class ChartBuilder: Builder<ChartDependency>, ChartBuildable {
 			presenter: viewController,
 			fetchChartTopTracksUseCase: component.fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: component.fetchChartTopArtistsUseCase,
-			fetchMusicAppDeepLinkUseCase: component.fetchMusicAppDeepLinkUseCase,
+			fetchTrackDeepLinkUseCase: component.fetchTrackDeepLinkUseCase,
+			fetchArtistDeepLinkUseCase: component.fetchArtistDeepLinkUseCase,
 			urlOpener: component.urlOpener
 		)
 		interactor.listener = listener

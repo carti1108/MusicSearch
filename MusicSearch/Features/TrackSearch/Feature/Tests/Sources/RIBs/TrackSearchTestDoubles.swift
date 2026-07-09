@@ -67,9 +67,9 @@ final class MockFetchSimilarTracksUseCaseForTrackSearchBuilder: FetchSimilarTrac
 }
 
 @MainActor
-final class MockFetchMusicAppDeepLinkUseCaseForTrackSearchBuilder: FetchMusicAppDeepLinkUseCase {
+final class MockFetchTrackDeepLinkUseCaseForTrackSearchBuilder: FetchMusicAppDeepLinkUseCase {
 	func execute(track: Track) async -> URL? { nil }
-	func execute(artist: String) async -> URL? { nil }
+	
 }
 
 @MainActor
