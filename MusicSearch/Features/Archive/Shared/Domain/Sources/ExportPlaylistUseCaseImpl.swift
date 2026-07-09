@@ -2,13 +2,13 @@ import Foundation
 import OSLog
 import MSDomain
 
-public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
-    private let spotifyRepository: SpotifyRepository
-    private let authRepository: SpotifyAuthRepository
+public final class ExportPlaylistUseCaseImpl: ExportPlaylistUseCase {
+    private let playlistExportService: PlaylistExportService
+    private let authService: MusicAuthService
 
-    public init(spotifyRepository: SpotifyRepository, authRepository: SpotifyAuthRepository) {
-        self.spotifyRepository = spotifyRepository
-        self.authRepository = authRepository
+    public init(playlistExportService: PlaylistExportService, authService: MusicAuthService) {
+        self.playlistExportService = playlistExportService
+        self.authService = authService
     }
 
     public func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
@@ -18,7 +18,7 @@ public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
                 var failedTracks: [ExportFailure] = []
                 let totalCount = tracks.count
 
-                guard let validToken = authRepository.getAccessToken() else {
+                guard let validToken = authService.getAccessToken() else {
                     continuation.yield(ExportProgress(totalCount: totalCount, currentCount: 0, failedTracks: [], isComplete: true, fatalError: .unauthenticated))
                     continuation.finish()
                     return
@@ -26,8 +26,8 @@ public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
 
                 do {
                     try Task.checkCancellation()
-                    let userId = try await spotifyRepository.getUserProfile(token: validToken)
-                    let playlistId = try await spotifyRepository.createPlaylist(userId: userId, name: playlistName, token: validToken)
+                    let userId = try await playlistExportService.getUserProfile(token: validToken)
+                    let playlistId = try await playlistExportService.createPlaylist(userId: userId, name: playlistName, token: validToken)
 
                     var urisToAdd: [String] = []
 
@@ -37,13 +37,13 @@ public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
                             if let spotifyURI = track.platformIDs["spotify"] {
                                 let uriToUse = spotifyURI.hasPrefix("spotify:track:") ? spotifyURI : "spotify:track:\(spotifyURI)"
                                 urisToAdd.append(uriToUse)
-                            } else if let uri = try await spotifyRepository.searchTrack(title: track.title, artist: track.artist, token: validToken) {
+                            } else if let uri = try await playlistExportService.searchTrack(title: track.title, artist: track.artist, token: validToken) {
                                 urisToAdd.append(uri)
                             } else {
                                 failedTracks.append(ExportFailure(track: track, error: .trackNotFound))
                             }
                         } catch {
-                            Logger(subsystem: "MusicSearch", category: "ExportToSpotifyUseCase")
+                            Logger(subsystem: "MusicSearch", category: "ExportPlaylistUseCase")
 								.error("Failed to search track on Spotify: \(track.title) - \(error.localizedDescription)")
                             failedTracks.append(ExportFailure(track: track, error: .searchFailed))
                         }
@@ -52,14 +52,14 @@ public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
                         continuation.yield(ExportProgress(totalCount: totalCount, currentCount: currentCount, failedTracks: failedTracks, isComplete: false))
 
                         if urisToAdd.count >= 100 {
-                            try await spotifyRepository.addItemsToPlaylist(playlistId: playlistId, uris: urisToAdd, token: validToken)
+                            try await playlistExportService.addItemsToPlaylist(playlistId: playlistId, uris: urisToAdd, token: validToken)
                             urisToAdd.removeAll()
                         }
                     }
 
                     if !urisToAdd.isEmpty {
                         try Task.checkCancellation()
-                        try await spotifyRepository.addItemsToPlaylist(playlistId: playlistId, uris: urisToAdd, token: validToken)
+                        try await playlistExportService.addItemsToPlaylist(playlistId: playlistId, uris: urisToAdd, token: validToken)
                     }
 
                     continuation.yield(ExportProgress(totalCount: totalCount, currentCount: currentCount, failedTracks: failedTracks, isComplete: true))
@@ -68,7 +68,7 @@ public final class ExportToSpotifyUseCaseImpl: ExportToSpotifyUseCase {
                 } catch is CancellationError {
                     continuation.finish()
                 } catch {
-                    Logger(subsystem: "MusicSearch", category: "ExportToSpotifyUseCase")
+                    Logger(subsystem: "MusicSearch", category: "ExportPlaylistUseCase")
 						.error("Failed to create playlist or add tracks: \(error.localizedDescription)")
                     continuation.yield(ExportProgress(totalCount: totalCount, currentCount: currentCount, failedTracks: failedTracks, isComplete: true, fatalError: .playlistCreationFailed))
                     continuation.finish()

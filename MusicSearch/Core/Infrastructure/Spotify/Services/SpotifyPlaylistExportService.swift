@@ -2,7 +2,7 @@ import Foundation
 import ArchiveDomain
 import NetworkLayer
 
-public final class SpotifyRepositoryImpl: SpotifyRepository {
+public final class SpotifyPlaylistExportService: PlaylistExportService {
     private let networkManager: NetworkRequesting
 
     public init(networkManager: NetworkRequesting) {

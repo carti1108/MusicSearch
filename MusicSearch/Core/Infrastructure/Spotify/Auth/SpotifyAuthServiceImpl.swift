@@ -3,7 +3,7 @@ import MSDomain
 import NetworkLayer
 import MSUtil
 
-public final class SpotifyAuthRepositoryImpl: SpotifyAuthRepository {
+public final class SpotifyAuthServiceImpl: MusicAuthService {
     private let networkManager: NetworkRequesting
 
     public init(networkManager: NetworkRequesting) {

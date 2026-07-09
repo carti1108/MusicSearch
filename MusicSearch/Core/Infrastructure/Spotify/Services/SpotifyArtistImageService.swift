@@ -1,5 +1,5 @@
 //
-//  SpotifyArtistImageRepository.swift
+//  SpotifyArtistImageService.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 4/22/26.
@@ -10,11 +10,11 @@ import NetworkLayer
 import MSDomain
 import MSUtil
 
-public actor SpotifyArtistImageRepository: ArtistImageRepository {
+public actor SpotifyArtistImageService: ArtistImageService {
 
 	private let configuration: SpotifyAPIConfiguration
 	private let networkManager: NetworkRequesting
-	private let authRepository: SpotifyAuthRepository
+	private let authService: MusicAuthService
 
 	private enum SpotifyRepositoryError: Error {
 		case invalidURL
@@ -24,11 +24,11 @@ public actor SpotifyArtistImageRepository: ArtistImageRepository {
 	public init(
 		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
 		networkManager: NetworkRequesting,
-		authRepository: SpotifyAuthRepository
+		authService: MusicAuthService
 	) {
 		self.configuration = configuration
 		self.networkManager = networkManager
-		self.authRepository = authRepository
+		self.authService = authService
 	}
 
 	public func fetchImageURL(for artistName: String) async throws -> URL? {
@@ -37,12 +37,12 @@ public actor SpotifyArtistImageRepository: ArtistImageRepository {
 	}
 
 	private func getAccessToken() async throws -> String {
-		if let token = authRepository.getAccessToken() {
+		if let token = authService.getAccessToken() {
 			return token
 		}
 
 		do {
-			return try await authRepository.getClientCredentialsToken()
+			return try await authService.getClientCredentialsToken()
 		} catch {
 			throw SpotifyRepositoryError.unauthorized
 		}

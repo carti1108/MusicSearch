@@ -1,5 +1,5 @@
 import Foundation
 
-public protocol ExportToSpotifyUseCase: Sendable {
+public protocol ExportPlaylistUseCase: Sendable {
     func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress>
 }

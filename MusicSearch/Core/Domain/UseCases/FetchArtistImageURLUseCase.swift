@@ -12,13 +12,13 @@ public protocol FetchArtistImageURLUseCase: Sendable {
 }
 
 public final class FetchArtistImageURLUseCaseImpl: FetchArtistImageURLUseCase {
-	private let artistImageRepository: ArtistImageRepository
+	private let artistImageService: ArtistImageService
 
-	public init(artistImageRepository: ArtistImageRepository) {
-		self.artistImageRepository = artistImageRepository
+	public init(artistImageService: ArtistImageService) {
+		self.artistImageService = artistImageService
 	}
 
 	public func execute(artistName: String) async throws -> URL? {
-		try await self.artistImageRepository.fetchImageURL(for: artistName)
+		try await self.artistImageService.fetchImageURL(for: artistName)
 	}
 }

@@ -1,7 +1,7 @@
 import Foundation
 import ArchiveDomain
 
-public final class MockExportToSpotifyUseCase: ExportToSpotifyUseCase, @unchecked Sendable {
+public final class MockExportPlaylistUseCase: ExportPlaylistUseCase, @unchecked Sendable {
     public var executeCallCount = 0
     public var lastTracks: [ArchivedTrack]?
     public var lastPlaylistName: String?

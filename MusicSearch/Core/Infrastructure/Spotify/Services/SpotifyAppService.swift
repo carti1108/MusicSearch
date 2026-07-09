@@ -1,5 +1,5 @@
 //
-//  SpotifyAppRepository.swift
+//  SpotifyAppService.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 2/10/26.
@@ -10,7 +10,7 @@ import NetworkLayer
 import MSDomain
 import OSLog
 
-public actor SpotifyAppRepository: MusicAppRepository {
+public actor SpotifyAppService: MusicAppService {
 
 	private struct SearchRequest {
 		let query: String
@@ -19,7 +19,7 @@ public actor SpotifyAppRepository: MusicAppRepository {
 
 	private let configuration: SpotifyAPIConfiguration
 	private let networkManager: NetworkRequesting
-	private let authRepository: SpotifyAuthRepository
+	private let authService: MusicAuthService
 
 	private enum SpotifyRepositoryError: Error {
 		case unauthorized
@@ -30,11 +30,11 @@ public actor SpotifyAppRepository: MusicAppRepository {
 	public init(
 		configuration: SpotifyAPIConfiguration = DefaultSpotifyAPIConfiguration(),
 		networkManager: NetworkRequesting,
-		authRepository: SpotifyAuthRepository
+		authService: MusicAuthService
 	) {
 		self.configuration = configuration
 		self.networkManager = networkManager
-		self.authRepository = authRepository
+		self.authService = authService
 	}
 
 	public func fetchDeepLink(for track: Track) async -> URL? {
@@ -52,7 +52,7 @@ public actor SpotifyAppRepository: MusicAppRepository {
 			let urlString = try await self.searchWithRetry(query: request.query, type: request.type)
 			return try self.makeURL(from: urlString)
 		} catch {
-			Logger(subsystem: "MusicSearch", category: "SpotifyAppRepository")
+			Logger(subsystem: "MusicSearch", category: "SpotifyAppService")
 				.error("fetchAppRedirectURL failed: \(error.localizedDescription). Returning fallback Web URL.")
 			return self.fallbackWebURL(query: query)
 		}
@@ -77,12 +77,12 @@ public actor SpotifyAppRepository: MusicAppRepository {
 	}
 
 	private func getAccessToken() async throws -> String {
-		if let token = authRepository.getAccessToken() {
+		if let token = authService.getAccessToken() {
 			return token
 		}
 
 		do {
-			return try await authRepository.getClientCredentialsToken()
+			return try await authService.getClientCredentialsToken()
 		} catch {
 			throw SpotifyRepositoryError.unauthorized
 		}
