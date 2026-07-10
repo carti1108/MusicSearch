@@ -4,15 +4,17 @@ public extension Target {
     
     static func domainTargets(
         name: String,
-        bundlePrefix: String,
-        deploymentTarget: DeploymentTargets,
-        settings: Settings,
+        bundlePrefix: String = ProjectEnvironment.bundlePrefix,
+        deploymentTarget: DeploymentTargets = ProjectEnvironment.deploymentTarget,
+        settings: Settings = ProjectEnvironment.projectSettings,
         dependencies: [TargetDependency] = [],
         basePath: String? = nil,
         folderName: String? = nil
     ) -> Target {
-        let path = basePath ?? "MusicSearch/Core/\(name)"
+        let path = basePath ?? ""
         let folder = folderName ?? "Domain"
+        
+        let resolvedPath = path.isEmpty ? folder : "\(path)/\(folder)"
         
         return Target.target(
             name: "\(name)Domain",
@@ -21,7 +23,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).\(name)Domain",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["\(path)/\(folder)/Sources/**"],
+            sources: ["\(resolvedPath)/Sources/**"],
             dependencies: dependencies,
             settings: settings
         )
@@ -29,15 +31,17 @@ public extension Target {
 
     static func dataTargets(
         name: String,
-        bundlePrefix: String,
-        deploymentTarget: DeploymentTargets,
-        settings: Settings,
+        bundlePrefix: String = ProjectEnvironment.bundlePrefix,
+        deploymentTarget: DeploymentTargets = ProjectEnvironment.deploymentTarget,
+        settings: Settings = ProjectEnvironment.projectSettings,
         dependencies: [TargetDependency] = [],
         basePath: String? = nil,
         folderName: String? = nil
     ) -> Target {
-        let path = basePath ?? "MusicSearch/Core/\(name)"
+        let path = basePath ?? ""
         let folder = folderName ?? "Data"
+        
+        let resolvedPath = path.isEmpty ? folder : "\(path)/\(folder)"
         
         return Target.target(
             name: "\(name)Data",
@@ -46,7 +50,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).\(name)Data",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["\(path)/\(folder)/Sources/**"],
+            sources: ["\(resolvedPath)/Sources/**"],
             dependencies: dependencies,
             settings: settings
         )
@@ -54,9 +58,9 @@ public extension Target {
 
     static func microFeatureTargets(
         name: String,
-        bundlePrefix: String,
-        deploymentTarget: DeploymentTargets,
-        settings: Settings,
+        bundlePrefix: String = ProjectEnvironment.bundlePrefix,
+        deploymentTarget: DeploymentTargets = ProjectEnvironment.deploymentTarget,
+        settings: Settings = ProjectEnvironment.projectSettings,
         interfaceDependencies: [TargetDependency] = [],
         implementationDependencies: [TargetDependency] = [],
         testingDependencies: [TargetDependency] = [],
@@ -65,10 +69,20 @@ public extension Target {
         basePath: String? = nil,
         folderName: String? = nil
     ) -> [Target] {
-        let path = basePath ?? "MusicSearch/Features/\(name)"
+        let path = basePath ?? ""
         let folder = folderName ?? ""
-        let resolvedPath = folder.isEmpty ? path : "\(path)/\(folder)"
+        let resolvedPath: String
+        if path.isEmpty && folder.isEmpty {
+            resolvedPath = ""
+        } else if path.isEmpty {
+            resolvedPath = folder
+        } else if folder.isEmpty {
+            resolvedPath = path
+        } else {
+            resolvedPath = "\(path)/\(folder)"
+        }
         
+        let sourcePrefix = resolvedPath.isEmpty ? "" : "\(resolvedPath)/"
         
         let interfaceTarget = Target.target(
             name: "Feature\(name)Interface",
@@ -77,7 +91,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Interface",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["\(resolvedPath)/Interface/Sources/**"],
+            sources: ["\(sourcePrefix)Interface/Sources/**"],
             dependencies: interfaceDependencies,
             settings: settings
         )
@@ -89,7 +103,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["\(resolvedPath)/Sources/**"],
+            sources: ["\(sourcePrefix)Sources/**"],
             dependencies: implementationDependencies + [.target(name: "Feature\(name)Interface")],
             settings: settings
         )
@@ -101,7 +115,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Testing",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["\(resolvedPath)/Testing/Sources/**"],
+            sources: ["\(sourcePrefix)Testing/Sources/**"],
             dependencies: testingDependencies + [.target(name: "Feature\(name)Interface")],
             settings: settings
         )
@@ -113,7 +127,7 @@ public extension Target {
             bundleId: "\(bundlePrefix).Feature\(name)Tests",
             deploymentTargets: deploymentTarget,
             infoPlist: .default,
-            sources: ["\(resolvedPath)/Tests/**"],
+            sources: ["\(sourcePrefix)Tests/**"],
             dependencies: testsDependencies + [.target(name: "Feature\(name)"), .target(name: "Feature\(name)Testing")],
             settings: settings
         )
@@ -138,7 +152,7 @@ public extension Target {
                     ]
                 ]
             ]),
-            sources: ["\(resolvedPath)/Example/Sources/**"],
+            sources: ["\(sourcePrefix)Example/Sources/**"],
             dependencies: exampleDependencies + [
                 .target(name: "Feature\(name)"),
                 .target(name: "Feature\(name)Interface"),
