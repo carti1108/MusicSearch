@@ -11,23 +11,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		willConnectTo session: UISceneSession,
 		options connectionOptions: UIScene.ConnectionOptions
 	) {
-		guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
 
-		let window = UIWindow(windowScene: windowScene)
+        let window = UIWindow(windowScene: windowScene)
+        self.window = window
 
-		let component = ExampleAppComponent()
-        let builder = ArchiveBuilder(dependency: component)
-        let router = builder.build(withListener: MockArchiveListener())
-
-        self.router = router
-        router.interactable.activate()
-        router.load()
-
-        window.rootViewController = UINavigationController(rootViewController: router.viewControllable.uiviewController)
+        let demoListVC = DemoListViewController()
+        let nav = UINavigationController(rootViewController: demoListVC)
+        window.rootViewController = nav
         window.makeKeyAndVisible()
-		self.window = window
 	}
 }
 
-@MainActor
-final class MockArchiveListener: ArchiveListener {}

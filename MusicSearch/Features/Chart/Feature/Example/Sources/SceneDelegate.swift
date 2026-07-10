@@ -17,18 +17,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        let component = ExampleAppComponent()
-        let builder = ChartBuilder(dependency: component)
-        let router = builder.build(withListener: MockChartListener())
-
-        self.chartRouter = router
-        router.interactable.activate()
-        router.load()
-
-        window.rootViewController = router.viewControllable.uiviewController
+        let demoListVC = DemoListViewController()
+        let nav = UINavigationController(rootViewController: demoListVC)
+        window.rootViewController = nav
         window.makeKeyAndVisible()
     }
 }
 
-@MainActor
-final class MockChartListener: ChartListener {}

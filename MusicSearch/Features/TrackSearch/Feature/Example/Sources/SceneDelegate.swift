@@ -16,19 +16,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        let component = ExampleAppComponent()
-        let builder = TrackSearchBuilder(dependency: component)
-        let navigationController = UINavigationController()
-        let router = builder.build(withListener: MockTrackSearchListener(), navigationController: navigationController)
-
-        self.trackSearchRouter = router
-        router.interactable.activate()
-        router.load()
-
-        window.rootViewController = navigationController
+        let demoListVC = DemoListViewController()
+        let nav = UINavigationController(rootViewController: demoListVC)
+        window.rootViewController = nav
         window.makeKeyAndVisible()
     }
 }
 
-@MainActor
-final class MockTrackSearchListener: TrackSearchListener {}

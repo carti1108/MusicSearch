@@ -17,20 +17,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        let component = ExampleAppComponent()
-        let builder = ArchiveSearchBuilder(dependency: component)
-        let router = builder.build(withListener: MockArchiveSearchListener())
-
-        self.router = router
-        router.interactable.activate()
-        router.load()
-
-        window.rootViewController = UINavigationController(rootViewController: router.viewControllable.uiviewController)
+        let demoListVC = DemoListViewController()
+        let nav = UINavigationController(rootViewController: demoListVC)
+        window.rootViewController = nav
         window.makeKeyAndVisible()
     }
-}
-
-@MainActor
-final class MockArchiveSearchListener: ArchiveSearchListener {
-    func archiveSearchDidTapClose() {}
 }

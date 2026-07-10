@@ -17,18 +17,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        let component = ExampleAppComponent()
-        let builder = SettingsBuilder(dependency: component)
-        let router = builder.build(withListener: MockSettingsListener())
-
-        self.router = router
-        router.interactable.activate()
-        router.load()
-
-        window.rootViewController = UINavigationController(rootViewController: router.viewControllable.uiviewController)
+        let demoListVC = DemoListViewController()
+        let nav = UINavigationController(rootViewController: demoListVC)
+        window.rootViewController = nav
         window.makeKeyAndVisible()
     }
 }
 
-@MainActor
-final class MockSettingsListener: SettingsListener {}

@@ -17,22 +17,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        let component = ExampleAppComponent()
-        let builder = ArchiveFolderDetailBuilder(dependency: component)
-        let router = builder.build(withListener: MockArchiveFolderDetailListener(), folderItem: FolderItem(title: "Example Folder", subtitle: "0", type: .custom))
-
-        self.router = router
-        router.interactable.activate()
-        router.load()
-
-        window.rootViewController = UINavigationController(rootViewController: router.viewControllable.uiviewController)
+        let demoListVC = DemoListViewController()
+        let nav = UINavigationController(rootViewController: demoListVC)
+        window.rootViewController = nav
         window.makeKeyAndVisible()
     }
-}
-
-@MainActor
-final class MockArchiveFolderDetailListener: ArchiveFolderDetailListener {
-    func archiveFolderDetailDidTapClose() {}
-    func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem) {}
-    func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {}
 }
