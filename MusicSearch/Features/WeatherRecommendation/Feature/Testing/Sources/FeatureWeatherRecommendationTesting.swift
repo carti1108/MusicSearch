@@ -69,8 +69,7 @@ public final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-public final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+public final class MockFetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
     public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	public 
 }

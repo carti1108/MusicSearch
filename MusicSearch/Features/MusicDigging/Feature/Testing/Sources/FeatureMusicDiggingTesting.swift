@@ -38,14 +38,25 @@ public final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-public final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+public final class MockFetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
     public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	public 
 }
 
 @MainActor
 public final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
+	public var result: [Track] = []
+	public var errorToThrow: Error?
+	public var delay: TimeInterval?
+
     public init() {}
-	public func execute(targetTrack: Track) async throws -> [Track] { [] }
+	public func execute(targetTrack: Track) async throws -> [Track] {
+		if let delay = delay {
+			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+		}
+		if let error = errorToThrow {
+			throw error
+		}
+		return result
+	}
 }

@@ -9,12 +9,20 @@ import ChartDomain
 @MainActor
 public final class MockFetchChartTopTracksUseCase: FetchChartTopTracksUseCase {
 	public var result: [Track] = []
+	public var errorToThrow: Error?
+	public var delay: TimeInterval?
 	public var executeCallCount = 0
 
 	public init() {}
 
 	public func execute() async throws -> [Track] {
 		self.executeCallCount += 1
+		if let delay = delay {
+			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+		}
+		if let error = errorToThrow {
+			throw error
+		}
 		return self.result
 	}
 }
@@ -22,12 +30,20 @@ public final class MockFetchChartTopTracksUseCase: FetchChartTopTracksUseCase {
 @MainActor
 public final class MockFetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase {
 	public var result: [Artist] = []
+	public var errorToThrow: Error?
+	public var delay: TimeInterval?
 	public var executeCallCount = 0
 
 	public init() {}
 
 	public func execute() async throws -> [Artist] {
 		self.executeCallCount += 1
+		if let delay = delay {
+			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+		}
+		if let error = errorToThrow {
+			throw error
+		}
 		return self.result
 	}
 }

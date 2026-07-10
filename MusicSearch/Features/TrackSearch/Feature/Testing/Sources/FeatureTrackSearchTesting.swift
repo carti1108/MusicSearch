@@ -11,6 +11,7 @@ import FeatureMusicDiggingInterface
 public final class MockSearchTracksUseCase: SearchTracksUseCase {
 	public var result: (tracks: [Track], totalResults: Int) = ([], 0)
 	public var errorToThrow: Error?
+	public var delay: TimeInterval?
 	public var executeCallCount = 0
 	public var lastQuery: String?
 	public var lastLimit: Int?
@@ -27,6 +28,10 @@ public final class MockSearchTracksUseCase: SearchTracksUseCase {
 		self.lastQuery = query
 		self.lastLimit = limit
 		self.lastPage = page
+
+		if let delay = delay {
+			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+		}
 
 		if let error = self.errorToThrow {
 			throw error
@@ -79,10 +84,9 @@ public final class MockURLOpener: URLOpening {
 }
 
 @MainActor
-public final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
+public final class MockFetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
     public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	public 
 }
 
 @MainActor
