@@ -8,6 +8,12 @@ import FeatureArchiveFolderDetailInterface
 
 @MainActor
 final class ExampleAppComponent: ArchiveFolderDetailDependency {
+    let scenario: DemoScenario
+
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
+    }
+
     var archiveRepository: ArchiveRepository {
         MockArchiveRepository()
     }
@@ -16,8 +22,12 @@ final class ExampleAppComponent: ArchiveFolderDetailDependency {
         MockExportPlaylistUseCase()
     }
 
-    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase {
-        MockManageMusicAuthUseCase()
+    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
+        MockGetMusicAccessTokenUseCase()
+    }
+    
+    var authorizeMusicUseCase: AuthorizeMusicUseCase {
+        MockAuthorizeMusicUseCase()
     }
 }
 
@@ -46,8 +56,10 @@ final class MockExportPlaylistUseCase: ExportPlaylistUseCase {
     }
 }
 
-final class MockManageMusicAuthUseCase: ManageMusicAuthUseCase {
-    func getAccessToken() -> String? { return "token" }
-    func authorize() async throws { }
-    func disconnect() { }
+final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
+    func execute() -> String? { return "token" }
+}
+
+final class MockAuthorizeMusicUseCase: AuthorizeMusicUseCase {
+    func execute() async throws { }
 }

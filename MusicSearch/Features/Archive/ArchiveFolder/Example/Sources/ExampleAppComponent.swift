@@ -9,6 +9,12 @@ import FeatureArchiveFolderDetailInterface
 
 @MainActor
 final class ExampleAppComponent: ArchiveFolderDependency {
+    let scenario: DemoScenario
+
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
+    }
+
     var archiveRepository: ArchiveRepository {
         MockArchiveRepository()
     }

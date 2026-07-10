@@ -12,6 +12,12 @@ import FeatureArchiveTrackSearchInterface
 
 @MainActor
 final class ExampleAppComponent: AddArchiveDependency {
+    let scenario: DemoScenario
+
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
+    }
+
     var archiveRepository: ArchiveRepository {
         MockArchiveRepository()
     }
@@ -38,8 +44,6 @@ final class MockSearchTracksUseCase: SearchTracksUseCase {
         return ([], 0)
     }
 }
-
-
 
 final class MockArchiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
     func build(withListener listener: FeatureArchiveTrackSearchInterface.ArchiveTrackSearchListener) -> FeatureArchiveTrackSearchInterface.ArchiveTrackSearchRouting {

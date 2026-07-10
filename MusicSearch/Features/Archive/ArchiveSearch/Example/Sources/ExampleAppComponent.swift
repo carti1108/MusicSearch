@@ -8,6 +8,12 @@ import FeatureArchiveSearchInterface
 
 @MainActor
 final class ExampleAppComponent: ArchiveSearchDependency {
+    let scenario: DemoScenario
+
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
+    }
+
     var archiveRepository: ArchiveRepository {
         MockArchiveRepository()
     }

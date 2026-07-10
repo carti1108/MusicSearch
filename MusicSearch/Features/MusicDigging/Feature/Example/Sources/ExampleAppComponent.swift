@@ -5,44 +5,47 @@ import FeatureMusicDigging
 import FeatureMusicDiggingInterface
 import MSUtil
 import MusicDiggingDomain
+import FeatureMusicDiggingTesting
 
 @MainActor
 final class ExampleAppComponent: MusicDiggingDependency {
-    var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
-        MockFetchSimilarTracksUseCase()
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
     }
+    
+    var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
+        let mock = MockFetchSimilarTracksUseCase()
+        
+        switch scenario {
+        case .success:
+            mock.result = [
+                Track(title: "Mock Similar 1", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Similar 3", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Similar 4", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Similar 5", artist: "Mock Artist", imageURL: nil)
+            ]
+        case .empty:
+            mock.result = []
+        case .error:
+            mock.errorToThrow = NSError(domain: "Test", code: 1, userInfo: [NSLocalizedDescriptionKey: "네트워크 에러 발생"])
+        case .delayed:
+            mock.delay = 2.0
+            mock.result = [
+                Track(title: "Mock Similar 1", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil)
+            ]
+        }
+        
+        return mock
+    }
+    
     var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
-        MockFetchTrackDeepLinkUseCase()
+        MockFetchTrackDeepLinkUseCaseForMusicDiggingBuilder()
     }
     var urlOpener: URLOpening {
         MockURLOpener()
     }
-}
-
-final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
-	func execute(targetTrack track: Track) async throws -> [Track] {
-        return [
-            Track(title: "Mock Similar 1", artist: "Mock Artist", imageURL: nil),
-            Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil),
-			Track(title: "Mock Similar 2", artist: "Mock Artist", imageURL: nil)
-        ]
-    }
-}
-
-final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-    func execute(track: Track) async -> URL? { nil }
-    
-}
-
-final class MockURLOpener: URLOpening {
-    func open(_ url: URL) {}
 }

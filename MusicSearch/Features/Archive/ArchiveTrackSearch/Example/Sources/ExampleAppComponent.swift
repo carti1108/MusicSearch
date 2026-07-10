@@ -10,6 +10,12 @@ import FeatureArchiveTrackSearchInterface
 
 @MainActor
 final class ExampleAppComponent: ArchiveTrackSearchDependency {
+    let scenario: DemoScenario
+
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
+    }
+
     var archiveRepository: ArchiveRepository {
         MockArchiveRepository()
     }

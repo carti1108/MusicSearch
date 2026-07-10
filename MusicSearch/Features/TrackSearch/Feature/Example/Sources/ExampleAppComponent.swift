@@ -9,11 +9,40 @@ import TrackSearchDomain
 import MusicDiggingDomain
 import FeatureMusicDiggingInterface
 import MicroRIBs
+import FeatureTrackSearchTesting
 
 @MainActor
 final class ExampleAppComponent: TrackSearchDependency {
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario) {
+        self.scenario = scenario
+    }
+    
     var searchTracksUseCase: SearchTracksUseCase {
-        MockSearchTracksUseCase()
+        let mock = MockSearchTracksUseCase()
+        
+        switch scenario {
+        case .success:
+            mock.result = (tracks: [
+                Track(title: "Mock Track 1", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Track 2", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Track 3", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Track 4", artist: "Mock Artist", imageURL: nil)
+            ], totalResults: 4)
+        case .empty:
+            mock.result = (tracks: [], totalResults: 0)
+        case .error:
+            mock.errorToThrow = NSError(domain: "Test", code: 1, userInfo: [NSLocalizedDescriptionKey: "네트워크 에러 발생"])
+        case .delayed:
+            mock.delay = 2.0
+            mock.result = (tracks: [
+                Track(title: "Mock Track 1", artist: "Mock Artist", imageURL: nil),
+                Track(title: "Mock Track 2", artist: "Mock Artist", imageURL: nil)
+            ], totalResults: 2)
+        }
+        
+        return mock
     }
     var fetchTracksByTagUseCase: FetchTracksByTagUseCase {
         MockFetchTracksByTagUseCase()
@@ -28,43 +57,12 @@ final class ExampleAppComponent: TrackSearchDependency {
         MockURLOpener()
     }
     var musicDiggingBuilder: MusicDiggingBuildable {
-        MockMusicDiggingBuildable()
+        MockMusicDiggingBuildableForExample()
     }
-}
-
-final class MockSearchTracksUseCase: SearchTracksUseCase {
-    func execute(
-        query: String,
-        limit: Int,
-        page: Int
-    ) async throws -> (tracks: [Track], totalResults: Int) {
-        let tracks = [
-            Track(title: "Mock Track 1", artist: "Mock Artist", imageURL: nil),
-            Track(title: "Mock Track 2", artist: "Mock Artist", imageURL: nil)
-        ]
-        return (tracks: tracks, totalResults: 2)
-    }
-}
-
-final class MockFetchTracksByTagUseCase: FetchTracksByTagUseCase {
-    func execute(tag: String) async throws -> [Track] { return [] }
-}
-
-final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
-    func execute(targetTrack: Track) async throws -> [Track] { return [] }
-}
-
-final class MockFetchTrackDeepLinkUseCase: FetchMusicAppDeepLinkUseCase {
-    func execute(track: Track) async -> URL? { nil }
-    
-}
-
-final class MockURLOpener: URLOpening {
-    func open(_ url: URL) {}
 }
 
 @MainActor
-final class MockMusicDiggingBuildable: MusicDiggingBuildable {
+final class MockMusicDiggingBuildableForExample: MusicDiggingBuildable {
     func build(withListener listener: MusicDiggingListener, seedTrack: Track) -> MusicDiggingRouting {
         return MockMusicDiggingRouting(
             interactor: MockMusicDiggingInteractor(),
