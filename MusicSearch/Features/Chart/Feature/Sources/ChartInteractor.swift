@@ -227,7 +227,7 @@ final class ChartInteractor: PresentableInteractor<ChartPresentable>, ChartInter
 	}
 
 	private func openMusicApp(for artist: String) {
-		let fetchTrackDeepLinkUseCase = self.fetchTrackDeepLinkUseCase
+		let fetchArtistDeepLinkUseCase = self.fetchArtistDeepLinkUseCase
 		let urlOpener = self.urlOpener
 		Task {
 			guard let url = await fetchArtistDeepLinkUseCase.execute(artist: artist) else { return }
