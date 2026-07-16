@@ -16,9 +16,9 @@ public struct ArchiveTrackSearchView: View {
 			VStack(spacing: 0) {
 				HStack {
 					Image(systemName: "magnifyingglass")
-						.foregroundColor(CustomColor.outline)
+						.foregroundStyle(CustomColor.outline)
 					TextField("곡 제목, 아티스트 검색", text: $store.query)
-						.foregroundColor(CustomColor.onBackground)
+						.foregroundStyle(CustomColor.onBackground)
 						.autocapitalization(.none)
 						.disableAutocorrection(true)
 
@@ -27,7 +27,7 @@ public struct ArchiveTrackSearchView: View {
 							store.send(.clearQueryTapped)
 						}) {
 							Image(systemName: "xmark.circle.fill")
-								.foregroundColor(CustomColor.outline)
+								.foregroundStyle(CustomColor.outline)
 						}
 					}
 				}
@@ -42,7 +42,7 @@ public struct ArchiveTrackSearchView: View {
 					Spacer()
 				} else if store.results.isEmpty && !store.query.isEmpty {
 					Text("검색 결과가 없습니다.")
-						.foregroundColor(CustomColor.outline)
+						.foregroundStyle(CustomColor.outline)
 						.padding()
 					Spacer()
 				} else {
@@ -78,11 +78,11 @@ public struct ArchiveTrackSearchView: View {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(track.title)
                                                 .font(.system(size: 16, weight: .bold))
-                                                .foregroundColor(.white)
+                                                .foregroundStyle(.white)
                                                 .lineLimit(1)
                                             Text(track.artist)
                                                 .font(.system(size: 14))
-                                                .foregroundColor(Color.white.opacity(0.7))
+                                                .foregroundStyle(Color.white.opacity(0.7))
                                                 .lineLimit(1)
                                         }
                                         Spacer()

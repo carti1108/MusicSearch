@@ -16,10 +16,10 @@ public struct ArchiveSearchView: View {
             VStack(alignment: .leading, spacing: 24) {
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(CustomColor.outline)
+                        .foregroundStyle(CustomColor.outline)
                     TextField("곡명, 아티스트 또는 장르 검색", text: $store.searchText)
                         .customText(.bodyMd)
-                        .foregroundColor(CustomColor.onSurface)
+                        .foregroundStyle(CustomColor.onSurface)
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 44)
@@ -35,14 +35,14 @@ public struct ArchiveSearchView: View {
                                 HStack {
                                     Text("최근 검색어")
                                         .customText(.headlineMd)
-                                        .foregroundColor(CustomColor.onSurface)
+                                        .foregroundStyle(CustomColor.onSurface)
                                     Spacer()
                                     Button(action: {
                                         store.send(.clearRecentSearches)
                                     }) {
                                         Text("지우기")
                                             .customText(.labelSm)
-                                            .foregroundColor(CustomColor.primary)
+                                            .foregroundStyle(CustomColor.primary)
                                     }
                                     .buttonStyle(BouncyButtonStyle())
                                 }
@@ -51,14 +51,14 @@ public struct ArchiveSearchView: View {
                                     ForEach(store.recentSearches, id: \.self) { term in
                                         HStack {
                                             Image(systemName: "clock")
-                                                .foregroundColor(CustomColor.outlineVariant)
+                                                .foregroundStyle(CustomColor.outlineVariant)
                                             Text(term)
                                                 .customText(.bodyLg)
-                                                .foregroundColor(CustomColor.onSurface)
+                                                .foregroundStyle(CustomColor.onSurface)
                                             Spacer()
                                             Button(action: { store.send(.removeRecentSearch(term)) }) {
                                                 Image(systemName: "xmark")
-                                                    .foregroundColor(CustomColor.outlineVariant)
+                                                    .foregroundStyle(CustomColor.outlineVariant)
                                                     .padding(8)
                                             }
                                             .buttonStyle(BouncyButtonStyle())
@@ -73,7 +73,7 @@ public struct ArchiveSearchView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("검색 결과")
                                     .customText(.headlineMd)
-                                    .foregroundColor(CustomColor.onSurface)
+                                    .foregroundStyle(CustomColor.onSurface)
 
                                 VStack(spacing: 16) {
                                     ForEach(store.recommendedTracks, id: \.id) { track in
@@ -88,7 +88,7 @@ public struct ArchiveSearchView: View {
                                                         .fill(CustomColor.surfaceContainerHighest)
                                                         .overlay(
                                                             Image(systemName: "music.note")
-                                                                .foregroundColor(CustomColor.outlineVariant)
+                                                                .foregroundStyle(CustomColor.outlineVariant)
                                                         )
                                                 }
                                             }
@@ -98,10 +98,10 @@ public struct ArchiveSearchView: View {
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(track.title)
                                                     .customText(.bodyLg)
-                                                    .foregroundColor(CustomColor.onSurface)
+                                                    .foregroundStyle(CustomColor.onSurface)
                                                 Text(track.artist)
                                                     .customText(.bodyMd)
-                                                    .foregroundColor(CustomColor.outline)
+                                                    .foregroundStyle(CustomColor.outline)
                                             }
 
                                             Spacer()
@@ -113,7 +113,7 @@ public struct ArchiveSearchView: View {
                         } else if !store.searchText.isEmpty {
                             Text("검색 결과가 없습니다.")
                                 .customText(.bodyMd)
-                                .foregroundColor(CustomColor.outline)
+                                .foregroundStyle(CustomColor.outline)
                                 .padding(.top, 20)
                         }
                     }
