@@ -12,7 +12,7 @@ public struct AddArchiveView: View {
 	}
 
 	public var body: some View {
-		NavigationView {
+		NavigationStack {
 			Form {
 				Section {
 					HStack {
@@ -23,7 +23,7 @@ public struct AddArchiveView: View {
 									.resizable()
 									.scaledToFill()
 									.frame(width: 160, height: 160)
-									.clipShape(RoundedRectangle(cornerRadius: CustomRadius.md))
+									.clipShape(.rect(cornerRadius: CustomRadius.md))
 									.shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
 							} else {
 								VStack(spacing: 8) {
@@ -32,10 +32,10 @@ public struct AddArchiveView: View {
 									Text("커버 이미지 추가")
 										.customText(.labelSm)
 								}
-								.foregroundColor(CustomColor.outline)
+								.foregroundStyle(CustomColor.outline)
 								.frame(width: 160, height: 160)
 								.background(CustomColor.surfaceContainerLow)
-								.clipShape(RoundedRectangle(cornerRadius: CustomRadius.md))
+								.clipShape(.rect(cornerRadius: CustomRadius.md))
 							}
 						}
 						.onChange(of: coverItem) {
@@ -54,11 +54,8 @@ public struct AddArchiveView: View {
 				Section(header: Text("기본 정보")) {
 					if !store.isEditMode {
 						Button(action: { store.send(.searchButtonTapped) }) {
-							HStack {
-								Image(systemName: "magnifyingglass")
-								Text("노래 검색하여 자동 입력하기")
-							}
-							.foregroundColor(CustomColor.primary)
+							Label("노래 검색하여 자동 입력하기", systemImage: "magnifyingglass")
+								.foregroundStyle(CustomColor.primary)
 							.padding(.vertical, 4)
 						}
 					}
@@ -86,11 +83,11 @@ public struct AddArchiveView: View {
 									Spacer()
 									if store.genre == genreName {
 										Image(systemName: "checkmark")
-											.foregroundColor(CustomColor.primary)
+											.foregroundStyle(CustomColor.primary)
 									}
 								}
 							}
-							.foregroundColor(CustomColor.onSurface)
+							.foregroundStyle(CustomColor.onSurface)
 						}
 					}
 
@@ -112,7 +109,7 @@ public struct AddArchiveView: View {
 					DatePicker("청취일", selection: $store.listenDate, displayedComponents: .date)
 				}
 
-				Section(header: Text("나의 평점: \(String(format: "%.1f", store.rating))")) {
+				Section(header: Text("나의 평점: \(store.rating, format: .number.precision(.fractionLength(1)))")) {
 					Slider(value: $store.rating, in: 0...5, step: 0.5)
 						.tint(CustomColor.tertiary)
 				}
@@ -126,19 +123,19 @@ public struct AddArchiveView: View {
 			.toolbar {
 				ToolbarItem(placement: .navigationBarLeading) {
 					Button("취소") { store.send(.closeButtonTapped) }
-						.foregroundColor(CustomColor.onSurface)
+						.foregroundStyle(CustomColor.onSurface)
 				}
 				ToolbarItem(placement: .principal) {
 					Text(store.isEditMode ? "기록 수정" : "새 기록 추가")
 						.font(.headline)
-						.foregroundColor(CustomColor.onBackground)
+						.foregroundStyle(CustomColor.onBackground)
 				}
 				ToolbarItem(placement: .navigationBarTrailing) {
 					Button("저장") {
 						store.send(.saveButtonTapped)
 					}
-					.fontWeight(.bold)
-					.foregroundColor(store.title.isEmpty || store.artist.isEmpty ? CustomColor.outline : CustomColor.primary)
+					.bold()
+					.foregroundStyle(store.title.isEmpty || store.artist.isEmpty ? CustomColor.outline : CustomColor.primary)
 					.disabled(store.title.isEmpty || store.artist.isEmpty)
 				}
 			}
