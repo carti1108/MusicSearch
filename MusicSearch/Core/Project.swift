@@ -3,7 +3,6 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "Core",
-    packages: ProjectEnvironment.packages,
     settings: ProjectEnvironment.projectSettings,
     targets: [
         .target(
@@ -19,13 +18,13 @@ let project = Project(
         .target(
             name: "MSUtil",
             destinations: [.iPhone],
-            product: .staticFramework,
+			product: .staticFramework,
             bundleId: "\(ProjectEnvironment.bundlePrefix).MSUtil",
             deploymentTargets: ProjectEnvironment.deploymentTarget,
             infoPlist: .default,
             sources: ["Util/**"],
             dependencies: [
-                .package(product: "Kingfisher")
+                .external(name: "Kingfisher")
             ],
             settings: ProjectEnvironment.projectSettings
         ),
@@ -64,7 +63,7 @@ let project = Project(
             dependencies: [
                 .target(name: "MSDomain"),
                 .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .package(product: "NetworkLayer")
+                .external(name: "NetworkLayer")
             ],
             settings: ProjectEnvironment.projectSettings
         ),

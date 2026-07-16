@@ -3,7 +3,6 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "Settings",
-    packages: ProjectEnvironment.packages,
     settings: ProjectEnvironment.projectSettings,
     targets: [
         Target.microFeatureTargets(
@@ -11,7 +10,7 @@ let project = Project(
             interfaceDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .package(product: "MicroRIBs")
+                .external(name: "MicroRIBs")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -19,14 +18,14 @@ let project = Project(
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "FeatureArchiveFolderDetailInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .package(product: "NetworkLayer"),
-                .package(product: "ComposableArchitecture")
+                .external(name: "NetworkLayer"),
+                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive")),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core")),
-                .package(product: "ComposableArchitecture")
+                .external(name: "ComposableArchitecture")
             ],
             testsDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),

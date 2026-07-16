@@ -3,7 +3,6 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "TrackSearch",
-    packages: ProjectEnvironment.packages,
     settings: ProjectEnvironment.projectSettings,
     targets: [
         [Target.domainTargets(
@@ -27,7 +26,7 @@ let project = Project(
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "TrackSearchDomain"),
                 .project(target: "FeatureMusicDiggingInterface", path: .relativeToRoot("MusicSearch/Features/MusicDigging")),
-                .package(product: "MicroRIBs")
+                .external(name: "MicroRIBs")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
