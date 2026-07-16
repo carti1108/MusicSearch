@@ -4,13 +4,7 @@ public struct ProjectEnvironment {
     public static let deploymentTarget: DeploymentTargets = .iOS("17.0")
     public static let bundlePrefix = "com.carti"
     
-    public static let packages: [Package] = [
-        .remote(url: "https://github.com/onevcat/Kingfisher.git", requirement: .upToNextMajor(from: "8.0.0")),
-        .remote(url: "https://github.com/carti1108/MicroRIBs", requirement: .branch("main")),
-        .remote(url: "https://github.com/carti1108/NetworkLayer.git", requirement: .branch("main")),
-        .remote(url: "https://github.com/pointfreeco/swift-composable-architecture.git", requirement: .upToNextMajor(from: "1.10.0"))
-    ]
-    
+        
     public static let projectSettings: Settings = .settings(
         base: [
             "CODE_SIGN_IDENTITY": "",

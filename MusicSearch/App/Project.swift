@@ -3,7 +3,6 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "MusicSearchApp",
-    packages: ProjectEnvironment.packages,
     settings: ProjectEnvironment.projectSettings,
     targets: [
         .target(
@@ -19,6 +18,7 @@ let project = Project(
                 "SPOTIFY_CLIENT_SECRET": "$(SPOTIFY_CLIENT_SECRET)",
                 "NSLocationWhenInUseUsageDescription": "현재 위치의 날씨 정보를 제공하기 위해 위치 권한이 필요합니다.",
                 "UILaunchStoryboardName": "LaunchScreen",
+                "UIUserInterfaceStyle": "Dark",
                 "LSApplicationQueriesSchemes": ["spotify"],
                 "CFBundleURLTypes": [
                     [
@@ -76,8 +76,8 @@ let project = Project(
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core")),
                 
-                .package(product: "NetworkLayer"),
-                .package(product: "MicroRIBs")
+                .external(name: "NetworkLayer"),
+                .external(name: "MicroRIBs")
             ],
             settings: ProjectEnvironment.appSettings
         )
