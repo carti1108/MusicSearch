@@ -40,16 +40,16 @@ public struct ArchiveFolderView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "folder")
                                 .font(.system(size: 40))
-                                .foregroundColor(CustomColor.outline)
+                                .foregroundStyle(CustomColor.outline)
                             Text("폴더가 없습니다.")
                                 .customText(.bodyMd)
-                                .foregroundColor(CustomColor.outline)
+                                .foregroundStyle(CustomColor.outline)
                         }
                         .padding(.top, 100)
                     } else {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CustomSpacing.gutter) {
                             ForEach(currentFolders) { folder in
-                                FolderTile(title: folder.title, subtitle: folder.subtitle)
+                                FolderTileView(title: folder.title, subtitle: folder.subtitle)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         store.send(.folderTapped(folder))
@@ -63,34 +63,6 @@ public struct ArchiveFolderView: View {
         }
         .onAppear {
             store.send(.onAppear)
-        }
-    }
-}
-
-struct FolderTile: View {
-    let title: String
-    let subtitle: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: CustomSpacing.base) {
-            Rectangle()
-                .fill(CustomColor.surfaceContainerLow)
-                .aspectRatio(1, contentMode: .fit)
-                .cornerRadius(CustomRadius.md)
-                .overlay(
-                    Image(systemName: "folder.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(CustomColor.surfaceContainerHigh)
-                )
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .customText(.bodyMd)
-                    .foregroundColor(CustomColor.onSurface)
-                Text(subtitle)
-                    .customText(.labelSm)
-                    .foregroundColor(CustomColor.outline)
-            }
         }
     }
 }
