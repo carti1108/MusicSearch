@@ -7,7 +7,7 @@ import MSUtil
 @testable import FeatureMusicDigging
 import FeatureMusicDiggingInterface
 import MusicDiggingDomain
-import FeatureMusicDiggingTesting
+
 
 @MainActor
 public final class MockMusicDiggingInteractable: Interactor, MusicDiggingInteractable {

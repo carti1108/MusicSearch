@@ -36,7 +36,8 @@ let project = Project(
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ChartDomain"),
-                .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core"))
+                .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core")),
+                .target(name: "FeatureChart")
             ],
             testsDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),

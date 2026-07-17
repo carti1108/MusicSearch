@@ -33,6 +33,7 @@ public final class WeatherRecommendationPresentableSpy: WeatherRecommendationPre
 
 @MainActor
 public final class MockFetchMusicForWeatherUseCaseForInteractor: FetchMusicForWeatherUseCase {
+	public init() {}
 	public var result = WeatherMusicCuration(
 		weather: Weather(
 			temperature: 18,
@@ -56,6 +57,7 @@ public final class MockFetchMusicForWeatherUseCaseForInteractor: FetchMusicForWe
 
 @MainActor
 public final class MockFetchTrackDeepLinkUseCaseForWeatherRecommendationInteractor: FetchTrackDeepLinkUseCase {
+	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 	
 }
