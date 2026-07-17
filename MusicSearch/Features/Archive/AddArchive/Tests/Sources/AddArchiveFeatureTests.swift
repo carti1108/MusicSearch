@@ -1,14 +1,14 @@
 import ComposableArchitecture
-import XCTest
+import Testing
 import ArchiveDomain
 import TrackSearchDomain
 import MSDomain
 @testable import FeatureAddArchive
 
 @MainActor
-final class AddArchiveFeatureTests: XCTestCase {
+struct AddArchiveFeatureTests {
 
-    func testMemoInput() async {
+    @Test func testMemoInput() async {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
             AddArchiveFeature(archiveRepository: MockArchiveRepository(), searchTracksUseCase: MockSearchTracksUseCase(), onDelegate: { _ in })
         }
@@ -18,7 +18,7 @@ final class AddArchiveFeatureTests: XCTestCase {
         }
     }
 
-    func testCloseTapped() async {
+    @Test func testCloseTapped() async {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
             AddArchiveFeature(archiveRepository: MockArchiveRepository(), searchTracksUseCase: MockSearchTracksUseCase(), onDelegate: { _ in })
         }

@@ -1,11 +1,11 @@
-import XCTest
+import Testing
 import ComposableArchitecture
 import MSDomain
 @testable import FeatureSettings
 
 @MainActor
-final class SettingsFeatureTests: XCTestCase {
-    func testOnAppearWithToken() async {
+struct SettingsFeatureTests {
+    @Test func testOnAppearWithToken() async {
         let mockFetch = MockFetchUserProfileUseCase(profile: ("Test User", nil))
         let mockGet = MockGetMusicAccessTokenUseCase(token: "token")
         let mockAuth = MockAuthorizeMusicUseCase()
@@ -21,7 +21,7 @@ final class SettingsFeatureTests: XCTestCase {
         }
     }
 
-    func testOnAppearWithoutToken() async {
+    @Test func testOnAppearWithoutToken() async {
         let mockFetch = MockFetchUserProfileUseCase(profile: nil)
         let mockGet = MockGetMusicAccessTokenUseCase(token: nil)
         let mockAuth = MockAuthorizeMusicUseCase()
@@ -37,7 +37,7 @@ final class SettingsFeatureTests: XCTestCase {
         }
     }
 
-    func testLoginTapped() async {
+    @Test func testLoginTapped() async {
         let mockFetch = MockFetchUserProfileUseCase(profile: ("Test User", nil))
         let mockGet = MockGetMusicAccessTokenUseCase(token: nil)
         let mockAuth = MockAuthorizeMusicUseCase()
@@ -58,7 +58,7 @@ final class SettingsFeatureTests: XCTestCase {
         }
     }
 
-    func testDisconnectTapped() async {
+    @Test func testDisconnectTapped() async {
         let mockFetch = MockFetchUserProfileUseCase(profile: nil)
         let mockGet = MockGetMusicAccessTokenUseCase(token: "token")
         let mockAuth = MockAuthorizeMusicUseCase()
@@ -74,7 +74,7 @@ final class SettingsFeatureTests: XCTestCase {
         await store.send(.disconnectTapped) {
             $0.spotifyState = .disconnected
         }
-        XCTAssertTrue(mockDisconnect.disconnectCalled)
+        #expect(mockDisconnect.disconnectCalled)
     }
 }
 

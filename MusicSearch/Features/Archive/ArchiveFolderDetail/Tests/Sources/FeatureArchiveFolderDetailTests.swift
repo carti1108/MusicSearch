@@ -1,12 +1,12 @@
-import XCTest
+import Testing
 import ComposableArchitecture
 import ArchiveDomain
 import MSDomain
 @testable import FeatureArchiveFolderDetail
 
 @MainActor
-final class FeatureArchiveFolderDetailTests: XCTestCase {
-    func testOnAppear() async {
+struct FeatureArchiveFolderDetailTests {
+    @Test func testOnAppear() async {
         let folder = FolderItem(title: "My Folder", subtitle: "0", type: .custom)
         let tracks = [
             ArchivedTrack(id: UUID(), title: "A", artist: "B", genre: "Pop", label: "", rating: 0)
@@ -36,10 +36,10 @@ final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
 }
 final class MockExport: ExportPlaylistUseCase {
     func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
-        return AsyncStream { continuation in
-            continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
-            continuation.finish()
-        }
+        let (stream, continuation) = AsyncStream.makeStream(of: ExportProgress.self)
+        continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
+        continuation.finish()
+        return stream
     }
 }
 

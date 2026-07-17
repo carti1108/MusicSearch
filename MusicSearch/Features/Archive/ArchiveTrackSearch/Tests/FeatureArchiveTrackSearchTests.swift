@@ -1,8 +1,8 @@
-import XCTest
+import Testing
 @testable import FeatureArchiveTrackSearch
 
-final class FeatureArchiveTrackSearchTests: XCTestCase {
-	func test_example() {
-		XCTAssertTrue(true)
+struct FeatureArchiveTrackSearchTests {
+	@Test func test_example() {
+		#expect(true)
 	}
 }

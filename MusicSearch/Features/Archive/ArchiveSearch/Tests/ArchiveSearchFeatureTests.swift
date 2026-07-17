@@ -1,11 +1,11 @@
-import XCTest
+import Testing
 import ComposableArchitecture
 import ArchiveDomain
 @testable import FeatureArchiveSearch
 
 @MainActor
-final class ArchiveSearchFeatureTests: XCTestCase {
-    func testOnAppear() async {
+struct ArchiveSearchFeatureTests {
+    @Test func testOnAppear() async {
         let expectedTracks = [
             ArchivedTrack(id: "1", trackID: "t1", title: "A", artist: "B", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date())
         ]
@@ -22,7 +22,7 @@ final class ArchiveSearchFeatureTests: XCTestCase {
         }
     }
 
-    func testSearchTextFiltering() async {
+    @Test func testSearchTextFiltering() async {
         let allTracks = [
             ArchivedTrack(id: "1", trackID: "t1", title: "Apple", artist: "B", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date()),
             ArchivedTrack(id: "2", trackID: "t2", title: "Banana", artist: "D", coverImageData: nil, genre: "Rock", tags: [], memo: "", createdAt: Date(), updatedAt: Date())
@@ -51,7 +51,7 @@ final class ArchiveSearchFeatureTests: XCTestCase {
         }
     }
 
-    func testRecentSearches() async {
+    @Test func testRecentSearches() async {
         var state = ArchiveSearchFeature.State()
         state.recentSearches = ["term1", "term2"]
 

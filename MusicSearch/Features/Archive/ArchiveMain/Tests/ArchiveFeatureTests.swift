@@ -1,11 +1,11 @@
-import XCTest
+import Testing
 import ComposableArchitecture
 import ArchiveDomain
 @testable import FeatureArchive
 
 @MainActor
-final class ArchiveFeatureTests: XCTestCase {
-    func testOnAppear() async {
+struct ArchiveFeatureTests {
+    @Test func testOnAppear() async {
         let expectedTracks = [
             ArchivedTrack(id: "1", trackID: "t1", title: "A", artist: "B", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date()),
             ArchivedTrack(id: "2", trackID: "t2", title: "C", artist: "D", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date()),
@@ -24,7 +24,7 @@ final class ArchiveFeatureTests: XCTestCase {
         }
     }
 
-    func testOnDeleteTapped() async {
+    @Test func testOnDeleteTapped() async {
         let expectedTracks = [
             ArchivedTrack(id: "1", trackID: "t1", title: "A", artist: "B", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date())
         ]
@@ -44,7 +44,7 @@ final class ArchiveFeatureTests: XCTestCase {
         }
     }
 
-    func testRoutingActions() async {
+    @Test func testRoutingActions() async {
         var delegatedActions: [ArchiveFeature.DelegateAction] = []
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
@@ -54,13 +54,13 @@ final class ArchiveFeatureTests: XCTestCase {
         }
 
         await store.send(.onAddTapped)
-        XCTAssertEqual(delegatedActions, [.routeToAddArchive])
+        #expect(delegatedActions == [.routeToAddArchive])
 
         await store.send(.onSearchTapped)
-        XCTAssertEqual(delegatedActions, [.routeToAddArchive, .routeToSearch])
+        #expect(delegatedActions == [.routeToAddArchive, .routeToSearch])
 
         await store.send(.onFolderTapped)
-        XCTAssertEqual(delegatedActions, [.routeToAddArchive, .routeToSearch, .routeToFolder])
+        #expect(delegatedActions == [.routeToAddArchive, .routeToSearch, .routeToFolder])
     }
 }
 

@@ -1,11 +1,11 @@
-import XCTest
+import Testing
 import ComposableArchitecture
 import ArchiveDomain
 @testable import FeatureArchiveFolder
 
 @MainActor
-final class ArchiveFolderFeatureTests: XCTestCase {
-    func testOnAppear() async {
+struct ArchiveFolderFeatureTests {
+    @Test func testOnAppear() async {
         let expectedFolders = [
             FolderItem(id: "1", name: "Pop", createdAt: Date(), trackIDs: ["t1"]),
             FolderItem(id: "2", name: "Rock", createdAt: Date(), trackIDs: ["t2"])
@@ -21,7 +21,7 @@ final class ArchiveFolderFeatureTests: XCTestCase {
         }
     }
 
-    func testAddFolder() async {
+    @Test func testAddFolder() async {
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {
             ArchiveFolderFeature(archiveRepository: MockArchiveRepository(folders: [])) { _ in }
         }
@@ -46,7 +46,7 @@ final class ArchiveFolderFeatureTests: XCTestCase {
         }
     }
 
-    func testFolderTapped() async {
+    @Test func testFolderTapped() async {
         let folder = FolderItem(id: "1", name: "Pop", createdAt: Date(), trackIDs: ["t1"])
 
         var delegatedActions: [ArchiveFolderFeature.DelegateAction] = []
@@ -58,7 +58,7 @@ final class ArchiveFolderFeatureTests: XCTestCase {
 
         await store.send(.folderTapped(folder))
 
-        XCTAssertEqual(delegatedActions.count, 1)
+        #expect(delegatedActions.count == 1)
     }
 }
 
