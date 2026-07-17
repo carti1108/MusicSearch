@@ -14,6 +14,7 @@ enum DemoScenario: String, CaseIterable {
 final class DemoListViewController: UIViewController {
     
     private let tableView = UITableView()
+    private var currentRouter: Any?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,6 +43,7 @@ final class DemoListViewController: UIViewController {
         let component = ExampleAppComponent(scenario: scenario)
         let builder = SettingsBuilder(dependency: component)
         let router = builder.build(withListener: MockSettingsListener())
+        self.currentRouter = router
         
         router.load()
         router.interactable.activate()
@@ -56,6 +58,7 @@ final class DemoListViewController: UIViewController {
     }
     
     @objc private func closeDemo() {
+        self.currentRouter = nil
         dismiss(animated: true)
     }
 }

@@ -20,7 +20,7 @@ final class ExampleAppComponent: ArchiveDependency {
     }
 
     var archiveRepository: ArchiveRepository {
-        MockArchiveRepository()
+        MockArchiveRepository(scenario: scenario)
     }
 
     var addArchiveBuilder: AddArchiveBuildable {
@@ -43,10 +43,29 @@ final class ExampleAppComponent: ArchiveDependency {
 // MARK: - Mocks
 
 final class MockArchiveRepository: ArchiveRepository {
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario = .success) {
+        self.scenario = scenario
+    }
+    
     func fetchArchivedTracks() async throws -> [ArchivedTrack] {
-        return [
-            ArchivedTrack(id: UUID(), title: "Test Track", artist: "Test Artist", genre: "Pop", label: "", rating: 0)
-        ]
+        switch scenario {
+        case .success:
+            return [
+                ArchivedTrack(id: UUID(), title: "Test Track 1", artist: "Test Artist 1", genre: "Pop", label: "", rating: 0),
+                ArchivedTrack(id: UUID(), title: "Test Track 2", artist: "Test Artist 2", genre: "Rock", label: "", rating: 0)
+            ]
+        case .empty:
+            return []
+        case .error:
+            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "네트워크 에러 발생"])
+        case .delayed:
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            return [
+                ArchivedTrack(id: UUID(), title: "Delayed Track", artist: "Delayed Artist", genre: "Indie", label: "", rating: 0)
+            ]
+        }
     }
 
     func addArchivedTrack(_ track: ArchivedTrack) async throws { }
@@ -109,9 +128,10 @@ final class MockViewControllable: ViewControllable {
 final class MockInteractable: Interactable {
     var isActive: Bool = true
     var isActiveStream: AsyncStream<Bool> {
-        AsyncStream { continuation in
-            continuation.yield(true)
-        }
+        let (stream, continuation) = AsyncStream.makeStream(of: Bool.self)
+        continuation.yield(true)
+        continuation.finish()
+        return stream
     }
     func activate() {}
     func deactivate() {}

@@ -15,7 +15,7 @@ final class ExampleAppComponent: ArchiveFolderDetailDependency {
     }
 
     var archiveRepository: ArchiveRepository {
-        MockArchiveRepository()
+        MockArchiveRepository(scenario: scenario)
     }
 
     var exportPlaylistUseCase: ExportPlaylistUseCase {
@@ -34,10 +34,29 @@ final class ExampleAppComponent: ArchiveFolderDetailDependency {
 // MARK: - Mocks
 
 final class MockArchiveRepository: ArchiveRepository {
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario = .success) {
+        self.scenario = scenario
+    }
+    
     func fetchArchivedTracks() async throws -> [ArchivedTrack] {
-        return [
-            ArchivedTrack(id: UUID(), title: "Folder Track", artist: "Artist", genre: "Pop", label: "", rating: 0)
-        ]
+        switch scenario {
+        case .success:
+            return [
+                ArchivedTrack(id: UUID(), title: "Folder Track 1", artist: "Artist 1", genre: "Pop", label: "", rating: 0),
+                ArchivedTrack(id: UUID(), title: "Folder Track 2", artist: "Artist 2", genre: "Pop", label: "", rating: 0)
+            ]
+        case .empty:
+            return []
+        case .error:
+            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "네트워크 에러 발생"])
+        case .delayed:
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            return [
+                ArchivedTrack(id: UUID(), title: "Delayed Track", artist: "Delayed Artist", genre: "Jazz", label: "", rating: 0)
+            ]
+        }
     }
 
     func addArchivedTrack(_ track: ArchivedTrack) async throws { }
@@ -49,10 +68,10 @@ final class MockArchiveRepository: ArchiveRepository {
 
 final class MockExportPlaylistUseCase: ExportPlaylistUseCase {
     func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
-        return AsyncStream { continuation in
-            continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
-            continuation.finish()
-        }
+        let (stream, continuation) = AsyncStream.makeStream(of: ExportProgress.self)
+        continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
+        continuation.finish()
+        return stream
     }
 }
 

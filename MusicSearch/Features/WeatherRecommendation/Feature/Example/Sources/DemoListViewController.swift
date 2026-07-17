@@ -51,6 +51,7 @@ final class DemoListViewController: UITableViewController {
         
         let router = builder.build(withListener: MockWeatherRecommendationListener())
         self.currentRouter = router
+        self.currentRouter = router
         
         router.interactable.activate()
         router.load()

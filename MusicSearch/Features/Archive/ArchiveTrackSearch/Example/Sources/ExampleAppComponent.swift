@@ -20,7 +20,7 @@ final class ExampleAppComponent: ArchiveTrackSearchDependency {
         MockArchiveRepository()
     }
     var searchTracksUseCase: SearchTracksUseCase {
-        MockSearchTracksUseCase()
+        MockSearchTracksUseCase(scenario: scenario)
     }
 }
 
@@ -34,7 +34,28 @@ final class MockArchiveRepository: ArchiveRepository {
 }
 
 final class MockSearchTracksUseCase: SearchTracksUseCase {
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario = .success) {
+        self.scenario = scenario
+    }
+    
     func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
-        return ([], 0)
+        switch scenario {
+        case .success:
+            return (tracks: [
+                Track(title: "Searched Track 1", artist: "Artist 1", imageURL: nil),
+                Track(title: "Searched Track 2", artist: "Artist 2", imageURL: nil)
+            ], totalResults: 2)
+        case .empty:
+            return ([], 0)
+        case .error:
+            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "검색 에러 발생"])
+        case .delayed:
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            return (tracks: [
+                Track(title: "Delayed Track", artist: "Delayed Artist", imageURL: nil)
+            ], totalResults: 1)
+        }
     }
 }

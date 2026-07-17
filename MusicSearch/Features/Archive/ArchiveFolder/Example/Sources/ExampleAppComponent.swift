@@ -16,7 +16,7 @@ final class ExampleAppComponent: ArchiveFolderDependency {
     }
 
     var archiveRepository: ArchiveRepository {
-        MockArchiveRepository()
+        MockArchiveRepository(scenario: scenario)
     }
     var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
         MockArchiveFolderDetailBuilder()
@@ -26,7 +26,30 @@ final class ExampleAppComponent: ArchiveFolderDependency {
 // MARK: - Mocks
 
 final class MockArchiveRepository: ArchiveRepository {
-    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return [] }
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario = .success) {
+        self.scenario = scenario
+    }
+    
+    func fetchArchivedTracks() async throws -> [ArchivedTrack] {
+        switch scenario {
+        case .success:
+            return [
+                ArchivedTrack(id: UUID(), title: "Test Track 1", artist: "Test Artist 1", genre: "Pop", label: "", rating: 0),
+                ArchivedTrack(id: UUID(), title: "Test Track 2", artist: "Test Artist 2", genre: "Rock", label: "", rating: 0)
+            ]
+        case .empty:
+            return []
+        case .error:
+            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "네트워크 에러 발생"])
+        case .delayed:
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            return [
+                ArchivedTrack(id: UUID(), title: "Delayed Track", artist: "Delayed Artist", genre: "Indie", label: "", rating: 0)
+            ]
+        }
+    }
     func addArchivedTrack(_ track: ArchivedTrack) async throws { }
     func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
     func deleteArchivedTrack(id: UUID) async throws { }

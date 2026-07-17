@@ -15,6 +15,7 @@ enum DemoScenario: String, CaseIterable {
 final class DemoListViewController: UIViewController {
     
     private let tableView = UITableView()
+    private var currentRouter: Any?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,7 +43,9 @@ final class DemoListViewController: UIViewController {
     private func launchScenario(_ scenario: DemoScenario) {
         let component = ExampleAppComponent(scenario: scenario)
         let builder = ArchiveFolderDetailBuilder(dependency: component)
-        let router = builder.build(withListener: MockArchiveFolderDetailListener())
+        let folderItem = FolderItem(title: "Demo Folder", subtitle: "0 tracks", type: .custom)
+        let router = builder.build(withListener: MockArchiveFolderDetailListener(), folderItem: folderItem)
+        self.currentRouter = router
         
         router.load()
         router.interactable.activate()
@@ -57,6 +60,7 @@ final class DemoListViewController: UIViewController {
     }
     
     @objc private func closeDemo() {
+        self.currentRouter = nil
         dismiss(animated: true)
     }
 }
@@ -89,7 +93,7 @@ final class MockArchiveFolderDetailListener: ArchiveFolderDetailListener {
 @MainActor
 final class MockURLOpener: URLOpening {
     func open(_ url: URL) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             let alert = UIAlertController(title: "URL Routing", message: "딥링크 이동:\n\(url.absoluteString)", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             

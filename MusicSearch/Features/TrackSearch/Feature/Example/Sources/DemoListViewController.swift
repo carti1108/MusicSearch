@@ -16,6 +16,7 @@ enum DemoScenario: String, CaseIterable {
 final class DemoListViewController: UIViewController {
     
     private let tableView = UITableView()
+    private var currentRouter: Any?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,6 +46,7 @@ final class DemoListViewController: UIViewController {
         let builder = TrackSearchBuilder(dependency: component)
         let nav = UINavigationController()
         let router = builder.build(withListener: MockTrackSearchListener(), navigationController: nav)
+        self.currentRouter = router
         
         router.load()
         router.interactable.activate()
@@ -60,6 +62,7 @@ final class DemoListViewController: UIViewController {
     }
     
     @objc private func closeDemo() {
+        self.currentRouter = nil
         dismiss(animated: true)
     }
 }
@@ -87,7 +90,7 @@ final class MockTrackSearchListener: TrackSearchListener {}
 @MainActor
 final class MockURLOpener: URLOpening {
     func open(_ url: URL) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             let alert = UIAlertController(title: "URL Routing", message: "딥링크 이동:\n\(url.absoluteString)", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             

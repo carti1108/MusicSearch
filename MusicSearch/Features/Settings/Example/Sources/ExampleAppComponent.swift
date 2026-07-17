@@ -29,7 +29,7 @@ final class ExampleAppComponent: SettingsDependency {
     }
     
     var fetchUserProfileUseCase: FetchUserProfileUseCase {
-        let mock = MockFetchUserProfileUseCase()
+        let mock = MockFetchUserProfileUseCase(scenario: scenario)
         return mock
     }
 }
@@ -48,8 +48,24 @@ final class MockDisconnectMusicUseCase: DisconnectMusicUseCase {
 }
 
 final class MockFetchUserProfileUseCase: FetchUserProfileUseCase {
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario = .success) {
+        self.scenario = scenario
+    }
+    
     func execute() async throws -> (name: String, imageURL: URL?) {
-        return (name: "Demo User", imageURL: nil)
+        switch scenario {
+        case .success:
+            return (name: "Demo User", imageURL: nil)
+        case .empty:
+            return (name: "", imageURL: nil)
+        case .error:
+            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "프로필 로드 에러"])
+        case .delayed:
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            return (name: "Delayed User", imageURL: nil)
+        }
     }
 }
 

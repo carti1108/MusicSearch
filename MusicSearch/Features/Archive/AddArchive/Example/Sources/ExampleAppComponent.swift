@@ -19,7 +19,7 @@ final class ExampleAppComponent: AddArchiveDependency {
     }
 
     var archiveRepository: ArchiveRepository {
-        MockArchiveRepository()
+        MockArchiveRepository(scenario: scenario)
     }
     var searchTracksUseCase: SearchTracksUseCase {
         MockSearchTracksUseCase()
@@ -33,8 +33,24 @@ final class ExampleAppComponent: AddArchiveDependency {
 // MARK: - Mocks
 
 final class MockArchiveRepository: ArchiveRepository {
+    let scenario: DemoScenario
+    
+    init(scenario: DemoScenario = .success) {
+        self.scenario = scenario
+    }
+    
     func fetchArchivedTracks() async throws -> [ArchivedTrack] { return [] }
-    func addArchivedTrack(_ track: ArchivedTrack) async throws { }
+    
+    func addArchivedTrack(_ track: ArchivedTrack) async throws {
+        switch scenario {
+        case .error:
+            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "아카이브 추가 실패"])
+        case .delayed:
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+        default:
+            break
+        }
+    }
     func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
     func deleteArchivedTrack(id: UUID) async throws { }
 }
