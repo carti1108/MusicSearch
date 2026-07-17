@@ -19,11 +19,11 @@ public struct TrackRowItemView: View {
                         .scaledToFill()
                 } else {
                     LinearGradient(gradient: Gradient(colors: [CustomColor.primary.opacity(0.6), CustomColor.tertiary.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                        .overlay(
+                        .overlay {
                             Image(systemName: "music.quarternote.3")
                                 .font(.system(size: CustomSpacing.base))
                                 .foregroundStyle(CustomColor.onPrimary)
-                        )
+                        }
                 }
             }
             .frame(width: 64, height: 64)

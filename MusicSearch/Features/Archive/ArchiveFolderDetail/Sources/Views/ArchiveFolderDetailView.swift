@@ -63,7 +63,7 @@ public struct ArchiveFolderDetailView: View {
                 }
                 .padding(32)
                 .background(CustomColor.surfaceContainer)
-                .cornerRadius(CustomRadius.lg)
+                .clipShape(.rect(cornerRadius: CustomRadius.lg))
                 .shadow(radius: 10)
             }
         }

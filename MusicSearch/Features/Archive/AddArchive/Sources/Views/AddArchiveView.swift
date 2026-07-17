@@ -38,11 +38,9 @@ public struct AddArchiveView: View {
 								.clipShape(.rect(cornerRadius: CustomRadius.md))
 							}
 						}
-						.onChange(of: coverItem) {
-							Task {
-								if let data = try? await coverItem?.loadTransferable(type: Data.self) {
-									store.send(.setCoverImageData(data))
-								}
+						.task(id: coverItem) {
+							if let data = try? await coverItem?.loadTransferable(type: Data.self) {
+								store.send(.setCoverImageData(data))
 							}
 						}
 						Spacer()
@@ -121,7 +119,7 @@ public struct AddArchiveView: View {
 			}
 			.navigationBarTitleDisplayMode(.inline)
 			.toolbar {
-				ToolbarItem(placement: .navigationBarLeading) {
+				ToolbarItem(placement: .topBarLeading) {
 					Button("취소") { store.send(.closeButtonTapped) }
 						.foregroundStyle(CustomColor.onSurface)
 				}
@@ -130,7 +128,7 @@ public struct AddArchiveView: View {
 						.font(.headline)
 						.foregroundStyle(CustomColor.onBackground)
 				}
-				ToolbarItem(placement: .navigationBarTrailing) {
+				ToolbarItem(placement: .topBarTrailing) {
 					Button("저장") {
 						store.send(.saveButtonTapped)
 					}

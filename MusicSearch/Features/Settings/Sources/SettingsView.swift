@@ -19,12 +19,12 @@ public struct SettingsView: View {
                     }) {
                         HStack {
                             Image(systemName: "music.note")
-                                .foregroundColor(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
+                                .foregroundStyle(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
                             Text("Spotify 계정 연동")
-                                .foregroundColor(CustomColor.onSurface)
+                                .foregroundStyle(CustomColor.onSurface)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .foregroundColor(CustomColor.outline)
+                                .foregroundStyle(CustomColor.outline)
                         }
                     }
                     .listRowBackground(CustomColor.surfaceContainer)
@@ -43,20 +43,20 @@ public struct SettingsView: View {
                                 Circle()
                                     .fill(Color.gray)
                                     .frame(width: 50, height: 50)
-                                    .overlay(Text(String(name.prefix(1))).foregroundColor(.white))
+                                    .overlay { Text(String(name.prefix(1))).foregroundStyle(.white) }
                             }
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(name)
                                     .customText(.headlineMd)
-                                    .foregroundColor(CustomColor.onSurface)
+                                    .foregroundStyle(CustomColor.onSurface)
                                 HStack(spacing: 4) {
                                     Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
+                                .foregroundStyle(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
                                     .font(.system(size: 12))
                                     Text("Connected")
                                         .customText(.labelSm)
-                                .foregroundColor(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
+                                .foregroundStyle(Color(red: 29/255.0, green: 185/255.0, blue: 84/255.0))
                                 }
                             }
                             Spacer()
@@ -67,11 +67,11 @@ public struct SettingsView: View {
                         }) {
                             Text("연동 해제")
                                 .customText(.bodyMd)
-                                .foregroundColor(CustomColor.onError)
+                                .foregroundStyle(CustomColor.onError)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 8)
                                 .background(CustomColor.error)
-                                .cornerRadius(8)
+                                .clipShape(.rect(cornerRadius: 8))
                         }
                         .buttonStyle(.borderless)
                     }

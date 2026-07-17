@@ -12,7 +12,7 @@ public struct ArchiveTrackSearchView: View {
 	}
 
 	public var body: some View {
-		NavigationView {
+		NavigationStack {
 			VStack(spacing: 0) {
 				HStack {
 					Image(systemName: "magnifyingglass")
@@ -33,7 +33,7 @@ public struct ArchiveTrackSearchView: View {
 				}
 				.padding(10)
 				.background(CustomColor.surfaceContainer)
-				.cornerRadius(10)
+				.clipShape(.rect(cornerRadius: 10))
 				.padding()
 
 				if store.isLoading {
@@ -114,11 +114,16 @@ public struct ArchiveTrackSearchView: View {
                 }
                 .edgesIgnoringSafeArea(.all)
             )
-			.navigationBarTitle("곡 검색", displayMode: .inline)
-			.navigationBarItems(leading: Button("취소", action: {
-				store.send(.closeButtonTapped)
-				dismiss()
-			}))
+			.navigationTitle("곡 검색")
+        .navigationBarTitleDisplayMode(.inline)
+			.toolbar {
+				ToolbarItem(placement: .topBarLeading) {
+					Button("취소") {
+						store.send(.closeButtonTapped)
+						dismiss()
+					}
+				}
+			}
 			.onAppear {
 				store.send(.onAppear)
 			}

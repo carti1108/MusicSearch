@@ -24,7 +24,7 @@ public struct ArchiveSearchView: View {
                 .padding(.horizontal, 16)
                 .frame(height: 44)
                 .background(CustomColor.surfaceContainerLow)
-                .cornerRadius(10)
+                .clipShape(.rect(cornerRadius: 10))
                 .padding(.horizontal, CustomSpacing.containerMargin)
                 .padding(.top, CustomSpacing.containerMargin)
 
@@ -86,14 +86,14 @@ public struct ArchiveSearchView: View {
                                                 } else {
                                                     Rectangle()
                                                         .fill(CustomColor.surfaceContainerHighest)
-                                                        .overlay(
+                                                        .overlay {
                                                             Image(systemName: "music.note")
                                                                 .foregroundStyle(CustomColor.outlineVariant)
-                                                        )
+                                                        }
                                                 }
                                             }
                                             .frame(width: 56, height: 56)
-                                            .cornerRadius(6)
+                                            .clipShape(.rect(cornerRadius: 6))
 
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(track.title)

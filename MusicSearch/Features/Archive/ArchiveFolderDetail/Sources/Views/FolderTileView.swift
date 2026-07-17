@@ -16,11 +16,11 @@ public struct FolderTileView: View {
                 .fill(CustomColor.surfaceContainerLow)
                 .aspectRatio(1, contentMode: .fit)
                 .clipShape(.rect(cornerRadius: CustomRadius.md))
-                .overlay(
+                .overlay {
                     Image(systemName: "folder.fill")
                         .font(.system(size: 32))
                         .foregroundStyle(CustomColor.surfaceContainerHigh)
-                )
+                }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)

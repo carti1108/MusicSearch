@@ -14,13 +14,13 @@ public final class MockExportPlaylistUseCase: ExportPlaylistUseCase, @unchecked 
         lastTracks = tracks
         lastPlaylistName = playlistName
 
-        return AsyncStream { continuation in
-            Task {
-                for progress in executeResult {
-                    continuation.yield(progress)
-                }
-                continuation.finish()
+        let (stream, continuation) = AsyncStream.makeStream(of: ExportProgress.self)
+        Task {
+            for progress in executeResult {
+                continuation.yield(progress)
             }
+            continuation.finish()
         }
+        return stream
     }
 }
