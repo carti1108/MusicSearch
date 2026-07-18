@@ -41,6 +41,7 @@ let project = Project(
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core"))
             ],
             testsDependencies: [
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "WeatherRecommendationDomain")
             ],

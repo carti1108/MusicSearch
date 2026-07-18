@@ -9,6 +9,7 @@ import MSDomain
 
 import Foundation
 import Testing
+import MSTesting
 import UIKit
 @testable import FeatureMusicDigging
 @testable import FeatureMusicDiggingTesting

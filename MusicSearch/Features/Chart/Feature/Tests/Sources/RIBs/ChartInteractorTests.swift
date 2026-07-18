@@ -9,6 +9,7 @@ import MSDomain
 
 import Foundation
 import Testing
+import MSTesting
 @testable import FeatureChart
 import FeatureChartTesting
 import ChartDomain
@@ -32,6 +33,7 @@ struct ChartInteractorTests {
 			fetchChartTopTracksUseCase: fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: MockFetchChartTopArtistsUseCase(),
 			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForChartInteractor(),
+			fetchArtistDeepLinkUseCase: MockFetchArtistDeepLinkUseCaseForChartInteractor(),
 			urlOpener: MockURLOpener()
 		)
 
@@ -48,8 +50,8 @@ struct ChartInteractorTests {
 		#expect(fetchChartTopTracksUseCase.executeCallCount == 1)
 		#expect(presenter.loadingStates == [true, false])
 		#expect(presenter.errorMessages == [nil])
-		#expect(presenter.podiumItemsHistory.last?.map(\.title) == ["Track 2", "Track 1", "Track 3"])
-		#expect(presenter.listItemsHistory.last?.map(\.title) == ["Track 4"])
+		#expect(presenter.podiumItemsHistory.last?.map { $0.title } == ["Track 2", "Track 1", "Track 3"])
+		#expect(presenter.listItemsHistory.last?.map { $0.title } == ["Track 4"])
 	}
 
 	@Test("세그먼트 변경 시 아티스트 차트를 로드하고 현재 세그먼트를 갱신하는가")
@@ -67,6 +69,7 @@ struct ChartInteractorTests {
 			fetchChartTopTracksUseCase: MockFetchChartTopTracksUseCase(),
 			fetchChartTopArtistsUseCase: fetchChartTopArtistsUseCase,
 			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForChartInteractor(),
+			fetchArtistDeepLinkUseCase: MockFetchArtistDeepLinkUseCaseForChartInteractor(),
 			urlOpener: MockURLOpener()
 		)
 
@@ -81,6 +84,6 @@ struct ChartInteractorTests {
 		// Then
 		#expect(fetchChartTopArtistsUseCase.executeCallCount == 1)
 		#expect(presenter.updatedSegmentIndices == [1])
-		#expect(presenter.podiumItemsHistory.last?.map(\.title) == ["Artist 2", "Artist 1", "Artist 3"])
+		#expect(presenter.podiumItemsHistory.last?.map { $0.title } == ["Artist 2", "Artist 1", "Artist 3"])
 	}
 }

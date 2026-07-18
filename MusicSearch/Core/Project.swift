@@ -93,6 +93,16 @@ let project = Project(
                 .target(name: "MSDomain")
             ],
             settings: ProjectEnvironment.projectSettings
+        ),
+        .target(
+            name: "MSTesting",
+            destinations: [.iPhone],
+            product: .staticFramework,
+            bundleId: "\(ProjectEnvironment.bundlePrefix).MSTesting",
+            deploymentTargets: ProjectEnvironment.deploymentTarget,
+            infoPlist: .default,
+            sources: ["Testing/Sources/**"],
+            settings: ProjectEnvironment.projectSettings
         )
     ]
 )

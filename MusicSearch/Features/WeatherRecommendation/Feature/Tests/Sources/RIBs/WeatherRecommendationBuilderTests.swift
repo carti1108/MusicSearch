@@ -23,7 +23,7 @@ struct WeatherRecommendationBuilderTests {
 		let fetchTrackDeepLinkUseCase = MockFetchTrackDeepLinkUseCase()
 		let dependency = MockWeatherRecommendationDependency(
 			fetchMusicForWeatherUseCase: fetchMusicForWeatherUseCase,
-			fetchTrackDeepLinkUseCase: fetchMusicAppDeepLinkUseCase
+			fetchTrackDeepLinkUseCase: fetchTrackDeepLinkUseCase
 		)
 		let builder = WeatherRecommendationBuilder(dependency: dependency)
 		let listener = MockWeatherRecommendationListener()

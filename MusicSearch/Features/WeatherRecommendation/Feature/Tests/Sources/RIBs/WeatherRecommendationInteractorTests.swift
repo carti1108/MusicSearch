@@ -9,6 +9,7 @@ import MSDomain
 
 import Foundation
 import Testing
+import MSTesting
 @testable import FeatureWeatherRecommendation
 @testable import FeatureWeatherRecommendationTesting
 

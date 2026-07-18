@@ -11,6 +11,7 @@ import Foundation
 import Testing
 import UIKit
 import MicroRIBs
+import MSTesting
 @testable import FeatureTrackSearch
 @testable import FeatureTrackSearchTesting
 

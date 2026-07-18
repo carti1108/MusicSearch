@@ -24,6 +24,7 @@ struct ChartBuilderTests {
 			fetchChartTopTracksUseCase: fetchChartTopTracksUseCase,
 			fetchChartTopArtistsUseCase: MockFetchChartTopArtistsUseCaseForBuilder(),
 			fetchTrackDeepLinkUseCase: MockFetchTrackDeepLinkUseCaseForChartBuilder(),
+            fetchArtistDeepLinkUseCase: MockFetchArtistDeepLinkUseCaseForChartBuilder(),
 			urlOpener: MockURLOpener()
 		)
 		let builder = ChartBuilder(dependency: dependency)
