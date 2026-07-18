@@ -84,7 +84,7 @@ public struct AddArchiveFeature {
 
 	public enum Alert: Equatable {}
 
-	public enum DelegateAction {
+	public enum DelegateAction: Equatable {
 		case didCloseAddArchive
 		case didTapSearchTrack
 	}

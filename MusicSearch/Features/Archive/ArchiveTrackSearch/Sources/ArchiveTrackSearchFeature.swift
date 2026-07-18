@@ -34,7 +34,7 @@ public struct ArchiveTrackSearchFeature {
 		}
 	}
 
-	public enum DelegateAction {
+	public enum DelegateAction: Equatable {
 		case trackSelected(Track)
 	}
 
@@ -65,10 +65,14 @@ public struct ArchiveTrackSearchFeature {
 				state.isLoading = true
 				return .run { send in
 					try await self.clock.sleep(for: .milliseconds(500))
-					let result = try await searchTracksUseCase.execute(query: currentQuery, limit: 20, page: 1)
-					await send(.searchResponse(TaskResult {
-						TrackSearchResponse(tracks: result.tracks, totalResults: result.totalResults)
-					}))
+					await send(
+						.searchResponse(
+							TaskResult {
+								let result = try await searchTracksUseCase.execute(query: currentQuery, limit: 20, page: 1)
+								return TrackSearchResponse(tracks: result.tracks, totalResults: result.totalResults)
+							}
+						)
+					)
 				}
 				.cancellable(id: CancelID.search, cancelInFlight: true)
 

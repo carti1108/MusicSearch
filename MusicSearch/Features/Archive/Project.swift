@@ -12,6 +12,33 @@ let project = Project(
             ],
             basePath: "Shared"
         )],
+        [.target(
+            name: "ArchiveSharedPresentation",
+            destinations: [.iPhone],
+            product: .staticFramework,
+            bundleId: "\(ProjectEnvironment.bundlePrefix).ArchiveSharedPresentation",
+            deploymentTargets: ProjectEnvironment.deploymentTarget,
+            infoPlist: .default,
+            sources: ["Shared/Presentation/Sources/**"],
+            dependencies: [
+                .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
+                .target(name: "ArchiveDomain")
+            ],
+            settings: ProjectEnvironment.projectSettings
+        )],
+        [.target(
+            name: "ArchiveSharedTesting",
+            destinations: [.iPhone],
+            product: .staticFramework,
+            bundleId: "\(ProjectEnvironment.bundlePrefix).ArchiveSharedTesting",
+            deploymentTargets: ProjectEnvironment.deploymentTarget,
+            infoPlist: .default,
+            sources: ["Shared/Testing/Sources/**"],
+            dependencies: [
+                .target(name: "ArchiveDomain")
+            ],
+            settings: ProjectEnvironment.projectSettings
+        )],
         [Target.dataTargets(
             name: "Archive",
             dependencies: [
@@ -50,6 +77,7 @@ let project = Project(
                 .external(name: "ComposableArchitecture")
             ],
             testsDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain")
             ],
@@ -70,6 +98,7 @@ let project = Project(
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
+                .target(name: "ArchiveSharedPresentation"),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
                 .external(name: "NetworkLayer"),
@@ -82,6 +111,7 @@ let project = Project(
                 .external(name: "ComposableArchitecture")
             ],
             testsDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain")
             ],
@@ -121,6 +151,7 @@ let project = Project(
                 .external(name: "ComposableArchitecture")
             ],
             testsDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
@@ -143,6 +174,7 @@ let project = Project(
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
+                .target(name: "ArchiveSharedPresentation"),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
@@ -156,6 +188,7 @@ let project = Project(
                 .external(name: "ComposableArchitecture")
             ],
             testsDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain")
             ],
@@ -189,6 +222,7 @@ let project = Project(
                 .external(name: "ComposableArchitecture")
             ],
             testsDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain")
             ],
@@ -218,6 +252,7 @@ let project = Project(
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
             ],
             testsDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))

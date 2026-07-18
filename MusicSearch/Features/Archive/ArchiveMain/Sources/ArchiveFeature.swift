@@ -26,7 +26,7 @@ public struct ArchiveFeature {
         case delegate(DelegateAction)
     }
 
-    public enum DelegateAction {
+    public enum DelegateAction: Equatable {
         case routeToAddArchive
         case routeToSearch
         case routeToFolder

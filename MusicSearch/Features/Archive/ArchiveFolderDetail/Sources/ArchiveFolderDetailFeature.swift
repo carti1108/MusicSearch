@@ -44,7 +44,7 @@ public struct ArchiveFolderDetailFeature {
         case export
     }
 
-    public enum DelegateAction {
+    public enum DelegateAction: Equatable {
         case didTapClose
         case didTapFolder(FolderItem)
         case didTapTrack(ArchivedTrack)
@@ -172,7 +172,7 @@ public struct ArchiveFolderDetailFeature {
                         case .rating(let value):
                             filteredTracks = allTracks.filter { Int($0.rating) == value }
                         case .custom:
-                            break
+                            filteredTracks = allTracks
                         }
 
                         await send(.loadDataResponse(folders: isMonthGroup ? foldersToDisplay : nil, tracks: isMonthGroup ? nil : filteredTracks))

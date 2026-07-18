@@ -31,7 +31,7 @@ public struct ArchiveFolderFeature {
         case delegate(DelegateAction)
     }
 
-    public enum DelegateAction {
+    public enum DelegateAction: Equatable {
         case didTapClose
         case didTapFolder(FolderItem)
     }

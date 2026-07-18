@@ -25,7 +25,7 @@ public struct ArchiveSearchFeature {
 		case delegate(DelegateAction)
 	}
 
-	public enum DelegateAction {
+	public enum DelegateAction: Equatable {
 		case archiveSearchDidTapClose
 	}
 
