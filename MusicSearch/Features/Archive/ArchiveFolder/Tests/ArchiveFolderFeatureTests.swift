@@ -1,79 +1,84 @@
+import Foundation
 import Testing
 import ComposableArchitecture
 import ArchiveDomain
+import FeatureArchiveFolderTesting
 @testable import FeatureArchiveFolder
 
 @MainActor
 struct ArchiveFolderFeatureTests {
     @Test func testOnAppear() async {
-        let expectedFolders = [
-            FolderItem(id: "1", name: "Pop", createdAt: Date(), trackIDs: ["t1"]),
-            FolderItem(id: "2", name: "Rock", createdAt: Date(), trackIDs: ["t2"])
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy"
+        let yearString = formatter.string(from: Date())
+        
+        let tracks = [
+            ArchivedTrack.stub(title: "A", artist: "B", genre: "Pop", rating: 5),
+            ArchivedTrack.stub(title: "C", artist: "D", genre: "Pop", rating: 4)
         ]
 
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {
-            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(folders: expectedFolders)) { _ in }
+            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(tracks: tracks)) { _ in }
         }
 
         await store.send(.onAppear)
-        await store.receive(\.loadDataResponse) {
-            $0.folders = expectedFolders
-        }
-    }
-
-    @Test func testAddFolder() async {
-        let store = TestStore(initialState: ArchiveFolderFeature.State()) {
-            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(folders: [])) { _ in }
-        }
-
-        await store.send(.addFolderButtonTapped) {
-            $0.isAddFolderAlertPresented = true
-        }
-
-        await store.send(.binding(.set(\.newFolderName, "My New Folder"))) {
-            $0.newFolderName = "My New Folder"
-        }
-
-        await store.send(.addFolderConfirmTapped) {
-            $0.isAddFolderAlertPresented = false
-        }
-
-        await store.receive(\.onAppear)
-        await store.receive(\.loadDataResponse)
-
-        await store.send(.binding(.set(\.newFolderName, ""))) {
-            $0.newFolderName = ""
+        await store.receive(\.foldersLoaded) {
+            $0.listenYearFolders = [
+                FolderItem(title: "\(yearString)년 청취", subtitle: "2 곡", type: .listenYear(year: yearString))
+            ]
+            $0.genreFolders = [
+                FolderItem(title: "Pop", subtitle: "2 곡", type: .genre(name: "Pop"))
+            ]
+            $0.ratingFolders = [
+                FolderItem(title: "★★★★★", subtitle: "1 곡", type: .rating(value: 5)),
+                FolderItem(title: "★★★★☆", subtitle: "1 곡", type: .rating(value: 4))
+            ]
         }
     }
 
     @Test func testFolderTapped() async {
-        let folder = FolderItem(id: "1", name: "Pop", createdAt: Date(), trackIDs: ["t1"])
+        let folder = FolderItem(title: "Pop", subtitle: "2 곡", type: .genre(name: "Pop"))
 
         var delegatedActions: [ArchiveFolderFeature.DelegateAction] = []
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {
-            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(folders: [folder])) { action in
+            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(tracks: [])) { action in
                 delegatedActions.append(action)
             }
         }
 
         await store.send(.folderTapped(folder))
-
         #expect(delegatedActions.count == 1)
+        if case let .didTapFolder(tappedFolder) = delegatedActions.first {
+            #expect(tappedFolder == folder)
+        } else {
+            Issue.record("Expected didTapFolder")
+        }
+    }
+    
+    @Test func testCloseButtonTapped() async {
+        var delegatedActions: [ArchiveFolderFeature.DelegateAction] = []
+        let store = TestStore(initialState: ArchiveFolderFeature.State()) {
+            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(tracks: [])) { action in
+                delegatedActions.append(action)
+            }
+        }
+
+        await store.send(.closeButtonTapped)
+        #expect(delegatedActions.count == 1)
+        if case .didTapClose = delegatedActions.first {
+            // Success
+        } else {
+            Issue.record("Expected didTapClose")
+        }
     }
 }
 
-final class MockArchiveRepository: ArchiveRepository {
-    var folders: [FolderItem]
-    init(folders: [FolderItem]) { self.folders = folders }
+final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
+    var tracks: [ArchivedTrack]
+    init(tracks: [ArchivedTrack]) { self.tracks = tracks }
 
-    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return [] }
-    func saveArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
+    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return tracks }
+    func addArchivedTrack(_ track: ArchivedTrack) async throws { }
     func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
     func deleteArchivedTrack(id: UUID) async throws { }
-    func fetchFolders() async throws -> [FolderItem] { return folders }
-    func saveFolder(_ folder: FolderItem) async throws { }
-    func deleteFolder(id: String) async throws { }
-    func addTrackToFolder(trackID: String, folderID: String) async throws { }
-    func removeTrackFromFolder(trackID: String, folderID: String) async throws { }
 }

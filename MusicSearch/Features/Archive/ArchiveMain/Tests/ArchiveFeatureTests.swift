@@ -1,15 +1,18 @@
+import Foundation
 import Testing
 import ComposableArchitecture
 import ArchiveDomain
+import ArchiveSharedTesting
+import FeatureArchiveTesting
 @testable import FeatureArchive
 
 @MainActor
 struct ArchiveFeatureTests {
     @Test func testOnAppear() async {
         let expectedTracks = [
-            ArchivedTrack(id: "1", trackID: "t1", title: "A", artist: "B", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date()),
-            ArchivedTrack(id: "2", trackID: "t2", title: "C", artist: "D", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date()),
-            ArchivedTrack(id: "3", trackID: "t3", title: "E", artist: "F", coverImageData: nil, genre: "Rock", tags: [], memo: "", createdAt: Date(), updatedAt: Date())
+            ArchivedTrack.stub(title: "A", artist: "B", genre: "Pop"),
+            ArchivedTrack.stub(title: "C", artist: "D", genre: "Pop"),
+            ArchivedTrack.stub(title: "E", artist: "F", genre: "Rock")
         ]
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
@@ -26,7 +29,7 @@ struct ArchiveFeatureTests {
 
     @Test func testOnDeleteTapped() async {
         let expectedTracks = [
-            ArchivedTrack(id: "1", trackID: "t1", title: "A", artist: "B", coverImageData: nil, genre: "Pop", tags: [], memo: "", createdAt: Date(), updatedAt: Date())
+            ArchivedTrack.stub(title: "A", artist: "B", genre: "Pop")
         ]
 
         let mockRepository = MockArchiveRepository(tracks: expectedTracks)
@@ -64,18 +67,3 @@ struct ArchiveFeatureTests {
     }
 }
 
-final class MockArchiveRepository: ArchiveRepository {
-    var tracks: [ArchivedTrack]
-    init(tracks: [ArchivedTrack]) { self.tracks = tracks }
-
-    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return tracks }
-    func saveArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func deleteArchivedTrack(id: UUID) async throws { }
-    func fetchFolders() async throws -> [FolderItem] { return [] }
-    func saveFolder(_ folder: FolderItem) async throws { }
-    func deleteFolder(id: String) async throws { }
-    func addTrackToFolder(trackID: String, folderID: String) async throws { }
-    func removeTrackFromFolder(trackID: String, folderID: String) async throws { }
-}

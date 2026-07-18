@@ -2,33 +2,11 @@ import Foundation
 import ArchiveDomain
 
 public final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
-	public init() {}
+    public var tracks: [ArchivedTrack]
+    public init(tracks: [ArchivedTrack]) { self.tracks = tracks }
 
-	public var fetchArchivedTracksCallCount = 0
-	public var fetchArchivedTracksResult: [ArchivedTrack] = []
-	public func fetchArchivedTracks() async throws -> [ArchivedTrack] {
-		fetchArchivedTracksCallCount += 1
-		return fetchArchivedTracksResult
-	}
-
-	public var addArchivedTrackCallCount = 0
-	public var lastAddedTrack: ArchivedTrack?
-	public func addArchivedTrack(_ track: ArchivedTrack) async throws {
-		addArchivedTrackCallCount += 1
-		lastAddedTrack = track
-	}
-
-	public var deleteArchivedTrackCallCount = 0
-	public var lastDeletedTrackId: UUID?
-	public func deleteArchivedTrack(id: UUID) async throws {
-		deleteArchivedTrackCallCount += 1
-		lastDeletedTrackId = id
-	}
-
-	public var updateArchivedTrackCallCount = 0
-	public var lastUpdatedTrack: ArchivedTrack?
-	public func updateArchivedTrack(_ track: ArchivedTrack) async throws {
-		updateArchivedTrackCallCount += 1
-		lastUpdatedTrack = track
-	}
+    public func fetchArchivedTracks() async throws -> [ArchivedTrack] { return tracks }
+    public func addArchivedTrack(_ track: ArchivedTrack) async throws { }
+    public func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
+    public func deleteArchivedTrack(id: UUID) async throws { }
 }

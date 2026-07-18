@@ -1,7 +1,9 @@
+import Foundation
 import Testing
 import ComposableArchitecture
 import ArchiveDomain
-import MSDomain
+import ArchiveSharedTesting
+import FeatureArchiveFolderDetailTesting
 @testable import FeatureArchiveFolderDetail
 
 @MainActor
@@ -26,14 +28,6 @@ struct FeatureArchiveFolderDetailTests {
     }
 }
 
-final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
-    var tracks: [ArchivedTrack]
-    init(tracks: [ArchivedTrack]) { self.tracks = tracks }
-    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return tracks }
-    func addArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func deleteArchivedTrack(id: UUID) async throws { }
-}
 final class MockExport: ExportPlaylistUseCase {
     func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
         let (stream, continuation) = AsyncStream.makeStream(of: ExportProgress.self)
