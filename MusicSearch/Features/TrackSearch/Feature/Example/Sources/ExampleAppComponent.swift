@@ -81,6 +81,7 @@ final class MockMusicDiggingRouting: ViewableRouter<Interactable, ViewControllab
 final class MockMusicDiggingInteractor: Interactable {
     var isActive: Bool = true
     var isActiveStream: AsyncStream<Bool> { AsyncStream { $0.yield(true); $0.finish() } }
+
     func activate() {}
     func deactivate() {}
 }

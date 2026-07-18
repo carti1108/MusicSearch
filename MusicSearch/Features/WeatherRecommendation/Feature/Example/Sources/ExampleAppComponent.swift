@@ -56,7 +56,7 @@ final class ExampleAppComponent: WeatherRecommendationDependency {
 @MainActor
 final class MockDelayedFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
     func execute() async throws -> WeatherMusicCuration {
-        try await Task.sleep(nanoseconds: 2_000_000_000) // 2초 지연
+        try await Task.sleep(nanoseconds: 2_000_000_000)
         let mockWeather = Weather(temperature: 18.0, condition: .thunderstorm, description: "천둥번개", iconCode: "11d", cityName: "Seoul")
         let mockTracks = [
             Track(title: "Thunder Track", artist: "Thunder Artist", imageURL: nil)

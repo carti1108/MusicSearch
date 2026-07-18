@@ -8,9 +8,9 @@ import MSUtil
 import FeatureChartInterface
 import ChartDomain
 
-
 @MainActor
 public final class ChartPresentableSpy: ChartPresentable {
+    public init() {}
 	public weak var listener: ChartPresentableListener?
 
 	public var updatedSegmentIndices: [Int] = []
@@ -38,10 +38,12 @@ public final class ChartPresentableSpy: ChartPresentable {
 }
 @MainActor
 public final class MockFetchTrackDeepLinkUseCaseForChartInteractor: FetchTrackDeepLinkUseCase {
+    public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 }
 @MainActor
 public final class MockFetchArtistDeepLinkUseCaseForChartInteractor: FetchArtistDeepLinkUseCase {
+    public init() {}
 	public func execute(artist: String) async -> URL? { nil }
 }
 @MainActor
@@ -54,6 +56,7 @@ public final class MockChartViewControllerForRouter: UIViewController, ChartView
 @MainActor
 public final class MockFetchChartTopTracksUseCaseForBuilder: FetchChartTopTracksUseCase {
 	public var executeCallCount = 0
+    public init() {}
 
 	public func execute() async throws -> [Track] {
 		self.executeCallCount += 1
@@ -66,6 +69,7 @@ public final class MockFetchChartTopTracksUseCaseForBuilder: FetchChartTopTracks
 }
 @MainActor
 public final class MockFetchChartTopArtistsUseCaseForBuilder: FetchChartTopArtistsUseCase {
+    public init() {}
 	public func execute() async throws -> [Artist] { [] }
 }
 @MainActor
@@ -78,5 +82,4 @@ public final class MockFetchArtistDeepLinkUseCaseForChartBuilder: FetchArtistDee
 	public init() {}
 	public func execute(artist: String) async -> URL? { nil }
 }
-
 

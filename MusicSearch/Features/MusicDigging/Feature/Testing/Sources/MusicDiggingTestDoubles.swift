@@ -8,7 +8,6 @@ import MSUtil
 import FeatureMusicDiggingInterface
 import MusicDiggingDomain
 
-
 @MainActor
 public final class MockMusicDiggingInteractable: Interactor, MusicDiggingInteractable {
 	public weak var router: MusicDiggingRouting?
