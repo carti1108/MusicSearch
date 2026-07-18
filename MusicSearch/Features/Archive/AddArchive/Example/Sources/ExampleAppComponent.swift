@@ -51,6 +51,7 @@ final class MockArchiveRepository: ArchiveRepository {
             break
         }
     }
+
     func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
     func deleteArchivedTrack(id: UUID) async throws { }
 }

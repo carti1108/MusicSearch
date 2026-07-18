@@ -25,6 +25,7 @@ protocol TrackSearchPresentableListener: AnyObject {
 @MainActor
 protocol TrackSearchPresentable: Presentable {
 	var listener: TrackSearchPresentableListener? { get set }
+
 	func updateTracks(_ tracks: [Track])
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)

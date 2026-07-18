@@ -39,7 +39,6 @@ final class AppComponent: RootDependency {
 		)
 	}()
 
-
 	private lazy var artistImageServiceInstance: ArtistImageService = {
 		SpotifyArtistImageService(
 			configuration: self.spotifyAPIConfiguration,
@@ -51,7 +50,6 @@ final class AppComponent: RootDependency {
 	private lazy var fetchArtistImageURLUseCaseInstance: FetchArtistImageURLUseCase = {
 		FetchArtistImageURLUseCaseImpl(artistImageService: self.artistImageServiceInstance)
 	}()
-
 
 	private lazy var locationRepositoryInstance: LocationRepository = {
 		LocationRepositoryImpl(locationManager: self.locationManager)

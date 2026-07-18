@@ -25,6 +25,6 @@ public struct FolderItem: Identifiable, Equatable {
     }
 
     public static func == (lhs: FolderItem, rhs: FolderItem) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.title == rhs.title && lhs.subtitle == rhs.subtitle && lhs.type == rhs.type
     }
 }

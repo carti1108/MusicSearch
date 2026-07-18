@@ -199,6 +199,9 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 		self.weatherContainerView.backgroundColor = .clear
 
+		self.sectionTitleLabel.text = "오늘 날씨와 어울리는 선곡 🎧"
+		self.sectionTitleLabel.isHidden = false
+
 		var snapshot = NSDiffableDataSourceSnapshot<Section, Track>()
 		snapshot.appendSections([.main])
 		snapshot.appendItems(tracks)

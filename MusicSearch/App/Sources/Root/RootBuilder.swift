@@ -58,7 +58,6 @@ protocol RootDependency: Dependency {
 	// MARK: - Repositories
 	var archiveRepository: any ArchiveRepository { get }
 
-
 	// MARK: - Utilities
 	var urlOpener: URLOpening { get }
 }
@@ -111,7 +110,6 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	var archiveRepository: any ArchiveRepository {
 		self.dependency.archiveRepository
 	}
-
 
 	// MARK: - Utilities
 	var urlOpener: URLOpening {

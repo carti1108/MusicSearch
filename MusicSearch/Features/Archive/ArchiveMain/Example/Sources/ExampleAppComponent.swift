@@ -133,6 +133,7 @@ final class MockInteractable: Interactable {
         continuation.finish()
         return stream
     }
+
     func activate() {}
     func deactivate() {}
 }

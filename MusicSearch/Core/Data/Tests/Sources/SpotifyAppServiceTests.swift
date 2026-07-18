@@ -4,7 +4,7 @@ import Foundation
 @testable import MSDomain
 import NetworkLayer
 
-struct MockNetworkManager: NetworkRequesting {
+struct MockNetworkManager: NetworkRequesting, @unchecked Sendable {
     var errorToThrow: Error?
     var responseToReturn: Any?
     
@@ -61,7 +61,7 @@ struct SpotifyAppServiceTests {
         
         let repository = SpotifyAppService(
             networkManager: mockNetwork,
-            authRepository: mockAuth
+            authService: mockAuth
         )
         
         let track = Track(title: "Hysteria", artist: "Muse", imageURL: nil)
@@ -87,7 +87,7 @@ struct SpotifyAppServiceTests {
         let response = SpotifyTrackSearchResponse(tracks: SpotifyItems(items: [mockDTO], total: 1))
         let mockNetwork = MockNetworkManager(responseToReturn: response)
         let mockAuth = MockMusicAuthService()
-        let repository = SpotifyAppService(networkManager: mockNetwork, authRepository: mockAuth)
+        let repository = SpotifyAppService(networkManager: mockNetwork, authService: mockAuth)
         
         let track = Track(title: "Hysteria", artist: "Muse", imageURL: nil)
         
@@ -108,7 +108,7 @@ struct SpotifyAppServiceTests {
         let response = SpotifyArtistSearchResponse(artists: SpotifyItems(items: [mockDTO], total: 1))
         let mockNetwork = MockNetworkManager(responseToReturn: response)
         let mockAuth = MockMusicAuthService()
-        let repository = SpotifyAppService(networkManager: mockNetwork, authRepository: mockAuth)
+        let repository = SpotifyAppService(networkManager: mockNetwork, authService: mockAuth)
         
         // When
         let url = await repository.fetchDeepLink(for: "Muse")
@@ -127,7 +127,7 @@ struct SpotifyAppServiceTests {
         let response = SpotifyArtistSearchResponse(artists: SpotifyItems(items: [mockDTO], total: 1))
         let mockNetwork = MockNetworkManager(responseToReturn: response)
         let mockAuth = MockMusicAuthService()
-        let repository = SpotifyAppService(networkManager: mockNetwork, authRepository: mockAuth)
+        let repository = SpotifyAppService(networkManager: mockNetwork, authService: mockAuth)
         
         // When
         let url = await repository.fetchDeepLink(for: "Muse")
@@ -147,7 +147,7 @@ struct SpotifyAppServiceTests {
         let response = SpotifyTrackSearchResponse(tracks: SpotifyItems(items: [mockDTO], total: 100))
         let mockNetwork = MockNetworkManager(responseToReturn: response)
         let mockAuth = MockMusicAuthService()
-        let repository = SpotifyAppService(networkManager: mockNetwork, authRepository: mockAuth)
+        let repository = SpotifyAppService(networkManager: mockNetwork, authService: mockAuth)
         
         // When
         let result = try await repository.searchSpotifyTracks(query: "Hysteria", limit: 20, offset: 0)

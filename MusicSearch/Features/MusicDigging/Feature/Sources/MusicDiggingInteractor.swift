@@ -23,6 +23,7 @@ protocol MusicDiggingPresentableListener: AnyObject {
 @MainActor
 protocol MusicDiggingPresentable: Presentable {
 	var listener: MusicDiggingPresentableListener? { get set }
+
 	func updateSeedTrack(_ track: Track)
 	func updateRecommendations(_ tracks: [Track])
 	func showLoading(_ isShow: Bool)

@@ -23,6 +23,7 @@ protocol ChartPresentableListener: AnyObject {
 @MainActor
 protocol ChartPresentable: Presentable {
 	var listener: ChartPresentableListener? { get set }
+
 	func updateSegment(to index: Int)
 	func update(podiumItems: [ChartItem], listItems: [ChartItem])
 	func showLoading(_ isShow: Bool)

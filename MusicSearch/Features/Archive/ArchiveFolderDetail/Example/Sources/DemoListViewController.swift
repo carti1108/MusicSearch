@@ -88,6 +88,7 @@ final class MockArchiveFolderDetailListener: ArchiveFolderDetailListener {
     func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem) {}
     func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {}
 }
+
     func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack) {}
 
 @MainActor

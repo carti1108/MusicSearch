@@ -22,6 +22,7 @@ protocol WeatherRecommendationPresentableListener: AnyObject {
 @MainActor
 protocol WeatherRecommendationPresentable: Presentable {
 	var listener: WeatherRecommendationPresentableListener? { get set }
+
 	func update(weather: Weather, tracks: [Track])
 	func showLoading(_ isShow: Bool)
 	func showError(_ message: String?)

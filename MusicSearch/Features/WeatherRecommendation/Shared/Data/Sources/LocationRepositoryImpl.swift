@@ -15,6 +15,7 @@ import WeatherRecommendationDomain
 public protocol LocationManaging: Sendable {
 	var authorizationStatus: CLAuthorizationStatus { get }
 	var desiredAccuracy: CLLocationAccuracy { get set }
+
 	func requestWhenInUseAuthorization()
 	func requestLocation() async throws -> CLLocation
 }
