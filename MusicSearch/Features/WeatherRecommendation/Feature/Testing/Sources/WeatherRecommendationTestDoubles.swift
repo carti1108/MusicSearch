@@ -1,3 +1,10 @@
+//
+//  WeatherRecommendationTestDoubles.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 7/10/26.
+//
+
 import MSDomain
 import Foundation
 import UIKit

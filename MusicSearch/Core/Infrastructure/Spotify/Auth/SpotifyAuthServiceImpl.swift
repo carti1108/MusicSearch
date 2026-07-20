@@ -1,9 +1,17 @@
+//
+//  SpotifyAuthServiceImpl.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 7/9/26.
+//
+
 import Foundation
 import MSDomain
 import NetworkLayer
 import MSUtil
 
 public final class SpotifyAuthServiceImpl: MusicAuthService {
+	
     private let networkManager: NetworkRequesting
 
     public init(networkManager: NetworkRequesting) {

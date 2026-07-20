@@ -1,3 +1,10 @@
+//
+//  SettingsFeature.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 6/23/26.
+//
+
 import Foundation
 import ComposableArchitecture
 import MSDomain

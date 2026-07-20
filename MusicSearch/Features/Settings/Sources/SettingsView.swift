@@ -1,3 +1,10 @@
+//
+//  SettingsView.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 6/17/26.
+//
+
 import SwiftUI
 import ComposableArchitecture
 import MSDesignSystem

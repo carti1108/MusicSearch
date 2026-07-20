@@ -1,3 +1,10 @@
+//
+//  PlaylistExportService.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 7/9/26.
+//
+
 import Foundation
 
 public protocol PlaylistExportService: Sendable {

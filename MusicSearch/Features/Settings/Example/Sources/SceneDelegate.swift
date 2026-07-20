@@ -1,3 +1,10 @@
+//
+//  SceneDelegate.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 6/23/26.
+//
+
 import UIKit
 import MicroRIBs
 import FeatureSettings

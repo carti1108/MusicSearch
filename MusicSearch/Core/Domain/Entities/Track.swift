@@ -8,6 +8,7 @@
 import Foundation
 
 public struct Track: Identifiable, Equatable, Sendable, Hashable {
+	
 	public let id: String
 	public let mbid: String?
 	public let title: String

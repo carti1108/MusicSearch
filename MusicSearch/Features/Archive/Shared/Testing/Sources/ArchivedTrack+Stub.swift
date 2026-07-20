@@ -1,3 +1,10 @@
+//
+//  ArchivedTrack+Stub.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 7/18/26.
+//
+
 import Foundation
 import ArchiveDomain
 

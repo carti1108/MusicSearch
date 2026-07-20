@@ -1,3 +1,10 @@
+//
+//  SpotifyAppServiceTests.swift
+//  MusicSearch
+//
+//  Created by Kiseok on 7/9/26.
+//
+
 import Testing
 import Foundation
 @testable import MSData
