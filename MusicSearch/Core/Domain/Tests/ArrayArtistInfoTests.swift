@@ -1,28 +1,17 @@
 //
-//  ArtistImageEnrichmentServiceTests.swift
+//  ArrayArtistInfoTests.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 7/9/26.
 //
 
 import Testing
+import MSTesting
 import Foundation
 @testable import MSDomain
 
-struct MockFetchArtistImageURLUseCase: FetchArtistImageURLUseCase {
-    var executeStub: (String) async throws -> URL?
-    
-    init(executeStub: @escaping (String) async throws -> URL?) {
-        self.executeStub = executeStub
-    }
-    
-    func execute(artistName: String) async throws -> URL? {
-        return try await executeStub(artistName)
-    }
-}
-
-@Suite("Artist Image Enrichment Service Tests")
-struct ArtistImageEnrichmentServiceTests {
+@Suite("Array+ArtistInfo Extension Tests")
+struct ArrayArtistInfoTests {
     
     @Test("정상적으로 모든 아티스트의 이미지 URL을 보강하는가")
     func testEnrichSuccessfully() async throws {
@@ -32,7 +21,7 @@ struct ArtistImageEnrichmentServiceTests {
             Artist(id: "2", name: "Radiohead", imageURL: nil, listeners: "2000", tags: [], bio: nil)
         ]
         
-        let mockUseCase = MockFetchArtistImageURLUseCase { name in
+        let fetchMock: @Sendable (String) async throws -> URL? = { name in
             if name == "Muse" {
                 return URL(string: "https://muse.jpg")
             } else {
@@ -40,13 +29,8 @@ struct ArtistImageEnrichmentServiceTests {
             }
         }
         
-        let service = ArtistImageEnrichmentServiceImpl(
-            fetchArtistImageURLUseCase: mockUseCase,
-            maxConcurrentImageRequests: 2
-        )
-        
         // When
-        let enrichedArtists = await service.enrich(artists)
+        let enrichedArtists = await artists.enrichingArtistImage(maxConcurrentRequests: 2, using: fetchMock)
         
         // Then
         #expect(enrichedArtists.count == 2)
@@ -67,20 +51,15 @@ struct ArtistImageEnrichmentServiceTests {
         
         struct MockError: Error {}
         
-        let mockUseCase = MockFetchArtistImageURLUseCase { name in
+        let fetchMock: @Sendable (String) async throws -> URL? = { name in
             if name == "Radiohead" {
                 throw MockError()
             }
             return URL(string: "https://\(name.lowercased()).jpg")
         }
         
-        let service = ArtistImageEnrichmentServiceImpl(
-            fetchArtistImageURLUseCase: mockUseCase,
-            maxConcurrentImageRequests: 2
-        )
-        
         // When
-        let enrichedArtists = await service.enrich(artists)
+        let enrichedArtists = await artists.enrichingArtistImage(maxConcurrentRequests: 2, using: fetchMock)
         
         // Then
         #expect(enrichedArtists.count == 3)
