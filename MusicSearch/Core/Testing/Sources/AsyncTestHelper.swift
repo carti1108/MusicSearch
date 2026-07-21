@@ -8,12 +8,12 @@
 import Foundation
 
 @MainActor
-enum AsyncTestHelper {
-	static func pause(for duration: Duration = .milliseconds(20)) async {
+public enum AsyncTestHelper {
+	public static func pause(for duration: Duration = .milliseconds(20)) async {
 		try? await Task.sleep(for: duration)
 	}
 
-	static func waitUntil(
+	public static func waitUntil(
 		timeout: Duration = .seconds(1),
 		pollInterval: Duration = .milliseconds(10),
 		condition: @escaping () -> Bool
@@ -35,7 +35,7 @@ enum AsyncTestHelper {
 
 @MainActor
 @discardableResult
-func waitUntil(
+public func waitUntil(
 	_ description: String = "",
 	timeout: Duration = .seconds(1),
 	pollInterval: Duration = .milliseconds(10),

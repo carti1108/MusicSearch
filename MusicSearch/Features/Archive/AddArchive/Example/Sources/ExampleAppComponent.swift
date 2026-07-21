@@ -64,7 +64,7 @@ final class MockArchiveRepository: ArchiveRepository {
 }
 
 final class MockSearchTracksUseCase: SearchTracksUseCase {
-    func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
+    func execute(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
         return ([], 0)
     }
 }

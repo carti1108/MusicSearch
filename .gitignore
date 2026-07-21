@@ -73,3 +73,7 @@ build_log*.txt
 graph.png
 build_temp/
 .agents/
+
+# macOS
+.DS_Store
+**/.DS_Store

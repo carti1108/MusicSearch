@@ -9,6 +9,7 @@ import Foundation
 import Testing
 import ComposableArchitecture
 import ArchiveDomain
+import ArchiveSharedTesting
 import FeatureArchiveFolderTesting
 @testable import FeatureArchiveFolder
 

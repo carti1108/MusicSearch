@@ -75,7 +75,7 @@ public struct ArchiveTrackSearchFeature {
 					await send(
 						.searchResponse(
 							TaskResult {
-								let result = try await searchTracksUseCase.execute(query: currentQuery, limit: 20, page: 1)
+								let result = try await searchTracksUseCase.execute(query: currentQuery, limit: 20, offset: 0)
 								return TrackSearchResponse(tracks: result.tracks, totalResults: result.totalResults)
 							}
 						)

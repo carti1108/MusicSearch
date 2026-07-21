@@ -9,6 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
+import ArchiveSharedPresentation
 
 public struct ArchiveFolderView: View {
     @Bindable var store: StoreOf<ArchiveFolderFeature>

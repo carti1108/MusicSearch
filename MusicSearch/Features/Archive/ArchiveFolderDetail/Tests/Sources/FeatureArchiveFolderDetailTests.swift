@@ -11,6 +11,7 @@ import ComposableArchitecture
 import ArchiveDomain
 import ArchiveSharedTesting
 import FeatureArchiveFolderDetailTesting
+import MSDomain
 @testable import FeatureArchiveFolderDetail
 
 @MainActor

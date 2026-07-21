@@ -8,11 +8,16 @@
 import SwiftUI
 import MSDesignSystem
 
-struct FolderTileView: View {
-    let title: String
-    let subtitle: String
+public struct FolderTileView: View {
+    public let title: String
+    public let subtitle: String
 
-    var body: some View {
+    public init(title: String, subtitle: String) {
+        self.title = title
+        self.subtitle = subtitle
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: CustomSpacing.base) {
             Rectangle()
                 .fill(CustomColor.surfaceContainerLow)
