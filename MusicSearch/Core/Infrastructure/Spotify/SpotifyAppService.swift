@@ -63,12 +63,12 @@ public actor SpotifyAppService: MusicAppService {
 		return try await self.search(query: query, type: type, token: token)
 	}
 
-	public func searchSpotifyTracks(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
+	public func searchTracks(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
 		let token = try await self.getAccessToken()
-		return try await self.performSearchSpotifyTracks(query: query, limit: limit, offset: offset, token: token)
+		return try await self.performSearchTracks(query: query, limit: limit, offset: offset, token: token)
 	}
 
-	private func performSearchSpotifyTracks(query: String, limit: Int, offset: Int, token: String) async throws -> (tracks: [Track], totalResults: Int) {
+	private func performSearchTracks(query: String, limit: Int, offset: Int, token: String) async throws -> (tracks: [Track], totalResults: Int) {
 		let api = SpotifyAPI.search(query: query, type: "track", limit: limit, offset: offset, token: token, config: self.configuration)
 		let result = try await self.networkManager.perform(with: api, as: SpotifyTrackSearchResponse.self)
 
