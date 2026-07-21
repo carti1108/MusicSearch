@@ -12,41 +12,54 @@ public protocol SearchTracksUseCase: Sendable {
 	func execute(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int)
 }
 
 public struct SearchTracksUseCaseImpl: SearchTracksUseCase {
 
 	private let trackRepository: TrackRepository
-	private let maxConcurrentInfoRequests: Int = 8
+	private let musicAppService: MusicAppService?
+	private let enrichTracksUseCase: EnrichTracksUseCase
 
-	public init(trackRepository: TrackRepository) {
+	public init(
+		trackRepository: TrackRepository,
+		musicAppService: MusicAppService? = nil,
+		enrichTracksUseCase: EnrichTracksUseCase
+	) {
 		self.trackRepository = trackRepository
+		self.musicAppService = musicAppService
+		self.enrichTracksUseCase = enrichTracksUseCase
 	}
 
 	public func execute(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
 		let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
 		guard !normalizedQuery.isEmpty else {
 			return ([], 0)
 		}
 
+		if let musicAppService {
+			do {
+				let result = try await musicAppService.searchTracks(query: normalizedQuery, limit: limit, offset: offset)
+				if !result.tracks.isEmpty {
+					let enrichedTracks = await self.enrichTracksUseCase.execute(tracks: result.tracks)
+					return (tracks: enrichedTracks, totalResults: result.totalResults)
+				}
+			} catch {
+				// Fallback to TrackRepository
+			}
+		}
+
 		let result = try await self.trackRepository.searchTracks(
 			query: normalizedQuery,
 			limit: limit,
-			page: page
+			offset: offset
 		)
-		let enrichedTracks = await self.enrichTrackInfo(for: result.tracks)
+		let enrichedTracks = await self.enrichTracksUseCase.execute(tracks: result.tracks)
 		return (tracks: enrichedTracks, totalResults: result.totalResults)
-	}
-
-	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
-		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
-			try await self.trackRepository.fetchTrackInfo(for: track)
-		}
 	}
 }

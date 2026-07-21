@@ -13,7 +13,7 @@ public protocol TrackRepository: Sendable {
 	func searchTracks(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int)
 	func fetchTopTracks(by tag: String) async throws -> [Track]
 	func fetchSimilarTracks(to track: Track) async throws -> [Track]

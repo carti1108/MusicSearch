@@ -16,31 +16,17 @@ import TrackSearchDomain
 public struct TrackRepositoryImpl: TrackRepository {
 
 	private let networkManager: NetworkRequesting
-	private let musicAppService: MusicAppService?
 
-	public init(networkManager: NetworkRequesting, musicAppService: MusicAppService? = nil) {
+	public init(networkManager: NetworkRequesting) {
 		self.networkManager = networkManager
-		self.musicAppService = musicAppService
 	}
 
 	public func searchTracks(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
-		if let musicAppService {
-			let offset = max(0, (page - 1) * limit)
-			do {
-				let result = try await musicAppService.searchSpotifyTracks(query: query, limit: limit, offset: offset)
-				if !result.tracks.isEmpty {
-					return result
-				}
-			} catch {
-				Logger(subsystem: "MusicSearch", category: "TrackRepository")
-					.error("Spotify App search failed: \(error.localizedDescription). Falling back to LastFM.")
-			}
-		}
-
+		let page = (limit > 0) ? (offset / limit) + 1 : 1
 		return self.makeSearchResult(from: try await self.networkManager.perform(
 			with: LastFMAPI.searchTracks(keyword: query, limit: limit, page: page),
 			as: TrackSearchResponseDTO.self
@@ -66,37 +52,6 @@ public struct TrackRepositoryImpl: TrackRepository {
 	public func fetchTrackInfo(for track: Track) async throws -> Track {
 		if track.thumbnailURL != nil {
 			return track
-		}
-
-		if let musicAppService {
-			let sanitizedTitle = track.title.replacingOccurrences(of: "\"", with: "")
-			let sanitizedArtist = track.artist.replacingOccurrences(of: "\"", with: "")
-			var query = "track:\"\(sanitizedTitle)\" artist:\"\(sanitizedArtist)\""
-
-			if let albumTitle = track.albumTitle {
-				let sanitizedAlbum = albumTitle.replacingOccurrences(of: "\"", with: "")
-				query += " album:\"\(sanitizedAlbum)\""
-			}
-
-			do {
-				let result = try await musicAppService.searchSpotifyTracks(query: query, limit: 1, offset: 0)
-				if let spotifyTrack = result.tracks.first {
-					return Track(
-						id: track.id,
-						mbid: track.mbid,
-						title: track.title,
-						artist: track.artist,
-						imageURL: spotifyTrack.imageURL,
-						thumbnailURL: spotifyTrack.thumbnailURL,
-						albumTitle: spotifyTrack.albumTitle ?? track.albumTitle,
-						albumType: spotifyTrack.albumType ?? track.albumType,
-						releaseDate: spotifyTrack.releaseDate ?? track.releaseDate
-					)
-				}
-			} catch {
-				Logger(subsystem: "MusicSearch", category: "TrackRepository")
-					.error("Spotify App track info search failed: \(error.localizedDescription).")
-			}
 		}
 
 		do {

@@ -17,22 +17,15 @@ public protocol FetchChartTopTracksUseCase: Sendable {
 public struct FetchChartTopTracksUseCaseImpl: FetchChartTopTracksUseCase {
 
 	private let chartRepository: ChartRepository
-	private let trackRepository: TrackRepository
-	private let maxConcurrentInfoRequests: Int = 8
+	private let enrichTracksUseCase: EnrichTracksUseCase
 
-	public init(chartRepository: ChartRepository, trackRepository: TrackRepository) {
+	public init(chartRepository: ChartRepository, enrichTracksUseCase: EnrichTracksUseCase) {
 		self.chartRepository = chartRepository
-		self.trackRepository = trackRepository
+		self.enrichTracksUseCase = enrichTracksUseCase
 	}
 
 	public func execute() async throws -> [Track] {
 		let tracks = try await self.chartRepository.fetchTopTracks()
-		return await self.enrichTrackInfo(for: tracks)
-	}
-
-	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
-		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
-			try await self.trackRepository.fetchTrackInfo(for: track)
-		}
+		return await self.enrichTracksUseCase.execute(tracks: tracks)
 	}
 }

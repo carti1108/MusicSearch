@@ -1,5 +1,5 @@
 //
-//  SpotifySearchTracksUseCaseImpl.swift
+//  MusicAppSearchTracksUseCaseImpl.swift
 //  MusicSearch
 //
 //  Created by Kiseok on 6/30/26.
@@ -8,27 +8,25 @@
 import MSDomain
 import Foundation
 
-public struct SpotifySearchTracksUseCaseImpl: SearchTracksUseCase {
+public struct MusicAppSearchTracksUseCaseImpl: SearchTracksUseCase {
 
-	private let spotifyRepository: MusicAppService
+	private let musicAppService: MusicAppService
 
-	public init(spotifyRepository: MusicAppService) {
-		self.spotifyRepository = spotifyRepository
+	public init(musicAppService: MusicAppService) {
+		self.musicAppService = musicAppService
 	}
 
 	public func execute(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
 		let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
 		guard !normalizedQuery.isEmpty else {
 			return ([], 0)
 		}
 
-		let offset = max(0, (page - 1) * limit)
-
-		return try await self.spotifyRepository.searchSpotifyTracks(
+		return try await self.musicAppService.searchTracks(
 			query: normalizedQuery,
 			limit: limit,
 			offset: offset

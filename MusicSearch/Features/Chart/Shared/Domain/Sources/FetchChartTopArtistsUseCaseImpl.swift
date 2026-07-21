@@ -14,19 +14,22 @@ public protocol FetchChartTopArtistsUseCase: Sendable {
 public struct FetchChartTopArtistsUseCaseImpl: FetchChartTopArtistsUseCase {
 
 	private let chartRepository: ChartRepository
-	private let artistImageEnrichmentService: ArtistImageEnrichmentService?
+	private let artistImageService: ArtistImageService?
 
 	public init(
 		chartRepository: ChartRepository,
-		artistImageEnrichmentService: ArtistImageEnrichmentService? = nil
+		artistImageService: ArtistImageService? = nil
 	) {
 		self.chartRepository = chartRepository
-		self.artistImageEnrichmentService = artistImageEnrichmentService
+		self.artistImageService = artistImageService
 	}
 
 	public func execute() async throws -> [Artist] {
 		let artists = try await self.chartRepository.fetchTopArtists()
-		guard let artistImageEnrichmentService else { return artists }
-		return await artistImageEnrichmentService.enrich(artists)
+		guard let artistImageService else { return artists }
+		
+		return await artists.enrichingArtistImage { name in
+			try await artistImageService.fetchImageURL(for: name)
+		}
 	}
 }

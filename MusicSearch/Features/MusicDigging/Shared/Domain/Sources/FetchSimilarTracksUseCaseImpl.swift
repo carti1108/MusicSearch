@@ -17,20 +17,15 @@ public protocol FetchSimilarTracksUseCase: Sendable {
 public struct FetchSimilarTracksUseCaseImpl: FetchSimilarTracksUseCase {
 
 	private let trackRepository: TrackRepository
-	private let maxConcurrentInfoRequests: Int = 8
+	private let enrichTracksUseCase: EnrichTracksUseCase
 
-	public init(trackRepository: TrackRepository) {
+	public init(trackRepository: TrackRepository, enrichTracksUseCase: EnrichTracksUseCase) {
 		self.trackRepository = trackRepository
+		self.enrichTracksUseCase = enrichTracksUseCase
 	}
 
 	public func execute(targetTrack: Track) async throws -> [Track] {
 		let tracks = try await self.trackRepository.fetchSimilarTracks(to: targetTrack)
-		return await self.enrichTrackInfo(for: tracks)
-	}
-
-	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
-		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
-			try await self.trackRepository.fetchTrackInfo(for: track)
-		}
+		return await self.enrichTracksUseCase.execute(tracks: tracks)
 	}
 }

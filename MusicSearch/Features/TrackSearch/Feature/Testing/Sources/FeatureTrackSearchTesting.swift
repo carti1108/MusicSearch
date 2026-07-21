@@ -22,19 +22,19 @@ public final class MockSearchTracksUseCase: SearchTracksUseCase {
 	public var executeCallCount = 0
 	public var lastQuery: String?
 	public var lastLimit: Int?
-	public var lastPage: Int?
+	public var lastOffset: Int?
 
 	public init() {}
 
 	public func execute(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
 		self.executeCallCount += 1
 		self.lastQuery = query
 		self.lastLimit = limit
-		self.lastPage = page
+		self.lastOffset = offset
 
 		if let delay = delay {
 			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))

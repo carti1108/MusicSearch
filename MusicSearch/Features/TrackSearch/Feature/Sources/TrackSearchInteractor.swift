@@ -41,11 +41,11 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 
 	private var lastKeyword: String?
 	private var currentTracks: [Track] = []
-	private var currentPage: Int = 1
+	private var currentOffset: Int = 0
 	private var totalResults: Int = 0
 	private var isLoading: Bool = false
 	private var isLoadingMore: Bool = false
-	private var loadingPage: Int?
+	private var loadingOffset: Int?
 
 	private var searchTask: Task<Void, Never>?
 	private var loadMoreTask: Task<Void, Never>?
@@ -103,9 +103,9 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 			self.loadMoreTask?.cancel()
 
 			self.lastKeyword = nil
-			self.loadingPage = nil
+			self.loadingOffset = nil
 			self.currentTracks = []
-			self.currentPage = 1
+			self.currentOffset = 0
 			self.totalResults = 0
 			self.isLoading = false
 			self.isLoadingMore = false
@@ -117,10 +117,10 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 		}
 
 		self.lastKeyword = keyword
-		self.currentPage = 1
+		self.currentOffset = 0
 		self.searchTask?.cancel()
 		self.loadMoreTask?.cancel()
-		self.loadingPage = nil
+		self.loadingOffset = nil
 		self.isLoadingMore = false
 		self.isLoading = true
 
@@ -141,13 +141,13 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 				let result = try await searchTracksUseCase.execute(
 					query: keyword,
 					limit: limit,
-					page: 1
+					offset: 0
 				)
 				guard !Task.isCancelled, let self else { return }
 
 				self.currentTracks = result.tracks
 				self.totalResults = result.totalResults
-				self.currentPage = 1
+				self.currentOffset = 0
 				self.presenter.updateTracks(self.currentTracks)
 			} catch is CancellationError {
 				return
@@ -156,7 +156,7 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 
 				self.currentTracks = []
 				self.totalResults = 0
-				self.currentPage = 1
+				self.currentOffset = 0
 
 				self.presenter.updateTracks([])
 				self.presenter.showError("검색 중 오류가 발생했습니다.")
@@ -167,10 +167,10 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 	private func loadMore() {
 		guard self.canLoadMore, let keyword = self.lastKeyword else { return }
 
-		let nextPage = self.currentPage + 1
-		guard self.loadingPage != nextPage else { return }
+		let nextOffset = self.currentOffset + self.limit
+		guard self.loadingOffset != nextOffset else { return }
 
-		self.loadingPage = nextPage
+		self.loadingOffset = nextOffset
 		self.isLoadingMore = true
 
 		self.loadMoreTask?.cancel()
@@ -181,8 +181,8 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 				if !Task.isCancelled, let self {
 					self.isLoadingMore = false
 				}
-				if let self, self.loadingPage == nextPage {
-					self.loadingPage = nil
+				if let self, self.loadingOffset == nextOffset {
+					self.loadingOffset = nil
 				}
 			}
 
@@ -190,12 +190,12 @@ final class TrackSearchInteractor: PresentableInteractor<TrackSearchPresentable>
 				let result = try await searchTracksUseCase.execute(
 					query: keyword,
 					limit: limit,
-					page: nextPage
+					offset: nextOffset
 				)
 				guard !Task.isCancelled, let self else { return }
 
 				self.currentTracks.append(contentsOf: result.tracks)
-				self.currentPage = nextPage
+				self.currentOffset = nextOffset
 				self.totalResults = result.totalResults
 				self.presenter.updateTracks(self.currentTracks)
 			} catch is CancellationError {

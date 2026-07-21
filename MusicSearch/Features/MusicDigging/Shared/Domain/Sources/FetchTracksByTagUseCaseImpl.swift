@@ -17,10 +17,11 @@ public protocol FetchTracksByTagUseCase: Sendable {
 public struct FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 
 	private let trackRepository: TrackRepository
-	private let maxConcurrentInfoRequests: Int = 8
+	private let enrichTracksUseCase: EnrichTracksUseCase
 
-	public init(trackRepository: TrackRepository) {
+	public init(trackRepository: TrackRepository, enrichTracksUseCase: EnrichTracksUseCase) {
 		self.trackRepository = trackRepository
+		self.enrichTracksUseCase = enrichTracksUseCase
 	}
 
 	public func execute(tag: String) async throws -> [Track] {
@@ -30,12 +31,6 @@ public struct FetchTracksByTagUseCaseImpl: FetchTracksByTagUseCase {
 		}
 
 		let tracks = try await self.trackRepository.fetchTopTracks(by: normalizedTag)
-		return await self.enrichTrackInfo(for: tracks)
-	}
-
-	private func enrichTrackInfo(for tracks: [Track]) async -> [Track] {
-		await tracks.enrichingTrackInfo(maxConcurrentRequests: self.maxConcurrentInfoRequests) { track in
-			try await self.trackRepository.fetchTrackInfo(for: track)
-		}
+		return await self.enrichTracksUseCase.execute(tracks: tracks)
 	}
 }

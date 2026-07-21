@@ -53,7 +53,7 @@ struct TrackSearchInteractorTests {
 		#expect(self.mockUseCase.executeCallCount == 1)
 		#expect(self.mockUseCase.lastQuery == "Muse")
 		#expect(self.mockUseCase.lastLimit == 20)
-		#expect(self.mockUseCase.lastPage == 1)
+		#expect(self.mockUseCase.lastOffset == 0)
 		#expect(self.presenter.loadingStates == [true, false])
 		#expect(self.presenter.errorMessages == [nil])
 		#expect(self.presenter.updatedTracksHistory.last?.map(\.title) == ["Hysteria", "Plug In Baby"])

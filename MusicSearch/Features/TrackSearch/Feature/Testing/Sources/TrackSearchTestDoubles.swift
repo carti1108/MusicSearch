@@ -55,7 +55,7 @@ public final class TrackSearchRoutingSpy: ViewableRouter<MockTrackSearchInteract
 @MainActor
 public final class MockSearchTracksUseCaseForBuilder: SearchTracksUseCase {
 	public init() {}
-	public func execute(query: String, limit: Int, page: Int) async throws -> (tracks: [Track], totalResults: Int) {
+	public func execute(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
 		([], 0)
 	}
 }
@@ -90,7 +90,7 @@ public final class RouterMockSearchTracksUseCase: SearchTracksUseCase {
 	public func execute(
 		query: String,
 		limit: Int,
-		page: Int
+		offset: Int
 	) async throws -> (tracks: [Track], totalResults: Int) {
 		([], 0)
 	}
