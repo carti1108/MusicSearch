@@ -11,9 +11,18 @@ import Security
 public final class KeychainManager {
     public static let shared = KeychainManager()
 
+    public var isTesting: Bool = false
+    private var inMemoryStorage: [String: String] = [:]
+
     private init() {}
 
     public func save(_ data: Data, forKey key: String) -> Bool {
+        if isTesting {
+            if let string = String(data: data, encoding: .utf8) {
+                inMemoryStorage[key] = string
+            }
+            return true
+        }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -28,6 +37,9 @@ public final class KeychainManager {
     }
 
     public func load(forKey key: String) -> Data? {
+        if isTesting {
+            return inMemoryStorage[key]?.data(using: .utf8)
+        }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -47,6 +59,10 @@ public final class KeychainManager {
     }
 
     public func delete(forKey key: String) -> Bool {
+        if isTesting {
+            inMemoryStorage.removeValue(forKey: key)
+            return true
+        }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,

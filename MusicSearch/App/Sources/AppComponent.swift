@@ -9,7 +9,6 @@ import Foundation
 import NetworkLayer
 import CoreLocation
 import MSDomain
-import MSData
 import MSInfrastructure
 import MSUtil
 import ChartData

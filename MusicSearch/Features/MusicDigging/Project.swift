@@ -35,7 +35,8 @@ let project = Project(
                 .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "MusicDiggingDomain")
-            ],
+            ,
+                .external(name: "NetworkLayer")],
             exampleDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "MusicDiggingDomain"),

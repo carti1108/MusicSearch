@@ -49,54 +49,6 @@ let project = Project(
             settings: ProjectEnvironment.projectSettings
         ),
         .target(
-            name: "MSData",
-            destinations: [.iPhone],
-            product: .staticFramework,
-            bundleId: "\(ProjectEnvironment.bundlePrefix).MSData",
-            deploymentTargets: ProjectEnvironment.deploymentTarget,
-            infoPlist: .default,
-            sources: [
-                "Data/Repositories/**"
-            ],
-            dependencies: [
-                .target(name: "MSDomain"),
-                .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .external(name: "NetworkLayer")
-            ],
-            settings: ProjectEnvironment.projectSettings
-        ),
-        .target(
-            name: "MSDomainTests",
-            destinations: [.iPhone],
-            product: .unitTests,
-            bundleId: "\(ProjectEnvironment.bundlePrefix).MSDomainTests",
-            deploymentTargets: ProjectEnvironment.deploymentTarget,
-            infoPlist: .default,
-            sources: ["Domain/Tests/**"],
-            dependencies: [
-                .target(name: "MSDomain"),
-                .target(name: "MSTesting")
-            ],
-            settings: ProjectEnvironment.projectSettings
-        ),
-        .target(
-            name: "MSDataTests",
-            destinations: [.iPhone],
-            product: .unitTests,
-            bundleId: "\(ProjectEnvironment.bundlePrefix).MSDataTests",
-            deploymentTargets: ProjectEnvironment.deploymentTarget,
-            infoPlist: .default,
-            sources: [
-                "Data/Tests/**"
-            ],
-            dependencies: [
-                .target(name: "MSData"),
-                .target(name: "MSDomain"),
-                .target(name: "MSTesting")
-            ],
-            settings: ProjectEnvironment.projectSettings
-        ),
-        .target(
             name: "MSInfrastructure",
             destinations: [.iPhone],
             product: .staticFramework,
@@ -109,7 +61,8 @@ let project = Project(
             dependencies: [
                 .target(name: "MSDomain"),
                 .external(name: "NetworkLayer")
-            ],
+            ,
+                .project(target: "ArchiveDomain", path: "../Features/Archive")],
             settings: ProjectEnvironment.projectSettings
         ),
         .target(
@@ -123,7 +76,9 @@ let project = Project(
             dependencies: [
                 .target(name: "MSInfrastructure"),
                 .target(name: "MSDomain"),
-                .target(name: "MSTesting")
+                .target(name: "MSTesting"),
+                .target(name: "MSUtil"),
+                .project(target: "ArchiveDomain", path: "../Features/Archive")
             ],
             settings: ProjectEnvironment.projectSettings
         ),
@@ -135,6 +90,10 @@ let project = Project(
             deploymentTargets: ProjectEnvironment.deploymentTarget,
             infoPlist: .default,
             sources: ["Testing/Sources/**"],
+            dependencies: [
+                .target(name: "MSDomain"),
+                .external(name: "NetworkLayer")
+            ],
             settings: ProjectEnvironment.projectSettings
         )
     ]

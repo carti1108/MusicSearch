@@ -2,9 +2,15 @@ import Testing
 import Foundation
 @testable import MSInfrastructure
 @testable import MSDomain
+import MSUtil
 import MSTesting
 
+@Suite(.serialized)
 struct SpotifyAuthServiceImplTests {
+    
+    init() {
+        KeychainManager.shared.isTesting = true
+    }
     
     @Test("네트워크 정상 응답 시 fetchUserProfile이 올바른 유저 정보를 반환하는가")
     func testFetchUserProfileSuccess() async throws {

@@ -5,12 +5,12 @@
 //  Created by Kiseok on 12/13/25.
 //
 
-import MSData
 
 import Foundation
 import NetworkLayer
 import MSDomain
 import ChartDomain
+import MSInfrastructure
 
 public struct ChartRepositoryImpl: ChartRepository {
 

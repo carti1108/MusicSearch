@@ -17,7 +17,6 @@ let project = Project(
             name: "WeatherRecommendation",
             dependencies: [
                 .target(name: "WeatherRecommendationDomain"),
-                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core"))
             ],
             basePath: "Shared"
@@ -45,7 +44,8 @@ let project = Project(
                 .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "WeatherRecommendationDomain")
-            ],
+            ,
+                .external(name: "NetworkLayer")],
             exampleDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "WeatherRecommendationDomain"),

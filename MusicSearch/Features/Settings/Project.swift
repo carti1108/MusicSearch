@@ -16,7 +16,6 @@ let project = Project(
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive")),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
-                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "FeatureArchiveFolderDetailInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
                 .external(name: "NetworkLayer"),

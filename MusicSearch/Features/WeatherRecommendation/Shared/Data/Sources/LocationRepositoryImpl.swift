@@ -5,7 +5,6 @@
 //  Created by Kiseok on 12/5/25.
 //
 
-import MSData
 
 import Foundation
 import CoreLocation

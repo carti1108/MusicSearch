@@ -7,11 +7,11 @@
 
 import Foundation
 import OSLog
-import MSData
 import MSDomain
 import MSUtil
 import NetworkLayer
 import TrackSearchDomain
+import MSInfrastructure
 
 public struct TrackRepositoryImpl: TrackRepository {
 

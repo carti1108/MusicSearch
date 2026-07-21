@@ -67,7 +67,6 @@ let project = Project(
                 .project(target: "FeatureSettingsInterface", path: .relativeToRoot("MusicSearch/Features/Settings")),
                 
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
-                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "ChartData", path: .relativeToRoot("MusicSearch/Features/Chart")),
                 .project(target: "TrackSearchData", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),

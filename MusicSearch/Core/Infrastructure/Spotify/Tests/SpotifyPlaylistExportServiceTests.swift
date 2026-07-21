@@ -11,8 +11,8 @@ struct SpotifyPlaylistExportServiceTests {
         // Given
         let mockResponse = SpotifyUserProfileResponse(
             display_name: "TestUser",
-            images: nil,
-            id: "user123"
+            id: "user123",
+            images: nil
         )
         let mockNetwork = MockNetworkManager(responseToReturn: mockResponse)
         let sut = SpotifyPlaylistExportService(networkManager: mockNetwork)

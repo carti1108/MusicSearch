@@ -5,10 +5,10 @@
 //  Created by Kiseok on 12/13/25.
 //
 
-import MSData
 
 import Foundation
 import MSDomain
+import MSInfrastructure
 
 struct ChartTopTracksResponseDTO: Decodable {
 	let tracks: ChartTrackListDTO
