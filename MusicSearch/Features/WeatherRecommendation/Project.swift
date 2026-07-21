@@ -17,7 +17,8 @@ let project = Project(
             name: "WeatherRecommendation",
             dependencies: [
                 .target(name: "WeatherRecommendationDomain"),
-                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core"))
+                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core"))
             ],
             basePath: "Shared"
         )],

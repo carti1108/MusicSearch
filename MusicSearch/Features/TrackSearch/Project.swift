@@ -16,7 +16,8 @@ let project = Project(
             name: "TrackSearch",
             dependencies: [
                 .target(name: "TrackSearchDomain"),
-                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core"))
+                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core"))
             ],
             basePath: "Shared"
         )],

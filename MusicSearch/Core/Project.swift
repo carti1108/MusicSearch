@@ -40,7 +40,8 @@ let project = Project(
                 "Domain/Interfaces/**",
                 "Domain/Services/**",
                 "Domain/UseCases/**",
-                "Domain/Sources/**"
+                "Domain/Sources/**",
+                "Domain/Util/**"
             ],
             dependencies: [
                 .target(name: "MSUtil")
@@ -55,10 +56,7 @@ let project = Project(
             deploymentTargets: ProjectEnvironment.deploymentTarget,
             infoPlist: .default,
             sources: [
-                "Data/DTOs/**",
-                "Data/Network/**",
-                "Data/Repositories/**",
-                "Infrastructure/**"
+                "Data/Repositories/**"
             ],
             dependencies: [
                 .target(name: "MSDomain"),
@@ -76,7 +74,8 @@ let project = Project(
             infoPlist: .default,
             sources: ["Domain/Tests/**"],
             dependencies: [
-                .target(name: "MSDomain")
+                .target(name: "MSDomain"),
+                .target(name: "MSTesting")
             ],
             settings: ProjectEnvironment.projectSettings
         ),
@@ -87,10 +86,44 @@ let project = Project(
             bundleId: "\(ProjectEnvironment.bundlePrefix).MSDataTests",
             deploymentTargets: ProjectEnvironment.deploymentTarget,
             infoPlist: .default,
-            sources: ["Data/Tests/**"],
+            sources: [
+                "Data/Tests/**"
+            ],
             dependencies: [
                 .target(name: "MSData"),
-                .target(name: "MSDomain")
+                .target(name: "MSDomain"),
+                .target(name: "MSTesting")
+            ],
+            settings: ProjectEnvironment.projectSettings
+        ),
+        .target(
+            name: "MSInfrastructure",
+            destinations: [.iPhone],
+            product: .staticFramework,
+            bundleId: "\(ProjectEnvironment.bundlePrefix).MSInfrastructure",
+            deploymentTargets: ProjectEnvironment.deploymentTarget,
+            infoPlist: .default,
+            sources: [
+                .glob("Infrastructure/**", excluding: ["Infrastructure/**/Tests/**"])
+            ],
+            dependencies: [
+                .target(name: "MSDomain"),
+                .external(name: "NetworkLayer")
+            ],
+            settings: ProjectEnvironment.projectSettings
+        ),
+        .target(
+            name: "MSInfrastructureTests",
+            destinations: [.iPhone],
+            product: .unitTests,
+            bundleId: "\(ProjectEnvironment.bundlePrefix).MSInfrastructureTests",
+            deploymentTargets: ProjectEnvironment.deploymentTarget,
+            infoPlist: .default,
+            sources: ["Infrastructure/**/Tests/**"],
+            dependencies: [
+                .target(name: "MSInfrastructure"),
+                .target(name: "MSDomain"),
+                .target(name: "MSTesting")
             ],
             settings: ProjectEnvironment.projectSettings
         ),

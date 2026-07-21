@@ -43,7 +43,8 @@ let project = Project(
             name: "Archive",
             dependencies: [
                 .target(name: "ArchiveDomain"),
-                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core"))
+                .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core"))
             ],
             basePath: "Shared"
         )],
@@ -101,6 +102,7 @@ let project = Project(
                 .target(name: "ArchiveSharedPresentation"),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .external(name: "NetworkLayer"),
                 .external(name: "ComposableArchitecture")
             ],
@@ -137,6 +139,7 @@ let project = Project(
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .external(name: "NetworkLayer"),
                 .external(name: "ComposableArchitecture")
@@ -177,6 +180,7 @@ let project = Project(
                 .target(name: "ArchiveSharedPresentation"),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .external(name: "NetworkLayer"),
                 .external(name: "ComposableArchitecture")
@@ -211,6 +215,7 @@ let project = Project(
                 .target(name: "ArchiveDomain"),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSData", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .external(name: "NetworkLayer"),
                 .external(name: "ComposableArchitecture")

@@ -10,6 +10,7 @@ import NetworkLayer
 import CoreLocation
 import MSDomain
 import MSData
+import MSInfrastructure
 import MSUtil
 import ChartData
 import TrackSearchData
@@ -47,10 +48,6 @@ final class AppComponent: RootDependency {
 		)
 	}()
 
-	private lazy var fetchArtistImageURLUseCaseInstance: FetchArtistImageURLUseCase = {
-		FetchArtistImageURLUseCaseImpl(artistImageService: self.artistImageServiceInstance)
-	}()
-
 	private lazy var locationRepositoryInstance: LocationRepository = {
 		LocationRepositoryImpl(locationManager: self.locationManager)
 	}()
@@ -64,8 +61,7 @@ final class AppComponent: RootDependency {
 
 	private lazy var trackRepositoryInstance: TrackRepository = {
 		TrackRepositoryImpl(
-			networkManager: self.networkManager,
-			musicAppService: self.musicAppServiceInstance
+			networkManager: self.networkManager
 		)
 	}()
 
@@ -98,6 +94,13 @@ final class AppComponent: RootDependency {
 		ExportPlaylistUseCaseImpl(
 			playlistExportService: self.playlistExportServiceInstance,
 			authService: self.musicAuthServiceInstance
+		)
+	}()
+
+	private lazy var enrichTracksUseCaseInstance: EnrichTracksUseCase = {
+		EnrichTracksUseCaseImpl(
+			trackRepository: self.trackRepositoryInstance,
+			musicAppService: self.musicAppServiceInstance
 		)
 	}()
 
@@ -141,9 +144,6 @@ final class AppComponent: RootDependency {
 	var fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase {
 		FetchArtistDeepLinkUseCaseImpl(musicAppService: self.musicAppServiceInstance)
 	}
-	var fetchArtistImageURLUseCase: FetchArtistImageURLUseCase {
-		self.fetchArtistImageURLUseCaseInstance
-	}
 
 	private lazy var musicAuthServiceInstance: MusicAuthService = {
 		SpotifyAuthServiceImpl(networkManager: self.networkManager)
@@ -171,30 +171,38 @@ final class AppComponent: RootDependency {
 	}
 
 	var searchTracksUseCase: any SearchTracksUseCase {
-		SearchTracksUseCaseImpl(trackRepository: self.trackRepository)
+		SearchTracksUseCaseImpl(
+			trackRepository: self.trackRepository,
+			musicAppService: self.musicAppService,
+			enrichTracksUseCase: self.enrichTracksUseCaseInstance
+		)
 	}
 
 	var fetchTracksByTagUseCase: any FetchTracksByTagUseCase {
-		FetchTracksByTagUseCaseImpl(trackRepository: self.trackRepository)
+		FetchTracksByTagUseCaseImpl(
+			trackRepository: self.trackRepository,
+			enrichTracksUseCase: self.enrichTracksUseCaseInstance
+		)
 	}
 
 	var fetchSimilarTracksUseCase: any FetchSimilarTracksUseCase {
-		FetchSimilarTracksUseCaseImpl(trackRepository: self.trackRepository)
+		FetchSimilarTracksUseCaseImpl(
+			trackRepository: self.trackRepository,
+			enrichTracksUseCase: self.enrichTracksUseCaseInstance
+		)
 	}
 
 	var fetchChartTopTracksUseCase: any FetchChartTopTracksUseCase {
 		FetchChartTopTracksUseCaseImpl(
 			chartRepository: self.chartRepository,
-			trackRepository: self.trackRepository
+			enrichTracksUseCase: self.enrichTracksUseCaseInstance
 		)
 	}
 
 	var fetchChartTopArtistsUseCase: any FetchChartTopArtistsUseCase {
 		FetchChartTopArtistsUseCaseImpl(
 			chartRepository: self.chartRepository,
-			artistImageEnrichmentService: ArtistImageEnrichmentServiceImpl(
-				fetchArtistImageURLUseCase: self.fetchArtistImageURLUseCase
-			)
+			artistImageService: self.artistImageService
 		)
 	}
 
