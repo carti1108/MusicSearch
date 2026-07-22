@@ -18,7 +18,16 @@
 
 | Weather | Search | Chart | Archive |
 | :---: | :---: | :---: |:---: |
-| <img src="https://github.com/user-attachments/assets/72dc3c6c-7321-427a-88e1-de0bd4669aa3" width="150" alt="Home" /> | <img src="https://github.com/user-attachments/assets/03e122f6-c892-4715-9211-b5bb99b70559" width="150" alt="Search" /> | <img src="https://github.com/user-attachments/assets/71496392-0bd3-443c-98e3-8d227843b7b6" width="150" alt="Chart" /> |
+| <img src="https://github.com/user-attachments/assets/fa3093f6-df81-4b35-99fa-3140021f1c36" width="150" alt="Home" /> | <img src="https://github.com/user-attachments/assets/cfa6799f-3209-4733-aa4c-da700d0bc285" width="150" alt="Search" /> | <img src="https://github.com/user-attachments/assets/9814a02d-cee2-49ec-8473-b74641ac992e" width="150" alt="Chart" /> | <img src="https://github.com/user-attachments/assets/c8f5657b-1c88-4276-be2e-b637e8211668" width="150" alt="Archive" /> |
+
+<img width="960" height="2087" alt="Weather" src= />
+<img width="960" height="2087" alt="Search" src= />
+<img width="960" height="2087" alt="Chart" src= />
+<img width="960" height="2087" alt="Archive" src= />
+
+
+
+
 
 ---
 
