@@ -85,6 +85,8 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 
 	private lazy var collectionView: UICollectionView = {
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: self.createLayout())
+		cv.showsVerticalScrollIndicator = false
+		cv.showsHorizontalScrollIndicator = false
 		cv.backgroundColor = .clear
 		cv.translatesAutoresizingMaskIntoConstraints = false
 		cv.delegate = self
@@ -164,13 +166,16 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 			snapshot.appendItems(listItems, toSection: .list)
 		}
 
+		self.isRestoringOffset = true
 		UIView.performWithoutAnimation {
 			self.dataSource.apply(
 				snapshot,
 				animatingDifferences: false
 			) { [weak self] in
+				self?.collectionView.layoutIfNeeded()
 				self?.restoreScrollOffsetIfNeeded()
 				self?.primeInitialCrossfadeIfNeeded(force: true)
+				self?.isRestoringOffset = false
 			}
 		}
 	}
@@ -261,9 +266,7 @@ final class ChartViewController: UIViewController, ChartPresentable, ChartViewCo
 		let clampedY = min(max(target.y, minY), maxY)
 		let clampedOffset = CGPoint(x: 0, y: clampedY)
 
-		self.isRestoringOffset = true
 		self.collectionView.setContentOffset(clampedOffset, animated: false)
-		self.isRestoringOffset = false
 	}
 
 	private func primeInitialCrossfadeIfNeeded(force: Bool = false) {
