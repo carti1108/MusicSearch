@@ -112,6 +112,7 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	private let sectionTitleLabel: UILabel = {
 		let label = UILabel()
 		label.text = ""
+		label.font = .systemFont(ofSize: 22, weight: .bold)
 		label.isHidden = true
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
