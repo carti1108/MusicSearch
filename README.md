@@ -20,15 +20,6 @@
 | :---: | :---: | :---: |:---: |
 | <img src="https://github.com/user-attachments/assets/fa3093f6-df81-4b35-99fa-3140021f1c36" width="150" alt="Home" /> | <img src="https://github.com/user-attachments/assets/cfa6799f-3209-4733-aa4c-da700d0bc285" width="150" alt="Search" /> | <img src="https://github.com/user-attachments/assets/9814a02d-cee2-49ec-8473-b74641ac992e" width="150" alt="Chart" /> | <img src="https://github.com/user-attachments/assets/c8f5657b-1c88-4276-be2e-b637e8211668" width="150" alt="Archive" /> |
 
-<img width="960" height="2087" alt="Weather" src= />
-<img width="960" height="2087" alt="Search" src= />
-<img width="960" height="2087" alt="Chart" src= />
-<img width="960" height="2087" alt="Archive" src= />
-
-
-
-
-
 ---
 
 ## ✨ 주요 기능
