@@ -90,6 +90,7 @@ public struct SettingsView: View {
         }
         .navigationTitle("설정")
         .listStyle(.insetGrouped)
+        .scrollIndicators(.hidden)
         .scrollContentBackground(.hidden)
         .background(CustomColor.background.ignoresSafeArea())
         .onAppear {

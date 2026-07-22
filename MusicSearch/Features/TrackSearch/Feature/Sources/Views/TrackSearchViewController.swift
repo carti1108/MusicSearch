@@ -35,6 +35,8 @@ final class TrackSearchViewController: UIViewController, TrackSearchPresentable,
 		let layout = UICollectionViewCompositionalLayout.list(using: config)
 
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+		cv.showsVerticalScrollIndicator = false
+		cv.showsHorizontalScrollIndicator = false
 		cv.backgroundColor = .clear
 		cv.keyboardDismissMode = .onDrag
 		cv.translatesAutoresizingMaskIntoConstraints = false

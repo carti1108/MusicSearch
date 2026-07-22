@@ -99,6 +99,7 @@ public struct ArchiveView: View {
                 }
             }
             .listStyle(.plain)
+            .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)
             .padding(.bottom, 80)
 

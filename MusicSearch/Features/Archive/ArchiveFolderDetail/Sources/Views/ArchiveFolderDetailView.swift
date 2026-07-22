@@ -51,6 +51,7 @@ public struct ArchiveFolderDetailView: View {
                     }
                 }
                 .listStyle(.plain)
+                .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
             }
 

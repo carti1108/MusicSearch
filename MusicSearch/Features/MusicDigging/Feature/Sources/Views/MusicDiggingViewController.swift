@@ -23,7 +23,7 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 
 	private let scrollView: UIScrollView = {
 		let sv = UIScrollView()
-		sv.showsVerticalScrollIndicator = true
+		sv.showsVerticalScrollIndicator = false
 		sv.alwaysBounceVertical = true
 		sv.translatesAutoresizingMaskIntoConstraints = false
 		return sv
@@ -97,9 +97,9 @@ final class MusicDiggingViewController: UIViewController, MusicDiggingPresentabl
 	private lazy var collectionView: UICollectionView = {
 		let layout = self.createCarouselLayout()
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
-		cv.backgroundColor = .clear
-		cv.showsHorizontalScrollIndicator = false
 		cv.showsVerticalScrollIndicator = false
+		cv.showsHorizontalScrollIndicator = false
+		cv.backgroundColor = .clear
 		cv.isScrollEnabled = false
 		cv.register(TrackCarouselCell.self, forCellWithReuseIdentifier: TrackCarouselCell.reuseIdentifier)
 		cv.delegate = self

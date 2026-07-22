@@ -123,6 +123,8 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 
 	private lazy var scrollView: UIScrollView = {
 		let scrollView = UIScrollView()
+		scrollView.showsVerticalScrollIndicator = false
+		scrollView.showsHorizontalScrollIndicator = false
 		scrollView.translatesAutoresizingMaskIntoConstraints = false
 		scrollView.showsVerticalScrollIndicator = false
 		return scrollView
@@ -137,6 +139,8 @@ final class WeatherRecommendationViewController: UIViewController, ReuseIdentifi
 	private lazy var collectionView: UICollectionView = {
 		let layout = self.createCarouselLayout()
 		let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+		cv.showsVerticalScrollIndicator = false
+		cv.showsHorizontalScrollIndicator = false
 		cv.backgroundColor = .clear
 		cv.showsVerticalScrollIndicator = false
 		cv.showsHorizontalScrollIndicator = false

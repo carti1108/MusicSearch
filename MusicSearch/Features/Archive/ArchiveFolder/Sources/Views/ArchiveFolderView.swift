@@ -43,7 +43,7 @@ public struct ArchiveFolderView: View {
                 .padding(.top, CustomSpacing.base)
                 .padding(.bottom, CustomSpacing.containerMargin)
 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     if currentFolders.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "folder")

@@ -53,7 +53,7 @@ public struct ArchiveTrackSearchView: View {
 						.padding()
 					Spacer()
 				} else {
-                    ScrollView {
+                    ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 12) {
                             ForEach(store.results, id: \.id) { track in
                                 Button(action: {

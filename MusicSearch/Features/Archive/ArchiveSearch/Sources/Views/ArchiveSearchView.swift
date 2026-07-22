@@ -35,7 +35,7 @@ public struct ArchiveSearchView: View {
                 .padding(.horizontal, CustomSpacing.containerMargin)
                 .padding(.top, CustomSpacing.containerMargin)
 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
                         if !store.recentSearches.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
