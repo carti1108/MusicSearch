@@ -7,7 +7,6 @@
 
 import Foundation
 import MSDomain
-import TrackSearchDomain
 import OSLog
 
 public protocol EnrichTracksUseCase: Sendable {
