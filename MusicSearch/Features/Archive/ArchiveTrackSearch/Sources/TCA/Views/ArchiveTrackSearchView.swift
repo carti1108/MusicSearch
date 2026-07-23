@@ -9,12 +9,13 @@ import SwiftUI
 import ComposableArchitecture
 import MSDesignSystem
 import MSDomain
+import FeatureArchiveTrackSearchInterface
 
 public struct ArchiveTrackSearchView: View {
-	@Bindable var store: StoreOf<ArchiveTrackSearchFeature>
+	@Bindable var store: Store<ArchiveTrackSearchState, ArchiveTrackSearchAction>
 	@Environment(\.dismiss) var dismiss
 
-	public init(store: StoreOf<ArchiveTrackSearchFeature>) {
+	public init(store: Store<ArchiveTrackSearchState, ArchiveTrackSearchAction>) {
 		self.store = store
 	}
 

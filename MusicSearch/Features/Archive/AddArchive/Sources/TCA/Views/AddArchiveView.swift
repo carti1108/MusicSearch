@@ -9,12 +9,13 @@ import SwiftUI
 import ComposableArchitecture
 import PhotosUI
 import MSDesignSystem
+import FeatureAddArchiveInterface
 
 public struct AddArchiveView: View {
-	@Bindable var store: StoreOf<AddArchiveFeature>
+	@Bindable var store: Store<AddArchiveState, AddArchiveAction>
 	@State private var coverItem: PhotosPickerItem?
 
-	public init(store: StoreOf<AddArchiveFeature>) {
+	public init(store: Store<AddArchiveState, AddArchiveAction>) {
 		self.store = store
 	}
 

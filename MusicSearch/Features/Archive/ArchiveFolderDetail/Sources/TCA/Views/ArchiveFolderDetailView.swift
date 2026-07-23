@@ -10,14 +10,15 @@ import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
 import ArchiveSharedPresentation
+import FeatureArchiveFolderDetailInterface
 
 public struct ArchiveFolderDetailView: View {
-    @Bindable var store: StoreOf<ArchiveFolderDetailFeature>
+    @Bindable var store: Store<ArchiveFolderDetailState, ArchiveFolderDetailAction>
 
     @State private var showingExportAlert = false
     @State private var exportResultMessage = ""
 
-    public init(store: StoreOf<ArchiveFolderDetailFeature>) {
+    public init(store: Store<ArchiveFolderDetailState, ArchiveFolderDetailAction>) {
         self.store = store
     }
 

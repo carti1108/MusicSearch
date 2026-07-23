@@ -10,11 +10,12 @@ import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
 import ArchiveSharedPresentation
+import FeatureArchiveFolderInterface
 
 public struct ArchiveFolderView: View {
-    @Bindable var store: StoreOf<ArchiveFolderFeature>
+    @Bindable var store: Store<ArchiveFolderState, ArchiveFolderAction>
 
-    public init(store: StoreOf<ArchiveFolderFeature>) {
+    public init(store: Store<ArchiveFolderState, ArchiveFolderAction>) {
         self.store = store
     }
 

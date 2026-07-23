@@ -1,25 +1,42 @@
-//
-//  ArchiveView.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 7/16/26.
-//
-
 import SwiftUI
 import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
+import FeatureArchiveInterface
+import FeatureArchiveSearchInterface
+import FeatureArchiveFolderInterface
+import FeatureAddArchiveInterface
 
-public struct ArchiveView: View {
-    @Bindable var store: StoreOf<ArchiveFeature>
+public struct ArchiveView<
+    Search: View,
+    Folder: View,
+    AddArchive: View,
+    EditArchive: View
+>: View {
+    @Bindable var store: Store<ArchiveState, ArchiveAction>
+
+    let searchView: (Store<ArchiveSearchState, ArchiveSearchAction>) -> Search
+    let folderView: (Store<ArchiveFolderState, ArchiveFolderAction>) -> Folder
+    let addArchiveView: (Store<AddArchiveState, AddArchiveAction>) -> AddArchive
+    let editArchiveView: (Store<AddArchiveState, AddArchiveAction>) -> EditArchive
 
     @State private var showFilterSheet = false
     @State private var filterIntroGood = false
     @State private var filterMiddleGood = false
     @State private var filterEndGood = false
 
-    public init(store: StoreOf<ArchiveFeature>) {
+    public init(
+        store: Store<ArchiveState, ArchiveAction>,
+        @ViewBuilder searchView: @escaping (Store<ArchiveSearchState, ArchiveSearchAction>) -> Search,
+        @ViewBuilder folderView: @escaping (Store<ArchiveFolderState, ArchiveFolderAction>) -> Folder,
+        @ViewBuilder addArchiveView: @escaping (Store<AddArchiveState, AddArchiveAction>) -> AddArchive,
+        @ViewBuilder editArchiveView: @escaping (Store<AddArchiveState, AddArchiveAction>) -> EditArchive
+    ) {
         self.store = store
+        self.searchView = searchView
+        self.folderView = folderView
+        self.addArchiveView = addArchiveView
+        self.editArchiveView = editArchiveView
     }
 
     private var filteredTracks: [ArchivedTrack] {
@@ -135,5 +152,40 @@ public struct ArchiveView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .background(sheets)
+    }
+
+    @ViewBuilder
+    private var sheets: some View {
+        let searchBinding: Binding<Store<ArchiveSearchState, ArchiveSearchAction>?> = $store.scope(
+            state: \.destination?[case: \.search],
+            action: \.destination.search
+        )
+        let folderBinding: Binding<Store<ArchiveFolderState, ArchiveFolderAction>?> = $store.scope(
+            state: \.destination?[case: \.folder],
+            action: \.destination.folder
+        )
+        let addArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(
+            state: \.destination?[case: \.addArchive],
+            action: \.destination.addArchive
+        )
+        let editArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(
+            state: \.destination?[case: \.editArchive],
+            action: \.destination.editArchive
+        )
+
+        Color.clear
+            .sheet(item: searchBinding) { store in
+                searchView(store)
+            }
+            .sheet(item: folderBinding) { store in
+                folderView(store)
+            }
+            .sheet(item: addArchiveBinding) { store in
+                addArchiveView(store)
+            }
+            .sheet(item: editArchiveBinding) { store in
+                editArchiveView(store)
+            }
     }
 }
