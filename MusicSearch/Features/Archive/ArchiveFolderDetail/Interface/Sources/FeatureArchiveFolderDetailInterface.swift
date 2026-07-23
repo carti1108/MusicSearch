@@ -1,36 +1,43 @@
-//
-//  FeatureArchiveFolderDetailInterface.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
-import Foundation
-import MicroRIBs
-import ArchiveDomain
+import ComposableArchitecture
+@preconcurrency import ArchiveDomain
 import MSDomain
 
-public protocol ArchiveFolderDetailBuildable: Buildable {
-    func build(withListener listener: ArchiveFolderDetailListener, folderItem: FolderItem) -> ArchiveFolderDetailRouting
+public enum ExportState: Equatable, Sendable {
+    case idle
+    case exporting(progress: ExportProgress)
+    case completed(successCount: Int, failedCount: Int)
 }
 
-@MainActor
-public protocol ArchiveFolderDetailRouting: ViewableRouting {
-    func routeToFolderDetail(folderItem: FolderItem)
-    func detachFolderDetail(popUI: Bool)
+@ObservableState
+public struct ArchiveFolderDetailState: Equatable, Sendable {
+    public var folderItem: FolderItem
+    public var title: String
+    public var folders: [FolderItem]?
+    public var tracks: [ArchivedTrack]?
+    public var exportState: ExportState = .idle
+
+    public init(folderItem: FolderItem) {
+        self.folderItem = folderItem
+        self.title = folderItem.title
+    }
 }
 
-@MainActor
-public protocol ArchiveFolderDetailListener: AnyObject {
-    func archiveFolderDetailDidTapClose()
-    func archiveFolderDetailDidTapFolder(_ folderItem: FolderItem)
-    func archiveFolderDetailDidTapTrack(_ track: ArchivedTrack)
-}
+public enum ArchiveFolderDetailAction: Sendable {
+    case onAppear
+    case loadDataResponse(folders: [FolderItem]?, tracks: [ArchivedTrack]?)
+    case folderTapped(FolderItem)
+    case trackTapped(ArchivedTrack)
+    case closeButtonTapped
+    case exportButtonTapped
+    case loginPromptTapped
+    case exportProgress(ExportProgress)
+    case exportCompleted(successCount: Int, failedCount: Int)
+    case delegate(DelegateAction)
 
-@MainActor
-public protocol ArchiveFolderDetailDependency: Dependency {
-    var archiveRepository: ArchiveRepository { get }
-    var exportPlaylistUseCase: ExportPlaylistUseCase { get }
-    var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase { get }
-    var authorizeMusicUseCase: AuthorizeMusicUseCase { get }
+    public enum DelegateAction: Equatable, Sendable {
+        case didTapClose
+        case didTapFolder(FolderItem)
+        case didTapTrack(ArchivedTrack)
+        case showLoginPrompt
+    }
 }

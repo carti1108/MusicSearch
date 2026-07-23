@@ -9,52 +9,21 @@ import Foundation
 import ComposableArchitecture
 import TrackSearchDomain
 import MSDomain
+import FeatureArchiveTrackSearchInterface
 
 @Reducer
-public struct ArchiveTrackSearchFeature {
+public struct ArchiveTrackSearchFeature: Reducer {
 
-	@ObservableState
-	public struct State: Equatable {
-		public var query: String = ""
-		public var results: [Track] = []
-		public var isLoading: Bool = false
-
-		public init() {}
-	}
-
-	public enum Action: BindableAction {
-		case binding(BindingAction<State>)
-		case onAppear
-		case closeButtonTapped
-		case clearQueryTapped
-		case trackSelected(Track)
-		case searchResponse(TaskResult<TrackSearchResponse>)
-		case delegate(DelegateAction)
-	}
-
-	public struct TrackSearchResponse: Equatable {
-		public let tracks: [Track]
-		public let totalResults: Int
-		public init(tracks: [Track], totalResults: Int) {
-			self.tracks = tracks
-			self.totalResults = totalResults
-		}
-	}
-
-	public enum DelegateAction: Equatable {
-		case trackSelected(Track)
-	}
+	public typealias State = ArchiveTrackSearchState
+	public typealias Action = ArchiveTrackSearchAction
 
 	private let searchTracksUseCase: SearchTracksUseCase
-	private let onDelegate: (DelegateAction) -> Void
 	private enum CancelID { case search }
 
 	public init(
-		searchTracksUseCase: SearchTracksUseCase,
-		onDelegate: @escaping (DelegateAction) -> Void
+		searchTracksUseCase: SearchTracksUseCase
 	) {
 		self.searchTracksUseCase = searchTracksUseCase
-		self.onDelegate = onDelegate
 	}
 
 	public var body: some ReducerOf<Self> {
@@ -109,10 +78,8 @@ public struct ArchiveTrackSearchFeature {
 			case .closeButtonTapped:
 				return .none
 
-			case let .delegate(delegateAction):
-				return .run { @MainActor _ in
-					onDelegate(delegateAction)
-				}
+			case .delegate:
+				return .none
 			}
 		}
 	}

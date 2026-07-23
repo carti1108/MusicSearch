@@ -9,49 +9,19 @@ import Foundation
 import ComposableArchitecture
 import ArchiveDomain
 import OSLog
+import FeatureArchiveFolderInterface
 
 @Reducer
-public struct ArchiveFolderFeature {
+public struct ArchiveFolderFeature: Reducer {
 
-    @ObservableState
-    public struct State: Equatable {
-        public var selectedTab: Int = 0
-        public var releaseYearFolders: [FolderItem] = []
-        public var listenYearFolders: [FolderItem] = []
-        public var genreFolders: [FolderItem] = []
-        public var ratingFolders: [FolderItem] = []
-
-        public init() {}
-    }
-
-    public enum Action: BindableAction {
-        case binding(BindingAction<State>)
-        case onAppear
-        case foldersLoaded(
-            releaseYear: [FolderItem],
-            listenYear: [FolderItem],
-            genre: [FolderItem],
-            rating: [FolderItem]
-        )
-        case folderTapped(FolderItem)
-        case closeButtonTapped
-        case delegate(DelegateAction)
-    }
-
-    public enum DelegateAction: Equatable {
-        case didTapClose
-        case didTapFolder(FolderItem)
-    }
+    public typealias State = ArchiveFolderState
+    public typealias Action = ArchiveFolderAction
 
     private let archiveRepository: ArchiveRepository
-    private let onDelegate: @MainActor @Sendable (DelegateAction) -> Void
-
     public init(
-        archiveRepository: ArchiveRepository,
-        onDelegate: @escaping @MainActor @Sendable (DelegateAction) -> Void
+        archiveRepository: ArchiveRepository
     ) {
         self.archiveRepository = archiveRepository
-        self.onDelegate = onDelegate
     }
 
     public var body: some ReducerOf<Self> {
@@ -117,14 +87,10 @@ public struct ArchiveFolderFeature {
                 return .none
 
             case let .folderTapped(folder):
-                return .run { @MainActor [onDelegate] _ in
-                    onDelegate(.didTapFolder(folder))
-                }
+                return .send(.delegate(.didTapFolder(folder)))
 
             case .closeButtonTapped:
-                return .run { @MainActor [onDelegate] _ in
-                    onDelegate(.didTapClose)
-                }
+                return .send(.delegate(.didTapClose))
 
             case .delegate:
                 return .none

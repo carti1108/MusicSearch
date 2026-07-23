@@ -1,25 +1,32 @@
-//
-//  FeatureArchiveFolderInterface.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
+import ComposableArchitecture
+@preconcurrency import ArchiveDomain
 
-import MicroRIBs
+@ObservableState
+public struct ArchiveFolderState: Equatable, Sendable {
+    public var selectedTab: Int = 0
+    public var releaseYearFolders: [FolderItem] = []
+    public var listenYearFolders: [FolderItem] = []
+    public var genreFolders: [FolderItem] = []
+    public var ratingFolders: [FolderItem] = []
 
-public protocol ArchiveFolderBuildable: Buildable {
-    func build(withListener listener: ArchiveFolderListener) -> ArchiveFolderRouting
+    public init() {}
 }
 
-import ArchiveDomain
+public enum ArchiveFolderAction: BindableAction, Sendable {
+    case binding(BindingAction<ArchiveFolderState>)
+    case onAppear
+    case foldersLoaded(
+        releaseYear: [FolderItem],
+        listenYear: [FolderItem],
+        genre: [FolderItem],
+        rating: [FolderItem]
+    )
+    case folderTapped(FolderItem)
+    case closeButtonTapped
+    case delegate(DelegateAction)
 
-public protocol ArchiveFolderRouting: ViewableRouting {
-    func routeToFolderDetail(folderItem: FolderItem)
-    func detachFolderDetail(popUI: Bool)
-}
-
-@MainActor
-public protocol ArchiveFolderListener: AnyObject {
-    func archiveFolderDidTapClose()
-    func archiveFolderDidTapTrack(_ track: ArchivedTrack)
+    public enum DelegateAction: Equatable, Sendable {
+        case didTapClose
+        case didTapFolder(FolderItem)
+    }
 }

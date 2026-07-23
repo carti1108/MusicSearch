@@ -10,70 +10,31 @@ import ComposableArchitecture
 import ArchiveDomain
 import MSDomain
 import OSLog
+import FeatureArchiveFolderDetailInterface
 
 @Reducer
-public struct ArchiveFolderDetailFeature {
+public struct ArchiveFolderDetailFeature: Reducer {
 
-    public enum ExportState: Equatable {
-        case idle
-        case exporting(progress: ExportProgress)
-        case completed(successCount: Int, failedCount: Int)
-    }
-
-    @ObservableState
-    public struct State: Equatable {
-        public var folderItem: FolderItem
-        public var title: String
-        public var folders: [FolderItem]?
-        public var tracks: [ArchivedTrack]?
-        public var exportState: ExportState = .idle
-
-        public init(folderItem: FolderItem) {
-            self.folderItem = folderItem
-            self.title = folderItem.title
-        }
-    }
-
-    public enum Action {
-        case onAppear
-        case loadDataResponse(folders: [FolderItem]?, tracks: [ArchivedTrack]?)
-        case folderTapped(FolderItem)
-        case trackTapped(ArchivedTrack)
-        case closeButtonTapped
-        case exportButtonTapped
-        case loginPromptTapped
-        case exportProgress(ExportProgress)
-        case exportCompleted(successCount: Int, failedCount: Int)
-        case delegate(DelegateAction)
-    }
+    public typealias State = ArchiveFolderDetailState
+    public typealias Action = ArchiveFolderDetailAction
 
     private enum CancelID {
         case export
     }
 
-    public enum DelegateAction: Equatable {
-        case didTapClose
-        case didTapFolder(FolderItem)
-        case didTapTrack(ArchivedTrack)
-        case showLoginPrompt
-    }
-
     private let archiveRepository: ArchiveRepository
     private let exportPlaylistUseCase: ExportPlaylistUseCase
     private let getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase
-    private let onDelegate: (DelegateAction) -> Void
-
     public init(
         archiveRepository: ArchiveRepository,
         exportPlaylistUseCase: ExportPlaylistUseCase,
-        getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase,
-        onDelegate: @escaping (DelegateAction) -> Void
+        getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase,
+        authorizeMusicUseCase: AuthorizeMusicUseCase
     ) {
         self.archiveRepository = archiveRepository
         self.exportPlaylistUseCase = exportPlaylistUseCase
         self.getMusicAccessTokenUseCase = getMusicAccessTokenUseCase
         self.authorizeMusicUseCase = authorizeMusicUseCase
-        self.onDelegate = onDelegate
     }
 
     public var body: some ReducerOf<Self> {
@@ -194,29 +155,21 @@ public struct ArchiveFolderDetailFeature {
                 return .none
 
             case let .folderTapped(folder):
-                return .run { @MainActor _ in
-                    onDelegate(.didTapFolder(folder))
-                }
+                return .send(.delegate(.didTapFolder(folder)))
 
             case let .trackTapped(track):
-                return .run { @MainActor _ in
-                    onDelegate(.didTapTrack(track))
-                }
+                return .send(.delegate(.didTapTrack(track)))
 
             case .closeButtonTapped:
                 return .merge(
                     .cancel(id: CancelID.export),
-                    .run { @MainActor _ in
-                        onDelegate(.didTapClose)
-                    }
+                    .send(.delegate(.didTapClose))
                 )
 
             case .exportButtonTapped:
                 guard let tracks = state.tracks, !tracks.isEmpty else { return .none }
                 if getMusicAccessTokenUseCase.execute() == nil {
-                    return .run { @MainActor _ in
-                        onDelegate(.showLoginPrompt)
-                    }
+                    return .send(.delegate(.showLoginPrompt))
                 } else {
                     return .run { [title = state.title] send in
                         let playlistName = "MusicSearch Archive - \(title)"

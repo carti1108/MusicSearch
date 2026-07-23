@@ -1,42 +1,49 @@
-//
-//  FeatureArchiveInterface.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
-import Foundation
-import MicroRIBs
+import ComposableArchitecture
 import ArchiveDomain
-import FeatureAddArchiveInterface
+import TrackSearchDomain
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetailInterface
+import FeatureAddArchiveInterface
 
-@MainActor
-public protocol ArchiveDependency: Dependency {
-	var archiveRepository: ArchiveRepository { get }
-	var addArchiveBuilder: AddArchiveBuildable { get }
-	var archiveSearchBuilder: ArchiveSearchBuildable { get }
-	var archiveFolderBuilder: ArchiveFolderBuildable { get }
-	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable { get }
+@CasePathable
+public enum ArchiveDestinationState: Equatable, Sendable {
+    case search(ArchiveSearchState)
+    case folder(ArchiveFolderState)
+    case addArchive(AddArchiveState)
+    case editArchive(AddArchiveState)
 }
 
-public protocol ArchiveBuildable: Buildable {
-	func build(withListener listener: ArchiveListener) -> ArchiveRouting
+@CasePathable
+public enum ArchiveDestinationAction: Sendable {
+    case search(ArchiveSearchAction)
+    case folder(ArchiveFolderAction)
+    case addArchive(AddArchiveAction)
+    case editArchive(AddArchiveAction)
 }
 
-public protocol ArchiveRouting: ViewableRouting {
-	func routeToAddArchive()
-	func routeToEditArchive(track: ArchivedTrack)
-	func detachAddArchive()
+@ObservableState
+public struct ArchiveState: Equatable, Sendable {
+    public var totalTracksCount: Int = 0
+    public var topGenreName: String = "없음"
+    public var recentTracks: [ArchivedTrack] = []
 
-	func routeToSearch()
-	func detachSearch()
+    @Presents public var destination: ArchiveDestinationState?
 
-	func routeToFolder()
-	func detachFolder()
+    public init() {}
 }
 
-public protocol ArchiveListener: AnyObject {
+@CasePathable
+public enum ArchiveAction: Sendable {
+    case onAppear
+    case loadDataResponse(tracks: [ArchivedTrack])
+    case onAddTapped
+    case onSearchTapped
+    case onFolderTapped
+    case onTrackTapped(track: ArchivedTrack)
+    case onDeleteTapped(track: ArchivedTrack)
+    case destination(PresentationAction<ArchiveDestinationAction>)
 }
+
+
+
+

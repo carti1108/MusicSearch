@@ -12,102 +12,23 @@ import TrackSearchDomain
 import MSDomain
 import OSLog
 import Kingfisher
+import FeatureAddArchiveInterface
 
 @Reducer
-public struct AddArchiveFeature {
+public struct AddArchiveFeature: Reducer {
 
-	@ObservableState
-	public struct State: Equatable {
-		public var availableGenres: [String] = []
-		public var selectedTrack: Track? = nil
-
-		public var title: String = ""
-		public var artist: String = ""
-		public var genre: String = ""
-		public var label: String = ""
-		public var albumTitle: String = ""
-		public var distributor: String = ""
-		public var albumType: String = "정규"
-		public var isIntroGood: Bool = false
-		public var isGoodUntilMiddle: Bool = false
-		public var isGoodUntilEnd: Bool = false
-		public var rating: Double = 3.0
-		public var memo: String = ""
-
-		public var releaseDate: Date = Date()
-		public var hasReleaseDate: Bool = false
-		public var listenDate: Date = Date()
-
-		public var coverImageData: Data?
-		public var isGenreExpanded: Bool = false
-		public var platformIDs: [String: String] = [:]
-
-		public var editTrackId: UUID?
-		public var isEditMode: Bool = false
-
-		@Presents public var alert: AlertState<Alert>?
-
-		public init(editTrack: ArchivedTrack? = nil) {
-			if let track = editTrack {
-				self.editTrackId = track.id
-				self.isEditMode = true
-				self.title = track.title
-				self.artist = track.artist
-				self.genre = track.genre
-				self.label = track.label
-				self.albumTitle = track.albumTitle ?? ""
-				self.distributor = track.distributor ?? ""
-				self.albumType = track.albumType ?? "정규"
-				self.isIntroGood = track.isIntroGood
-				self.isGoodUntilMiddle = track.isGoodUntilMiddle
-				self.isGoodUntilEnd = track.isGoodUntilEnd
-				self.rating = track.rating
-				self.memo = track.memo ?? ""
-				if let date = track.releaseDate {
-					self.hasReleaseDate = true
-					self.releaseDate = date
-				}
-				self.listenDate = track.listenDate
-				self.coverImageData = track.coverImageData
-				self.platformIDs = track.platformIDs
-			}
-		}
-	}
-
-	public enum Action: BindableAction {
-		case binding(BindingAction<State>)
-		case onAppear
-		case closeButtonTapped
-		case searchButtonTapped
-		case saveButtonTapped
-		case trackSelected(Track)
-		case coverImageLoaded(Data?)
-		case setCoverImageData(Data?)
-		case genresLoaded(TaskResult<[String]>)
-		case trackSaved(TaskResult<Void>)
-		case alert(PresentationAction<Alert>)
-		case delegate(DelegateAction)
-	}
-
-	public enum Alert: Equatable {}
-
-	public enum DelegateAction: Equatable {
-		case didCloseAddArchive
-		case didTapSearchTrack
-	}
+	public typealias State = AddArchiveState
+	public typealias Action = AddArchiveAction
+	public typealias Alert = AddArchiveAlert
 
 	private let archiveRepository: ArchiveRepository
 	private let searchTracksUseCase: SearchTracksUseCase
-	private let onDelegate: (DelegateAction) -> Void
-
 	public init(
 		archiveRepository: ArchiveRepository,
-		searchTracksUseCase: SearchTracksUseCase,
-		onDelegate: @escaping (DelegateAction) -> Void
+		searchTracksUseCase: SearchTracksUseCase
 	) {
 		self.archiveRepository = archiveRepository
 		self.searchTracksUseCase = searchTracksUseCase
-		self.onDelegate = onDelegate
 	}
 
 	public var body: some ReducerOf<Self> {
@@ -143,14 +64,10 @@ public struct AddArchiveFeature {
 				return .none
 
 			case .closeButtonTapped:
-				return .run { @MainActor _ in
-					onDelegate(.didCloseAddArchive)
-				}
+				return .send(.delegate(.didCloseAddArchive))
 
 			case .searchButtonTapped:
-				return .run { @MainActor _ in
-					onDelegate(.didTapSearchTrack)
-				}
+				return .send(.delegate(.didTapSearchTrack))
 
 			case let .setCoverImageData(data):
 				state.coverImageData = data
@@ -253,9 +170,7 @@ public struct AddArchiveFeature {
 				}
 
 			case .trackSaved(.success):
-				return .run { @MainActor _ in
-					onDelegate(.didCloseAddArchive)
-				}
+				return .send(.delegate(.didCloseAddArchive))
 
 			case let .trackSaved(.failure(error)):
 				state.alert = AlertState { TextState("저장 실패") } message: { TextState("저장 중 문제가 발생했습니다: \(error.localizedDescription)") }
@@ -264,10 +179,8 @@ public struct AddArchiveFeature {
 			case .alert:
 				return .none
 
-			case let .delegate(delegateAction):
-				return .run { @MainActor _ in
-					onDelegate(delegateAction)
-				}
+			case .delegate:
+				return .none
 			}
 		}
 		.ifLet(\.$alert, action: \.alert)

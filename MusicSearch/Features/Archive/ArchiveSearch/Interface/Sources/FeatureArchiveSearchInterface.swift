@@ -1,20 +1,26 @@
-//
-//  FeatureArchiveSearchInterface.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
+import ComposableArchitecture
+import ArchiveDomain
 
-import MicroRIBs
+@ObservableState
+public struct ArchiveSearchState: Equatable, Sendable {
+    public var searchText: String = ""
+    public var recentSearches: [String] = []
+    public var recommendedTracks: [ArchivedTrack] = []
+    public var allTracks: [ArchivedTrack] = []
 
-public protocol ArchiveSearchBuildable: Buildable {
-    func build(withListener listener: ArchiveSearchListener) -> ArchiveSearchRouting
+    public init() {}
 }
 
-public protocol ArchiveSearchRouting: ViewableRouting {
-}
+public enum ArchiveSearchAction: BindableAction, Sendable {
+    case binding(BindingAction<ArchiveSearchState>)
+    case onAppear
+    case clearRecentSearches
+    case removeRecentSearch(String)
+    case closeButtonTapped
+    case tracksLoaded(TaskResult<[ArchivedTrack]>)
+    case delegate(DelegateAction)
 
-@MainActor
-public protocol ArchiveSearchListener: AnyObject {
-    func archiveSearchDidTapClose()
+    public enum DelegateAction: Equatable, Sendable {
+        case archiveSearchDidTapClose
+    }
 }

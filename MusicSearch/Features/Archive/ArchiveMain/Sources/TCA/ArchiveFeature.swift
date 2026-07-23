@@ -1,54 +1,62 @@
-//
-//  ArchiveFeature.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
 import Foundation
 import ComposableArchitecture
 import ArchiveDomain
 import OSLog
+import FeatureArchiveInterface
+import FeatureArchiveSearchInterface
+import FeatureArchiveFolderInterface
+import FeatureAddArchiveInterface
 
 @Reducer
-public struct ArchiveFeature {
+public struct ArchiveFeature<
+    Search: Reducer,
+    Folder: Reducer,
+    AddArchive: Reducer,
+    EditArchive: Reducer
+> where Search.State == ArchiveSearchState, Search.Action == ArchiveSearchAction,
+        Folder.State == ArchiveFolderState, Folder.Action == ArchiveFolderAction,
+        AddArchive.State == AddArchiveState, AddArchive.Action == AddArchiveAction,
+        EditArchive.State == AddArchiveState, EditArchive.Action == AddArchiveAction {
 
-    @ObservableState
-    public struct State: Equatable {
-        public var totalTracksCount: Int = 0
-        public var topGenreName: String = "없음"
-        public var recentTracks: [ArchivedTrack] = []
+    public typealias State = ArchiveState
+    public typealias Action = ArchiveAction
 
-        public init() {}
-    }
+    public struct DestinationReducer: Reducer {
+        public typealias State = ArchiveDestinationState
+        public typealias Action = ArchiveDestinationAction
 
-    public enum Action {
-        case onAppear
-        case loadDataResponse(tracks: [ArchivedTrack])
-        case onAddTapped
-        case onSearchTapped
-        case onFolderTapped
-        case onTrackTapped(track: ArchivedTrack)
-        case onDeleteTapped(track: ArchivedTrack)
-        case delegate(DelegateAction)
-    }
+        let search: Search
+        let folder: Folder
+        let addArchive: AddArchive
+        let editArchive: EditArchive
 
-    public enum DelegateAction: Equatable {
-        case routeToAddArchive
-        case routeToSearch
-        case routeToFolder
-        case routeToEditArchive(track: ArchivedTrack)
+        public var body: some ReducerOf<Self> {
+            EmptyReducer()
+                .ifCaseLet(\.search, action: \.search) { search }
+                .ifCaseLet(\.folder, action: \.folder) { folder }
+                .ifCaseLet(\.addArchive, action: \.addArchive) { addArchive }
+                .ifCaseLet(\.editArchive, action: \.editArchive) { editArchive }
+        }
     }
 
     private let archiveRepository: ArchiveRepository
-    private let onDelegate: @MainActor @Sendable (DelegateAction) -> Void
+    private let search: Search
+    private let folder: Folder
+    private let addArchive: AddArchive
+    private let editArchive: EditArchive
 
     public init(
         archiveRepository: ArchiveRepository,
-        onDelegate: @escaping @MainActor @Sendable (DelegateAction) -> Void
+        search: Search,
+        folder: Folder,
+        addArchive: AddArchive,
+        editArchive: EditArchive
     ) {
         self.archiveRepository = archiveRepository
-        self.onDelegate = onDelegate
+        self.search = search
+        self.folder = folder
+        self.addArchive = addArchive
+        self.editArchive = editArchive
     }
 
     public var body: some ReducerOf<Self> {
@@ -61,7 +69,7 @@ public struct ArchiveFeature {
                         await send(.loadDataResponse(tracks: tracks))
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFeature")
-							.error("Failed to fetch archived tracks: \(error.localizedDescription)")
+                            .error("Failed to fetch archived tracks: \(error.localizedDescription)")
                     }
                 }
 
@@ -82,24 +90,20 @@ public struct ArchiveFeature {
                 return .none
 
             case .onAddTapped:
-                return .run { @MainActor [onDelegate] _ in
-                    onDelegate(.routeToAddArchive)
-                }
+                state.destination = .addArchive(AddArchiveState())
+                return .none
 
             case .onSearchTapped:
-                return .run { @MainActor [onDelegate] _ in
-                    onDelegate(.routeToSearch)
-                }
+                state.destination = .search(ArchiveSearchState())
+                return .none
 
             case .onFolderTapped:
-                return .run { @MainActor [onDelegate] _ in
-                    onDelegate(.routeToFolder)
-                }
+                state.destination = .folder(ArchiveFolderState())
+                return .none
 
             case let .onTrackTapped(track):
-                return .run { @MainActor [onDelegate] _ in
-                    onDelegate(.routeToEditArchive(track: track))
-                }
+                state.destination = .editArchive(AddArchiveState(editTrack: track))
+                return .none
 
             case let .onDeleteTapped(track):
                 return .run { send in
@@ -108,13 +112,28 @@ public struct ArchiveFeature {
                         await send(.onAppear)
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFeature")
-							.error("Failed to delete archived track: \(error.localizedDescription)")
+                            .error("Failed to delete archived track: \(error.localizedDescription)")
                     }
                 }
 
-            case .delegate:
+            case .destination(.presented(.search(.delegate(.archiveSearchDidTapClose)))),
+                 .destination(.presented(.folder(.delegate(.didTapClose)))),
+                 .destination(.presented(.addArchive(.delegate(.didCloseAddArchive)))),
+                 .destination(.presented(.editArchive(.delegate(.didCloseAddArchive)))):
+                state.destination = nil
+                return .send(.onAppear) // Refresh after edit/add
+
+            case .destination:
                 return .none
             }
+        }
+        .ifLet(\.$destination, action: \.destination) {
+            DestinationReducer(
+                search: search,
+                folder: folder,
+                addArchive: addArchive,
+                editArchive: editArchive
+            )
         }
     }
 }
