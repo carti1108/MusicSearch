@@ -13,6 +13,14 @@ import Kingfisher
 import MSUtil
 
 @MainActor
+protocol ChartPresentableListener: AnyObject {
+	func viewDidLoad()
+	func didChangeSegment(index: Int)
+	func didTapRefresh()
+	func didSelectItem(at indexPath: IndexPath)
+}
+
+@MainActor
 final class ChartViewController: UIViewController, ChartPresentable, ChartViewControllable, LoadingPresentable, ErrorPresentable {
 	enum Section: Int {
 		case podium

@@ -13,6 +13,14 @@ import MSDomain
 import MSUtil
 
 @MainActor
+protocol MusicDiggingPresentableListener: AnyObject {
+	func viewDidAppear()
+	func didTapRetry()
+	func didTapSeedTrack()
+	func didSelectRecommendation(at indexPath: IndexPath)
+}
+
+@MainActor
 final class MusicDiggingViewController: UIViewController, MusicDiggingPresentable, MusicDiggingViewControllable, LoadingPresentable, ErrorPresentable {
 	enum Section { case recommendations }
 

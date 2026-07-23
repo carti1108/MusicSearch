@@ -13,14 +13,6 @@ import FeatureChartInterface
 import ChartDomain
 
 @MainActor
-protocol ChartPresentableListener: AnyObject {
-	func viewDidLoad()
-	func didChangeSegment(index: Int)
-	func didTapRefresh()
-	func didSelectItem(at indexPath: IndexPath)
-}
-
-@MainActor
 protocol ChartPresentable: Presentable {
 	var listener: ChartPresentableListener? { get set }
 

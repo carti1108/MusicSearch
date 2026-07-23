@@ -14,6 +14,13 @@ import MSUtil
 import WeatherRecommendationDomain
 
 @MainActor
+protocol WeatherRecommendationPresentableListener: AnyObject {
+	func viewDidLoad()
+	func didTapRefresh()
+	func didSelectTrack(at index: Int)
+}
+
+@MainActor
 final class WeatherRecommendationViewController: UIViewController, ReuseIdentifiable, WeatherRecommendationPresentable, WeatherRecommendationViewControllable, ErrorPresentable {
 	enum Section {
 		case main

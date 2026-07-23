@@ -15,14 +15,6 @@ import MSDomain
 import TrackSearchDomain
 
 @MainActor
-protocol TrackSearchPresentableListener: AnyObject {
-	func didUpdateSearchText(_ keyword: String)
-	func didTapRetry()
-	func didSelectTrack(_ track: Track)
-	func didReachListBottom()
-}
-
-@MainActor
 protocol TrackSearchPresentable: Presentable {
 	var listener: TrackSearchPresentableListener? { get set }
 
