@@ -57,7 +57,7 @@ let project = Project(
                 .target(name: "FeatureArchiveFolderInterface"),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .project(target: "FeatureSettingsInterface", path: .relativeToRoot("MusicSearch/Features/Settings")),
-                .external(name: "MicroRIBs")
+                .external(name: "ComposableArchitecture")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -68,7 +68,6 @@ let project = Project(
                 .target(name: "FeatureArchiveFolderInterface"),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .project(target: "FeatureSettingsInterface", path: .relativeToRoot("MusicSearch/Features/Settings")),
-                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -93,7 +92,7 @@ let project = Project(
             interfaceDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
-                .external(name: "MicroRIBs")
+                .external(name: "ComposableArchitecture")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -102,7 +101,6 @@ let project = Project(
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .external(name: "NetworkLayer"),
-                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -129,7 +127,7 @@ let project = Project(
                 .target(name: "ArchiveDomain"),
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
                 .target(name: "FeatureArchiveTrackSearchInterface"),
-                .external(name: "MicroRIBs")
+                .external(name: "ComposableArchitecture")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -139,7 +137,6 @@ let project = Project(
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .external(name: "NetworkLayer"),
-                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -169,7 +166,7 @@ let project = Project(
             interfaceDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
-                .external(name: "MicroRIBs")
+                .external(name: "ComposableArchitecture")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -179,7 +176,6 @@ let project = Project(
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .external(name: "NetworkLayer"),
-                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -204,7 +200,7 @@ let project = Project(
             interfaceDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
-                .external(name: "MicroRIBs")
+                .external(name: "ComposableArchitecture")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -213,7 +209,6 @@ let project = Project(
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .external(name: "NetworkLayer"),
-                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
@@ -237,14 +232,13 @@ let project = Project(
             name: "ArchiveTrackSearch",
             interfaceDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
-                .external(name: "MicroRIBs")
+                .external(name: "ComposableArchitecture")
             ],
             implementationDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
                 .project(target: "MSDesignSystem", path: .relativeToRoot("MusicSearch/Core")),
-                .external(name: "ComposableArchitecture")
             ],
             testingDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),

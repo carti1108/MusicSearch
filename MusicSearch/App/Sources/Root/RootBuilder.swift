@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SwiftUI
+import ComposableArchitecture
 import MicroRIBs
 import FeatureChart
 import FeatureChartInterface
@@ -17,16 +19,9 @@ import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
 import FeatureArchive
 import FeatureArchiveInterface
-import FeatureAddArchive
-import FeatureAddArchiveInterface
 import FeatureArchiveSearch
-import FeatureArchiveSearchInterface
 import FeatureArchiveFolder
-import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetail
-import FeatureArchiveFolderDetailInterface
-import FeatureArchiveTrackSearch
-import FeatureArchiveTrackSearchInterface
+import FeatureAddArchive
 import FeatureSettings
 import FeatureSettingsInterface
 import MSDomain
@@ -39,7 +34,7 @@ import MusicDiggingDomain
 import ArchiveDomain
 
 @MainActor
-protocol RootDependency: Dependency {
+protocol RootDependency: MicroRIBs.Dependency {
 	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase { get }
 	var fetchTrackDeepLinkUseCase: any FetchTrackDeepLinkUseCase { get }
@@ -63,7 +58,7 @@ protocol RootDependency: Dependency {
 }
 
 @MainActor
-final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, ArchiveDependency, AddArchiveDependency, ArchiveSearchDependency, ArchiveFolderDependency, ArchiveFolderDetailDependency, ArchiveTrackSearchDependency, SettingsDependency {
+final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, SettingsDependency {
 
 	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
@@ -129,24 +124,7 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	var musicDiggingBuilder: MusicDiggingBuildable {
 		MusicDiggingBuilder(dependency: self)
 	}
-	var archiveBuilder: ArchiveBuildable {
-		ArchiveBuilder(dependency: self)
-	}
-	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
-		ArchiveFolderDetailBuilder(dependency: self)
-	}
-	var addArchiveBuilder: AddArchiveBuildable {
-		AddArchiveBuilder(dependency: self)
-	}
-	var archiveSearchBuilder: ArchiveSearchBuildable {
-		ArchiveSearchBuilder(dependency: self)
-	}
-	var archiveFolderBuilder: ArchiveFolderBuildable {
-		ArchiveFolderBuilder(dependency: self)
-	}
-	var archiveTrackSearchBuilder: ArchiveTrackSearchBuildable {
-		ArchiveTrackSearchBuilder(dependency: self)
-	}
+
 	var settingsBuilder: SettingsBuildable {
 		SettingsBuilder(dependency: self)
 	}
@@ -163,13 +141,42 @@ final class RootBuilder: Builder<RootDependency> {
 		let viewController = RootViewController()
 		let interactor = RootInteractor(presenter: viewController)
 
+		let archiveStore = Store(
+			initialState: ArchiveState(),
+			reducer: {
+				ArchiveFeature(
+					archiveRepository: component.archiveRepository,
+					search: ArchiveSearchFeature(archiveRepository: component.archiveRepository),
+					folder: ArchiveFolderFeature(archiveRepository: component.archiveRepository),
+					addArchive: AddArchiveFeature(
+						archiveRepository: component.archiveRepository,
+						searchTracksUseCase: component.searchTracksUseCase
+					),
+					editArchive: AddArchiveFeature(
+						archiveRepository: component.archiveRepository,
+						searchTracksUseCase: component.searchTracksUseCase
+					)
+				)
+			}
+		)
+
+		let archiveView = ArchiveView(
+			store: archiveStore,
+			searchView: { store in ArchiveSearchView(store: store) },
+			folderView: { store in ArchiveFolderView(store: store) },
+			addArchiveView: { store in AddArchiveView(store: store) },
+			editArchiveView: { store in AddArchiveView(store: store) }
+		)
+
+		let archiveViewController = UIHostingController(rootView: archiveView)
+
 		return RootRouter(
 			interactor: interactor,
 			viewController: viewController,
 			weatherRecommendationBuilder: component.weatherRecommendationBuilder,
 			trackSearchBuilder: component.trackSearchBuilder,
 			chartBuilder: component.chartBuilder,
-			archiveBuilder: component.archiveBuilder,
+			archiveViewController: archiveViewController,
 			settingsBuilder: component.settingsBuilder
 		)
 	}
