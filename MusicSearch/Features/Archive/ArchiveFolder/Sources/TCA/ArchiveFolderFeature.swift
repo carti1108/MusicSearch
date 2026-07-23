@@ -44,11 +44,11 @@ public struct ArchiveFolderFeature {
     }
 
     private let archiveRepository: ArchiveRepository
-    private let onDelegate: (DelegateAction) -> Void
+    private let onDelegate: @MainActor @Sendable (DelegateAction) -> Void
 
     public init(
         archiveRepository: ArchiveRepository,
-        onDelegate: @escaping (DelegateAction) -> Void
+        onDelegate: @escaping @MainActor @Sendable (DelegateAction) -> Void
     ) {
         self.archiveRepository = archiveRepository
         self.onDelegate = onDelegate
@@ -63,7 +63,7 @@ public struct ArchiveFolderFeature {
                 return .none
 
             case .onAppear:
-                return .run { send in
+                return .run { [archiveRepository] send in
                     do {
                         let tracks = try await archiveRepository.fetchArchivedTracks()
 
@@ -117,12 +117,12 @@ public struct ArchiveFolderFeature {
                 return .none
 
             case let .folderTapped(folder):
-                return .run { @MainActor _ in
+                return .run { @MainActor [onDelegate] _ in
                     onDelegate(.didTapFolder(folder))
                 }
 
             case .closeButtonTapped:
-                return .run { @MainActor _ in
+                return .run { @MainActor [onDelegate] _ in
                     onDelegate(.didTapClose)
                 }
 

@@ -41,11 +41,11 @@ public struct ArchiveFeature {
     }
 
     private let archiveRepository: ArchiveRepository
-    private let onDelegate: (DelegateAction) -> Void
+    private let onDelegate: @MainActor @Sendable (DelegateAction) -> Void
 
     public init(
         archiveRepository: ArchiveRepository,
-        onDelegate: @escaping (DelegateAction) -> Void
+        onDelegate: @escaping @MainActor @Sendable (DelegateAction) -> Void
     ) {
         self.archiveRepository = archiveRepository
         self.onDelegate = onDelegate
@@ -82,22 +82,22 @@ public struct ArchiveFeature {
                 return .none
 
             case .onAddTapped:
-                return .run { @MainActor _ in
+                return .run { @MainActor [onDelegate] _ in
                     onDelegate(.routeToAddArchive)
                 }
 
             case .onSearchTapped:
-                return .run { @MainActor _ in
+                return .run { @MainActor [onDelegate] _ in
                     onDelegate(.routeToSearch)
                 }
 
             case .onFolderTapped:
-                return .run { @MainActor _ in
+                return .run { @MainActor [onDelegate] _ in
                     onDelegate(.routeToFolder)
                 }
 
             case let .onTrackTapped(track):
-                return .run { @MainActor _ in
+                return .run { @MainActor [onDelegate] _ in
                     onDelegate(.routeToEditArchive(track: track))
                 }
 
