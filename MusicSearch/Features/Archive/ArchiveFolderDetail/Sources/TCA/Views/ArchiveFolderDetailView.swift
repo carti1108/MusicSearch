@@ -93,6 +93,18 @@ public struct ArchiveFolderDetailView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .navigationTitle(store.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let tracks = store.tracks, !tracks.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { store.send(.exportButtonTapped) }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundStyle(CustomColor.primary)
+                    }
+                }
+            }
+        }
+        .alert($store.scope(state: \.alert, action: \.alert))
     }
 }
-

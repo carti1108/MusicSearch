@@ -169,7 +169,19 @@ public struct ArchiveFolderDetailFeature: Reducer {
             case .exportButtonTapped:
                 guard let tracks = state.tracks, !tracks.isEmpty else { return .none }
                 if getMusicAccessTokenUseCase.execute() == nil {
-                    return .send(.delegate(.showLoginPrompt))
+                    state.alert = AlertState {
+                        TextState("Spotify 연동 필요")
+                    } actions: {
+                        ButtonState(role: .cancel) {
+                            TextState("취소")
+                        }
+                        ButtonState(action: .confirmLogin) {
+                            TextState("로그인")
+                        }
+                    } message: {
+                        TextState("플레이리스트를 내보내려면 Spotify 로그인이 필요합니다.")
+                    }
+                    return .none
                 } else {
                     return .run { [title = state.title] send in
                         let playlistName = "MusicSearch Archive - \(title)"
@@ -201,9 +213,16 @@ public struct ArchiveFolderDetailFeature: Reducer {
                 state.exportState = .completed(successCount: success, failedCount: failed)
                 return .none
 
+            case .alert(.presented(.confirmLogin)):
+                return .send(.loginPromptTapped)
+
+            case .alert:
+                return .none
+
             case .delegate:
                 return .none
             }
         }
+        .ifLet(\.$alert, action: \.alert)
     }
 }

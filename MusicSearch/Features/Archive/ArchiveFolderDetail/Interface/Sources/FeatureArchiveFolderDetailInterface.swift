@@ -15,6 +15,7 @@ public struct ArchiveFolderDetailState: Equatable, Sendable {
     public var folders: [FolderItem]?
     public var tracks: [ArchivedTrack]?
     public var exportState: ExportState = .idle
+    @Presents public var alert: AlertState<ArchiveFolderDetailAction.Alert>?
 
     public init(folderItem: FolderItem) {
         self.folderItem = folderItem
@@ -22,6 +23,7 @@ public struct ArchiveFolderDetailState: Equatable, Sendable {
     }
 }
 
+@CasePathable
 public enum ArchiveFolderDetailAction: Sendable {
     case onAppear
     case loadDataResponse(folders: [FolderItem]?, tracks: [ArchivedTrack]?)
@@ -32,7 +34,12 @@ public enum ArchiveFolderDetailAction: Sendable {
     case loginPromptTapped
     case exportProgress(ExportProgress)
     case exportCompleted(successCount: Int, failedCount: Int)
+    case alert(PresentationAction<Alert>)
     case delegate(DelegateAction)
+
+    public enum Alert: Equatable, Sendable {
+        case confirmLogin
+    }
 
     public enum DelegateAction: Equatable, Sendable {
         case didTapClose
