@@ -6,8 +6,6 @@
 //
 
 import UIKit
-import SwiftUI
-import ComposableArchitecture
 import MicroRIBs
 import FeatureChart
 import FeatureChartInterface
@@ -19,9 +17,6 @@ import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
 import FeatureArchive
 import FeatureArchiveInterface
-import FeatureArchiveSearch
-import FeatureArchiveFolder
-import FeatureAddArchive
 import FeatureSettings
 import FeatureSettingsInterface
 import MSDomain
@@ -58,7 +53,7 @@ protocol RootDependency: MicroRIBs.Dependency {
 }
 
 @MainActor
-final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, SettingsDependency {
+final class RootComponent: Component<RootDependency>, WeatherRecommendationDependency, TrackSearchDependency, ChartDependency, MusicDiggingDependency, SettingsDependency, ArchiveDependency {
 
 	// MARK: - UseCases
 	var fetchMusicForWeatherUseCase: any FetchMusicForWeatherUseCase {
@@ -128,6 +123,9 @@ final class RootComponent: Component<RootDependency>, WeatherRecommendationDepen
 	var settingsBuilder: SettingsBuildable {
 		SettingsBuilder(dependency: self)
 	}
+	var archiveBuilder: ArchiveBuildable {
+		ArchiveBuilder(dependency: self)
+	}
 }
 
 @MainActor
@@ -141,42 +139,13 @@ final class RootBuilder: Builder<RootDependency> {
 		let viewController = RootViewController()
 		let interactor = RootInteractor(presenter: viewController)
 
-		let archiveStore = Store(
-			initialState: ArchiveState(),
-			reducer: {
-				ArchiveFeature(
-					archiveRepository: component.archiveRepository,
-					search: ArchiveSearchFeature(archiveRepository: component.archiveRepository),
-					folder: ArchiveFolderFeature(archiveRepository: component.archiveRepository),
-					addArchive: AddArchiveFeature(
-						archiveRepository: component.archiveRepository,
-						searchTracksUseCase: component.searchTracksUseCase
-					),
-					editArchive: AddArchiveFeature(
-						archiveRepository: component.archiveRepository,
-						searchTracksUseCase: component.searchTracksUseCase
-					)
-				)
-			}
-		)
-
-		let archiveView = ArchiveView(
-			store: archiveStore,
-			searchView: { store in ArchiveSearchView(store: store) },
-			folderView: { store in ArchiveFolderView(store: store) },
-			addArchiveView: { store in AddArchiveView(store: store) },
-			editArchiveView: { store in AddArchiveView(store: store) }
-		)
-
-		let archiveViewController = UIHostingController(rootView: archiveView)
-
 		return RootRouter(
 			interactor: interactor,
 			viewController: viewController,
 			weatherRecommendationBuilder: component.weatherRecommendationBuilder,
 			trackSearchBuilder: component.trackSearchBuilder,
 			chartBuilder: component.chartBuilder,
-			archiveViewController: archiveViewController,
+			archiveBuilder: component.archiveBuilder,
 			settingsBuilder: component.settingsBuilder
 		)
 	}

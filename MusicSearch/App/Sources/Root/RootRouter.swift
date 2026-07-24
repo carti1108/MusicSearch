@@ -22,7 +22,7 @@ import FeatureSettingsInterface
 import WeatherRecommendationDomain
 
 @MainActor
-protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener, SettingsListener {
+protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener, SettingsListener, ArchiveListener {
 	var router: RootRouting? { get set }
 	var listener: RootListener? { get set }
 }
@@ -38,13 +38,13 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 	private let trackSearchBuilder: TrackSearchBuildable
 	private let chartBuilder: ChartBuildable
 	private let settingsBuilder: SettingsBuildable
+	private let archiveBuilder: ArchiveBuildable
 
 	private var weatherRecommendationRouter: WeatherRecommendationRouting?
 	private var trackSearchRouter: TrackSearchRouting?
 	private var chartRouter: ChartRouting?
 	private var settingsRouter: SettingsRouting?
-    
-    private let archiveViewController: UIViewController
+	private var archiveRouter: ArchiveRouting?
 
 	init(
 		interactor: RootInteractable,
@@ -52,13 +52,13 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 		weatherRecommendationBuilder: WeatherRecommendationBuildable,
 		trackSearchBuilder: TrackSearchBuildable,
 		chartBuilder: ChartBuildable,
-		archiveViewController: UIViewController,
+		archiveBuilder: ArchiveBuildable,
 		settingsBuilder: SettingsBuildable
 	) {
 		self.weatherRecommendationBuilder = weatherRecommendationBuilder
 		self.trackSearchBuilder = trackSearchBuilder
 		self.chartBuilder = chartBuilder
-		self.archiveViewController = archiveViewController
+		self.archiveBuilder = archiveBuilder
 		self.settingsBuilder = settingsBuilder
 		super.init(interactor: interactor, viewController: viewController)
 		interactor.router = self
@@ -104,7 +104,11 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 			selectedImage: nil
 		)
 
-		let archiveNavigationController = UINavigationController(rootViewController: archiveViewController)
+		let archiveRouter = self.archiveBuilder.build(withListener: self.interactor)
+		self.attachChild(archiveRouter)
+		self.archiveRouter = archiveRouter
+
+		let archiveNavigationController = UINavigationController(rootViewController: archiveRouter.viewControllable.uiviewController)
 		archiveNavigationController.tabBarItem = UITabBarItem(
 			title: "Archive",
 			image: UIImage(systemName: "folder.fill"),

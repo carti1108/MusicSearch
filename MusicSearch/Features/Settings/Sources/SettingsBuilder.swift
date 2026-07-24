@@ -29,7 +29,7 @@ public protocol SettingsInteractable: Interactable {
     var listener: SettingsListener? { get set }
 }
 
-public final class SettingsWrapperInteractor: Interactor, SettingsInteractable {
+public final class SettingsInteractor: Interactor, SettingsInteractable {
     public weak var router: SettingsRouting?
     public weak var listener: SettingsListener?
 }
@@ -38,7 +38,7 @@ public final class SettingsHostingController: UIHostingController<SettingsView>,
     public var uiviewController: UIViewController { self }
 }
 
-public final class SettingsWrapperRouter: ViewableRouter<SettingsInteractable, ViewControllable>, SettingsRouting {
+public final class SettingsRouter: ViewableRouter<SettingsInteractable, ViewControllable>, SettingsRouting {
 }
 
 public final class SettingsBuilder: Builder<SettingsDependency>, SettingsBuildable {
@@ -50,7 +50,7 @@ public final class SettingsBuilder: Builder<SettingsDependency>, SettingsBuildab
     public func build(withListener listener: SettingsListener) -> SettingsRouting {
         let component = SettingsComponent(dependency: dependency)
 
-        let interactor = SettingsWrapperInteractor()
+        let interactor = SettingsInteractor()
         interactor.listener = listener
 
         let store = Store(initialState: SettingsFeature.State()) {
@@ -66,7 +66,7 @@ public final class SettingsBuilder: Builder<SettingsDependency>, SettingsBuildab
         let viewController = SettingsHostingController(rootView: view)
         viewController.view.backgroundColor = .clear
 
-        let router = SettingsWrapperRouter(
+        let router = SettingsRouter(
             interactor: interactor,
             viewController: viewController
         )
