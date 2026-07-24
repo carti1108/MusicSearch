@@ -17,10 +17,12 @@ public enum ArchiveSearchAction: BindableAction, Sendable {
     case clearRecentSearches
     case removeRecentSearch(String)
     case closeButtonTapped
+    case trackTapped(ArchivedTrack)
     case tracksLoaded(TaskResult<[ArchivedTrack]>)
     case delegate(DelegateAction)
 
     public enum DelegateAction: Equatable, Sendable {
         case archiveSearchDidTapClose
+        case archiveSearchDidTapTrack(ArchivedTrack)
     }
 }

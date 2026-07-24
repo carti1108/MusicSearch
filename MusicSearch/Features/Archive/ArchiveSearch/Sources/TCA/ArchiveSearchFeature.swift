@@ -66,6 +66,9 @@ public struct ArchiveSearchFeature: Reducer {
 				state.recentSearches.removeAll { $0 == term }
 				return .none
 
+            case let .trackTapped(track):
+                return .send(.delegate(.archiveSearchDidTapTrack(track)))
+
 			case .closeButtonTapped:
 				return .send(.delegate(.archiveSearchDidTapClose))
 

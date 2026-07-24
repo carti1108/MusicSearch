@@ -3,6 +3,7 @@ import ComposableArchitecture
 import ArchiveDomain
 import TrackSearchDomain
 import MSDomain
+import FeatureArchiveTrackSearchInterface
 
 public enum AddArchiveAlert: Equatable, Sendable {}
 
@@ -35,6 +36,7 @@ public struct AddArchiveState: Equatable, Sendable {
     public var editTrackId: UUID?
     public var isEditMode: Bool = false
 
+    @Presents public var trackSearch: ArchiveTrackSearchState?
     @Presents public var alert: AlertState<AddArchiveAlert>?
 
     public init(editTrack: ArchivedTrack? = nil) {
@@ -76,11 +78,11 @@ public enum AddArchiveAction: BindableAction, Sendable {
     case setCoverImageData(Data?)
     case genresLoaded(TaskResult<[String]>)
     case trackSaved(TaskResult<Void>)
+    case trackSearch(PresentationAction<ArchiveTrackSearchAction>)
     case alert(PresentationAction<AddArchiveAlert>)
     case delegate(DelegateAction)
 
     public enum DelegateAction: Equatable, Sendable {
         case didCloseAddArchive
-        case didTapSearchTrack
     }
 }

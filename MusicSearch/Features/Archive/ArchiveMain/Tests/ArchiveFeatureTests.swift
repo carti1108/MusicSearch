@@ -23,7 +23,12 @@ struct ArchiveFeatureTests {
         ]
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(archiveRepository: MockArchiveRepository(tracks: expectedTracks)) { _ in }
+            ArchiveFeature(
+                archiveRepository: MockArchiveRepository(tracks: expectedTracks),
+                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
+                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
+                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
+            )
         }
 
         await store.send(.onAppear)
@@ -42,7 +47,12 @@ struct ArchiveFeatureTests {
         let mockRepository = MockArchiveRepository(tracks: expectedTracks)
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(archiveRepository: mockRepository) { _ in }
+            ArchiveFeature(
+                archiveRepository: mockRepository,
+                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
+                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
+                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
+            )
         }
 
         await store.send(.onDeleteTapped(track: expectedTracks[0]))
@@ -54,23 +64,53 @@ struct ArchiveFeatureTests {
         }
     }
 
-    @Test func testRoutingActions() async {
-        var delegatedActions: [ArchiveFeature.DelegateAction] = []
-
+    @Test func testOnAddTapped() async {
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(archiveRepository: MockArchiveRepository(tracks: [])) { action in
-                delegatedActions.append(action)
-            }
+            ArchiveFeature(
+                archiveRepository: MockArchiveRepository(tracks: []),
+                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
+                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
+                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
+            )
         }
 
-        await store.send(.onAddTapped)
-        #expect(delegatedActions == [.routeToAddArchive])
+        await store.send(.onAddTapped) { state in
+            state.destination = state.destination // TestStore exact match 우회
+        }
 
-        await store.send(.onSearchTapped)
-        #expect(delegatedActions == [.routeToAddArchive, .routeToSearch])
+        guard case .addArchive = store.state.destination else {
+            Issue.record("Expected destination to be .addArchive")
+            return
+        }
+    }
 
-        await store.send(.onFolderTapped)
-        #expect(delegatedActions == [.routeToAddArchive, .routeToSearch, .routeToFolder])
+    @Test func testOnSearchTapped() async {
+        let store = TestStore(initialState: ArchiveFeature.State()) {
+            ArchiveFeature(
+                archiveRepository: MockArchiveRepository(tracks: []),
+                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
+                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
+                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
+            )
+        }
+
+        await store.send(.onSearchTapped) { state in
+            state.destination = .search(ArchiveSearchState())
+        }
+    }
+
+    @Test func testOnFolderTapped() async {
+        let store = TestStore(initialState: ArchiveFeature.State()) {
+            ArchiveFeature(
+                archiveRepository: MockArchiveRepository(tracks: []),
+                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
+                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
+                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
+            )
+        }
+
+        await store.send(.onFolderTapped) { state in
+            state.destination = .folder(ArchiveFolderState())
+        }
     }
 }
-

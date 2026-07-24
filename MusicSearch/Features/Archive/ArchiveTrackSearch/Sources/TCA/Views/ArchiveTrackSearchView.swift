@@ -123,7 +123,7 @@ public struct ArchiveTrackSearchView: View {
                 .edgesIgnoringSafeArea(.all)
             )
 			.navigationTitle("곡 검색")
-        .navigationBarTitleDisplayMode(.inline)
+			.navigationBarTitleDisplayMode(.inline)
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
 					Button("취소") {

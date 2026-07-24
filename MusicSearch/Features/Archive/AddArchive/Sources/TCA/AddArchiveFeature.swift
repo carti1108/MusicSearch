@@ -14,8 +14,11 @@ import OSLog
 import Kingfisher
 import FeatureAddArchiveInterface
 
+import FeatureArchiveTrackSearchInterface
+
 @Reducer
-public struct AddArchiveFeature: Reducer {
+public struct AddArchiveFeature<TrackSearch: Reducer>: Reducer
+where TrackSearch.State == ArchiveTrackSearchState, TrackSearch.Action == ArchiveTrackSearchAction {
 
 	public typealias State = AddArchiveState
 	public typealias Action = AddArchiveAction
@@ -23,12 +26,15 @@ public struct AddArchiveFeature: Reducer {
 
 	private let archiveRepository: ArchiveRepository
 	private let searchTracksUseCase: SearchTracksUseCase
+	private let trackSearch: TrackSearch
 	public init(
 		archiveRepository: ArchiveRepository,
-		searchTracksUseCase: SearchTracksUseCase
+		searchTracksUseCase: SearchTracksUseCase,
+		trackSearch: TrackSearch
 	) {
 		self.archiveRepository = archiveRepository
 		self.searchTracksUseCase = searchTracksUseCase
+		self.trackSearch = trackSearch
 	}
 
 	public var body: some ReducerOf<Self> {
@@ -67,7 +73,8 @@ public struct AddArchiveFeature: Reducer {
 				return .send(.delegate(.didCloseAddArchive))
 
 			case .searchButtonTapped:
-				return .send(.delegate(.didTapSearchTrack))
+				state.trackSearch = ArchiveTrackSearchState()
+				return .none
 
 			case let .setCoverImageData(data):
 				state.coverImageData = data
@@ -179,10 +186,24 @@ public struct AddArchiveFeature: Reducer {
 			case .alert:
 				return .none
 
+			case let .trackSearch(.presented(.delegate(.trackSelected(track)))):
+				state.trackSearch = nil
+				return .send(.trackSelected(track))
+
+			case .trackSearch(.presented(.closeButtonTapped)):
+				state.trackSearch = nil
+				return .none
+
+			case .trackSearch:
+				return .none
+
 			case .delegate:
 				return .none
 			}
 		}
 		.ifLet(\.$alert, action: \.alert)
+		.ifLet(\.$trackSearch, action: \.trackSearch) {
+			trackSearch
+		}
 	}
 }

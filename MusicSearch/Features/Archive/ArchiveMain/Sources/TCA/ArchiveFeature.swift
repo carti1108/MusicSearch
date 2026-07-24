@@ -5,58 +5,72 @@ import OSLog
 import FeatureArchiveInterface
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
 import FeatureAddArchiveInterface
 
 @Reducer
 public struct ArchiveFeature<
     Search: Reducer,
     Folder: Reducer,
-    AddArchive: Reducer,
-    EditArchive: Reducer
+    FolderDetail: Reducer,
+    AddArchive: Reducer
 > where Search.State == ArchiveSearchState, Search.Action == ArchiveSearchAction,
         Folder.State == ArchiveFolderState, Folder.Action == ArchiveFolderAction,
-        AddArchive.State == AddArchiveState, AddArchive.Action == AddArchiveAction,
-        EditArchive.State == AddArchiveState, EditArchive.Action == AddArchiveAction {
+        FolderDetail.State == ArchiveFolderDetailState, FolderDetail.Action == ArchiveFolderDetailAction,
+        AddArchive.State == AddArchiveState, AddArchive.Action == AddArchiveAction {
 
     public typealias State = ArchiveState
     public typealias Action = ArchiveAction
 
+    /// `addArchive`와 `editArchive`는 동일한 State/Action 타입을 공유하므로,
+    /// 주입된 `addArchive` Reducer 하나를 두 케이스에서 재사용합니다.
     public struct DestinationReducer: Reducer {
         public typealias State = ArchiveDestinationState
         public typealias Action = ArchiveDestinationAction
 
+        let addArchive: AddArchive
+
+        public var body: some ReducerOf<Self> {
+            EmptyReducer()
+                .ifCaseLet(\.addArchive, action: \.addArchive) { addArchive }
+                .ifCaseLet(\.editArchive, action: \.editArchive) { addArchive }
+        }
+    }
+
+    public struct PathReducer: Reducer {
+        public typealias State = ArchivePathState
+        public typealias Action = ArchivePathAction
+
         let search: Search
         let folder: Folder
-        let addArchive: AddArchive
-        let editArchive: EditArchive
+        let folderDetail: FolderDetail
 
         public var body: some ReducerOf<Self> {
             EmptyReducer()
                 .ifCaseLet(\.search, action: \.search) { search }
                 .ifCaseLet(\.folder, action: \.folder) { folder }
-                .ifCaseLet(\.addArchive, action: \.addArchive) { addArchive }
-                .ifCaseLet(\.editArchive, action: \.editArchive) { editArchive }
+                .ifCaseLet(\.folderDetail, action: \.folderDetail) { folderDetail }
         }
     }
 
     private let archiveRepository: ArchiveRepository
     private let search: Search
     private let folder: Folder
+    private let folderDetail: FolderDetail
     private let addArchive: AddArchive
-    private let editArchive: EditArchive
 
     public init(
         archiveRepository: ArchiveRepository,
         search: Search,
         folder: Folder,
-        addArchive: AddArchive,
-        editArchive: EditArchive
+        folderDetail: FolderDetail,
+        addArchive: AddArchive
     ) {
         self.archiveRepository = archiveRepository
         self.search = search
         self.folder = folder
+        self.folderDetail = folderDetail
         self.addArchive = addArchive
-        self.editArchive = editArchive
     }
 
     public var body: some ReducerOf<Self> {
@@ -94,11 +108,11 @@ public struct ArchiveFeature<
                 return .none
 
             case .onSearchTapped:
-                state.destination = .search(ArchiveSearchState())
+                state.path.append(.search(ArchiveSearchState()))
                 return .none
 
             case .onFolderTapped:
-                state.destination = .folder(ArchiveFolderState())
+                state.path.append(.folder(ArchiveFolderState()))
                 return .none
 
             case let .onTrackTapped(track):
@@ -116,23 +130,41 @@ public struct ArchiveFeature<
                     }
                 }
 
-            case .destination(.presented(.search(.delegate(.archiveSearchDidTapClose)))),
-                 .destination(.presented(.folder(.delegate(.didTapClose)))),
-                 .destination(.presented(.addArchive(.delegate(.didCloseAddArchive)))),
+            case let .path(.element(_, .search(.delegate(.archiveSearchDidTapTrack(track))))),
+                 let .path(.element(_, .folderDetail(.delegate(.didTapTrack(track))))):
+                state.destination = .editArchive(AddArchiveState(editTrack: track))
+                return .none
+
+            case let .path(.element(_, .folder(.delegate(.didTapFolder(folder))))),
+                 let .path(.element(_, .folderDetail(.delegate(.didTapFolder(folder))))):
+                state.path.append(.folderDetail(ArchiveFolderDetailState(folderItem: folder)))
+                return .none
+
+            case .path(.element(_, .search(.delegate(.archiveSearchDidTapClose)))),
+                 .path(.element(_, .folder(.delegate(.didTapClose)))),
+                 .path(.element(_, .folderDetail(.delegate(.didTapClose)))):
+                state.path.removeLast()
+                return .send(.onAppear)
+                
+            case .destination(.presented(.addArchive(.delegate(.didCloseAddArchive)))),
                  .destination(.presented(.editArchive(.delegate(.didCloseAddArchive)))):
                 state.destination = nil
-                return .send(.onAppear) // Refresh after edit/add
+                return .send(.onAppear)
 
-            case .destination:
+            case .path, .destination:
                 return .none
             }
         }
         .ifLet(\.$destination, action: \.destination) {
             DestinationReducer(
+                addArchive: addArchive
+            )
+        }
+        .forEach(\.path, action: \.path) {
+            PathReducer(
                 search: search,
                 folder: folder,
-                addArchive: addArchive,
-                editArchive: editArchive
+                folderDetail: folderDetail
             )
         }
     }

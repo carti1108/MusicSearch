@@ -5,20 +5,13 @@ import ArchiveDomain
 import FeatureArchiveInterface
 import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
+import FeatureArchiveFolderDetailInterface
 import FeatureAddArchiveInterface
 
-public struct ArchiveView<
-    Search: View,
-    Folder: View,
-    AddArchive: View,
-    EditArchive: View
->: View {
+public struct ArchiveView: View {
     @Bindable var store: Store<ArchiveState, ArchiveAction>
 
-    let searchView: (Store<ArchiveSearchState, ArchiveSearchAction>) -> Search
-    let folderView: (Store<ArchiveFolderState, ArchiveFolderAction>) -> Folder
-    let addArchiveView: (Store<AddArchiveState, AddArchiveAction>) -> AddArchive
-    let editArchiveView: (Store<AddArchiveState, AddArchiveAction>) -> EditArchive
+    let destinationViews: ArchiveDestinationViews
 
     @State private var showFilterSheet = false
     @State private var filterIntroGood = false
@@ -27,16 +20,10 @@ public struct ArchiveView<
 
     public init(
         store: Store<ArchiveState, ArchiveAction>,
-        @ViewBuilder searchView: @escaping (Store<ArchiveSearchState, ArchiveSearchAction>) -> Search,
-        @ViewBuilder folderView: @escaping (Store<ArchiveFolderState, ArchiveFolderAction>) -> Folder,
-        @ViewBuilder addArchiveView: @escaping (Store<AddArchiveState, AddArchiveAction>) -> AddArchive,
-        @ViewBuilder editArchiveView: @escaping (Store<AddArchiveState, AddArchiveAction>) -> EditArchive
+        destinationViews: ArchiveDestinationViews
     ) {
         self.store = store
-        self.searchView = searchView
-        self.folderView = folderView
-        self.addArchiveView = addArchiveView
-        self.editArchiveView = editArchiveView
+        self.destinationViews = destinationViews
     }
 
     private var filteredTracks: [ArchivedTrack] {
@@ -48,64 +35,68 @@ public struct ArchiveView<
     }
 
     public var body: some View {
-        ZStack(alignment: .bottom) {
-            ZStack {
-                CustomColor.background
-                Circle()
-                    .fill(CustomColor.surfaceContainerHighest.opacity(0.4))
-                    .frame(width: 400, height: 400)
-                    .blur(radius: 120)
-                    .offset(x: -150, y: -200)
-                Circle()
-                    .fill(CustomColor.surfaceContainer.opacity(0.5))
-                    .frame(width: 350, height: 350)
-                    .blur(radius: 100)
-                    .offset(x: 200, y: 150)
-            }
-            .ignoresSafeArea()
+        let addArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(state: \.destination?[case: \.addArchive], action: \.destination.addArchive)
+        let editArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(state: \.destination?[case: \.editArchive], action: \.destination.editArchive)
 
-            List {
-                VStack(spacing: CustomSpacing.containerMargin) {
-                    ArchiveHeaderView(
-                        onSearchTapped: { store.send(.onSearchTapped) },
-                        onFolderTapped: { store.send(.onFolderTapped) }
-                    )
-
-                    ArchiveDashboardCardsView(
-                        totalTracksCount: store.totalTracksCount,
-                        topGenreName: store.topGenreName
-                    )
-
-                    HStack(alignment: .bottom) {
-                        Text("최근 기록한 음악")
-                            .customText(.headlineMd)
-                            .foregroundStyle(CustomColor.onBackground)
-                        Spacer()
-                        Button(action: { showFilterSheet = true }) {
-                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                .font(.system(size: 20))
-                                .foregroundStyle(CustomColor.primary)
-                        }
-                    }
-                    .padding(.horizontal, CustomSpacing.containerMargin)
-                    .padding(.top, CustomSpacing.containerMargin)
-                    .padding(.bottom, 16)
-                    .buttonStyle(BouncyButtonStyle())
+        NavigationStack(path: $store.scope(state: \ArchiveState.path, action: \ArchiveAction.Cases.path)) {
+            ZStack(alignment: .bottom) {
+                ZStack {
+                    CustomColor.background
+                    Circle()
+                        .fill(CustomColor.surfaceContainerHighest.opacity(0.4))
+                        .frame(width: 400, height: 400)
+                        .blur(radius: 120)
+                        .offset(x: -150, y: -200)
+                    Circle()
+                        .fill(CustomColor.surfaceContainer.opacity(0.5))
+                        .frame(width: 350, height: 350)
+                        .blur(radius: 100)
+                        .offset(x: 200, y: 150)
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets())
+                .ignoresSafeArea()
 
-                ForEach(filteredTracks) { track in
-                    Button(action: {
-                        store.send(.onTrackTapped(track: track))
-                    }) {
-                        TrackRowItemView(track: track)
+                List {
+                    VStack(spacing: CustomSpacing.containerMargin) {
+                        ArchiveHeaderView(
+                            onSearchTapped: { store.send(.onSearchTapped) },
+                            onFolderTapped: { store.send(.onFolderTapped) }
+                        )
+
+                        ArchiveDashboardCardsView(
+                            totalTracksCount: store.totalTracksCount,
+                            topGenreName: store.topGenreName
+                        )
+
+                        HStack(alignment: .bottom) {
+                            Text("최근 기록한 음악")
+                                .customText(.headlineMd)
+                                .foregroundStyle(CustomColor.onBackground)
+                            Spacer()
+                            Button(action: { showFilterSheet = true }) {
+                                Image(systemName: "line.3.horizontal.decrease.circle")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(CustomColor.primary)
+                            }
+                            .buttonStyle(BouncyButtonStyle())
+                        }
+                        .padding(.horizontal, CustomSpacing.containerMargin)
+                        .padding(.top, CustomSpacing.containerMargin)
+                        .padding(.bottom, 16)
                     }
-                    .buttonStyle(BouncyButtonStyle())
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 0, leading: CustomSpacing.containerMargin, bottom: CustomSpacing.gutter, trailing: CustomSpacing.containerMargin))
+                    .listRowInsets(EdgeInsets())
+
+                    ForEach(filteredTracks) { track in
+                        Button(action: {
+                            store.send(.onTrackTapped(track: track))
+                        }) {
+                            TrackRowItemView(track: track)
+                        }
+                        .buttonStyle(BouncyButtonStyle())
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: CustomSpacing.containerMargin, bottom: CustomSpacing.gutter, trailing: CustomSpacing.containerMargin))
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 store.send(.onDeleteTapped(track: track))
@@ -113,79 +104,66 @@ public struct ArchiveView<
                                 Label("삭제", systemImage: "trash")
                             }
                         }
-                }
-            }
-            .listStyle(.plain)
-            .scrollIndicators(.hidden)
-            .scrollContentBackground(.hidden)
-            .padding(.bottom, 80)
-
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button(action: { store.send(.onAddTapped) }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundStyle(CustomColor.onPrimary)
-                            .padding(16)
-                            .background(CustomColor.primary)
-                            .clipShape(Circle())
-                            .shadow(color: CustomColor.primary.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
-                    .buttonStyle(BouncyButtonStyle())
-                    .padding(.trailing, CustomSpacing.containerMargin)
-                    .padding(.bottom, CustomSpacing.containerMargin)
+                }
+                .listStyle(.plain)
+                .scrollIndicators(.hidden)
+                .scrollContentBackground(.hidden)
+                .padding(.bottom, 80)
+
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: { store.send(.onAddTapped) }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundStyle(CustomColor.onPrimary)
+                                .padding(16)
+                                .background(CustomColor.primary)
+                                .clipShape(Circle())
+                                .shadow(color: CustomColor.primary.opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
+                        .buttonStyle(BouncyButtonStyle())
+                        .padding(.trailing, CustomSpacing.containerMargin)
+                        .padding(.bottom, CustomSpacing.containerMargin)
+                    }
                 }
             }
-        }
-        .sheet(isPresented: $showFilterSheet) {
-            ArchiveFilterSheetView(
-                filterIntroGood: $filterIntroGood,
-                filterMiddleGood: $filterMiddleGood,
-                filterEndGood: $filterEndGood,
-                showFilterSheet: $showFilterSheet
-            )
-                .presentationDetents([.height(300)])
-                .presentationDragIndicator(.visible)
-        }
-        .onAppear {
-            store.send(.onAppear)
-        }
-        .background(sheets)
-    }
-
-    @ViewBuilder
-    private var sheets: some View {
-        let searchBinding: Binding<Store<ArchiveSearchState, ArchiveSearchAction>?> = $store.scope(
-            state: \.destination?[case: \.search],
-            action: \.destination.search
-        )
-        let folderBinding: Binding<Store<ArchiveFolderState, ArchiveFolderAction>?> = $store.scope(
-            state: \.destination?[case: \.folder],
-            action: \.destination.folder
-        )
-        let addArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(
-            state: \.destination?[case: \.addArchive],
-            action: \.destination.addArchive
-        )
-        let editArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(
-            state: \.destination?[case: \.editArchive],
-            action: \.destination.editArchive
-        )
-
-        Color.clear
-            .sheet(item: searchBinding) { store in
-                searchView(store)
-            }
-            .sheet(item: folderBinding) { store in
-                folderView(store)
+            .sheet(isPresented: $showFilterSheet) {
+                ArchiveFilterSheetView(
+                    filterIntroGood: $filterIntroGood,
+                    filterMiddleGood: $filterMiddleGood,
+                    filterEndGood: $filterEndGood,
+                    showFilterSheet: $showFilterSheet
+                )
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
             }
             .sheet(item: addArchiveBinding) { store in
-                addArchiveView(store)
+                destinationViews.addArchive(store)
             }
             .sheet(item: editArchiveBinding) { store in
-                editArchiveView(store)
+                destinationViews.editArchive(store)
             }
+            .onAppear {
+                store.send(.onAppear)
+            }
+        } destination: { (store: Store<ArchivePathState, ArchivePathAction>) in
+            switch store.state {
+            case .search:
+                if let scopedStore = store.scope(state: \.[case: \.search], action: \ArchivePathAction.Cases.search) {
+                    destinationViews.search(scopedStore)
+                }
+            case .folder:
+                if let scopedStore = store.scope(state: \.[case: \.folder], action: \ArchivePathAction.Cases.folder) {
+                    destinationViews.folder(scopedStore)
+                }
+            case .folderDetail:
+                if let scopedStore = store.scope(state: \.[case: \.folderDetail], action: \ArchivePathAction.Cases.folderDetail) {
+                    destinationViews.folderDetail(scopedStore)
+                }
+            }
+        }
     }
 }
