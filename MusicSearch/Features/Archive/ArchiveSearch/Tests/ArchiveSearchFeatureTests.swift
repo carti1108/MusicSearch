@@ -21,8 +21,9 @@ struct ArchiveSearchFeatureTests {
         ]
 
         let store = TestStore(initialState: ArchiveSearchFeature.State()) {
-            ArchiveSearchFeature(archiveRepository: MockArchiveRepository(tracks: expectedTracks))
+            ArchiveSearchFeature()
         } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: expectedTracks)
             $0.continuousClock = ImmediateClock()
         }
 
@@ -42,8 +43,9 @@ struct ArchiveSearchFeatureTests {
         state.allTracks = allTracks
 
         let store = TestStore(initialState: state) {
-            ArchiveSearchFeature(archiveRepository: MockArchiveRepository(tracks: allTracks))
+            ArchiveSearchFeature()
         } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: allTracks)
             $0.continuousClock = ImmediateClock()
         }
 
@@ -66,7 +68,9 @@ struct ArchiveSearchFeatureTests {
         state.recentSearches = ["term1", "term2"]
 
         let store = TestStore(initialState: state) {
-            ArchiveSearchFeature(archiveRepository: MockArchiveRepository(tracks: []))
+            ArchiveSearchFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
         await store.send(.removeRecentSearch("term1")) {

@@ -66,7 +66,7 @@ struct ArchiveFeatureTests {
         }
 
         await store.send(.onAddTapped) { state in
-            state.destination = .addArchive(AddArchiveState())
+            state.destination = .addArchive(AddArchiveFeature.State())
         }
     }
 
@@ -78,7 +78,7 @@ struct ArchiveFeatureTests {
         }
 
         await store.send(.onSearchTapped) { state in
-            state.path.append(.search(ArchiveSearchState()))
+            state.path.append(.search(ArchiveSearchFeature.State()))
         }
     }
 
@@ -90,7 +90,7 @@ struct ArchiveFeatureTests {
         }
 
         await store.send(.onFolderTapped) { state in
-            state.path.append(.folder(ArchiveFolderState()))
+            state.path.append(.folder(ArchiveFolderFeature.State()))
         }
     }
 }
