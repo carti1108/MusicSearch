@@ -3,63 +3,57 @@ import ComposableArchitecture
 import ArchiveDomain
 import OSLog
 import FeatureArchiveInterface
-import FeatureArchiveSearchInterface
-import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetailInterface
-import FeatureAddArchiveInterface
 import FeatureArchiveSearch
 import FeatureArchiveFolder
 import FeatureArchiveFolderDetail
 import FeatureAddArchive
 
-@ObservableState
-public struct ArchiveState: Equatable, Sendable {
-    public var totalTracksCount: Int = 0
-    public var topGenreName: String = "없음"
-    public var recentTracks: [ArchivedTrack] = []
-
-    public var path = StackState<ArchiveFeature.Path.State>()
-    @Presents public var destination: ArchiveFeature.Destination.State?
-
-    public var showFilterSheet: Bool = false
-    public var filterIntroGood: Bool = false
-    public var filterMiddleGood: Bool = false
-    public var filterEndGood: Bool = false
-
-    public init() {}
-}
-
-@CasePathable
-public enum ArchiveAction: BindableAction, Sendable {
-    case binding(BindingAction<ArchiveState>)
-    case onAppear
-    case loadDataResponse(tracks: [ArchivedTrack])
-    case onAddTapped
-    case onSearchTapped
-    case onFolderTapped
-    case onTrackTapped(track: ArchivedTrack)
-    case onDeleteTapped(track: ArchivedTrack)
-    case path(StackAction<ArchiveFeature.Path.State, ArchiveFeature.Path.Action>)
-    case destination(PresentationAction<ArchiveFeature.Destination.Action>)
-}
-
 @Reducer
-public struct ArchiveFeature {
+public struct ArchiveFeature: Sendable {
 
-    public typealias State = ArchiveState
-    public typealias Action = ArchiveAction
-
-    @Reducer(state: .equatable)
+    @Reducer
     public enum Destination {
         case addArchive(AddArchiveFeature)
         case editArchive(AddArchiveFeature)
     }
 
-    @Reducer(state: .equatable)
+    @Reducer
     public enum Path {
         case search(ArchiveSearchFeature)
         case folder(ArchiveFolderFeature)
         case folderDetail(ArchiveFolderDetailFeature)
+    }
+
+    @ObservableState
+    public struct State: Equatable, Sendable {
+        public var totalTracksCount: Int = 0
+        public var topGenreName: String = "없음"
+        public var recentTracks: [ArchivedTrack] = []
+
+        public var path = StackState<Path.State>()
+        @Presents public var destination: Destination.State?
+
+        public var showFilterSheet: Bool = false
+        public var filterIntroGood: Bool = false
+        public var filterMiddleGood: Bool = false
+        public var filterEndGood: Bool = false
+
+        public init() {}
+    }
+
+    @CasePathable
+    public enum Action: BindableAction, Sendable {
+        case binding(BindingAction<State>)
+        case onAppear
+        case loadDataResponse(tracks: [ArchivedTrack])
+        case onAddTapped
+        case onSearchTapped
+        case onFolderTapped
+        case onTrackTapped(track: ArchivedTrack)
+        case onDeleteTapped(track: ArchivedTrack)
+        case resetFilter
+        case path(StackAction<Path.State, Path.Action>)
+        case destination(PresentationAction<Destination.Action>)
     }
 
     @Dependency(\.archiveRepository) var archiveRepository
@@ -99,40 +93,48 @@ public struct ArchiveFeature {
                 return .none
 
             case .onAddTapped:
-                state.destination = .addArchive(AddArchiveState())
+                state.destination = .addArchive(AddArchiveFeature.State())
                 return .none
 
             case .onSearchTapped:
-                state.path.append(.search(ArchiveSearchState()))
+                state.path.append(.search(ArchiveSearchFeature.State()))
                 return .none
 
             case .onFolderTapped:
-                state.path.append(.folder(ArchiveFolderState()))
+                state.path.append(.folder(ArchiveFolderFeature.State()))
                 return .none
 
             case let .onTrackTapped(track):
-                state.destination = .editArchive(AddArchiveState(editTrack: track))
+                state.destination = .editArchive(AddArchiveFeature.State(editTrack: track))
                 return .none
 
             case let .onDeleteTapped(track):
+                state.recentTracks.removeAll { $0.id == track.id }
+                state.totalTracksCount = state.recentTracks.count
                 return .run { send in
                     do {
                         try await archiveRepository.deleteArchivedTrack(id: track.id)
-                        await send(.onAppear)
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFeature")
                             .error("Failed to delete archived track: \(error.localizedDescription)")
+                        await send(.onAppear)
                     }
                 }
 
+            case .resetFilter:
+                state.filterIntroGood = false
+                state.filterMiddleGood = false
+                state.filterEndGood = false
+                return .none
+
             case let .path(.element(_, .search(.delegate(.didTapTrack(track))))),
                  let .path(.element(_, .folderDetail(.delegate(.didTapTrack(track))))):
-                state.destination = .editArchive(AddArchiveState(editTrack: track))
+                state.destination = .editArchive(AddArchiveFeature.State(editTrack: track))
                 return .none
 
             case let .path(.element(_, .folder(.delegate(.didTapFolder(folder))))),
                  let .path(.element(_, .folderDetail(.delegate(.didTapFolder(folder))))):
-                state.path.append(.folderDetail(ArchiveFolderDetailState(folderItem: folder)))
+                state.path.append(.folderDetail(ArchiveFolderDetailFeature.State(folderItem: folder)))
                 return .none
 
             case .path(.element(_, .search(.delegate(.didTapClose)))),
@@ -154,3 +156,17 @@ public struct ArchiveFeature {
         .forEach(\.path, action: \.path)
     }
 }
+
+extension ArchiveFeature.Destination.State: Identifiable {
+    public var id: String {
+        switch self {
+        case .addArchive: return "addArchive"
+        case .editArchive: return "editArchive"
+        }
+    }
+}
+
+extension ArchiveFeature.Destination.State: Equatable, Sendable {}
+extension ArchiveFeature.Destination.Action: Sendable {}
+extension ArchiveFeature.Path.State: Equatable, Sendable {}
+extension ArchiveFeature.Path.Action: Sendable {}

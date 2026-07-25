@@ -3,20 +3,16 @@ import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
 import FeatureArchiveInterface
-import FeatureArchiveSearchInterface
-import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetailInterface
-import FeatureAddArchiveInterface
 import FeatureArchiveSearch
 import FeatureArchiveFolder
 import FeatureArchiveFolderDetail
 import FeatureAddArchive
 
 public struct ArchiveView: View {
-    @Bindable var store: Store<ArchiveState, ArchiveAction>
+    @Bindable var store: StoreOf<ArchiveFeature>
 
     public init(
-        store: Store<ArchiveState, ArchiveAction>
+        store: StoreOf<ArchiveFeature>
     ) {
         self.store = store
     }
@@ -30,7 +26,7 @@ public struct ArchiveView: View {
     }
 
     public var body: some View {
-        NavigationStack(path: $store.scope(state: \ArchiveState.path, action: \ArchiveAction.Cases.path)) {
+        NavigationStack(path: $store.scope(state: \ArchiveFeature.State.path, action: \ArchiveFeature.Action.Cases.path)) {
             ZStack(alignment: .bottom) {
                 ZStack {
                     CustomColor.background
@@ -47,7 +43,7 @@ public struct ArchiveView: View {
                 }
                 .ignoresSafeArea()
 
-                List {
+                VStack(spacing: 0) {
                     VStack(spacing: CustomSpacing.containerMargin) {
                         ArchiveHeaderView(
                             onSearchTapped: { store.send(.onSearchTapped) },
@@ -75,33 +71,32 @@ public struct ArchiveView: View {
                         .padding(.top, CustomSpacing.containerMargin)
                         .padding(.bottom, 16)
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
 
-                    ForEach(filteredTracks) { track in
-                        Button(action: {
-                            store.send(.onTrackTapped(track: track))
-                        }) {
-                            TrackRowItemView(track: track)
-                        }
-                        .buttonStyle(BouncyButtonStyle())
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: CustomSpacing.containerMargin, bottom: CustomSpacing.gutter, trailing: CustomSpacing.containerMargin))
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                store.send(.onDeleteTapped(track: track))
-                            } label: {
-                                Label("삭제", systemImage: "trash")
+                    List {
+                        ForEach(filteredTracks) { track in
+                            Button(action: {
+                                store.send(.onTrackTapped(track: track))
+                            }) {
+                                TrackRowItemView(track: track)
+                            }
+                            .buttonStyle(BouncyButtonStyle())
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 0, leading: CustomSpacing.containerMargin, bottom: CustomSpacing.gutter, trailing: CustomSpacing.containerMargin))
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    store.send(.onDeleteTapped(track: track))
+                                } label: {
+                                    Label("삭제", systemImage: "trash")
+                                }
                             }
                         }
                     }
+                    .listStyle(.plain)
+                    .scrollIndicators(.hidden)
+                    .scrollContentBackground(.hidden)
+                    .safeAreaPadding(.bottom, 80)
                 }
-                .listStyle(.plain)
-                .scrollIndicators(.hidden)
-                .scrollContentBackground(.hidden)
-                .padding(.bottom, 80)
 
                 VStack {
                     Spacer()
@@ -124,10 +119,7 @@ public struct ArchiveView: View {
             }
             .sheet(isPresented: $store.showFilterSheet) {
                 ArchiveFilterSheetView(
-                    filterIntroGood: $store.filterIntroGood,
-                    filterMiddleGood: $store.filterMiddleGood,
-                    filterEndGood: $store.filterEndGood,
-                    showFilterSheet: $store.showFilterSheet
+                    store: store
                 )
                     .presentationDetents([.height(300)])
                     .presentationDragIndicator(.visible)

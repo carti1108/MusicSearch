@@ -6,38 +6,26 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 public struct ArchiveFilterSheetView: View {
-    @Binding var filterIntroGood: Bool
-    @Binding var filterMiddleGood: Bool
-    @Binding var filterEndGood: Bool
-    @Binding var showFilterSheet: Bool
+    @Bindable var store: StoreOf<ArchiveFeature>
 
-    public init(
-        filterIntroGood: Binding<Bool>,
-        filterMiddleGood: Binding<Bool>,
-        filterEndGood: Binding<Bool>,
-        showFilterSheet: Binding<Bool>
-    ) {
-        self._filterIntroGood = filterIntroGood
-        self._filterMiddleGood = filterMiddleGood
-        self._filterEndGood = filterEndGood
-        self._showFilterSheet = showFilterSheet
+    public init(store: StoreOf<ArchiveFeature>) {
+        self.store = store
     }
 
     public var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("곡 전개 평가 필터")) {
-                    Toggle("인트로가 좋음", isOn: $filterIntroGood)
-                    Toggle("중반부까지 좋음", isOn: $filterMiddleGood)
-                    Toggle("끝까지 좋음", isOn: $filterEndGood)
+                    Toggle("인트로가 좋음", isOn: $store.filterIntroGood)
+                    Toggle("중반부까지 좋음", isOn: $store.filterMiddleGood)
+                    Toggle("끝까지 좋음", isOn: $store.filterEndGood)
                 }
 
                 Button(action: {
-                    filterIntroGood = false
-                    filterMiddleGood = false
-                    filterEndGood = false
+                    store.send(.resetFilter)
                 }) {
                     Text("필터 초기화")
                         .foregroundStyle(.red)
@@ -48,7 +36,7 @@ public struct ArchiveFilterSheetView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("완료") {
-                        showFilterSheet = false
+                        store.showFilterSheet = false
                     }
                 }
             }
