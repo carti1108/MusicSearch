@@ -23,7 +23,9 @@ struct ArchiveFeatureTests {
         ]
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(archiveRepository: MockArchiveRepository(tracks: expectedTracks)) { _ in }
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: expectedTracks)
         }
 
         await store.send(.onAppear)
@@ -42,35 +44,53 @@ struct ArchiveFeatureTests {
         let mockRepository = MockArchiveRepository(tracks: expectedTracks)
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(archiveRepository: mockRepository) { _ in }
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = mockRepository
         }
 
         await store.send(.onDeleteTapped(track: expectedTracks[0]))
         await store.receive(\.onAppear)
         await store.receive(\.loadDataResponse) {
-            $0.recentTracks = expectedTracks
-            $0.totalTracksCount = 1
-            $0.topGenreName = "Pop"
+            $0.recentTracks = []
+            $0.totalTracksCount = 0
+            $0.topGenreName = "없음"
         }
     }
 
-    @Test func testRoutingActions() async {
-        var delegatedActions: [ArchiveFeature.DelegateAction] = []
-
+    @Test func testOnAddTapped() async {
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(archiveRepository: MockArchiveRepository(tracks: [])) { action in
-                delegatedActions.append(action)
-            }
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
-        await store.send(.onAddTapped)
-        #expect(delegatedActions == [.routeToAddArchive])
+        await store.send(.onAddTapped) { state in
+            state.destination = .addArchive(AddArchiveFeature.State())
+        }
+    }
 
-        await store.send(.onSearchTapped)
-        #expect(delegatedActions == [.routeToAddArchive, .routeToSearch])
+    @Test func testOnSearchTapped() async {
+        let store = TestStore(initialState: ArchiveFeature.State()) {
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
+        }
 
-        await store.send(.onFolderTapped)
-        #expect(delegatedActions == [.routeToAddArchive, .routeToSearch, .routeToFolder])
+        await store.send(.onSearchTapped) { state in
+            state.path.append(.search(ArchiveSearchFeature.State()))
+        }
+    }
+
+    @Test func testOnFolderTapped() async {
+        let store = TestStore(initialState: ArchiveFeature.State()) {
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
+        }
+
+        await store.send(.onFolderTapped) { state in
+            state.path.append(.folder(ArchiveFolderFeature.State()))
+        }
     }
 }
-

@@ -13,6 +13,14 @@ import MSDomain
 import MSUtil
 
 @MainActor
+protocol TrackSearchPresentableListener: AnyObject {
+	func didUpdateSearchText(_ keyword: String)
+	func didTapRetry()
+	func didSelectTrack(_ track: Track)
+	func didReachListBottom()
+}
+
+@MainActor
 final class TrackSearchViewController: UIViewController, TrackSearchPresentable, TrackSearchViewControllable, UISearchResultsUpdating, UICollectionViewDelegate, LoadingPresentable, ErrorPresentable {
 	enum Section { case main }
 

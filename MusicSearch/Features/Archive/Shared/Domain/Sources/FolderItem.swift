@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum FolderType: Equatable {
+public enum FolderType: Equatable, Sendable {
     case custom
     case releaseYear(year: String)
     case listenYear(year: String)
@@ -19,7 +19,7 @@ public enum FolderType: Equatable {
     case rating(value: Int)
 }
 
-public struct FolderItem: Identifiable, Equatable {
+public struct FolderItem: Identifiable, Equatable, Sendable {
     public let id = UUID()
     public let title: String
     public let subtitle: String

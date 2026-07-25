@@ -9,12 +9,15 @@ import SwiftUI
 import ComposableArchitecture
 import PhotosUI
 import MSDesignSystem
+import FeatureArchiveTrackSearch
 
 public struct AddArchiveView: View {
 	@Bindable var store: StoreOf<AddArchiveFeature>
 	@State private var coverItem: PhotosPickerItem?
 
-	public init(store: StoreOf<AddArchiveFeature>) {
+	public init(
+		store: StoreOf<AddArchiveFeature>
+	) {
 		self.store = store
 	}
 
@@ -61,7 +64,7 @@ public struct AddArchiveView: View {
 						Button(action: { store.send(.searchButtonTapped) }) {
 							Label("노래 검색하여 자동 입력하기", systemImage: "magnifyingglass")
 								.foregroundStyle(CustomColor.primary)
-							.padding(.vertical, 4)
+								.padding(.vertical, 4)
 						}
 					}
 
@@ -148,6 +151,9 @@ public struct AddArchiveView: View {
 				store.send(.onAppear)
 			}
 			.alert($store.scope(state: \.alert, action: \.alert))
+			.sheet(item: $store.scope(state: \.trackSearch, action: \.trackSearch)) { store in
+				ArchiveTrackSearchView(store: store)
+			}
 		}
 		.preferredColorScheme(.dark)
 	}

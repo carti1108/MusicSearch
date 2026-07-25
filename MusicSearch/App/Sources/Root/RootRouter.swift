@@ -22,7 +22,7 @@ import FeatureSettingsInterface
 import WeatherRecommendationDomain
 
 @MainActor
-protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener, ArchiveListener, SettingsListener {
+protocol RootInteractable: Interactable, WeatherRecommendationListener, TrackSearchListener, ChartListener, SettingsListener, ArchiveListener {
 	var router: RootRouting? { get set }
 	var listener: RootListener? { get set }
 }
@@ -37,14 +37,14 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 	private let weatherRecommendationBuilder: WeatherRecommendationBuildable
 	private let trackSearchBuilder: TrackSearchBuildable
 	private let chartBuilder: ChartBuildable
-	private let archiveBuilder: ArchiveBuildable
 	private let settingsBuilder: SettingsBuildable
+	private let archiveBuilder: ArchiveBuildable
 
 	private var weatherRecommendationRouter: WeatherRecommendationRouting?
 	private var trackSearchRouter: TrackSearchRouting?
 	private var chartRouter: ChartRouting?
-	private var archiveRouter: ArchiveRouting?
 	private var settingsRouter: SettingsRouting?
+	private var archiveRouter: ArchiveRouting?
 
 	init(
 		interactor: RootInteractable,
@@ -108,7 +108,7 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
 		self.attachChild(archiveRouter)
 		self.archiveRouter = archiveRouter
 
-		let archiveNavigationController = UINavigationController(rootViewController: archiveRouter.viewControllable.uiViewController)
+		let archiveNavigationController = UINavigationController(rootViewController: archiveRouter.viewControllable.uiviewController)
 		archiveNavigationController.tabBarItem = UITabBarItem(
 			title: "Archive",
 			image: UIImage(systemName: "folder.fill"),

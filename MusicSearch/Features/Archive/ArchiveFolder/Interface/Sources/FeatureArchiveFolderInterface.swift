@@ -1,25 +1,2 @@
-//
-//  FeatureArchiveFolderInterface.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
-import MicroRIBs
-
-public protocol ArchiveFolderBuildable: Buildable {
-    func build(withListener listener: ArchiveFolderListener) -> ArchiveFolderRouting
-}
-
-import ArchiveDomain
-
-public protocol ArchiveFolderRouting: ViewableRouting {
-    func routeToFolderDetail(folderItem: FolderItem)
-    func detachFolderDetail(popUI: Bool)
-}
-
-@MainActor
-public protocol ArchiveFolderListener: AnyObject {
-    func archiveFolderDidTapClose()
-    func archiveFolderDidTapTrack(_ track: ArchivedTrack)
-}
+// FeatureArchiveFolderInterface.swift
+// State and Action moved to FeatureArchiveFolder implementation.

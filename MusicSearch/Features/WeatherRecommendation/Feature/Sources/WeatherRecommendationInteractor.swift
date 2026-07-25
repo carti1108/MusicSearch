@@ -13,13 +13,6 @@ import FeatureWeatherRecommendationInterface
 import WeatherRecommendationDomain
 
 @MainActor
-protocol WeatherRecommendationPresentableListener: AnyObject {
-	func viewDidLoad()
-	func didTapRefresh()
-	func didSelectTrack(at index: Int)
-}
-
-@MainActor
 protocol WeatherRecommendationPresentable: Presentable {
 	var listener: WeatherRecommendationPresentableListener? { get set }
 

@@ -26,7 +26,9 @@ struct ArchiveFolderFeatureTests {
         ]
 
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {
-            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(tracks: tracks)) { _ in }
+            ArchiveFolderFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: tracks)
         }
 
         await store.send(.onAppear)
@@ -47,37 +49,25 @@ struct ArchiveFolderFeatureTests {
     @Test func testFolderTapped() async {
         let folder = FolderItem(title: "Pop", subtitle: "2 곡", type: .genre(name: "Pop"))
 
-        var delegatedActions: [ArchiveFolderFeature.DelegateAction] = []
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {
-            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(tracks: [])) { action in
-                delegatedActions.append(action)
-            }
+            ArchiveFolderFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
         await store.send(.folderTapped(folder))
-        #expect(delegatedActions.count == 1)
-        if case let .didTapFolder(tappedFolder) = delegatedActions.first {
-            #expect(tappedFolder == folder)
-        } else {
-            Issue.record("Expected didTapFolder")
-        }
+        await store.receive(\.delegate.didTapFolder, folder)
     }
     
     @Test func testCloseButtonTapped() async {
-        var delegatedActions: [ArchiveFolderFeature.DelegateAction] = []
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {
-            ArchiveFolderFeature(archiveRepository: MockArchiveRepository(tracks: [])) { action in
-                delegatedActions.append(action)
-            }
+            ArchiveFolderFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
         await store.send(.closeButtonTapped)
-        #expect(delegatedActions.count == 1)
-        if case .didTapClose = delegatedActions.first {
-            // Success
-        } else {
-            Issue.record("Expected didTapClose")
-        }
+        await store.receive(\.delegate.didTapClose)
     }
 }
 

@@ -52,16 +52,6 @@ let project = Project(
                 
                 .project(target: "FeatureArchive", path: .relativeToRoot("MusicSearch/Features/Archive")),
                 .project(target: "FeatureArchiveInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureAddArchive", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureAddArchiveInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveFolder", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveFolderInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveFolderDetail", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveFolderDetailInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveSearch", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveSearchInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveTrackSearch", path: .relativeToRoot("MusicSearch/Features/Archive")),
-                .project(target: "FeatureArchiveTrackSearchInterface", path: .relativeToRoot("MusicSearch/Features/Archive")),
                 
                 .project(target: "FeatureSettings", path: .relativeToRoot("MusicSearch/Features/Settings")),
                 .project(target: "FeatureSettingsInterface", path: .relativeToRoot("MusicSearch/Features/Settings")),

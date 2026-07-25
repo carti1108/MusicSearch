@@ -11,6 +11,7 @@ import Testing
 import ArchiveDomain
 import TrackSearchDomain
 import MSDomain
+import FeatureArchiveTrackSearchInterface
 @testable import FeatureAddArchive
 
 @MainActor
@@ -18,7 +19,10 @@ struct AddArchiveFeatureTests {
 
     @Test func testMemoInput() async {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
-            AddArchiveFeature(archiveRepository: MockArchiveRepository(), searchTracksUseCase: MockSearchTracksUseCase(), onDelegate: { _ in })
+            AddArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository()
+            $0.searchTracksUseCase = MockSearchTracksUseCase()
         }
 
         await store.send(.binding(.set(\.memo, "Great track"))) {
@@ -28,10 +32,14 @@ struct AddArchiveFeatureTests {
 
     @Test func testCloseTapped() async {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
-            AddArchiveFeature(archiveRepository: MockArchiveRepository(), searchTracksUseCase: MockSearchTracksUseCase(), onDelegate: { _ in })
+            AddArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository()
+            $0.searchTracksUseCase = MockSearchTracksUseCase()
         }
 
         await store.send(.closeButtonTapped)
+        await store.receive(\.delegate.didCloseAddArchive)
     }
 }
 

@@ -1,18 +1,9 @@
-//
-//  SceneDelegate.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
 import UIKit
-import MicroRIBs
-import FeatureArchiveSearch
-import FeatureArchiveSearchInterface
+import SwiftUI
+import ComposableArchitecture
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    private var router: ViewableRouting?
 
     func scene(
         _ scene: UIScene,
@@ -20,7 +11,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 

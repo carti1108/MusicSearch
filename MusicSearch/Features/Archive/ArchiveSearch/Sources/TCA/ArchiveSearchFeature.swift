@@ -10,10 +10,10 @@ import ComposableArchitecture
 import ArchiveDomain
 
 @Reducer
-public struct ArchiveSearchFeature {
+public struct ArchiveSearchFeature: Sendable {
 
 	@ObservableState
-	public struct State: Equatable {
+	public struct State: Equatable, Sendable {
 		public var searchText: String = ""
 		public var recentSearches: [String] = []
 		public var recommendedTracks: [ArchivedTrack] = []
@@ -22,26 +22,27 @@ public struct ArchiveSearchFeature {
 		public init() {}
 	}
 
-	public enum Action: BindableAction {
+	@CasePathable
+	public enum Action: BindableAction, Sendable {
 		case binding(BindingAction<State>)
 		case onAppear
 		case clearRecentSearches
 		case removeRecentSearch(String)
 		case closeButtonTapped
+		case trackTapped(ArchivedTrack)
 		case tracksLoaded(TaskResult<[ArchivedTrack]>)
 		case delegate(DelegateAction)
+
+		public enum DelegateAction: Equatable, Sendable {
+			case didTapClose
+			case didTapTrack(ArchivedTrack)
+		}
 	}
 
-	public enum DelegateAction: Equatable {
-		case archiveSearchDidTapClose
-	}
-
-	private let archiveRepository: ArchiveRepository
+	@Dependency(\.archiveRepository) var archiveRepository
 	private enum CancelID { case search }
 
-	public init(archiveRepository: ArchiveRepository) {
-		self.archiveRepository = archiveRepository
-	}
+	public init() {}
 
 	public var body: some ReducerOf<Self> {
 		BindingReducer()
@@ -86,8 +87,11 @@ public struct ArchiveSearchFeature {
 				state.recentSearches.removeAll { $0 == term }
 				return .none
 
+            case let .trackTapped(track):
+                return .send(.delegate(.didTapTrack(track)))
+
 			case .closeButtonTapped:
-				return .send(.delegate(.archiveSearchDidTapClose))
+				return .send(.delegate(.didTapClose))
 
 			case let .tracksLoaded(.success(tracks)):
 				if state.allTracks.isEmpty {

@@ -13,7 +13,18 @@ public final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable
     public init(tracks: [ArchivedTrack]) { self.tracks = tracks }
 
     public func fetchArchivedTracks() async throws -> [ArchivedTrack] { return tracks }
-    public func addArchivedTrack(_ track: ArchivedTrack) async throws { }
-    public func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    public func deleteArchivedTrack(id: UUID) async throws { }
+    public func fetchFolderContents(for folderItem: FolderItem) async throws -> FolderContents {
+        return FolderContents(folders: nil, tracks: tracks)
+    }
+    public func addArchivedTrack(_ track: ArchivedTrack) async throws {
+        tracks.append(track)
+    }
+    public func updateArchivedTrack(_ track: ArchivedTrack) async throws {
+        if let index = tracks.firstIndex(where: { $0.id == track.id }) {
+            tracks[index] = track
+        }
+    }
+    public func deleteArchivedTrack(id: UUID) async throws {
+        tracks.removeAll(where: { $0.id == id })
+    }
 }

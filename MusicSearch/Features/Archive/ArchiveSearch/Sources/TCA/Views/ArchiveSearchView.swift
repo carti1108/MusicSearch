@@ -114,6 +114,9 @@ public struct ArchiveSearchView: View {
                                             Spacer()
                                         }
                                         .background(Color.black.opacity(0.001))
+                                        .onTapGesture {
+                                            store.send(.trackTapped(track))
+                                        }
                                     }
                                 }
                             }

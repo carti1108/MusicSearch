@@ -23,7 +23,12 @@ struct FeatureArchiveFolderDetailTests {
         ]
 
         let store = TestStore(initialState: ArchiveFolderDetailFeature.State(folderItem: folder)) {
-            ArchiveFolderDetailFeature(archiveRepository: MockArchiveRepository(tracks: tracks), exportPlaylistUseCase: MockExport(), getMusicAccessTokenUseCase: MockGetMusicAccessTokenUseCase(), authorizeMusicUseCase: MockAuthorizeMusicUseCase(), onDelegate: { _ in })
+            ArchiveFolderDetailFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: tracks)
+            $0.exportPlaylistUseCase = MockExport()
+            $0.getMusicAccessTokenUseCase = MockGetMusicAccessTokenUseCase()
+            $0.authorizeMusicUseCase = MockAuthorizeMusicUseCase()
         }
 
         await store.send(ArchiveFolderDetailFeature.Action.onAppear)

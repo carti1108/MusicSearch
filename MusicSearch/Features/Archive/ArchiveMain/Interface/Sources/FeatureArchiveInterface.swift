@@ -1,41 +1,24 @@
-//
-//  FeatureArchiveInterface.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
 import Foundation
+import UIKit
 import MicroRIBs
 import ArchiveDomain
-import FeatureAddArchiveInterface
-import FeatureArchiveSearchInterface
-import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetailInterface
+import MSDomain
+import TrackSearchDomain
 
 @MainActor
-public protocol ArchiveDependency: Dependency {
-	var archiveRepository: ArchiveRepository { get }
-	var addArchiveBuilder: AddArchiveBuildable { get }
-	var archiveSearchBuilder: ArchiveSearchBuildable { get }
-	var archiveFolderBuilder: ArchiveFolderBuildable { get }
-	var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable { get }
+public protocol ArchiveDependency: MicroRIBs.Dependency {
+    var archiveRepository: any ArchiveRepository { get }
+    var searchTracksUseCase: any SearchTracksUseCase { get }
+    var exportPlaylistUseCase: any ExportPlaylistUseCase { get }
+    var getMusicAccessTokenUseCase: any GetMusicAccessTokenUseCase { get }
+    var authorizeMusicUseCase: any AuthorizeMusicUseCase { get }
 }
 
 public protocol ArchiveBuildable: Buildable {
-	func build(withListener listener: ArchiveListener) -> ArchiveRouting
+    func build(withListener listener: ArchiveListener) -> ArchiveRouting
 }
 
 public protocol ArchiveRouting: ViewableRouting {
-	func routeToAddArchive()
-	func routeToEditArchive(track: ArchivedTrack)
-	func detachAddArchive()
-
-	func routeToSearch()
-	func detachSearch()
-
-	func routeToFolder()
-	func detachFolder()
 }
 
 public protocol ArchiveListener: AnyObject {

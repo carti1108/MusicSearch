@@ -1,147 +1,58 @@
-//
-//  ExampleAppComponent.swift
-//  MusicSearch
-//
-//  Created by Kiseok on 6/30/26.
-//
-
 import Foundation
-import UIKit
-import Combine
 import MicroRIBs
-import MSDomain
 import ArchiveDomain
-import FeatureArchive
+import MSDomain
+import TrackSearchDomain
 import FeatureArchiveInterface
-import FeatureAddArchiveInterface
-import FeatureArchiveSearchInterface
-import FeatureArchiveFolderInterface
-import FeatureArchiveFolderDetailInterface
 
-@MainActor
-final class ExampleAppComponent: ArchiveDependency {
+final class ExampleAppComponent: Component<EmptyDependency>, ArchiveDependency {
     let scenario: DemoScenario
-
+    
     init(scenario: DemoScenario) {
         self.scenario = scenario
+        super.init(dependency: EmptyComponent())
     }
-
-    var archiveRepository: ArchiveRepository {
-        MockArchiveRepository(scenario: scenario)
-    }
-
-    var addArchiveBuilder: AddArchiveBuildable {
-        MockAddArchiveBuilder()
-    }
-
-    var archiveSearchBuilder: ArchiveSearchBuildable {
-        MockArchiveSearchBuilder()
-    }
-
-    var archiveFolderBuilder: ArchiveFolderBuildable {
-        MockArchiveFolderBuilder()
-    }
-
-    var archiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
-        MockArchiveFolderDetailBuilder()
-    }
+    
+    var archiveRepository: any ArchiveRepository { MockArchiveRepository(scenario: scenario) }
+    var searchTracksUseCase: any SearchTracksUseCase { MockSearchTracksUseCase() }
+    var exportPlaylistUseCase: any ExportPlaylistUseCase { MockExportPlaylistUseCase() }
+    var getMusicAccessTokenUseCase: any GetMusicAccessTokenUseCase { MockGetMusicAccessTokenUseCase() }
+    var authorizeMusicUseCase: any AuthorizeMusicUseCase { MockAuthorizeMusicUseCase() }
 }
 
-// MARK: - Mocks
-
-final class MockArchiveRepository: ArchiveRepository {
+final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
     let scenario: DemoScenario
-    
-    init(scenario: DemoScenario = .success) {
-        self.scenario = scenario
-    }
-    
+    init(scenario: DemoScenario) { self.scenario = scenario }
     func fetchArchivedTracks() async throws -> [ArchivedTrack] {
-        switch scenario {
-        case .success:
-            return [
-                ArchivedTrack(id: UUID(), title: "Test Track 1", artist: "Test Artist 1", genre: "Pop", label: "", rating: 0),
-                ArchivedTrack(id: UUID(), title: "Test Track 2", artist: "Test Artist 2", genre: "Rock", label: "", rating: 0)
-            ]
-        case .empty:
-            return []
-        case .error:
-            throw NSError(domain: "MockError", code: 1, userInfo: [NSLocalizedDescriptionKey: "네트워크 에러 발생"])
-        case .delayed:
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            return [
-                ArchivedTrack(id: UUID(), title: "Delayed Track", artist: "Delayed Artist", genre: "Indie", label: "", rating: 0)
-            ]
-        }
+        if scenario == .empty { return [] }
+        if scenario == .error { throw NSError(domain: "test", code: 1) }
+        if scenario == .delayed { try await Task.sleep(nanoseconds: 2_000_000_000) }
+        return [ArchivedTrack(title: "Test", artist: "Artist", genre: "Pop", label: "Label", rating: 5)]
     }
-
-    func addArchivedTrack(_ track: ArchivedTrack) async throws { }
-
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-
-    func deleteArchivedTrack(id: UUID) async throws { }
+    func addArchivedTrack(_ track: ArchivedTrack) async throws {}
+    func updateArchivedTrack(_ track: ArchivedTrack) async throws {}
+    func deleteArchivedTrack(id: UUID) async throws {}
 }
 
-final class MockAddArchiveBuilder: AddArchiveBuildable {
-    func build(withListener listener: AddArchiveListener, editTrack: ArchivedTrack?) -> AddArchiveRouting {
-        return MockAddArchiveRouter()
+final class MockSearchTracksUseCase: SearchTracksUseCase, @unchecked Sendable {
+    func execute(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
+        return ([], 0)
     }
 }
 
-final class MockArchiveSearchBuilder: ArchiveSearchBuildable {
-    func build(withListener listener: ArchiveSearchListener) -> ArchiveSearchRouting {
-        return MockArchiveSearchRouter()
-    }
-}
-
-final class MockArchiveFolderBuilder: ArchiveFolderBuildable {
-    func build(withListener listener: ArchiveFolderListener) -> ArchiveFolderRouting {
-        return MockArchiveFolderRouter()
-    }
-}
-
-final class MockArchiveFolderDetailBuilder: ArchiveFolderDetailBuildable {
-    func build(withListener listener: ArchiveFolderDetailListener, folderItem: FolderItem) -> ArchiveFolderDetailRouting {
-        return MockArchiveFolderDetailRouter()
-    }
-}
-
-final class MockAddArchiveRouter: ViewableRouter<Interactable, ViewControllable>, AddArchiveRouting {
-    init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
-    func routeToArchiveTrackSearch() {}
-    func detachArchiveTrackSearch() {}
-}
-
-final class MockArchiveSearchRouter: ViewableRouter<Interactable, ViewControllable>, ArchiveSearchRouting {
-    init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
-}
-
-final class MockArchiveFolderRouter: ViewableRouter<Interactable, ViewControllable>, ArchiveFolderRouting {
-    init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
-    func routeToFolderDetail(folderItem: FolderItem) {}
-    func detachFolderDetail(popUI: Bool) {}
-}
-
-final class MockArchiveFolderDetailRouter: ViewableRouter<Interactable, ViewControllable>, ArchiveFolderDetailRouting {
-    init() { super.init(interactor: MockInteractable(), viewController: MockViewControllable()) }
-    func routeToFolderDetail(folderItem: FolderItem) {}
-    func detachFolderDetail(popUI: Bool) {}
-}
-
-final class MockViewControllable: ViewControllable {
-    var uiViewController: UIViewController { UIViewController() }
-}
-
-final class MockInteractable: Interactable {
-    var isActive: Bool = true
-    var isActiveStream: AsyncStream<Bool> {
-        let (stream, continuation) = AsyncStream.makeStream(of: Bool.self)
-        continuation.yield(true)
+final class MockExportPlaylistUseCase: ExportPlaylistUseCase, @unchecked Sendable {
+    func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
+        let (stream, continuation) = AsyncStream.makeStream(of: ExportProgress.self)
+        continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
         continuation.finish()
         return stream
     }
-
-    func activate() {}
-    func deactivate() {}
 }
 
+final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, @unchecked Sendable {
+    func execute() -> String? { return "token" }
+}
+
+final class MockAuthorizeMusicUseCase: AuthorizeMusicUseCase, @unchecked Sendable {
+    func execute() async throws {}
+}

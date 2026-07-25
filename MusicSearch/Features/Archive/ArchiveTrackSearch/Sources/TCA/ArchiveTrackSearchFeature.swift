@@ -1,3 +1,4 @@
+import ArchiveDomain
 //
 //  ArchiveTrackSearchFeature.swift
 //  MusicSearch
@@ -9,53 +10,48 @@ import Foundation
 import ComposableArchitecture
 import TrackSearchDomain
 import MSDomain
+import FeatureArchiveTrackSearchInterface
 
 @Reducer
-public struct ArchiveTrackSearchFeature {
+public struct ArchiveTrackSearchFeature: Sendable {
 
-	@ObservableState
-	public struct State: Equatable {
-		public var query: String = ""
-		public var results: [Track] = []
-		public var isLoading: Bool = false
+    public struct TrackSearchResponse: Equatable, Sendable {
+        public let tracks: [Track]
+        public let totalResults: Int
+        public init(tracks: [Track], totalResults: Int) {
+            self.tracks = tracks
+            self.totalResults = totalResults
+        }
+    }
 
-		public init() {}
-	}
+    @ObservableState
+    public struct State: Equatable, Sendable {
+        public var query: String = ""
+        public var results: [Track] = []
+        public var isLoading: Bool = false
 
-	public enum Action: BindableAction {
-		case binding(BindingAction<State>)
-		case onAppear
-		case closeButtonTapped
-		case clearQueryTapped
-		case trackSelected(Track)
-		case searchResponse(TaskResult<TrackSearchResponse>)
-		case delegate(DelegateAction)
-	}
+        public init() {}
+    }
 
-	public struct TrackSearchResponse: Equatable {
-		public let tracks: [Track]
-		public let totalResults: Int
-		public init(tracks: [Track], totalResults: Int) {
-			self.tracks = tracks
-			self.totalResults = totalResults
-		}
-	}
+    @CasePathable
+    public enum Action: BindableAction, Sendable {
+        case binding(BindingAction<State>)
+        case onAppear
+        case closeButtonTapped
+        case clearQueryTapped
+        case trackSelected(Track)
+        case searchResponse(TaskResult<TrackSearchResponse>)
+        case delegate(DelegateAction)
 
-	public enum DelegateAction: Equatable {
-		case trackSelected(Track)
-	}
+        public enum DelegateAction: Equatable, Sendable {
+            case trackSelected(Track)
+        }
+    }
 
-	private let searchTracksUseCase: SearchTracksUseCase
-	private let onDelegate: (DelegateAction) -> Void
+	@Dependency(\.searchTracksUseCase) var searchTracksUseCase
 	private enum CancelID { case search }
 
-	public init(
-		searchTracksUseCase: SearchTracksUseCase,
-		onDelegate: @escaping (DelegateAction) -> Void
-	) {
-		self.searchTracksUseCase = searchTracksUseCase
-		self.onDelegate = onDelegate
-	}
+	public init() {}
 
 	public var body: some ReducerOf<Self> {
 		BindingReducer()
@@ -109,10 +105,8 @@ public struct ArchiveTrackSearchFeature {
 			case .closeButtonTapped:
 				return .none
 
-			case let .delegate(delegateAction):
-				return .run { @MainActor _ in
-					onDelegate(delegateAction)
-				}
+			case .delegate:
+				return .none
 			}
 		}
 	}

@@ -11,10 +11,10 @@ import ArchiveDomain
 import OSLog
 
 @Reducer
-public struct ArchiveFolderFeature {
+public struct ArchiveFolderFeature: Sendable {
 
     @ObservableState
-    public struct State: Equatable {
+    public struct State: Equatable, Sendable {
         public var selectedTab: Int = 0
         public var releaseYearFolders: [FolderItem] = []
         public var listenYearFolders: [FolderItem] = []
@@ -24,7 +24,8 @@ public struct ArchiveFolderFeature {
         public init() {}
     }
 
-    public enum Action: BindableAction {
+    @CasePathable
+    public enum Action: BindableAction, Sendable {
         case binding(BindingAction<State>)
         case onAppear
         case foldersLoaded(
@@ -36,23 +37,16 @@ public struct ArchiveFolderFeature {
         case folderTapped(FolderItem)
         case closeButtonTapped
         case delegate(DelegateAction)
+
+        public enum DelegateAction: Equatable, Sendable {
+            case didTapClose
+            case didTapFolder(FolderItem)
+        }
     }
 
-    public enum DelegateAction: Equatable {
-        case didTapClose
-        case didTapFolder(FolderItem)
-    }
+    @Dependency(\.archiveRepository) var archiveRepository
 
-    private let archiveRepository: ArchiveRepository
-    private let onDelegate: (DelegateAction) -> Void
-
-    public init(
-        archiveRepository: ArchiveRepository,
-        onDelegate: @escaping (DelegateAction) -> Void
-    ) {
-        self.archiveRepository = archiveRepository
-        self.onDelegate = onDelegate
-    }
+	public init() {}
 
     public var body: some ReducerOf<Self> {
         BindingReducer()
@@ -63,7 +57,7 @@ public struct ArchiveFolderFeature {
                 return .none
 
             case .onAppear:
-                return .run { send in
+                return .run { [archiveRepository] send in
                     do {
                         let tracks = try await archiveRepository.fetchArchivedTracks()
 
@@ -117,14 +111,10 @@ public struct ArchiveFolderFeature {
                 return .none
 
             case let .folderTapped(folder):
-                return .run { @MainActor _ in
-                    onDelegate(.didTapFolder(folder))
-                }
+                return .send(.delegate(.didTapFolder(folder)))
 
             case .closeButtonTapped:
-                return .run { @MainActor _ in
-                    onDelegate(.didTapClose)
-                }
+                return .send(.delegate(.didTapClose))
 
             case .delegate:
                 return .none

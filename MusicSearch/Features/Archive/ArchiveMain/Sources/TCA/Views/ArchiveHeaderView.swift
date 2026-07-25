@@ -37,6 +37,7 @@ public struct ArchiveHeaderView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("음악 검색")
+                .buttonStyle(BouncyButtonStyle())
 
                 Button(action: onFolderTapped) {
                     Image(systemName: "folder.fill")
@@ -48,11 +49,11 @@ public struct ArchiveHeaderView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("폴더 보기")
+                .buttonStyle(BouncyButtonStyle())
             }
         }
         .padding(.horizontal, CustomSpacing.containerMargin)
         .padding(.top, CustomSpacing.containerMargin)
         .padding(.bottom, 8)
-        .buttonStyle(BouncyButtonStyle())
     }
 }

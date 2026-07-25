@@ -13,14 +13,6 @@ import FeatureMusicDiggingInterface
 import MusicDiggingDomain
 
 @MainActor
-protocol MusicDiggingPresentableListener: AnyObject {
-	func viewDidAppear()
-	func didTapRetry()
-	func didTapSeedTrack()
-	func didSelectRecommendation(at indexPath: IndexPath)
-}
-
-@MainActor
 protocol MusicDiggingPresentable: Presentable {
 	var listener: MusicDiggingPresentableListener? { get set }
 

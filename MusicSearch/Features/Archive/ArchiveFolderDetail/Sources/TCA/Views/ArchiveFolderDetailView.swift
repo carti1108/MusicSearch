@@ -14,9 +14,6 @@ import ArchiveSharedPresentation
 public struct ArchiveFolderDetailView: View {
     @Bindable var store: StoreOf<ArchiveFolderDetailFeature>
 
-    @State private var showingExportAlert = false
-    @State private var exportResultMessage = ""
-
     public init(store: StoreOf<ArchiveFolderDetailFeature>) {
         self.store = store
     }
@@ -76,22 +73,21 @@ public struct ArchiveFolderDetailView: View {
                 .shadow(radius: 10)
             }
         }
-        .onChange(of: store.exportState) { _, newValue in
-            if case .completed(let success, let failed) = newValue {
-                exportResultMessage = "성공: \(success)곡, 실패: \(failed)곡"
-                showingExportAlert = true
-            }
-        }
-        .alert(isPresented: $showingExportAlert) {
-            Alert(
-                title: Text("내보내기 완료"),
-                message: Text(exportResultMessage),
-                dismissButton: .default(Text("확인"))
-            )
-        }
         .onAppear {
             store.send(.onAppear)
         }
+        .navigationTitle(store.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let tracks = store.tracks, !tracks.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { store.send(.exportButtonTapped) }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundStyle(CustomColor.primary)
+                    }
+                }
+            }
+        }
+        .alert($store.scope(state: \.alert, action: \.alert))
     }
 }
-
