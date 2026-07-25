@@ -11,7 +11,8 @@ public struct ProjectEnvironment {
             "CODE_SIGNING_REQUIRED": "NO",
             "CODE_SIGNING_ALLOWED": "NO",
             "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
-            "CLANG_ENABLE_MODULE_VERIFIER": "YES"
+            "CLANG_ENABLE_MODULE_VERIFIER": "YES",
+            "SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES": "YES"
         ],
         configurations: [
             .debug(name: "Debug", xcconfig: .relativeToRoot("Config.xcconfig")),
@@ -26,7 +27,8 @@ public struct ProjectEnvironment {
             "CODE_SIGNING_REQUIRED": "YES",
             "CODE_SIGNING_ALLOWED": "YES",
             "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
-            "CLANG_ENABLE_MODULE_VERIFIER": "YES"
+            "CLANG_ENABLE_MODULE_VERIFIER": "YES",
+            "SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES": "YES"
         ],
         configurations: [
             .debug(name: "Debug", xcconfig: .relativeToRoot("Config.xcconfig")),

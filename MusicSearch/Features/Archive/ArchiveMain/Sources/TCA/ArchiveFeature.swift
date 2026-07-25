@@ -168,5 +168,7 @@ extension ArchiveFeature.Destination.State: Identifiable {
 
 extension ArchiveFeature.Destination.State: Equatable, Sendable {}
 extension ArchiveFeature.Destination.Action: Sendable {}
+extension ArchiveFeature.Destination.CaseScope: Sendable {}
 extension ArchiveFeature.Path.State: Equatable, Sendable {}
 extension ArchiveFeature.Path.Action: Sendable {}
+extension ArchiveFeature.Path.CaseScope: Sendable {}
