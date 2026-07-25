@@ -13,7 +13,7 @@ import OSLog
 import FeatureArchiveFolderDetailInterface
 
 @Reducer
-public struct ArchiveFolderDetailFeature: Reducer {
+public struct ArchiveFolderDetailFeature {
 
     public typealias State = ArchiveFolderDetailState
     public typealias Action = ArchiveFolderDetailAction
@@ -22,20 +22,12 @@ public struct ArchiveFolderDetailFeature: Reducer {
         case export
     }
 
-    private let archiveRepository: ArchiveRepository
-    private let exportPlaylistUseCase: ExportPlaylistUseCase
-    private let getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, authorizeMusicUseCase: AuthorizeMusicUseCase
-    public init(
-        archiveRepository: ArchiveRepository,
-        exportPlaylistUseCase: ExportPlaylistUseCase,
-        getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase,
-        authorizeMusicUseCase: AuthorizeMusicUseCase
-    ) {
-        self.archiveRepository = archiveRepository
-        self.exportPlaylistUseCase = exportPlaylistUseCase
-        self.getMusicAccessTokenUseCase = getMusicAccessTokenUseCase
-        self.authorizeMusicUseCase = authorizeMusicUseCase
-    }
+    @Dependency(\.archiveRepository) var archiveRepository
+    @Dependency(\.exportPlaylistUseCase) var exportPlaylistUseCase
+    @Dependency(\.getMusicAccessTokenUseCase) var getMusicAccessTokenUseCase
+    @Dependency(\.authorizeMusicUseCase) var authorizeMusicUseCase
+
+	public init() {}
 
     public var body: some ReducerOf<Self> {
         Reduce { state, action in

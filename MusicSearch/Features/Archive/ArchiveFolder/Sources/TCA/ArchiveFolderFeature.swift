@@ -12,17 +12,14 @@ import OSLog
 import FeatureArchiveFolderInterface
 
 @Reducer
-public struct ArchiveFolderFeature: Reducer {
+public struct ArchiveFolderFeature {
 
     public typealias State = ArchiveFolderState
     public typealias Action = ArchiveFolderAction
 
-    private let archiveRepository: ArchiveRepository
-    public init(
-        archiveRepository: ArchiveRepository
-    ) {
-        self.archiveRepository = archiveRepository
-    }
+    @Dependency(\.archiveRepository) var archiveRepository
+
+	public init() {}
 
     public var body: some ReducerOf<Self> {
         BindingReducer()

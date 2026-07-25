@@ -11,17 +11,15 @@ import ArchiveDomain
 import FeatureArchiveSearchInterface
 
 @Reducer
-public struct ArchiveSearchFeature: Reducer {
+public struct ArchiveSearchFeature {
 
 	public typealias State = ArchiveSearchState
 	public typealias Action = ArchiveSearchAction
 
-	private let archiveRepository: ArchiveRepository
+	@Dependency(\.archiveRepository) var archiveRepository
 	private enum CancelID { case search }
 
-	public init(archiveRepository: ArchiveRepository) {
-		self.archiveRepository = archiveRepository
-	}
+	public init() {}
 
 	public var body: some ReducerOf<Self> {
 		BindingReducer()
@@ -67,10 +65,10 @@ public struct ArchiveSearchFeature: Reducer {
 				return .none
 
             case let .trackTapped(track):
-                return .send(.delegate(.archiveSearchDidTapTrack(track)))
+                return .send(.delegate(.didTapTrack(track)))
 
 			case .closeButtonTapped:
-				return .send(.delegate(.archiveSearchDidTapClose))
+				return .send(.delegate(.didTapClose))
 
 			case let .tracksLoaded(.success(tracks)):
 				if state.allTracks.isEmpty {

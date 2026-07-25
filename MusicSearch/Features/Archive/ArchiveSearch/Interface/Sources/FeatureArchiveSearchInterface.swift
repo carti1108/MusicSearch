@@ -22,7 +22,7 @@ public enum ArchiveSearchAction: BindableAction, Sendable {
     case delegate(DelegateAction)
 
     public enum DelegateAction: Equatable, Sendable {
-        case archiveSearchDidTapClose
-        case archiveSearchDidTapTrack(ArchivedTrack)
+        case didTapClose
+        case didTapTrack(ArchivedTrack)
     }
 }

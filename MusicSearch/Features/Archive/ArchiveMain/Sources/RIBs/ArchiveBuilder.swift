@@ -27,37 +27,21 @@ public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable 
         let interactor = ArchiveInteractor()
         interactor.listener = listener
 
-        let store = Store(
-            initialState: ArchiveState(),
-            reducer: {
-                ArchiveFeature(
-                    archiveRepository: component.dependency.archiveRepository,
-                    search: ArchiveSearchFeature(archiveRepository: component.dependency.archiveRepository),
-                    folder: ArchiveFolderFeature(archiveRepository: component.dependency.archiveRepository),
-                    folderDetail: ArchiveFolderDetailFeature(
-                        archiveRepository: component.dependency.archiveRepository,
-                        exportPlaylistUseCase: component.dependency.exportPlaylistUseCase,
-                        getMusicAccessTokenUseCase: component.dependency.getMusicAccessTokenUseCase,
-                        authorizeMusicUseCase: component.dependency.authorizeMusicUseCase
-                    ),
-                    addArchive: AddArchiveFeature(
-                        archiveRepository: component.dependency.archiveRepository,
-                        searchTracksUseCase: component.dependency.searchTracksUseCase,
-                        trackSearch: ArchiveTrackSearchFeature(searchTracksUseCase: component.dependency.searchTracksUseCase)
-                    )
-                )
-            }
-        )
+        let store = withDependencies {
+            $0.archiveRepository = component.dependency.archiveRepository
+            $0.exportPlaylistUseCase = component.dependency.exportPlaylistUseCase
+            $0.getMusicAccessTokenUseCase = component.dependency.getMusicAccessTokenUseCase
+            $0.authorizeMusicUseCase = component.dependency.authorizeMusicUseCase
+            $0.searchTracksUseCase = component.dependency.searchTracksUseCase
+        } operation: {
+            Store(
+                initialState: ArchiveState(),
+                reducer: { ArchiveFeature() }
+            )
+        }
 
         let view = ArchiveView(
-            store: store,
-            destinationViews: ArchiveDestinationViews(
-                search: { store in AnyView(ArchiveSearchView(store: store)) },
-                folder: { store in AnyView(ArchiveFolderView(store: store)) },
-                addArchive: { store in AnyView(AddArchiveView(store: store, trackSearchView: { store in ArchiveTrackSearchView(store: store) })) },
-                editArchive: { store in AnyView(AddArchiveView(store: store, trackSearchView: { store in ArchiveTrackSearchView(store: store) })) },
-                folderDetail: { store in AnyView(ArchiveFolderDetailView(store: store)) }
-            )
+            store: store
         )
 
         let viewController = ArchiveHostingController(rootView: view)

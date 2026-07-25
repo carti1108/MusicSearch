@@ -11,19 +11,16 @@ import PhotosUI
 import MSDesignSystem
 import FeatureArchiveTrackSearchInterface
 import FeatureAddArchiveInterface
+import FeatureArchiveTrackSearch
 
-public struct AddArchiveView<TrackSearch: View>: View {
+public struct AddArchiveView: View {
 	@Bindable var store: Store<AddArchiveState, AddArchiveAction>
 	@State private var coverItem: PhotosPickerItem?
 
-	let trackSearchView: (Store<ArchiveTrackSearchState, ArchiveTrackSearchAction>) -> TrackSearch
-
 	public init(
-		store: Store<AddArchiveState, AddArchiveAction>,
-		@ViewBuilder trackSearchView: @escaping (Store<ArchiveTrackSearchState, ArchiveTrackSearchAction>) -> TrackSearch
+		store: Store<AddArchiveState, AddArchiveAction>
 	) {
 		self.store = store
-		self.trackSearchView = trackSearchView
 	}
 
 	public var body: some View {
@@ -157,7 +154,7 @@ public struct AddArchiveView<TrackSearch: View>: View {
 			}
 			.alert($store.scope(state: \.alert, action: \.alert))
 			.sheet(item: $store.scope(state: \.trackSearch, action: \.trackSearch)) { store in
-				trackSearchView(store)
+				ArchiveTrackSearchView(store: store)
 			}
 		}
 		.preferredColorScheme(.dark)

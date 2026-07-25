@@ -7,37 +7,29 @@ import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
 import FeatureArchiveFolderDetailInterface
 import FeatureAddArchiveInterface
+import FeatureArchiveSearch
+import FeatureArchiveFolder
+import FeatureArchiveFolderDetail
+import FeatureAddArchive
 
 public struct ArchiveView: View {
     @Bindable var store: Store<ArchiveState, ArchiveAction>
 
-    let destinationViews: ArchiveDestinationViews
-
-    @State private var showFilterSheet = false
-    @State private var filterIntroGood = false
-    @State private var filterMiddleGood = false
-    @State private var filterEndGood = false
-
     public init(
-        store: Store<ArchiveState, ArchiveAction>,
-        destinationViews: ArchiveDestinationViews
+        store: Store<ArchiveState, ArchiveAction>
     ) {
         self.store = store
-        self.destinationViews = destinationViews
     }
 
     private var filteredTracks: [ArchivedTrack] {
         store.recentTracks.filter { track in
-            (!filterIntroGood || track.isIntroGood) &&
-            (!filterMiddleGood || track.isGoodUntilMiddle) &&
-            (!filterEndGood || track.isGoodUntilEnd)
+            (!store.filterIntroGood || track.isIntroGood) &&
+            (!store.filterMiddleGood || track.isGoodUntilMiddle) &&
+            (!store.filterEndGood || track.isGoodUntilEnd)
         }
     }
 
     public var body: some View {
-        let addArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(state: \.destination?[case: \.addArchive], action: \.destination.addArchive)
-        let editArchiveBinding: Binding<Store<AddArchiveState, AddArchiveAction>?> = $store.scope(state: \.destination?[case: \.editArchive], action: \.destination.editArchive)
-
         NavigationStack(path: $store.scope(state: \ArchiveState.path, action: \ArchiveAction.Cases.path)) {
             ZStack(alignment: .bottom) {
                 ZStack {
@@ -72,7 +64,7 @@ public struct ArchiveView: View {
                                 .customText(.headlineMd)
                                 .foregroundStyle(CustomColor.onBackground)
                             Spacer()
-                            Button(action: { showFilterSheet = true }) {
+                            Button(action: { store.showFilterSheet = true }) {
                                 Image(systemName: "line.3.horizontal.decrease.circle")
                                     .font(.system(size: 20))
                                     .foregroundStyle(CustomColor.primary)
@@ -130,39 +122,35 @@ public struct ArchiveView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showFilterSheet) {
+            .sheet(isPresented: $store.showFilterSheet) {
                 ArchiveFilterSheetView(
-                    filterIntroGood: $filterIntroGood,
-                    filterMiddleGood: $filterMiddleGood,
-                    filterEndGood: $filterEndGood,
-                    showFilterSheet: $showFilterSheet
+                    filterIntroGood: $store.filterIntroGood,
+                    filterMiddleGood: $store.filterMiddleGood,
+                    filterEndGood: $store.filterEndGood,
+                    showFilterSheet: $store.showFilterSheet
                 )
                     .presentationDetents([.height(300)])
                     .presentationDragIndicator(.visible)
             }
-            .sheet(item: addArchiveBinding) { store in
-                destinationViews.addArchive(store)
-            }
-            .sheet(item: editArchiveBinding) { store in
-                destinationViews.editArchive(store)
+            .sheet(item: $store.scope(state: \.destination, action: \.destination)) { store in
+                switch store.case {
+                case let .addArchive(scopedStore):
+                    AddArchiveView(store: scopedStore)
+                case let .editArchive(scopedStore):
+                    AddArchiveView(store: scopedStore)
+                }
             }
             .onAppear {
                 store.send(.onAppear)
             }
-        } destination: { (store: Store<ArchivePathState, ArchivePathAction>) in
-            switch store.state {
-            case .search:
-                if let scopedStore = store.scope(state: \.[case: \.search], action: \ArchivePathAction.Cases.search) {
-                    destinationViews.search(scopedStore)
-                }
-            case .folder:
-                if let scopedStore = store.scope(state: \.[case: \.folder], action: \ArchivePathAction.Cases.folder) {
-                    destinationViews.folder(scopedStore)
-                }
-            case .folderDetail:
-                if let scopedStore = store.scope(state: \.[case: \.folderDetail], action: \ArchivePathAction.Cases.folderDetail) {
-                    destinationViews.folderDetail(scopedStore)
-                }
+        } destination: { store in
+            switch store.case {
+            case let .search(scopedStore):
+                ArchiveSearchView(store: scopedStore)
+            case let .folder(scopedStore):
+                ArchiveFolderView(store: scopedStore)
+            case let .folderDetail(scopedStore):
+                ArchiveFolderDetailView(store: scopedStore)
             }
         }
     }

@@ -45,6 +45,5 @@ public enum ArchiveFolderDetailAction: Sendable {
         case didTapClose
         case didTapFolder(FolderItem)
         case didTapTrack(ArchivedTrack)
-        case showLoginPrompt
     }
 }

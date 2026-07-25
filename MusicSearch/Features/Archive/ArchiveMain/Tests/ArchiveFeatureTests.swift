@@ -23,12 +23,9 @@ struct ArchiveFeatureTests {
         ]
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(
-                archiveRepository: MockArchiveRepository(tracks: expectedTracks),
-                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
-                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
-                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
-            )
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: expectedTracks)
         }
 
         await store.send(.onAppear)
@@ -47,70 +44,53 @@ struct ArchiveFeatureTests {
         let mockRepository = MockArchiveRepository(tracks: expectedTracks)
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(
-                archiveRepository: mockRepository,
-                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
-                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
-                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
-            )
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = mockRepository
         }
 
         await store.send(.onDeleteTapped(track: expectedTracks[0]))
         await store.receive(\.onAppear)
         await store.receive(\.loadDataResponse) {
-            $0.recentTracks = expectedTracks
-            $0.totalTracksCount = 1
-            $0.topGenreName = "Pop"
+            $0.recentTracks = []
+            $0.totalTracksCount = 0
+            $0.topGenreName = "없음"
         }
     }
 
     @Test func testOnAddTapped() async {
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(
-                archiveRepository: MockArchiveRepository(tracks: []),
-                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
-                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
-                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
-            )
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
         await store.send(.onAddTapped) { state in
-            state.destination = state.destination // TestStore exact match 우회
-        }
-
-        guard case .addArchive = store.state.destination else {
-            Issue.record("Expected destination to be .addArchive")
-            return
+            state.destination = .addArchive(AddArchiveState())
         }
     }
 
     @Test func testOnSearchTapped() async {
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(
-                archiveRepository: MockArchiveRepository(tracks: []),
-                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
-                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
-                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
-            )
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
         await store.send(.onSearchTapped) { state in
-            state.destination = .search(ArchiveSearchState())
+            state.path.append(.search(ArchiveSearchState()))
         }
     }
 
     @Test func testOnFolderTapped() async {
         let store = TestStore(initialState: ArchiveFeature.State()) {
-            ArchiveFeature(
-                archiveRepository: MockArchiveRepository(tracks: []),
-                search: EmptyReducer<ArchiveSearchState, ArchiveSearchAction>(),
-                folder: EmptyReducer<ArchiveFolderState, ArchiveFolderAction>(),
-                addArchive: EmptyReducer<AddArchiveState, AddArchiveAction>()
-            )
+            ArchiveFeature()
+        } withDependencies: {
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
         }
 
         await store.send(.onFolderTapped) { state in
-            state.destination = .folder(ArchiveFolderState())
+            state.path.append(.folder(ArchiveFolderState()))
         }
     }
 }

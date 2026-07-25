@@ -8,7 +8,9 @@ let project = Project(
         [Target.domainTargets(
             name: "Archive",
             dependencies: [
-                .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core"))
+                .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
+                .external(name: "ComposableArchitecture")
             ],
             basePath: "Shared"
         )],
@@ -144,6 +146,7 @@ let project = Project(
                 .project(target: "MSInfrastructure", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "FeatureArchiveFolderDetailInterface"),
                 .target(name: "FeatureArchiveTrackSearchInterface"),
+                .target(name: "FeatureArchiveTrackSearch"),
                 .external(name: "NetworkLayer"),
             ],
             testingDependencies: [

@@ -1,3 +1,4 @@
+import ArchiveDomain
 //
 //  ArchiveTrackSearchFeature.swift
 //  MusicSearch
@@ -12,19 +13,15 @@ import MSDomain
 import FeatureArchiveTrackSearchInterface
 
 @Reducer
-public struct ArchiveTrackSearchFeature: Reducer {
+public struct ArchiveTrackSearchFeature {
 
 	public typealias State = ArchiveTrackSearchState
 	public typealias Action = ArchiveTrackSearchAction
 
-	private let searchTracksUseCase: SearchTracksUseCase
+	@Dependency(\.searchTracksUseCase) var searchTracksUseCase
 	private enum CancelID { case search }
 
-	public init(
-		searchTracksUseCase: SearchTracksUseCase
-	) {
-		self.searchTracksUseCase = searchTracksUseCase
-	}
+	public init() {}
 
 	public var body: some ReducerOf<Self> {
 		BindingReducer()

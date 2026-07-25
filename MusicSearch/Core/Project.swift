@@ -38,7 +38,6 @@ let project = Project(
             sources: [
                 "Domain/Entities/**",
                 "Domain/Interfaces/**",
-                "Domain/Services/**",
                 "Domain/UseCases/**",
                 "Domain/Sources/**",
                 "Domain/Util/**"

@@ -7,73 +7,68 @@ import FeatureArchiveSearchInterface
 import FeatureArchiveFolderInterface
 import FeatureArchiveFolderDetailInterface
 import FeatureAddArchiveInterface
+import FeatureArchiveSearch
+import FeatureArchiveFolder
+import FeatureArchiveFolderDetail
+import FeatureAddArchive
+
+@ObservableState
+public struct ArchiveState: Equatable, Sendable {
+    public var totalTracksCount: Int = 0
+    public var topGenreName: String = "없음"
+    public var recentTracks: [ArchivedTrack] = []
+
+    public var path = StackState<ArchiveFeature.Path.State>()
+    @Presents public var destination: ArchiveFeature.Destination.State?
+
+    public var showFilterSheet: Bool = false
+    public var filterIntroGood: Bool = false
+    public var filterMiddleGood: Bool = false
+    public var filterEndGood: Bool = false
+
+    public init() {}
+}
+
+@CasePathable
+public enum ArchiveAction: BindableAction, Sendable {
+    case binding(BindingAction<ArchiveState>)
+    case onAppear
+    case loadDataResponse(tracks: [ArchivedTrack])
+    case onAddTapped
+    case onSearchTapped
+    case onFolderTapped
+    case onTrackTapped(track: ArchivedTrack)
+    case onDeleteTapped(track: ArchivedTrack)
+    case path(StackAction<ArchiveFeature.Path.State, ArchiveFeature.Path.Action>)
+    case destination(PresentationAction<ArchiveFeature.Destination.Action>)
+}
 
 @Reducer
-public struct ArchiveFeature<
-    Search: Reducer,
-    Folder: Reducer,
-    FolderDetail: Reducer,
-    AddArchive: Reducer
-> where Search.State == ArchiveSearchState, Search.Action == ArchiveSearchAction,
-        Folder.State == ArchiveFolderState, Folder.Action == ArchiveFolderAction,
-        FolderDetail.State == ArchiveFolderDetailState, FolderDetail.Action == ArchiveFolderDetailAction,
-        AddArchive.State == AddArchiveState, AddArchive.Action == AddArchiveAction {
+public struct ArchiveFeature {
 
     public typealias State = ArchiveState
     public typealias Action = ArchiveAction
 
-    /// `addArchive`와 `editArchive`는 동일한 State/Action 타입을 공유하므로,
-    /// 주입된 `addArchive` Reducer 하나를 두 케이스에서 재사용합니다.
-    public struct DestinationReducer: Reducer {
-        public typealias State = ArchiveDestinationState
-        public typealias Action = ArchiveDestinationAction
-
-        let addArchive: AddArchive
-
-        public var body: some ReducerOf<Self> {
-            EmptyReducer()
-                .ifCaseLet(\.addArchive, action: \.addArchive) { addArchive }
-                .ifCaseLet(\.editArchive, action: \.editArchive) { addArchive }
-        }
+    @Reducer(state: .equatable)
+    public enum Destination {
+        case addArchive(AddArchiveFeature)
+        case editArchive(AddArchiveFeature)
     }
 
-    public struct PathReducer: Reducer {
-        public typealias State = ArchivePathState
-        public typealias Action = ArchivePathAction
-
-        let search: Search
-        let folder: Folder
-        let folderDetail: FolderDetail
-
-        public var body: some ReducerOf<Self> {
-            EmptyReducer()
-                .ifCaseLet(\.search, action: \.search) { search }
-                .ifCaseLet(\.folder, action: \.folder) { folder }
-                .ifCaseLet(\.folderDetail, action: \.folderDetail) { folderDetail }
-        }
+    @Reducer(state: .equatable)
+    public enum Path {
+        case search(ArchiveSearchFeature)
+        case folder(ArchiveFolderFeature)
+        case folderDetail(ArchiveFolderDetailFeature)
     }
 
-    private let archiveRepository: ArchiveRepository
-    private let search: Search
-    private let folder: Folder
-    private let folderDetail: FolderDetail
-    private let addArchive: AddArchive
+    @Dependency(\.archiveRepository) var archiveRepository
 
-    public init(
-        archiveRepository: ArchiveRepository,
-        search: Search,
-        folder: Folder,
-        folderDetail: FolderDetail,
-        addArchive: AddArchive
-    ) {
-        self.archiveRepository = archiveRepository
-        self.search = search
-        self.folder = folder
-        self.folderDetail = folderDetail
-        self.addArchive = addArchive
-    }
+    public init() {}
 
     public var body: some ReducerOf<Self> {
+        BindingReducer()
+
         Reduce { state, action in
             switch action {
             case .onAppear:
@@ -130,7 +125,7 @@ public struct ArchiveFeature<
                     }
                 }
 
-            case let .path(.element(_, .search(.delegate(.archiveSearchDidTapTrack(track))))),
+            case let .path(.element(_, .search(.delegate(.didTapTrack(track))))),
                  let .path(.element(_, .folderDetail(.delegate(.didTapTrack(track))))):
                 state.destination = .editArchive(AddArchiveState(editTrack: track))
                 return .none
@@ -140,7 +135,7 @@ public struct ArchiveFeature<
                 state.path.append(.folderDetail(ArchiveFolderDetailState(folderItem: folder)))
                 return .none
 
-            case .path(.element(_, .search(.delegate(.archiveSearchDidTapClose)))),
+            case .path(.element(_, .search(.delegate(.didTapClose)))),
                  .path(.element(_, .folder(.delegate(.didTapClose)))),
                  .path(.element(_, .folderDetail(.delegate(.didTapClose)))):
                 state.path.removeLast()
@@ -151,21 +146,11 @@ public struct ArchiveFeature<
                 state.destination = nil
                 return .send(.onAppear)
 
-            case .path, .destination:
+            case .path, .destination, .binding:
                 return .none
             }
         }
-        .ifLet(\.$destination, action: \.destination) {
-            DestinationReducer(
-                addArchive: addArchive
-            )
-        }
-        .forEach(\.path, action: \.path) {
-            PathReducer(
-                search: search,
-                folder: folder,
-                folderDetail: folderDetail
-            )
-        }
+        .ifLet(\.$destination, action: \.destination)
+        .forEach(\.path, action: \.path)
     }
 }
