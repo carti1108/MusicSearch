@@ -9,12 +9,11 @@ import SwiftUI
 import ComposableArchitecture
 import MSDesignSystem
 import ArchiveDomain
-import FeatureArchiveSearchInterface
 
 public struct ArchiveSearchView: View {
-    @Bindable var store: Store<ArchiveSearchState, ArchiveSearchAction>
+    @Bindable var store: StoreOf<ArchiveSearchFeature>
 
-    public init(store: Store<ArchiveSearchState, ArchiveSearchAction>) {
+    public init(store: StoreOf<ArchiveSearchFeature>) {
         self.store = store
     }
 
