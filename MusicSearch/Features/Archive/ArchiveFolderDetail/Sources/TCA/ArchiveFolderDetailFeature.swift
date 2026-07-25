@@ -10,13 +10,56 @@ import ComposableArchitecture
 import ArchiveDomain
 import MSDomain
 import OSLog
-import FeatureArchiveFolderDetailInterface
 
 @Reducer
-public struct ArchiveFolderDetailFeature {
+public struct ArchiveFolderDetailFeature: Sendable {
 
-    public typealias State = ArchiveFolderDetailState
-    public typealias Action = ArchiveFolderDetailAction
+    public enum ExportState: Equatable, Sendable {
+        case idle
+        case exporting(progress: ExportProgress)
+        case completed(successCount: Int, failedCount: Int)
+    }
+
+    @ObservableState
+    public struct State: Equatable, Sendable {
+        public var folderItem: FolderItem
+        public var title: String
+        public var folders: [FolderItem]?
+        public var tracks: [ArchivedTrack]?
+        public var exportState: ExportState = .idle
+        @Presents public var alert: AlertState<Action.Alert>?
+
+        public init(folderItem: FolderItem) {
+            self.folderItem = folderItem
+            self.title = folderItem.title
+        }
+    }
+
+    @CasePathable
+    public enum Action: Sendable {
+        case onAppear
+        case loadDataResponse(folders: [FolderItem]?, tracks: [ArchivedTrack]?)
+        case folderTapped(FolderItem)
+        case trackTapped(ArchivedTrack)
+        case closeButtonTapped
+        case exportButtonTapped
+        case loginPromptTapped
+        case exportProgress(ExportProgress)
+        case exportCompleted(successCount: Int, failedCount: Int)
+        case alert(PresentationAction<Alert>)
+        case delegate(DelegateAction)
+
+        public enum Alert: Equatable, Sendable {
+            case confirmLogin
+            case exportResultAcknowledge
+        }
+
+        public enum DelegateAction: Equatable, Sendable {
+            case didTapClose
+            case didTapFolder(FolderItem)
+            case didTapTrack(ArchivedTrack)
+        }
+    }
 
     private enum CancelID {
         case export
@@ -35,107 +78,8 @@ public struct ArchiveFolderDetailFeature {
             case .onAppear:
                 return .run { [folderItem = state.folderItem] send in
                     do {
-                        let allTracks = try await archiveRepository.fetchArchivedTracks()
-                        let formatter = DateFormatter()
-
-                        var filteredTracks: [ArchivedTrack] = []
-                        var isMonthGroup = false
-                        var foldersToDisplay: [FolderItem]? = nil
-
-                        switch folderItem.type {
-                        case .releaseYear(let year):
-                            isMonthGroup = true
-                            formatter.dateFormat = "yyyy"
-                            filteredTracks = allTracks.filter { track in
-                                if let date = track.releaseDate {
-                                    return formatter.string(from: date) == year
-                                }
-                                return false
-                            }
-
-                            formatter.dateFormat = "MM"
-                            let grouped = Dictionary(grouping: filteredTracks, by: { track -> String in
-                                if let date = track.releaseDate { return formatter.string(from: date) }
-                                return ""
-                            })
-                            foldersToDisplay = grouped.keys.filter { !$0.isEmpty }.sorted(by: <).map { month in
-                                FolderItem(title: month + "월", subtitle: "\(grouped[month]?.count ?? 0) 곡", type: .releaseMonth(year: year, month: month))
-                            }
-
-                        case .listenYear(let year):
-                            isMonthGroup = true
-                            formatter.dateFormat = "yyyy"
-                            filteredTracks = allTracks.filter { track in
-                                return formatter.string(from: track.listenDate) == year
-                            }
-
-                            formatter.dateFormat = "MM"
-                            let grouped = Dictionary(grouping: filteredTracks, by: { track -> String in
-                                return formatter.string(from: track.listenDate)
-                            })
-                            foldersToDisplay = grouped.keys.sorted(by: <).map { month in
-                                FolderItem(title: month + "월", subtitle: "\(grouped[month]?.count ?? 0) 곡", type: .listenMonth(year: year, month: month))
-                            }
-
-                        case .releaseMonth(let year, let month):
-                            isMonthGroup = true
-                            formatter.dateFormat = "yyyy-MM"
-                            filteredTracks = allTracks.filter { track in
-                                if let date = track.releaseDate {
-                                    return formatter.string(from: date) == "\(year)-\(month)"
-                                }
-                                return false
-                            }
-
-                            let calendar = Calendar.current
-                            let grouped = Dictionary(grouping: filteredTracks, by: { track -> Int in
-                                if let date = track.releaseDate { return calendar.component(.weekOfMonth, from: date) }
-                                return 0
-                            })
-                            foldersToDisplay = grouped.keys.filter { $0 > 0 }.sorted(by: <).map { week in
-                                FolderItem(title: "\(week)주차", subtitle: "\(grouped[week]?.count ?? 0) 곡", type: .releaseWeek(year: year, month: month, week: "\(week)"))
-                            }
-
-                        case .listenMonth(let year, let month):
-                            isMonthGroup = true
-                            formatter.dateFormat = "yyyy-MM"
-                            filteredTracks = allTracks.filter { track in
-                                return formatter.string(from: track.listenDate) == "\(year)-\(month)"
-                            }
-
-                            let calendar = Calendar.current
-                            let grouped = Dictionary(grouping: filteredTracks, by: { track -> Int in
-                                return calendar.component(.weekOfMonth, from: track.listenDate)
-                            })
-                            foldersToDisplay = grouped.keys.sorted(by: <).map { week in
-                                FolderItem(title: "\(week)주차", subtitle: "\(grouped[week]?.count ?? 0) 곡", type: .listenWeek(year: year, month: month, week: "\(week)"))
-                            }
-
-                        case .releaseWeek(let year, let month, let week):
-                            formatter.dateFormat = "yyyy-MM"
-                            let calendar = Calendar.current
-                            filteredTracks = allTracks.filter { track in
-                                if let date = track.releaseDate {
-                                    return formatter.string(from: date) == "\(year)-\(month)" && "\(calendar.component(.weekOfMonth, from: date))" == week
-                                }
-                                return false
-                            }
-
-                        case .listenWeek(let year, let month, let week):
-                            formatter.dateFormat = "yyyy-MM"
-                            let calendar = Calendar.current
-                            filteredTracks = allTracks.filter { track in
-                                return formatter.string(from: track.listenDate) == "\(year)-\(month)" && "\(calendar.component(.weekOfMonth, from: track.listenDate))" == week
-                            }
-                        case .genre(let name):
-                            filteredTracks = allTracks.filter { $0.genre == name }
-                        case .rating(let value):
-                            filteredTracks = allTracks.filter { Int($0.rating) == value }
-                        case .custom:
-                            filteredTracks = allTracks
-                        }
-
-                        await send(.loadDataResponse(folders: isMonthGroup ? foldersToDisplay : nil, tracks: isMonthGroup ? nil : filteredTracks))
+                        let contents = try await archiveRepository.fetchFolderContents(for: folderItem)
+                        await send(.loadDataResponse(folders: contents.folders, tracks: contents.tracks))
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFolderDetailFeature").error("Failed to fetch folder tracks: \(error.localizedDescription)")
                     }
@@ -203,10 +147,21 @@ public struct ArchiveFolderDetailFeature {
 
             case let .exportCompleted(success, failed):
                 state.exportState = .completed(successCount: success, failedCount: failed)
+                state.alert = AlertState { TextState("내보내기 완료") } actions: {
+                    ButtonState(action: .exportResultAcknowledge) {
+                        TextState("확인")
+                    }
+                } message: {
+                    TextState("성공: \(success)곡, 실패: \(failed)곡")
+                }
                 return .none
 
             case .alert(.presented(.confirmLogin)):
                 return .send(.loginPromptTapped)
+                
+            case .alert(.presented(.exportResultAcknowledge)):
+                state.exportState = .idle
+                return .none
 
             case .alert:
                 return .none
