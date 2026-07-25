@@ -35,7 +35,7 @@ public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable 
             $0.searchTracksUseCase = component.dependency.searchTracksUseCase
         } operation: {
             Store(
-                initialState: ArchiveState(),
+                initialState: ArchiveFeature.State(),
                 reducer: { ArchiveFeature() }
             )
         }
