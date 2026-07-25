@@ -13,10 +13,40 @@ import MSDomain
 import FeatureArchiveTrackSearchInterface
 
 @Reducer
-public struct ArchiveTrackSearchFeature {
+public struct ArchiveTrackSearchFeature: Sendable {
 
-	public typealias State = ArchiveTrackSearchState
-	public typealias Action = ArchiveTrackSearchAction
+    public struct TrackSearchResponse: Equatable, Sendable {
+        public let tracks: [Track]
+        public let totalResults: Int
+        public init(tracks: [Track], totalResults: Int) {
+            self.tracks = tracks
+            self.totalResults = totalResults
+        }
+    }
+
+    @ObservableState
+    public struct State: Equatable, Sendable {
+        public var query: String = ""
+        public var results: [Track] = []
+        public var isLoading: Bool = false
+
+        public init() {}
+    }
+
+    @CasePathable
+    public enum Action: BindableAction, Sendable {
+        case binding(BindingAction<State>)
+        case onAppear
+        case closeButtonTapped
+        case clearQueryTapped
+        case trackSelected(Track)
+        case searchResponse(TaskResult<TrackSearchResponse>)
+        case delegate(DelegateAction)
+
+        public enum DelegateAction: Equatable, Sendable {
+            case trackSelected(Track)
+        }
+    }
 
 	@Dependency(\.searchTracksUseCase) var searchTracksUseCase
 	private enum CancelID { case search }

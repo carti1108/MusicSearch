@@ -9,13 +9,40 @@ import Foundation
 import ComposableArchitecture
 import ArchiveDomain
 import OSLog
-import FeatureArchiveFolderInterface
 
 @Reducer
-public struct ArchiveFolderFeature {
+public struct ArchiveFolderFeature: Sendable {
 
-    public typealias State = ArchiveFolderState
-    public typealias Action = ArchiveFolderAction
+    @ObservableState
+    public struct State: Equatable, Sendable {
+        public var selectedTab: Int = 0
+        public var releaseYearFolders: [FolderItem] = []
+        public var listenYearFolders: [FolderItem] = []
+        public var genreFolders: [FolderItem] = []
+        public var ratingFolders: [FolderItem] = []
+
+        public init() {}
+    }
+
+    @CasePathable
+    public enum Action: BindableAction, Sendable {
+        case binding(BindingAction<State>)
+        case onAppear
+        case foldersLoaded(
+            releaseYear: [FolderItem],
+            listenYear: [FolderItem],
+            genre: [FolderItem],
+            rating: [FolderItem]
+        )
+        case folderTapped(FolderItem)
+        case closeButtonTapped
+        case delegate(DelegateAction)
+
+        public enum DelegateAction: Equatable, Sendable {
+            case didTapClose
+            case didTapFolder(FolderItem)
+        }
+    }
 
     @Dependency(\.archiveRepository) var archiveRepository
 

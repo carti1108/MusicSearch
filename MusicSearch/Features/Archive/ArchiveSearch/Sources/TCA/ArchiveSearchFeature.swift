@@ -8,13 +8,36 @@
 import Foundation
 import ComposableArchitecture
 import ArchiveDomain
-import FeatureArchiveSearchInterface
 
 @Reducer
-public struct ArchiveSearchFeature {
+public struct ArchiveSearchFeature: Sendable {
 
-	public typealias State = ArchiveSearchState
-	public typealias Action = ArchiveSearchAction
+	@ObservableState
+	public struct State: Equatable, Sendable {
+		public var searchText: String = ""
+		public var recentSearches: [String] = []
+		public var recommendedTracks: [ArchivedTrack] = []
+		public var allTracks: [ArchivedTrack] = []
+
+		public init() {}
+	}
+
+	@CasePathable
+	public enum Action: BindableAction, Sendable {
+		case binding(BindingAction<State>)
+		case onAppear
+		case clearRecentSearches
+		case removeRecentSearch(String)
+		case closeButtonTapped
+		case trackTapped(ArchivedTrack)
+		case tracksLoaded(TaskResult<[ArchivedTrack]>)
+		case delegate(DelegateAction)
+
+		public enum DelegateAction: Equatable, Sendable {
+			case didTapClose
+			case didTapTrack(ArchivedTrack)
+		}
+	}
 
 	@Dependency(\.archiveRepository) var archiveRepository
 	private enum CancelID { case search }
