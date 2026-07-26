@@ -12,6 +12,7 @@ import ArchiveDomain
 import ArchiveSharedTesting
 import FeatureArchiveFolderDetailTesting
 import MSDomain
+import MSTesting
 @testable import FeatureArchiveFolderDetail
 
 @MainActor
@@ -26,7 +27,7 @@ struct FeatureArchiveFolderDetailTests {
             ArchiveFolderDetailFeature()
         } withDependencies: {
             $0.archiveRepository = MockArchiveRepository(tracks: tracks)
-            $0.exportPlaylistUseCase = MockExport()
+            $0.exportPlaylistUseCase = MockExportPlaylistUseCase()
             $0.getMusicAccessTokenUseCase = MockGetMusicAccessTokenUseCase()
             $0.authorizeMusicUseCase = MockAuthorizeMusicUseCase()
         }
@@ -39,21 +40,5 @@ struct FeatureArchiveFolderDetailTests {
             $0.tracks = tracks
         }
     }
-}
-
-final class MockExport: ExportPlaylistUseCase {
-    func execute(tracks: [ArchivedTrack], playlistName: String) -> AsyncStream<ExportProgress> {
-        let (stream, continuation) = AsyncStream.makeStream(of: ExportProgress.self)
-        continuation.yield(ExportProgress(totalCount: 1, currentCount: 1, failedTracks: [], isComplete: true))
-        continuation.finish()
-        return stream
-    }
-}
-
-final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {
-    func execute() -> String? { return "token" }
-}
-final class MockAuthorizeMusicUseCase: AuthorizeMusicUseCase {
-    func execute() async throws {}
 }
 
