@@ -10,6 +10,10 @@ import ComposableArchitecture
 
 public struct ImageClient: Sendable {
     public var fetch: @Sendable (URL) async throws -> Data
+
+	public init(fetch: @Sendable @escaping (URL) async throws -> Data) {
+		self.fetch = fetch
+	}
 }
 
 extension ImageClient: DependencyKey {
