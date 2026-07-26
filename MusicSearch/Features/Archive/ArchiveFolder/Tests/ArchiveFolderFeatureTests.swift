@@ -71,12 +71,3 @@ struct ArchiveFolderFeatureTests {
     }
 }
 
-final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
-    var tracks: [ArchivedTrack]
-    init(tracks: [ArchivedTrack]) { self.tracks = tracks }
-
-    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return tracks }
-    func addArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func deleteArchivedTrack(id: UUID) async throws { }
-}

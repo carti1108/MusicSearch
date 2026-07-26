@@ -12,6 +12,8 @@ import ArchiveDomain
 import TrackSearchDomain
 import MSDomain
 import FeatureArchiveTrackSearchInterface
+import ArchiveSharedTesting
+import FeatureTrackSearchTesting
 @testable import FeatureAddArchive
 
 @MainActor
@@ -21,7 +23,7 @@ struct AddArchiveFeatureTests {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
             AddArchiveFeature()
         } withDependencies: {
-            $0.archiveRepository = MockArchiveRepository()
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
             $0.searchTracksUseCase = MockSearchTracksUseCase()
         }
 
@@ -34,7 +36,7 @@ struct AddArchiveFeatureTests {
         let store = TestStore(initialState: AddArchiveFeature.State()) {
             AddArchiveFeature()
         } withDependencies: {
-            $0.archiveRepository = MockArchiveRepository()
+            $0.archiveRepository = MockArchiveRepository(tracks: [])
             $0.searchTracksUseCase = MockSearchTracksUseCase()
         }
 
@@ -43,15 +45,3 @@ struct AddArchiveFeatureTests {
     }
 }
 
-final class MockArchiveRepository: ArchiveRepository, @unchecked Sendable {
-    func fetchArchivedTracks() async throws -> [ArchivedTrack] { return [] }
-    func addArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func updateArchivedTrack(_ track: ArchivedTrack) async throws { }
-    func deleteArchivedTrack(id: UUID) async throws { }
-}
-
-final class MockSearchTracksUseCase: SearchTracksUseCase, @unchecked Sendable {
-    func execute(query: String, limit: Int, offset: Int) async throws -> (tracks: [Track], totalResults: Int) {
-        return ([], 0)
-    }
-}

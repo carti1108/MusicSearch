@@ -88,10 +88,15 @@ let project = Project(
             testsDependencies: [
                 .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "FeatureTrackSearchTesting", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
                 .target(name: "ArchiveDomain")
             ],
             exampleDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "FeatureTrackSearchTesting", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core"))
             ],
@@ -122,10 +127,13 @@ let project = Project(
             testsDependencies: [
                 .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain")
             ],
             exampleDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core"))
             ],
@@ -165,12 +173,15 @@ let project = Project(
                 .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
-                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
+                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
+                .project(target: "FeatureTrackSearchTesting", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
             ],
             exampleDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
+                .project(target: "FeatureTrackSearchTesting", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core"))
             ],
             folderName: "AddArchive"
@@ -204,6 +215,7 @@ let project = Project(
                 .target(name: "ArchiveDomain")
             ],
             exampleDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core"))
@@ -238,6 +250,7 @@ let project = Project(
                 .target(name: "ArchiveDomain")
             ],
             exampleDependencies: [
+                .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core"))
@@ -266,12 +279,14 @@ let project = Project(
                 .target(name: "ArchiveSharedTesting"),
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
-                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
+                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
+                .project(target: "FeatureTrackSearchTesting", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
             ],
             exampleDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
                 .target(name: "ArchiveDomain"),
-                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
+                .project(target: "TrackSearchDomain", path: .relativeToRoot("MusicSearch/Features/TrackSearch")),
+                .project(target: "FeatureTrackSearchTesting", path: .relativeToRoot("MusicSearch/Features/TrackSearch"))
             ],
             folderName: "ArchiveTrackSearch"
         )

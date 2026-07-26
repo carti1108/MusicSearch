@@ -29,10 +29,12 @@ let project = Project(
             ],
             testsDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive"))
             ],
             exampleDependencies: [
                 .project(target: "MSDomain", path: .relativeToRoot("MusicSearch/Core")),
+                .project(target: "MSTesting", path: .relativeToRoot("MusicSearch/Core")),
                 .project(target: "ArchiveDomain", path: .relativeToRoot("MusicSearch/Features/Archive")),
                 .project(target: "MSUtil", path: .relativeToRoot("MusicSearch/Core")),
             ],

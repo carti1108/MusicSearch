@@ -9,6 +9,7 @@ import Foundation
 import Testing
 import ComposableArchitecture
 import MSDomain
+import MSTesting
 @testable import FeatureSettings
 
 @MainActor
@@ -79,30 +80,5 @@ struct SettingsFeatureTests {
             $0.spotifyState = .disconnected
         }
         #expect(mockDisconnect.disconnectCalled)
-    }
-}
-
-final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, @unchecked Sendable {
-    var token: String?
-    init(token: String?) { self.token = token }
-    func execute() -> String? { return token }
-}
-
-final class MockAuthorizeMusicUseCase: AuthorizeMusicUseCase {
-    func execute() async throws { }
-}
-
-final class MockDisconnectMusicUseCase: DisconnectMusicUseCase, @unchecked Sendable {
-    var disconnectCalled = false
-
-    func execute() { disconnectCalled = true }
-}
-
-final class MockFetchUserProfileUseCase: FetchUserProfileUseCase, @unchecked Sendable {
-    var profile: (String, URL?)?
-    init(profile: (String, URL?)?) { self.profile = profile }
-    func execute() async throws -> (name: String, imageURL: URL?) {
-        if let profile = profile { return profile }
-        throw NSError(domain: "Test", code: 0)
     }
 }
