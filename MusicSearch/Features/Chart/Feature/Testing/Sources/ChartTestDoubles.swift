@@ -5,19 +5,18 @@
 //  Created by Kiseok on 7/10/26.
 //
 
-import MSDomain
-import Foundation
-import UIKit
-import MicroRIBs
-import MSDomain
-import MSUtil
+import ChartDomain
 @testable import FeatureChart
 import FeatureChartInterface
-import ChartDomain
+import Foundation
+import MSDomain
+import MSUtil
+import MicroRIBs
+import UIKit
 
 @MainActor
 public final class ChartPresentableSpy: ChartPresentable {
-    public init() {}
+	public init() {}
 	public weak var listener: ChartPresentableListener?
 
 	public var updatedSegmentIndices: [Int] = []
@@ -43,27 +42,32 @@ public final class ChartPresentableSpy: ChartPresentable {
 		self.errorMessages.append(message)
 	}
 }
+
 @MainActor
 public final class MockFetchTrackDeepLinkUseCaseForChartInteractor: FetchTrackDeepLinkUseCase {
-    public init() {}
+	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 }
+
 @MainActor
 public final class MockFetchArtistDeepLinkUseCaseForChartInteractor: FetchArtistDeepLinkUseCase {
-    public init() {}
+	public init() {}
 	public func execute(artist: String) async -> URL? { nil }
 }
+
 @MainActor
 public final class MockChartInteractableForRouter: Interactor, ChartInteractable {
 	public weak var router: ChartRouting?
 	public weak var listener: ChartListener?
 }
+
 @MainActor
 public final class MockChartViewControllerForRouter: UIViewController, ChartViewControllable {}
+
 @MainActor
 public final class MockFetchChartTopTracksUseCaseForBuilder: FetchChartTopTracksUseCase {
 	public var executeCallCount = 0
-    public init() {}
+	public init() {}
 
 	public func execute() async throws -> [Track] {
 		self.executeCallCount += 1
@@ -74,19 +78,21 @@ public final class MockFetchChartTopTracksUseCaseForBuilder: FetchChartTopTracks
 		]
 	}
 }
+
 @MainActor
 public final class MockFetchChartTopArtistsUseCaseForBuilder: FetchChartTopArtistsUseCase {
-    public init() {}
+	public init() {}
 	public func execute() async throws -> [Artist] { [] }
 }
+
 @MainActor
 public final class MockFetchTrackDeepLinkUseCaseForChartBuilder: FetchTrackDeepLinkUseCase {
 	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 }
+
 @MainActor
 public final class MockFetchArtistDeepLinkUseCaseForChartBuilder: FetchArtistDeepLinkUseCase {
 	public init() {}
 	public func execute(artist: String) async -> URL? { nil }
 }
-

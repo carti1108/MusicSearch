@@ -5,18 +5,18 @@
 //  Created by Kiseok on 7/10/26.
 //
 
-import MSDomain
-import Foundation
-import UIKit
-import MicroRIBs
-import MSDomain
-import MSUtil
 @testable import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
+import Foundation
+import MSDomain
+import MSUtil
+import MicroRIBs
+import UIKit
 import WeatherRecommendationDomain
 
 @MainActor
 public final class WeatherRecommendationPresentableSpy: WeatherRecommendationPresentable {
+	public init() {}
 	public weak var listener: WeatherRecommendationPresentableListener?
 
 	public var updatedWeatherHistory: [Weather] = []
@@ -66,7 +66,6 @@ public final class MockFetchMusicForWeatherUseCaseForInteractor: FetchMusicForWe
 public final class MockFetchTrackDeepLinkUseCaseForWeatherRecommendationInteractor: FetchTrackDeepLinkUseCase {
 	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	
 }
 
 @MainActor
@@ -79,5 +78,18 @@ public final class MockWeatherRecommendationInteractableForRouter: Interactor, W
 @MainActor
 public final class MockWeatherRecommendationViewControllerForRouter: UIViewController, WeatherRecommendationViewControllable {
 	public init() { super.init(nibName: nil, bundle: nil) }
-	required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }}
+	required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+}
 
+@MainActor
+public final class MockDelayedFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
+	public init() {}
+	public func execute() async throws -> WeatherMusicCuration {
+		try await Task.sleep(nanoseconds: 2_000_000_000)
+		let mockWeather = Weather(temperature: 18.0, condition: .thunderstorm, description: "천둥번개", iconCode: "11d", cityName: "Seoul")
+		let mockTracks = [
+			Track(title: "Thunder Track", artist: "Thunder Artist", imageURL: nil)
+		]
+		return WeatherMusicCuration(weather: mockWeather, moodTag: "Intense", tracks: mockTracks)
+	}
+}

@@ -5,13 +5,13 @@
 //  Created by Kiseok on 7/10/26.
 //
 
-import MSUtil
-
 import UIKit
+import ChartDomain
 import FeatureChart
 import FeatureChartInterface
-import ChartDomain
 import FeatureChartTesting
+import MSTesting
+import MSUtil
 
 enum DemoScenario: String, CaseIterable {
     case success = "✅ 성공 (데이터 정상)"
@@ -60,7 +60,6 @@ final class DemoListViewController: UIViewController {
         let vc = router.viewControllable.uiviewController
         vc.modalPresentationStyle = .fullScreen
         
-        // Add a close button
         let nav = UINavigationController(rootViewController: vc)
         vc.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(closeDemo))
         
@@ -90,20 +89,4 @@ extension DemoListViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-@MainActor
-final class MockChartListener: ChartListener {}
 
-@MainActor
-final class MockURLOpener: URLOpening {
-    func open(_ url: URL) {
-        Task { @MainActor in
-            let alert = UIAlertController(title: "URL Routing", message: "딥링크 이동:\n\(url.absoluteString)", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
-            
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let topVC = windowScene.windows.first?.rootViewController?.presentedViewController {
-                topVC.present(alert, animated: true)
-            }
-        }
-    }
-}

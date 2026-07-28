@@ -7,12 +7,13 @@
 
 import Foundation
 import UIKit
-import MSDomain
 import FeatureWeatherRecommendation
 import FeatureWeatherRecommendationInterface
+import FeatureWeatherRecommendationTesting
+import MSDomain
+import MSTesting
 import MSUtil
 import WeatherRecommendationDomain
-import FeatureWeatherRecommendationTesting
 
 @MainActor
 final class ExampleAppComponent: WeatherRecommendationDependency {
@@ -54,38 +55,8 @@ final class ExampleAppComponent: WeatherRecommendationDependency {
     }
     
     var urlOpener: URLOpening {
-        AlertingURLOpener()
+        MockURLOpener()
     }
 }
 
-// MARK: - Custom Mocks for Demo
 
-@MainActor
-final class MockDelayedFetchMusicForWeatherUseCase: FetchMusicForWeatherUseCase {
-    func execute() async throws -> WeatherMusicCuration {
-        try await Task.sleep(nanoseconds: 2_000_000_000)
-        let mockWeather = Weather(temperature: 18.0, condition: .thunderstorm, description: "천둥번개", iconCode: "11d", cityName: "Seoul")
-        let mockTracks = [
-            Track(title: "Thunder Track", artist: "Thunder Artist", imageURL: nil)
-        ]
-        return WeatherMusicCuration(weather: mockWeather, moodTag: "Intense", tracks: mockTracks)
-    }
-}
-
-final class AlertingURLOpener: URLOpening {
-    @MainActor
-    func open(_ url: URL) {
-        let alert = UIAlertController(title: "URL Opened", message: url.absoluteString, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
-        
-        // Find topmost view controller to present alert
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
-            var topVC = rootVC
-            while let presented = topVC.presentedViewController {
-                topVC = presented
-            }
-            topVC.present(alert, animated: true)
-        }
-    }
-}

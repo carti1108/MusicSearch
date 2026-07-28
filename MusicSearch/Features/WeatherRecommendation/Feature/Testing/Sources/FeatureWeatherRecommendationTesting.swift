@@ -5,10 +5,10 @@
 //  Created by Kiseok on 6/30/26.
 //
 
+import FeatureWeatherRecommendationInterface
 import Foundation
 import MSDomain
 import MSUtil
-import FeatureWeatherRecommendationInterface
 import WeatherRecommendationDomain
 
 @MainActor
@@ -77,6 +77,6 @@ public final class MockURLOpener: URLOpening {
 
 @MainActor
 public final class MockFetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
-    public init() {}
+	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 }

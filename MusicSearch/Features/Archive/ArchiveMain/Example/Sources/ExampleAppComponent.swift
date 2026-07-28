@@ -1,12 +1,12 @@
 import Foundation
-import MicroRIBs
 import ArchiveDomain
-import MSDomain
-import TrackSearchDomain
-import FeatureArchiveInterface
 import ArchiveSharedTesting
+import FeatureArchiveInterface
 import FeatureTrackSearchTesting
+import MicroRIBs
+import MSDomain
 import MSTesting
+import TrackSearchDomain
 
 final class ExampleAppComponent: Component<EmptyDependency>, ArchiveDependency {
     let scenario: DemoScenario
@@ -25,4 +25,5 @@ final class ExampleAppComponent: Component<EmptyDependency>, ArchiveDependency {
     var getMusicAccessTokenUseCase: any GetMusicAccessTokenUseCase { MockGetMusicAccessTokenUseCase() }
     var authorizeMusicUseCase: any AuthorizeMusicUseCase { MockAuthorizeMusicUseCase() }
 }
+
 

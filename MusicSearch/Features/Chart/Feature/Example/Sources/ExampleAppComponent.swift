@@ -6,12 +6,13 @@
 //
 
 import Foundation
-import MSDomain
+import ChartDomain
 import FeatureChart
 import FeatureChartInterface
-import MSUtil
-import ChartDomain
 import FeatureChartTesting
+import MSDomain
+import MSTesting
+import MSUtil
 
 @MainActor
 final class ExampleAppComponent: ChartDependency {
@@ -89,4 +90,5 @@ final class ExampleAppComponent: ChartDependency {
         MockURLOpener()
     }
 }
+
 

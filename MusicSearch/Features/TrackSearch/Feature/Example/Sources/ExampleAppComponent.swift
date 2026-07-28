@@ -5,18 +5,20 @@
 //  Created by Kiseok on 6/30/26.
 //
 
+import Combine
 import Foundation
 import UIKit
-import Combine
-import MSDomain
+import FeatureMusicDiggingInterface
+import FeatureMusicDiggingTesting
 import FeatureTrackSearch
 import FeatureTrackSearchInterface
-import MSUtil
-import TrackSearchDomain
-import MusicDiggingDomain
-import FeatureMusicDiggingInterface
-import MicroRIBs
 import FeatureTrackSearchTesting
+import MicroRIBs
+import MSDomain
+import MSTesting
+import MSUtil
+import MusicDiggingDomain
+import TrackSearchDomain
 
 @MainActor
 final class ExampleAppComponent: TrackSearchDependency {
@@ -51,49 +53,26 @@ final class ExampleAppComponent: TrackSearchDependency {
         
         return mock
     }
+
     var fetchTracksByTagUseCase: FetchTracksByTagUseCase {
         MockFetchTracksByTagUseCase()
     }
+
     var fetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
         MockFetchSimilarTracksUseCase()
     }
+
     var fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
         MockFetchTrackDeepLinkUseCase()
     }
+
     var urlOpener: URLOpening {
         MockURLOpener()
     }
+
     var musicDiggingBuilder: MusicDiggingBuildable {
-        MockMusicDiggingBuildableForExample()
+        MusicDiggingBuilderSpy()
     }
 }
 
-@MainActor
-final class MockMusicDiggingBuildableForExample: MusicDiggingBuildable {
-    func build(withListener listener: MusicDiggingListener, seedTrack: Track) -> MusicDiggingRouting {
-        return MockMusicDiggingRouting(
-            interactor: MockMusicDiggingInteractor(),
-            viewController: MockViewControllable()
-        )
-    }
-}
-@MainActor
-final class MockMusicDiggingRouting: ViewableRouter<Interactable, ViewControllable>, MusicDiggingRouting {
-    override init(interactor: Interactable, viewController: ViewControllable) {
-        super.init(interactor: interactor, viewController: viewController)
-    }
-}
 
-@MainActor
-final class MockMusicDiggingInteractor: Interactable {
-    var isActive: Bool = true
-    var isActiveStream: AsyncStream<Bool> { AsyncStream { $0.yield(true); $0.finish() } }
-
-    func activate() {}
-    func deactivate() {}
-}
-
-@MainActor
-final class MockViewControllable: ViewControllable {
-    var uiViewController: UIViewController { UIViewController() }
-}

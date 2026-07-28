@@ -10,7 +10,8 @@ import MSUtil
 import UIKit
 import FeatureArchive
 import FeatureArchiveInterface
-import ArchiveDomain
+import ArchiveSharedTesting
+import MSTesting
 
 enum DemoScenario: String, CaseIterable {
     case success = "✅ 성공 (데이터 정상)"
@@ -91,17 +92,4 @@ extension DemoListViewController: UITableViewDelegate, UITableViewDataSource {
 @MainActor
 final class MockArchiveListener: ArchiveListener {}
 
-@MainActor
-final class MockURLOpener: URLOpening {
-    func open(_ url: URL) {
-        Task { @MainActor in
-            let alert = UIAlertController(title: "URL Routing", message: "딥링크 이동:\n\(url.absoluteString)", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
-            
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let topVC = windowScene.windows.first?.rootViewController?.presentedViewController {
-                topVC.present(alert, animated: true)
-            }
-        }
-    }
-}
+

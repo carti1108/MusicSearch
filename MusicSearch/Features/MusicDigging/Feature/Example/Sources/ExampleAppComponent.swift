@@ -13,6 +13,8 @@ import FeatureMusicDiggingInterface
 import MSUtil
 import MusicDiggingDomain
 import FeatureMusicDiggingTesting
+import MSTesting
+
 
 @MainActor
 final class ExampleAppComponent: MusicDiggingDependency {

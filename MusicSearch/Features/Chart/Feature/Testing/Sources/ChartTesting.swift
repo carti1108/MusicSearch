@@ -5,13 +5,13 @@
 //  Created by Kiseok on 6/30/26.
 //
 
+import ChartDomain
+import FeatureChartInterface
 import Foundation
-import UIKit
-import MicroRIBs
 import MSDomain
 import MSUtil
-import FeatureChartInterface
-import ChartDomain
+import MicroRIBs
+import UIKit
 
 @MainActor
 public final class MockFetchChartTopTracksUseCase: FetchChartTopTracksUseCase {
@@ -64,13 +64,15 @@ public final class MockChartListener: ChartListener {
 public final class MockChartDependency: ChartDependency {
 	public let fetchChartTopTracksUseCase: FetchChartTopTracksUseCase
 	public let fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase
-	public let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase
+	public let fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase
+	public let fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase
 	public let urlOpener: URLOpening
 
 	public init(
 		fetchChartTopTracksUseCase: FetchChartTopTracksUseCase,
 		fetchChartTopArtistsUseCase: FetchChartTopArtistsUseCase,
-		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase, fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase,
+		fetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase,
+		fetchArtistDeepLinkUseCase: FetchArtistDeepLinkUseCase,
 		urlOpener: URLOpening = MockURLOpener()
 	) {
 		self.fetchChartTopTracksUseCase = fetchChartTopTracksUseCase

@@ -5,14 +5,13 @@
 //  Created by Kiseok on 6/30/26.
 //
 
-import MusicDiggingDomain
-
+import FeatureMusicDiggingInterface
+import FeatureTrackSearchInterface
 import Foundation
 import MSDomain
 import MSUtil
-import FeatureTrackSearchInterface
+import MusicDiggingDomain
 import TrackSearchDomain
-import FeatureMusicDiggingInterface
 
 @MainActor
 public final class MockSearchTracksUseCase: SearchTracksUseCase {
@@ -50,7 +49,7 @@ public final class MockSearchTracksUseCase: SearchTracksUseCase {
 
 @MainActor
 public final class MockTrackSearchListener: TrackSearchListener {
-    public init() {}
+	public init() {}
 }
 
 @MainActor
@@ -92,21 +91,22 @@ public final class MockURLOpener: URLOpening {
 
 @MainActor
 public final class MockFetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
-    public init() {}
+	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 }
 
 @MainActor
 public final class MockFetchTracksByTagUseCase: FetchTracksByTagUseCase {
-    public init() {}
+	public init() {}
 	public func execute(tag: String) async throws -> [Track] { [] }
 }
 
 @MainActor
 public final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
-    public init() {}
+	public init() {}
 	public func execute(targetTrack: Track) async throws -> [Track] { [] }
 }
+
 @MainActor
 public final class MockMusicDiggingBuildable: MusicDiggingBuildable {
 	public init() {}

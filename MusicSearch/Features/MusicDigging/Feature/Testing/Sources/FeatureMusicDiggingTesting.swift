@@ -5,15 +5,15 @@
 //  Created by Kiseok on 6/30/26.
 //
 
+import FeatureMusicDiggingInterface
 import Foundation
 import MSDomain
 import MSUtil
-import FeatureMusicDiggingInterface
 import MusicDiggingDomain
 
 @MainActor
 public final class MockMusicDiggingListener: MusicDiggingListener {
-    public init() {}
+	public init() {}
 }
 
 @MainActor
@@ -46,7 +46,7 @@ public final class MockURLOpener: URLOpening {
 
 @MainActor
 public final class MockFetchTrackDeepLinkUseCase: FetchTrackDeepLinkUseCase {
-    public init() {}
+	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
 }
 
@@ -56,7 +56,7 @@ public final class MockFetchSimilarTracksUseCase: FetchSimilarTracksUseCase {
 	public var errorToThrow: Error?
 	public var delay: TimeInterval?
 
-    public init() {}
+	public init() {}
 	public func execute(targetTrack: Track) async throws -> [Track] {
 		if let delay = delay {
 			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))

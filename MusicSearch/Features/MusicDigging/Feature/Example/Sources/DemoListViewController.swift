@@ -5,15 +5,14 @@
 //  Created by Kiseok on 7/10/26.
 //
 
-import MSUtil
-
 import UIKit
 import FeatureMusicDigging
 import FeatureMusicDiggingInterface
-import MusicDiggingDomain
 import FeatureMusicDiggingTesting
 import MSDomain
-import FeatureMusicDiggingTesting
+import MSTesting
+import MSUtil
+import MusicDiggingDomain
 
 enum DemoScenario: String, CaseIterable {
     case success = "✅ 성공 (데이터 정상)"
@@ -53,7 +52,7 @@ final class DemoListViewController: UIViewController {
     private func launchScenario(_ scenario: DemoScenario) {
         let component = ExampleAppComponent(scenario: scenario)
         let builder = MusicDiggingBuilder(dependency: component)
-        let seedTrack = Track(title: "Sample Track", artist: "Sample Artist", imageURL: nil)
+        let seedTrack = Track(title: "Supernova", artist: "aespa", imageURL: nil)
         let router = builder.build(withListener: MockMusicDiggingListener(), seedTrack: seedTrack)
         self.currentRouter = router
         
@@ -61,9 +60,8 @@ final class DemoListViewController: UIViewController {
         router.interactable.activate()
         
         let vc = router.viewControllable.uiviewController
-        vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+        vc.modalPresentationStyle = .fullScreen
         
-        // Add a close button
         let nav = UINavigationController(rootViewController: vc)
         vc.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(closeDemo))
         
@@ -93,20 +91,3 @@ extension DemoListViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-@MainActor
-final class MockMusicDiggingListener: MusicDiggingListener {}
-
-@MainActor
-final class MockURLOpener: URLOpening {
-    func open(_ url: URL) {
-        Task { @MainActor in
-            let alert = UIAlertController(title: "URL Routing", message: "딥링크 이동:\n\(url.absoluteString)", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
-            
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let topVC = windowScene.windows.first?.rootViewController?.presentedViewController {
-                topVC.present(alert, animated: true)
-            }
-        }
-    }
-}

@@ -5,27 +5,30 @@
 //  Created by Kiseok on 7/10/26.
 //
 
-import MSDomain
-import Foundation
-import UIKit
-import MicroRIBs
-import MSDomain
-import MSUtil
 @testable import FeatureMusicDigging
 import FeatureMusicDiggingInterface
+import Foundation
+import MSDomain
+import MSUtil
+import MicroRIBs
 import MusicDiggingDomain
+import UIKit
 
 @MainActor
 public final class MockMusicDiggingInteractable: Interactor, MusicDiggingInteractable {
 	public weak var router: MusicDiggingRouting?
 	public weak var listener: MusicDiggingListener?
 }
+
 @MainActor
 public final class MockMusicDiggingViewController: UIViewController, MusicDiggingViewControllable {}
+
 @MainActor
 public final class MusicDiggingRoutingSpy: ViewableRouter<MockMusicDiggingInteractable, MockMusicDiggingViewController>, MusicDiggingRouting {}
+
 @MainActor
 public final class MusicDiggingBuilderSpy: MusicDiggingBuildable {
+	public init() {}
 	public var buildCallCount = 0
 	public var receivedListener: MusicDiggingListener?
 	public var receivedSeedTrack: Track?
@@ -47,8 +50,10 @@ public final class MusicDiggingBuilderSpy: MusicDiggingBuildable {
 		)
 	}
 }
+
 @MainActor
 public final class MusicDiggingPresentableSpy: MusicDiggingPresentable {
+	public init() {}
 	public weak var listener: MusicDiggingPresentableListener?
 
 	public var seedTrackHistory: [Track] = []
@@ -72,8 +77,10 @@ public final class MusicDiggingPresentableSpy: MusicDiggingPresentable {
 		self.errorMessages.append(message)
 	}
 }
+
 @MainActor
 public final class MockFetchSimilarTracksUseCaseForInteractor: FetchSimilarTracksUseCase {
+	public init() {}
 	public var result: [Track] = []
 	public var executeCallCount = 0
 	public var targetTracks: [Track] = []
@@ -84,11 +91,13 @@ public final class MockFetchSimilarTracksUseCaseForInteractor: FetchSimilarTrack
 		return self.result
 	}
 }
+
 @MainActor
 public final class MockFetchTrackDeepLinkUseCaseForMusicDiggingInteractor: FetchTrackDeepLinkUseCase {
+	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	
 }
+
 @MainActor
 public final class MockFetchSimilarTracksUseCaseForBuilder: FetchSimilarTracksUseCase {
 	public init() {}
@@ -103,17 +112,18 @@ public final class MockFetchSimilarTracksUseCaseForBuilder: FetchSimilarTracksUs
 		]
 	}
 }
+
 @MainActor
 public final class MockFetchTrackDeepLinkUseCaseForMusicDiggingBuilder: FetchTrackDeepLinkUseCase {
 	public init() {}
 	public func execute(track: Track) async -> URL? { nil }
-	
 }
+
 @MainActor
 public final class MockMusicDiggingInteractableForRouter: Interactor, MusicDiggingInteractable {
 	public weak var router: MusicDiggingRouting?
 	public weak var listener: MusicDiggingListener?
 }
+
 @MainActor
 public final class MockMusicDiggingViewControllerForRouter: UIViewController, MusicDiggingViewControllable {}
-

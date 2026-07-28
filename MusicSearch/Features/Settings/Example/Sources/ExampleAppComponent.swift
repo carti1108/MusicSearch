@@ -40,23 +40,8 @@ final class ExampleAppComponent: SettingsDependency {
         let mock = MockFetchUserProfileUseCase(scenario: scenario)
         return mock
     }
-}
-
-// MARK: - Mocks
-
-final class AlertingURLOpener: URLOpening {
-    @MainActor
-    func open(_ url: URL) {
-        let alert = UIAlertController(title: "URL Opened", message: url.absoluteString, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
-            var topVC = rootVC
-            while let presented = topVC.presentedViewController {
-                topVC = presented
-            }
-            topVC.present(alert, animated: true)
-        }
+    var urlOpener: URLOpening {
+        MockURLOpener()
     }
 }
+
