@@ -38,6 +38,7 @@ public struct ArchiveFolderFeature: Sendable {
         case closeButtonTapped
         case delegate(DelegateAction)
 
+        @CasePathable
         public enum DelegateAction: Equatable, Sendable {
             case didTapClose
             case didTapFolder(FolderItem)

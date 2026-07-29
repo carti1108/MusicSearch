@@ -93,6 +93,7 @@ public struct AddArchiveFeature: Sendable {
         case alert(PresentationAction<Alert>)
         case delegate(DelegateAction)
 
+        @CasePathable
         public enum DelegateAction: Equatable, Sendable {
             case didCloseAddArchive
         }

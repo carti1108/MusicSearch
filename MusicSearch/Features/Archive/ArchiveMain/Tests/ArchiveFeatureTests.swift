@@ -11,6 +11,9 @@ import ComposableArchitecture
 import ArchiveDomain
 import ArchiveSharedTesting
 import FeatureArchiveTesting
+import FeatureAddArchive
+import FeatureArchiveSearch
+import FeatureArchiveFolder
 @testable import FeatureArchive
 
 @MainActor
