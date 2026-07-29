@@ -19,6 +19,6 @@ public final class AuthorizeMusicUseCaseImpl: AuthorizeMusicUseCase {
     }
 
     public func execute() async throws {
-        try await authService.authorize()
+        try await self.authService.authorize()
     }
 }

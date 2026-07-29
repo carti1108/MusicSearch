@@ -7,12 +7,15 @@
 
 import MicroRIBs
 
+@MainActor
 public protocol SettingsBuildable: Buildable {
     func build(withListener listener: SettingsListener) -> SettingsRouting
 }
 
+@MainActor
 public protocol SettingsRouting: ViewableRouting {
 }
 
+@MainActor
 public protocol SettingsListener: AnyObject {
 }

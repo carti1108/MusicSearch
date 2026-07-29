@@ -51,9 +51,9 @@ public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentation
     }
 
     public func authorize(config: SpotifyAPIConfiguration) async throws -> String {
-        let verifier = generateCodeVerifier()
+        let verifier = self.generateCodeVerifier()
         self.pendingCodeVerifier = verifier
-        let challenge = generateCodeChallenge(verifier: verifier)
+        let challenge = self.generateCodeChallenge(verifier: verifier)
 
         let authURLString = "\(config.accountsBaseURL)/authorize?client_id=\(config.clientId)&response_type=code&redirect_uri=\(config.redirectURI)&scope=playlist-modify-public%20playlist-modify-private%20user-read-private&code_challenge_method=S256&code_challenge=\(challenge)"
         guard let authURL = URL(string: authURLString) else { throw URLError(.badURL) }
@@ -88,11 +88,11 @@ public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentation
         guard url.scheme == "musicsearch" else { return }
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return }
         if let code = components.queryItems?.first(where: { $0.name == "code" })?.value {
-            pendingContinuation?.resume(returning: code)
-            pendingContinuation = nil
+            self.pendingContinuation?.resume(returning: code)
+            self.pendingContinuation = nil
         } else if let _ = components.queryItems?.first(where: { $0.name == "error" })?.value {
-            pendingContinuation?.resume(throwing: URLError(.userAuthenticationRequired))
-            pendingContinuation = nil
+            self.pendingContinuation?.resume(throwing: URLError(.userAuthenticationRequired))
+            self.pendingContinuation = nil
         }
     }
 
@@ -103,7 +103,7 @@ public final class SpotifyAuthManager: NSObject, ASWebAuthenticationPresentation
     }
 
     public func exchangeToken(code: String, config: SpotifyAPIConfiguration, networkManager: NetworkRequesting) async throws -> SpotifyTokenResponse {
-        guard let verifier = pendingCodeVerifier else {
+        guard let verifier = self.pendingCodeVerifier else {
             throw URLError(.userAuthenticationRequired)
         }
         let api = SpotifyAPI.exchangeToken(code: code, codeVerifier: verifier, config: config)

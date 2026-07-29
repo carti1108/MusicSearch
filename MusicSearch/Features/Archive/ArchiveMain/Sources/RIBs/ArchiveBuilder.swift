@@ -15,6 +15,7 @@ import FeatureArchiveTrackSearch
 final class ArchiveComponent: Component<ArchiveDependency> {
 }
 
+@MainActor
 public final class ArchiveBuilder: Builder<ArchiveDependency>, ArchiveBuildable {
 
     public override init(dependency: ArchiveDependency) {

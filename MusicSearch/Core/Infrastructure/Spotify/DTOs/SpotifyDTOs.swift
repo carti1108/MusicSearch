@@ -7,46 +7,46 @@
 
 import Foundation
 
-public struct SpotifyTokenResponse: Decodable {
+public struct SpotifyTokenResponse: Decodable, Sendable {
 	public let access_token: String
 	public let token_type: String
 	public let expires_in: Int
 	public let refresh_token: String?
 }
 
-public struct SpotifyUserProfileResponse: Decodable {
+public struct SpotifyUserProfileResponse: Decodable, Sendable {
     public let display_name: String?
     public let id: String
     public let images: [SpotifyImage]?
 }
 
-public struct SpotifyImage: Decodable {
+public struct SpotifyImage: Decodable, Sendable {
     public let url: String
     public let height: Int?
     public let width: Int?
 }
 
-public struct SpotifyTrackSearchResponse: Decodable {
+public struct SpotifyTrackSearchResponse: Decodable, Sendable {
 	public let tracks: SpotifyItems<SpotifyTrackDTO>
 }
 
-public struct SpotifyArtistSearchResponse: Decodable {
+public struct SpotifyArtistSearchResponse: Decodable, Sendable {
 	public let artists: SpotifyItems<SpotifyArtistDTO>
 }
 
-public struct SpotifyItems<T: Decodable>: Decodable {
+public struct SpotifyItems<T: Decodable & Sendable>: Decodable, Sendable {
 	public let items: [T]
 	public let total: Int?
 }
 
-public struct SpotifyArtistDTO: Decodable {
+public struct SpotifyArtistDTO: Decodable, Sendable {
 	public let id: String?
 	public let name: String
 	public let uri: String?
 	public let external_urls: SpotifyExternalURLs?
 }
 
-public struct SpotifyAlbumDTO: Decodable {
+public struct SpotifyAlbumDTO: Decodable, Sendable {
 	public let id: String
 	public let name: String
 	public let album_type: String?
@@ -54,7 +54,7 @@ public struct SpotifyAlbumDTO: Decodable {
 	public let images: [SpotifyImage]?
 }
 
-public struct SpotifyTrackDTO: Decodable {
+public struct SpotifyTrackDTO: Decodable, Sendable {
 	public let id: String
 	public let name: String
 	public let uri: String
@@ -98,15 +98,15 @@ extension SpotifyTrackDTO {
 	}
 }
 
-public struct SpotifyExternalURLs: Decodable {
+public struct SpotifyExternalURLs: Decodable, Sendable {
 	public let spotify: String
 }
 
-public struct SpotifyPlaylistResponse: Decodable {
+public struct SpotifyPlaylistResponse: Decodable, Sendable {
     public let id: String
     public let uri: String
 }
 
-public struct SpotifySnapshotResponse: Decodable {
+public struct SpotifySnapshotResponse: Decodable, Sendable {
     public let snapshot_id: String
 }

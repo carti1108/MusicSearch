@@ -19,6 +19,6 @@ public final class DisconnectMusicUseCaseImpl: DisconnectMusicUseCase {
     }
 
     public func execute() {
-        authService.disconnect()
+        self.authService.disconnect()
     }
 }

@@ -193,6 +193,7 @@ public struct LiquidGlassModifier: ViewModifier {
 }
 
 // MARK: - View Extensions
+@MainActor
 public extension View {
 	func customText(_ style: CustomTextStyle) -> some View {
 		self.modifier(CustomTypographyModifier(style: style))

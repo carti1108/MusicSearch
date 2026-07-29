@@ -14,12 +14,15 @@ public protocol ArchiveDependency: MicroRIBs.Dependency {
     var authorizeMusicUseCase: any AuthorizeMusicUseCase { get }
 }
 
+@MainActor
 public protocol ArchiveBuildable: Buildable {
     func build(withListener listener: ArchiveListener) -> ArchiveRouting
 }
 
+@MainActor
 public protocol ArchiveRouting: ViewableRouting {
 }
 
+@MainActor
 public protocol ArchiveListener: AnyObject {
 }

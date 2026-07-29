@@ -19,6 +19,6 @@ public final class GetMusicAccessTokenUseCaseImpl: GetMusicAccessTokenUseCase {
     }
 
     public func execute() -> String? {
-        return authService.getAccessToken()
+        return self.authService.getAccessToken()
     }
 }

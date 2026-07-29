@@ -78,7 +78,7 @@ public struct ArchiveFolderDetailFeature: Sendable {
             case .onAppear:
                 return .run { [folderItem = state.folderItem] send in
                     do {
-                        let contents = try await archiveRepository.fetchFolderContents(for: folderItem)
+                        let contents = try await self.archiveRepository.fetchFolderContents(for: folderItem)
                         await send(.loadDataResponse(folders: contents.folders, tracks: contents.tracks))
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFolderDetailFeature").error("Failed to fetch folder tracks: \(error.localizedDescription)")
@@ -104,7 +104,7 @@ public struct ArchiveFolderDetailFeature: Sendable {
 
             case .exportButtonTapped:
                 guard let tracks = state.tracks, !tracks.isEmpty else { return .none }
-                if getMusicAccessTokenUseCase.execute() == nil {
+                if self.getMusicAccessTokenUseCase.execute() == nil {
                     state.alert = AlertState {
                         TextState("Spotify 연동 필요")
                     } actions: {
@@ -121,7 +121,7 @@ public struct ArchiveFolderDetailFeature: Sendable {
                 } else {
                     return .run { [title = state.title] send in
                         let playlistName = "MusicSearch Archive - \(title)"
-                        for await progress in exportPlaylistUseCase.execute(tracks: tracks, playlistName: playlistName) {
+                        for await progress in self.exportPlaylistUseCase.execute(tracks: tracks, playlistName: playlistName) {
                             await send(.exportProgress(progress))
                             if progress.isComplete {
                                 await send(.exportCompleted(successCount: progress.currentCount - progress.failedTracks.count, failedCount: progress.failedTracks.count))
@@ -134,7 +134,7 @@ public struct ArchiveFolderDetailFeature: Sendable {
             case .loginPromptTapped:
                 return .run { send in
                     do {
-                        try await authorizeMusicUseCase.execute()
+                        try await self.authorizeMusicUseCase.execute()
                         await send(.exportButtonTapped)
                     } catch {
                         Logger(subsystem: "MusicSearch", category: "ArchiveFolderDetailFeature").error("Spotify authorization failed: \(error.localizedDescription)")

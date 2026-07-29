@@ -7,6 +7,6 @@ public final class MockGetMusicAccessTokenUseCase: GetMusicAccessTokenUseCase, @
         self.token = token
     }
     public func execute() -> String? {
-        return token
+        return self.token
     }
 }

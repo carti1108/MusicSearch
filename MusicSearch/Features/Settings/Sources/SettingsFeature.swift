@@ -59,7 +59,7 @@ public struct SettingsFeature {
 		Reduce { state, action in
 			switch action {
 			case .onAppear:
-				return .run { [getMusicAccessTokenUseCase, fetchUserProfileUseCase] send in
+				return .run { [getMusicAccessTokenUseCase = self.getMusicAccessTokenUseCase, fetchUserProfileUseCase = self.fetchUserProfileUseCase] send in
 					guard getMusicAccessTokenUseCase.execute() != nil else {
 						await send(.fetchProfileResponse(.success(nil)))
 						return
@@ -72,14 +72,14 @@ public struct SettingsFeature {
 				}
 
 			case .loginTapped:
-				return .run { [authorizeMusicUseCase] send in
+				return .run { [authorizeMusicUseCase = self.authorizeMusicUseCase] send in
 					await send(.authResponse(TaskResult {
 						try await authorizeMusicUseCase.execute()
 					}))
 				}
 
 			case .disconnectTapped:
-				disconnectMusicUseCase.execute()
+				self.disconnectMusicUseCase.execute()
 				state.spotifyState = .disconnected
 				return .none
 

@@ -12,21 +12,21 @@ public final class MockMusicAuthService: MusicAuthService, @unchecked Sendable {
     public init() {}
 
     public func getAccessToken() -> String? {
-        return getAccessTokenResult
+        return self.getAccessTokenResult
     }
 
     public func getClientCredentialsToken() async throws -> String {
-        return getClientCredentialsTokenResult
+        return self.getClientCredentialsTokenResult
     }
 
     public func authorize() async throws {
-        if let error = authorizeError {
+        if let error = self.authorizeError {
             throw error
         }
     }
 
     public func disconnect() {
-        disconnectCalled = true
+        self.disconnectCalled = true
     }
 
     public func fetchUserProfile() async throws -> (name: String, imageURL: URL?) {

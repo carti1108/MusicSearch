@@ -26,7 +26,7 @@ public final class ExportPlaylistUseCaseImpl: ExportPlaylistUseCase {
             var failedTracks: [ExportFailure] = []
             let totalCount = tracks.count
 
-            guard let validToken = authService.getAccessToken() else {
+            guard let validToken = self.authService.getAccessToken() else {
                 continuation.yield(ExportProgress(totalCount: totalCount, currentCount: 0, failedTracks: [], isComplete: true, fatalError: .unauthenticated))
                 continuation.finish()
                 return
