@@ -1,28 +1,32 @@
 //
-//  KeychainManager.swift
+//  KeychainServiceImpl.swift
 //  MusicSearch
 //
-//  Created by Kiseok on 6/17/26.
+//  Created by Kiseok on 7/29/26.
 //
 
 import Foundation
 import Security
+import Synchronization
 
-public final class KeychainManager {
-    public static let shared = KeychainManager()
+public final class KeychainServiceImpl: KeychainService, Sendable {
+    public static let shared = KeychainServiceImpl()
 
-    public var isTesting: Bool = false
-    private var inMemoryStorage: [String: String] = [:]
+    private struct State {
+        var memoryCache: [String: String] = [:]
+    }
 
-    private init() {}
+    private let state = Mutex(State())
 
-    public func save(_ data: Data, forKey key: String) -> Bool {
-        if isTesting {
-            if let string = String(data: data, encoding: .utf8) {
-                inMemoryStorage[key] = string
-            }
-            return true
+    public init() {}
+
+    public func save(_ value: String, forKey key: String) -> Bool {
+        self.state.withLock { state in
+            state.memoryCache[key] = value
         }
+
+        guard let data = value.data(using: .utf8) else { return false }
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -31,15 +35,15 @@ public final class KeychainManager {
         ]
 
         SecItemDelete(query as CFDictionary)
-
         let status = SecItemAdd(query as CFDictionary, nil)
         return status == errSecSuccess
     }
 
-    public func load(forKey key: String) -> Data? {
-        if isTesting {
-            return inMemoryStorage[key]?.data(using: .utf8)
+    public func read(forKey key: String) -> String? {
+        if let cached = self.state.withLock({ $0.memoryCache[key] }) {
+            return cached
         }
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -50,19 +54,22 @@ public final class KeychainManager {
 
         var dataTypeRef: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+        guard status == errSecSuccess,
+              let data = dataTypeRef as? Data,
+              let string = String(data: data, encoding: .utf8) else { return nil }
 
-        if status == errSecSuccess {
-            return dataTypeRef as? Data
-        } else {
-            return nil
+        self.state.withLock { state in
+            state.memoryCache[key] = string
         }
+
+        return string
     }
 
     public func delete(forKey key: String) -> Bool {
-        if isTesting {
-            inMemoryStorage.removeValue(forKey: key)
-            return true
+        self.state.withLock { state in
+            state.memoryCache[key] = nil
         }
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -71,15 +78,5 @@ public final class KeychainManager {
 
         let status = SecItemDelete(query as CFDictionary)
         return status == errSecSuccess || status == errSecItemNotFound
-    }
-
-    public func saveString(_ string: String, forKey key: String) -> Bool {
-        guard let data = string.data(using: .utf8) else { return false }
-        return save(data, forKey: key)
-    }
-
-    public func loadString(forKey key: String) -> String? {
-        guard let data = load(forKey: key) else { return nil }
-        return String(data: data, encoding: .utf8)
     }
 }
