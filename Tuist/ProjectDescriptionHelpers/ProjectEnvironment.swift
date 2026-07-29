@@ -1,7 +1,7 @@
 import ProjectDescription
 
 public struct ProjectEnvironment {
-    public static let deploymentTarget: DeploymentTargets = .iOS("17.0")
+    public static let deploymentTarget: DeploymentTargets = .iOS("18.0")
     public static let bundlePrefix = "com.carti"
     
         
@@ -12,7 +12,8 @@ public struct ProjectEnvironment {
             "CODE_SIGNING_ALLOWED": "NO",
             "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
             "CLANG_ENABLE_MODULE_VERIFIER": "YES",
-            "SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES": "YES"
+            "SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES": "YES",
+            "SWIFT_STRICT_CONCURRENCY": "complete"
         ],
         configurations: [
             .debug(name: "Debug", xcconfig: .relativeToRoot("Config.xcconfig")),
@@ -28,7 +29,8 @@ public struct ProjectEnvironment {
             "CODE_SIGNING_ALLOWED": "YES",
             "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
             "CLANG_ENABLE_MODULE_VERIFIER": "YES",
-            "SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES": "YES"
+            "SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES": "YES",
+            "SWIFT_STRICT_CONCURRENCY": "complete"
         ],
         configurations: [
             .debug(name: "Debug", xcconfig: .relativeToRoot("Config.xcconfig")),
