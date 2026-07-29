@@ -13,32 +13,34 @@ import MSUtil
 public final class SpotifyAuthServiceImpl: MusicAuthService {
 	
     private let networkManager: NetworkRequesting
+    private let keychainService: KeychainService
 
-    public init(networkManager: NetworkRequesting) {
+    public init(networkManager: NetworkRequesting, keychainService: KeychainService = KeychainServiceImpl.shared) {
         self.networkManager = networkManager
+        self.keychainService = keychainService
     }
 
     public func getAccessToken() -> String? {
-        return KeychainManager.shared.loadString(forKey: "SpotifyAccessToken")
+        return self.keychainService.read(forKey: "SpotifyAccessToken")
     }
 
     public func authorize() async throws {
         let config = DefaultSpotifyAPIConfiguration()
         let code = try await SpotifyAuthManager.shared.authorize(config: config)
 
-        let response = try await SpotifyAuthManager.shared.exchangeToken(code: code, config: config, networkManager: networkManager)
+        let response = try await SpotifyAuthManager.shared.exchangeToken(code: code, config: config, networkManager: self.networkManager)
 
-        _ = KeychainManager.shared.saveString(response.access_token, forKey: "SpotifyAccessToken")
+        _ = self.keychainService.save(response.access_token, forKey: "SpotifyAccessToken")
         if let refreshToken = response.refresh_token {
-            _ = KeychainManager.shared.saveString(refreshToken, forKey: "SpotifyRefreshToken")
+            _ = self.keychainService.save(refreshToken, forKey: "SpotifyRefreshToken")
         }
 
         UserDefaults.standard.set(Date().addingTimeInterval(TimeInterval(response.expires_in)), forKey: "SpotifyTokenExpiry")
     }
 
     public func disconnect() {
-        _ = KeychainManager.shared.delete(forKey: "SpotifyAccessToken")
-        _ = KeychainManager.shared.delete(forKey: "SpotifyRefreshToken")
+        _ = self.keychainService.delete(forKey: "SpotifyAccessToken")
+        _ = self.keychainService.delete(forKey: "SpotifyRefreshToken")
         UserDefaults.standard.removeObject(forKey: "SpotifyTokenExpiry")
     }
 
@@ -52,7 +54,7 @@ public final class SpotifyAuthServiceImpl: MusicAuthService {
 
         let config = DefaultSpotifyAPIConfiguration()
         let api = SpotifyAPI.clientCredentialsToken(config: config)
-        let response = try await networkManager.perform(with: api, as: SpotifyTokenResponse.self)
+        let response = try await self.networkManager.perform(with: api, as: SpotifyTokenResponse.self)
 
         UserDefaults.standard.set(response.access_token, forKey: "SpotifyClientToken")
         UserDefaults.standard.set(now.addingTimeInterval(TimeInterval(response.expires_in - 60)), forKey: "SpotifyClientTokenExpiry")
@@ -61,12 +63,12 @@ public final class SpotifyAuthServiceImpl: MusicAuthService {
     }
 
     public func fetchUserProfile() async throws -> (name: String, imageURL: URL?) {
-        guard let token = getAccessToken() else {
+        guard let token = self.getAccessToken() else {
             throw URLError(.userAuthenticationRequired)
         }
 
         let api = SpotifyAPI.me(token: token, config: DefaultSpotifyAPIConfiguration())
-        let response = try await networkManager.perform(with: api, as: SpotifyUserProfileResponse.self)
+        let response = try await self.networkManager.perform(with: api, as: SpotifyUserProfileResponse.self)
 
         let name = response.display_name ?? "Spotify User"
         let urlString = response.images?.first?.url
