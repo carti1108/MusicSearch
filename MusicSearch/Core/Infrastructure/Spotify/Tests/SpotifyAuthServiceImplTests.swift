@@ -8,10 +8,6 @@ import MSTesting
 @Suite(.serialized)
 struct SpotifyAuthServiceImplTests {
     
-    init() {
-        KeychainManager.shared.isTesting = true
-    }
-    
     @Test("네트워크 정상 응답 시 fetchUserProfile이 올바른 유저 정보를 반환하는가")
     func testFetchUserProfileSuccess() async throws {
         // Given
@@ -21,10 +17,8 @@ struct SpotifyAuthServiceImplTests {
             images: [SpotifyImage(url: "https://example.com/test.png", height: nil, width: nil)]
         )
         let mockNetwork = MockNetworkManager(responseToReturn: mockResponse)
-        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork)
-        
-        _ = KeychainManager.shared.saveString("dummy-token", forKey: "SpotifyAccessToken")
-        defer { _ = KeychainManager.shared.delete(forKey: "SpotifyAccessToken") }
+        let mockKeychain = MockKeychainService(storage: ["SpotifyAccessToken": "dummy-token"])
+        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork, keychainService: mockKeychain)
         
         // When
         let result = try await sut.fetchUserProfile()
@@ -38,9 +32,8 @@ struct SpotifyAuthServiceImplTests {
     func testFetchUserProfileWithoutToken() async {
         // Given
         let mockNetwork = MockNetworkManager()
-        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork)
-        
-        _ = KeychainManager.shared.delete(forKey: "SpotifyAccessToken")
+        let mockKeychain = MockKeychainService()
+        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork, keychainService: mockKeychain)
         
         // When & Then
         await #expect(throws: URLError.self) {
@@ -53,10 +46,8 @@ struct SpotifyAuthServiceImplTests {
         // Given
         struct TestError: Error {}
         let mockNetwork = MockNetworkManager(errorToThrow: TestError())
-        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork)
-        
-        _ = KeychainManager.shared.saveString("dummy-token", forKey: "SpotifyAccessToken")
-        defer { _ = KeychainManager.shared.delete(forKey: "SpotifyAccessToken") }
+        let mockKeychain = MockKeychainService(storage: ["SpotifyAccessToken": "dummy-token"])
+        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork, keychainService: mockKeychain)
         
         // When & Then
         await #expect(throws: TestError.self) {
