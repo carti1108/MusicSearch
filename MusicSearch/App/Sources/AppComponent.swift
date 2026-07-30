@@ -145,7 +145,12 @@ final class AppComponent: RootDependency {
 	}
 
 	private lazy var musicAuthServiceInstance: MusicAuthService = {
-		SpotifyAuthServiceImpl(networkManager: self.networkManager)
+		SpotifyAuthServiceImpl(
+			networkManager: self.networkManager,
+			keychainService: KeychainServiceImpl.shared,
+			webAuthPresenter: UIKitWebAuthenticationPresenter(),
+			keyValueStorage: UserDefaultsStorageService.shared
+		)
 	}()
 
 	var getMusicAccessTokenUseCase: GetMusicAccessTokenUseCase {

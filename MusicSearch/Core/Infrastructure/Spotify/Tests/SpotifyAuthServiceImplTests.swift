@@ -55,6 +55,37 @@ struct SpotifyAuthServiceImplTests {
         }
     }
     
+    @Test("웹 인증 및 토큰 교환 성공 시 액세스 및 리프레시 토큰이 정상 저장되는가")
+    func testAuthorizeSuccess() async throws {
+        // Given
+        let tokenResponse = SpotifyTokenResponse(
+            access_token: "mock-access-token",
+            token_type: "Bearer",
+            expires_in: 3600,
+            refresh_token: "mock-refresh-token"
+        )
+        let mockNetwork = MockNetworkManager(responseToReturn: tokenResponse)
+        let mockKeychain = MockKeychainService()
+        let mockStorage = MockKeyValueStorageService()
+        let mockPresenter = MockWebAuthenticationPresenter(
+            resultToReturn: .success(URL(string: "musicsearch://callback?code=mock_code")!)
+        )
+        let sut = SpotifyAuthServiceImpl(
+            networkManager: mockNetwork,
+            keychainService: mockKeychain,
+            webAuthPresenter: mockPresenter,
+            keyValueStorage: mockStorage
+        )
+        
+        // When
+        try await sut.authorize()
+        
+        // Then
+        #expect(mockKeychain.read(forKey: "SpotifyAccessToken") == "mock-access-token")
+        #expect(mockKeychain.read(forKey: "SpotifyRefreshToken") == "mock-refresh-token")
+        #expect(mockStorage.object(forKey: "SpotifyTokenExpiry") != nil)
+    }
+
     @Test("클라이언트 크리덴셜 토큰을 성공적으로 발급 및 캐싱하는가")
     func testGetClientCredentialsToken() async throws {
         // Given
@@ -65,16 +96,19 @@ struct SpotifyAuthServiceImplTests {
             refresh_token: nil
         )
         let mockNetwork = MockNetworkManager(responseToReturn: mockResponse)
-        let sut = SpotifyAuthServiceImpl(networkManager: mockNetwork)
-        
-        UserDefaults.standard.removeObject(forKey: "SpotifyClientToken")
-        UserDefaults.standard.removeObject(forKey: "SpotifyClientTokenExpiry")
+        let mockKeychain = MockKeychainService()
+        let mockStorage = MockKeyValueStorageService()
+        let sut = SpotifyAuthServiceImpl(
+            networkManager: mockNetwork,
+            keychainService: mockKeychain,
+            keyValueStorage: mockStorage
+        )
         
         // When
         let token = try await sut.getClientCredentialsToken()
         
         // Then
         #expect(token == "new-client-token")
-        #expect(UserDefaults.standard.string(forKey: "SpotifyClientToken") == "new-client-token")
+        #expect(mockStorage.string(forKey: "SpotifyClientToken") == "new-client-token")
     }
 }
