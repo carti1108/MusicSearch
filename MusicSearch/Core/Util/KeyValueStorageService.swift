@@ -14,10 +14,10 @@ public protocol KeyValueStorageService: Sendable {
     func removeObject(forKey key: String)
 }
 
-public final class UserDefaultsStorageService: KeyValueStorageService, Sendable {
+public final class UserDefaultsStorageService: KeyValueStorageService, @unchecked Sendable {
     public static let shared = UserDefaultsStorageService()
 
-    private let userDefaults: UserDefaults
+	private let userDefaults: UserDefaults
 
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
