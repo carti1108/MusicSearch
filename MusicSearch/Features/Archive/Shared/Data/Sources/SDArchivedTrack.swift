@@ -16,7 +16,7 @@ public final class SDArchivedTrack {
 	public var coverImageData: Data?
 	public var title: String
 	public var artist: String
-	public var genre: String
+	public var genres: [String]
 	public var label: String
 	public var releaseDate: Date?
 	public var listenDate: Date
@@ -35,7 +35,7 @@ public final class SDArchivedTrack {
 		coverImageData: Data? = nil,
 		title: String,
 		artist: String,
-		genre: String,
+		genres: [String] = [],
 		label: String,
 		releaseDate: Date? = nil,
 		listenDate: Date = Date(),
@@ -53,7 +53,7 @@ public final class SDArchivedTrack {
 		self.coverImageData = coverImageData
 		self.title = title
 		self.artist = artist
-		self.genre = genre
+		self.genres = genres
 		self.label = label
 		self.releaseDate = releaseDate
 		self.listenDate = listenDate
@@ -74,7 +74,7 @@ public final class SDArchivedTrack {
 			coverImageData: coverImageData,
 			title: title,
 			artist: artist,
-			genre: genre,
+			genres: genres,
 			label: label,
 			releaseDate: releaseDate,
 			listenDate: listenDate,
@@ -96,7 +96,7 @@ public final class SDArchivedTrack {
 			coverImageData: domain.coverImageData,
 			title: domain.title,
 			artist: domain.artist,
-			genre: domain.genre,
+			genres: domain.genres,
 			label: domain.label,
 			releaseDate: domain.releaseDate,
 			listenDate: domain.listenDate,

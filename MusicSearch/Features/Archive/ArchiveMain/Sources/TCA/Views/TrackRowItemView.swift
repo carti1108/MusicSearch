@@ -52,13 +52,26 @@ public struct TrackRowItemView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 6) {
-                Text(track.genre)
-                    .customText(.monoLabel)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(CustomColor.surfaceContainerHighest)
-                    .foregroundStyle(CustomColor.onSurface)
-                    .clipShape(Capsule())
+                HStack(spacing: 4) {
+                    if let firstGenre = track.genres.first {
+                        Text(firstGenre)
+                            .customText(.monoLabel)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(CustomColor.surfaceContainerHighest)
+                            .foregroundStyle(CustomColor.onSurface)
+                            .clipShape(Capsule())
+                    }
+                    if track.genres.count > 1 {
+                        Text("+\(track.genres.count - 1)")
+                            .customText(.monoLabel)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(CustomColor.surfaceContainerHighest)
+                            .foregroundStyle(CustomColor.onSurface)
+                            .clipShape(Capsule())
+                    }
+                }
 
                 HStack(spacing: 2) {
                     Image(systemName: "star.fill")

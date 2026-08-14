@@ -105,25 +105,63 @@ public struct AddArchiveView: View {
 				Text("기타").tag("기타")
 			}
 
-			DisclosureGroup("장르 (선택: \(self.store.genre.isEmpty ? "없음" : self.store.genre))", isExpanded: $store.isGenreExpanded) {
-				TextField("장르 직접 입력", text: $store.genre)
-				ForEach(self.store.availableGenres, id: \.self) { genreName in
-					Button(action: {
-						self.store.genre = genreName
-						self.store.isGenreExpanded = false
-					}) {
+			VStack(alignment: .leading, spacing: 8) {
+				Text("장르")
+					.customText(.bodyMd)
+					.foregroundStyle(CustomColor.onSurface)
+
+				if !self.store.genres.isEmpty {
+					ScrollView(.horizontal, showsIndicators: false) {
 						HStack {
-							Text(genreName)
-							Spacer()
-							if self.store.genre == genreName {
-								Image(systemName: "checkmark")
-									.foregroundStyle(CustomColor.primary)
+							ForEach(self.store.genres, id: \.self) { genre in
+								HStack(spacing: 4) {
+									Text(genre)
+										.customText(.monoLabel)
+									Button(action: { self.store.send(.removeGenre(genre)) }) {
+										Image(systemName: "xmark.circle.fill")
+											.foregroundStyle(CustomColor.onSurfaceVariant)
+									}
+								}
+								.padding(.horizontal, 10)
+								.padding(.vertical, 6)
+								.background(CustomColor.surfaceContainerHighest)
+								.foregroundStyle(CustomColor.onSurface)
+								.clipShape(Capsule())
 							}
 						}
 					}
-					.foregroundStyle(CustomColor.onSurface)
+				}
+
+				TextField("장르 입력 (쉼표나 리턴으로 추가)", text: $store.genreInputText.sending(\.genreInputTextChanged))
+					.onSubmit {
+						self.store.send(.addGenre(self.store.genreInputText))
+					}
+					.onChange(of: self.store.genreInputText) { _, newValue in
+						if newValue.hasSuffix(",") {
+							let genre = String(newValue.dropLast())
+							self.store.send(.addGenre(genre))
+						}
+					}
+
+				if !self.store.recommendedGenres.isEmpty {
+					ScrollView(.horizontal, showsIndicators: false) {
+						HStack {
+							ForEach(self.store.recommendedGenres, id: \.self) { genre in
+								Button(action: { self.store.send(.addGenre(genre)) }) {
+									Text(genre)
+										.customText(.monoLabel)
+										.padding(.horizontal, 10)
+										.padding(.vertical, 6)
+										.background(CustomColor.surfaceContainer)
+										.foregroundStyle(CustomColor.primary)
+										.clipShape(Capsule())
+								}
+							}
+						}
+					}
 				}
 			}
+			.padding(.vertical, 4)
 
 			TextField("유통사", text: $store.distributor)
 			TextField("레이블", text: $store.label)

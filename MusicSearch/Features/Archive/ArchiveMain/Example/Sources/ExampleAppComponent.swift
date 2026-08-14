@@ -17,7 +17,7 @@ final class ExampleAppComponent: Component<EmptyDependency>, ArchiveDependency {
     }
     
     var archiveRepository: any ArchiveRepository {
-        let tracks = scenario == .empty ? [] : [ArchivedTrack(title: "Test", artist: "Artist", genre: "Pop", label: "Label", rating: 5)]
+        let tracks = scenario == .empty ? [] : [ArchivedTrack(title: "Test", artist: "Artist", genres: ["Pop"], label: "Label", rating: 5)]
         return MockArchiveRepository(tracks: tracks)
     }
     var searchTracksUseCase: any SearchTracksUseCase { MockSearchTracksUseCase() }

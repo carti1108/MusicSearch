@@ -25,7 +25,9 @@ public struct AddArchiveFeature: Sendable {
 
         public var title: String = ""
         public var artist: String = ""
-        public var genre: String = ""
+        public var genres: [String] = []
+        public var genreInputText: String = ""
+        public var recommendedGenres: [String] = []
         public var label: String = ""
         public var albumTitle: String = ""
         public var distributor: String = ""
@@ -56,7 +58,7 @@ public struct AddArchiveFeature: Sendable {
                 self.isEditMode = true
                 self.title = track.title
                 self.artist = track.artist
-                self.genre = track.genre
+                self.genres = track.genres
                 self.label = track.label
                 self.albumTitle = track.albumTitle ?? ""
                 self.distributor = track.distributor ?? ""
@@ -84,6 +86,9 @@ public struct AddArchiveFeature: Sendable {
         case closeButtonTapped
         case searchButtonTapped
         case saveButtonTapped
+        case genreInputTextChanged(String)
+        case addGenre(String)
+        case removeGenre(String)
         case trackSelected(Track)
         case coverImageLoaded(Data?)
         case setCoverImageData(Data?)
@@ -116,8 +121,7 @@ public struct AddArchiveFeature: Sendable {
 			case .onAppear:
 				return .run { send in
 					await send(.genresLoaded(TaskResult {
-						let tracks = try await archiveRepository.fetchArchivedTracks()
-						let customGenres = Array(Set(tracks.map { $0.genre })).sorted()
+						let customGenres = try await archiveRepository.fetchAllGenres()
 						let predefined = PredefinedGenre.allCases.map { $0.rawValue }
 
 						var combined = predefined
@@ -143,6 +147,30 @@ public struct AddArchiveFeature: Sendable {
 			case .searchButtonTapped:
 				state.trackSearch = ArchiveTrackSearchFeature.State()
 				return .none
+
+            case let .genreInputTextChanged(text):
+                state.genreInputText = text
+                if text.isEmpty {
+                    state.recommendedGenres = []
+                } else {
+                    state.recommendedGenres = state.availableGenres.filter {
+                        $0.lowercased().contains(text.lowercased()) && !state.genres.contains($0)
+                    }
+                }
+                return .none
+
+            case let .addGenre(genre):
+                let trimmed = genre.trimmingCharacters(in: .whitespaces)
+                if !trimmed.isEmpty && !state.genres.contains(trimmed) {
+                    state.genres.append(trimmed)
+                }
+                state.genreInputText = ""
+                state.recommendedGenres = []
+                return .none
+
+            case let .removeGenre(genre):
+                state.genres.removeAll { $0 == genre }
+                return .none
 
 			case let .setCoverImageData(data):
 				state.coverImageData = data
@@ -189,8 +217,8 @@ public struct AddArchiveFeature: Sendable {
 				return .none
 
 			case .saveButtonTapped:
-				if state.genre.trimmingCharacters(in: .whitespaces).isEmpty {
-					state.alert = AlertState { TextState("입력 오류") } message: { TextState("장르를 입력해주세요.") }
+				if state.genres.isEmpty {
+					state.alert = AlertState { TextState("입력 오류") } message: { TextState("최소 1개의 장르를 입력해주세요.") }
 					return .none
 				}
 				if state.memo.count > 500 {
@@ -208,7 +236,7 @@ public struct AddArchiveFeature: Sendable {
 					coverImageData: state.coverImageData,
 					title: state.title,
 					artist: state.artist,
-					genre: state.genre,
+					genres: state.genres,
 					label: state.label,
 					releaseDate: state.hasReleaseDate ? state.releaseDate : nil,
 					listenDate: state.listenDate,

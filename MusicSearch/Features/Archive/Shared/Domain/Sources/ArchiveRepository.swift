@@ -13,4 +13,5 @@ public protocol ArchiveRepository: Sendable {
 	func addArchivedTrack(_ track: ArchivedTrack) async throws
 	func updateArchivedTrack(_ track: ArchivedTrack) async throws
 	func deleteArchivedTrack(id: UUID) async throws
+	func fetchAllGenres() async throws -> [String]
 }

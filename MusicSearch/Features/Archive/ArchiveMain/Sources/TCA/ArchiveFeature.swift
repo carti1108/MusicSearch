@@ -38,6 +38,9 @@ public struct ArchiveFeature: Sendable {
         public var filterMiddleGood: Bool = false
         public var filterEndGood: Bool = false
 
+        public var availableGenres: [String] = []
+        public var selectedGenreFilters: Set<String> = []
+
         public init() {}
     }
 
@@ -52,6 +55,7 @@ public struct ArchiveFeature: Sendable {
         case onTrackTapped(track: ArchivedTrack)
         case onDeleteTapped(track: ArchivedTrack)
         case resetFilter
+        case toggleGenreFilter(String)
         case path(StackAction<Path.State, Path.Action>)
         case destination(PresentationAction<Destination.Action>)
     }
@@ -80,13 +84,20 @@ public struct ArchiveFeature: Sendable {
                 state.recentTracks = tracks
                 state.totalTracksCount = tracks.count
 
-                if !tracks.isEmpty {
-                    let genreCounts = tracks.reduce(into: [String: Int]()) { counts, track in
-                        counts[track.genre, default: 0] += 1
+                var allGenres: [String] = []
+                var genreCounts: [String: Int] = [:]
+                for track in tracks {
+                    for genre in track.genres {
+                        genreCounts[genre, default: 0] += 1
+                        if !allGenres.contains(genre) {
+                            allGenres.append(genre)
+                        }
                     }
-                    if let maxGenre = genreCounts.max(by: { $0.value < $1.value })?.key {
-                        state.topGenreName = maxGenre
-                    }
+                }
+                state.availableGenres = allGenres.sorted()
+
+                if let maxGenre = genreCounts.max(by: { $0.value < $1.value })?.key {
+                    state.topGenreName = maxGenre
                 } else {
                     state.topGenreName = "없음"
                 }
@@ -125,6 +136,15 @@ public struct ArchiveFeature: Sendable {
                 state.filterIntroGood = false
                 state.filterMiddleGood = false
                 state.filterEndGood = false
+                state.selectedGenreFilters.removeAll()
+                return .none
+
+            case let .toggleGenreFilter(genre):
+                if state.selectedGenreFilters.contains(genre) {
+                    state.selectedGenreFilters.remove(genre)
+                } else {
+                    state.selectedGenreFilters.insert(genre)
+                }
                 return .none
 
             case let .path(.element(_, .search(.delegate(.didTapTrack(track))))),

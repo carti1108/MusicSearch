@@ -112,7 +112,7 @@ public actor ArchiveRepositoryImpl: ArchiveRepository {
 				return formatter.string(from: track.listenDate) == "\(year)-\(month)" && "\(calendar.component(.weekOfMonth, from: track.listenDate))" == week
 			}
 		case .genre(let name):
-			filteredTracks = allTracks.filter { $0.genre == name }
+			filteredTracks = allTracks.filter { $0.genres.contains(name) }
 		case .rating(let value):
 			filteredTracks = allTracks.filter { Int($0.rating) == value }
 		case .custom:
@@ -136,7 +136,7 @@ public actor ArchiveRepositoryImpl: ArchiveRepository {
 			existingTrack.coverImageData = track.coverImageData
 			existingTrack.title = track.title
 			existingTrack.artist = track.artist
-			existingTrack.genre = track.genre
+			existingTrack.genres = track.genres
 			existingTrack.label = track.label
 			existingTrack.releaseDate = track.releaseDate
 			existingTrack.listenDate = track.listenDate
@@ -161,5 +161,16 @@ public actor ArchiveRepositoryImpl: ArchiveRepository {
 			modelContext.delete(trackToDelete)
 			try modelContext.save()
 		}
+	}
+
+	public func fetchAllGenres() throws -> [String] {
+		let tracks = try fetchArchivedTracks()
+		var genreSet = Set<String>()
+		for track in tracks {
+			for genre in track.genres {
+				genreSet.insert(genre)
+			}
+		}
+		return Array(genreSet).sorted()
 	}
 }

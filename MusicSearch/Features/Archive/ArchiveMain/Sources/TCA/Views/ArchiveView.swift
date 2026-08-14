@@ -19,9 +19,12 @@ public struct ArchiveView: View {
 
     private var filteredTracks: [ArchivedTrack] {
         store.recentTracks.filter { track in
-            (!store.filterIntroGood || track.isIntroGood) &&
-            (!store.filterMiddleGood || track.isGoodUntilMiddle) &&
-            (!store.filterEndGood || track.isGoodUntilEnd)
+            let introMatch = !store.filterIntroGood || track.isIntroGood
+            let middleMatch = !store.filterMiddleGood || track.isGoodUntilMiddle
+            let endMatch = !store.filterEndGood || track.isGoodUntilEnd
+            let genreMatch = store.selectedGenreFilters.isEmpty || store.selectedGenreFilters.allSatisfy { track.genres.contains($0) }
+            
+            return introMatch && middleMatch && endMatch && genreMatch
         }
     }
 
@@ -63,13 +66,36 @@ public struct ArchiveView: View {
                             Button(action: { store.showFilterSheet = true }) {
                                 Image(systemName: "line.3.horizontal.decrease.circle")
                                     .font(.system(size: 20))
-                                    .foregroundStyle(CustomColor.primary)
+                                    .foregroundStyle(store.filterIntroGood || store.filterMiddleGood || store.filterEndGood ? CustomColor.primary : CustomColor.outline)
                             }
                             .buttonStyle(BouncyButtonStyle())
                         }
                         .padding(.horizontal, CustomSpacing.containerMargin)
                         .padding(.top, CustomSpacing.containerMargin)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 8)
+
+                        if !store.availableGenres.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(store.availableGenres, id: \.self) { genre in
+                                        Button(action: {
+                                            store.send(.toggleGenreFilter(genre))
+                                        }) {
+                                            Text(genre)
+                                                .customText(.monoLabel)
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 6)
+                                                .background(store.selectedGenreFilters.contains(genre) ? CustomColor.primary : CustomColor.surfaceContainerHighest)
+                                                .foregroundStyle(store.selectedGenreFilters.contains(genre) ? CustomColor.onPrimary : CustomColor.onSurface)
+                                                .clipShape(Capsule())
+                                        }
+                                        .buttonStyle(BouncyButtonStyle())
+                                    }
+                                }
+                                .padding(.horizontal, CustomSpacing.containerMargin)
+                            }
+                            .padding(.bottom, 8)
+                        }
                     }
 
                     List {

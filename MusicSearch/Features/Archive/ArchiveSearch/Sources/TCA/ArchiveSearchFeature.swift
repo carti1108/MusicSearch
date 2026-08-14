@@ -62,7 +62,7 @@ public struct ArchiveSearchFeature: Sendable {
 					let filtered = allTracks.filter { track in
 						track.title.lowercased().contains(query) ||
 						track.artist.lowercased().contains(query) ||
-						track.genre.lowercased().contains(query)
+						track.genres.contains { $0.lowercased().contains(query) }
 					}
 
 					await send(.tracksLoaded(.success(filtered)))

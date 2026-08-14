@@ -20,7 +20,7 @@ struct FeatureArchiveFolderDetailTests {
     @Test func testOnAppear() async {
         let folder = FolderItem(title: "My Folder", subtitle: "0", type: .custom)
         let tracks = [
-            ArchivedTrack(id: UUID(), title: "A", artist: "B", genre: "Pop", label: "", rating: 0)
+            ArchivedTrack(id: UUID(), title: "A", artist: "B", genres: ["Pop"], label: "", rating: 0)
         ]
 
         let store = TestStore(initialState: ArchiveFolderDetailFeature.State(folderItem: folder)) {

@@ -82,7 +82,12 @@ public struct ArchiveFolderFeature: Sendable {
                             FolderItem(title: year + "년 청취", subtitle: "\(listenGrouped[year]?.count ?? 0) 곡", type: .listenYear(year: year))
                         }
 
-                        let groupedByGenre = Dictionary(grouping: tracks, by: { $0.genre })
+                        var groupedByGenre: [String: [ArchivedTrack]] = [:]
+                        for track in tracks {
+                            for genre in track.genres {
+                                groupedByGenre[genre, default: []].append(track)
+                            }
+                        }
                         let genreFolders = groupedByGenre.keys.sorted().map { genre in
                             FolderItem(title: genre, subtitle: "\(groupedByGenre[genre]?.count ?? 0) 곡", type: .genre(name: genre))
                         }

@@ -21,8 +21,8 @@ struct ArchiveFolderFeatureTests {
         let yearString = formatter.string(from: Date())
         
         let tracks = [
-            ArchivedTrack.stub(title: "A", artist: "B", genre: "Pop", rating: 5),
-            ArchivedTrack.stub(title: "C", artist: "D", genre: "Pop", rating: 4)
+            ArchivedTrack.stub(title: "A", artist: "B", genres: ["Pop"], rating: 5),
+            ArchivedTrack.stub(title: "C", artist: "D", genres: ["Pop"], rating: 4)
         ]
 
         let store = TestStore(initialState: ArchiveFolderFeature.State()) {

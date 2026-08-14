@@ -20,9 +20,9 @@ import FeatureArchiveFolder
 struct ArchiveFeatureTests {
     @Test func testOnAppear() async {
         let expectedTracks = [
-            ArchivedTrack.stub(title: "A", artist: "B", genre: "Pop"),
-            ArchivedTrack.stub(title: "C", artist: "D", genre: "Pop"),
-            ArchivedTrack.stub(title: "E", artist: "F", genre: "Rock")
+            ArchivedTrack.stub(title: "A", artist: "B", genres: ["Pop"]),
+            ArchivedTrack.stub(title: "C", artist: "D", genres: ["Pop"]),
+            ArchivedTrack.stub(title: "E", artist: "F", genres: ["Rock"])
         ]
 
         let store = TestStore(initialState: ArchiveFeature.State()) {
@@ -41,7 +41,7 @@ struct ArchiveFeatureTests {
 
     @Test func testOnDeleteTapped() async {
         let expectedTracks = [
-            ArchivedTrack.stub(title: "A", artist: "B", genre: "Pop")
+            ArchivedTrack.stub(title: "A", artist: "B", genres: ["Pop"])
         ]
 
         let mockRepository = MockArchiveRepository(tracks: expectedTracks)

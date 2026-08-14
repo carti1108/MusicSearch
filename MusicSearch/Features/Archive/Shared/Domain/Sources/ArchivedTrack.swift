@@ -13,7 +13,7 @@ public struct ArchivedTrack: Equatable, Identifiable, Sendable {
 	public let coverImageData: Data?
 	public let title: String
 	public let artist: String
-	public let genre: String
+	public let genres: [String]
 	public let label: String
 	public let releaseDate: Date?
 	public let listenDate: Date
@@ -32,7 +32,7 @@ public struct ArchivedTrack: Equatable, Identifiable, Sendable {
 		coverImageData: Data? = nil,
 		title: String,
 		artist: String,
-		genre: String,
+		genres: [String] = [],
 		label: String,
 		releaseDate: Date? = nil,
 		listenDate: Date = Date(),
@@ -50,7 +50,7 @@ public struct ArchivedTrack: Equatable, Identifiable, Sendable {
 		self.coverImageData = coverImageData
 		self.title = title
 		self.artist = artist
-		self.genre = genre
+		self.genres = genres
 		self.label = label
 		self.releaseDate = releaseDate
 		self.listenDate = listenDate

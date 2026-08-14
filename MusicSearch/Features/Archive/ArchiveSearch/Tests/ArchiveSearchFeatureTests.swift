@@ -17,7 +17,7 @@ import FeatureArchiveSearchTesting
 struct ArchiveSearchFeatureTests {
     @Test func testOnAppear() async {
         let expectedTracks = [
-            ArchivedTrack.stub(platformIDs: ["apple": "t1"], title: "A", artist: "B", genre: "Pop")
+            ArchivedTrack.stub(platformIDs: ["apple": "t1"], title: "A", artist: "B", genres: ["Pop"])
         ]
 
         let store = TestStore(initialState: ArchiveSearchFeature.State()) {
@@ -35,8 +35,8 @@ struct ArchiveSearchFeatureTests {
 
     @Test func testSearchTextFiltering() async {
         let allTracks = [
-            ArchivedTrack.stub(platformIDs: ["apple": "t1"], title: "Apple", artist: "B", genre: "Pop"),
-            ArchivedTrack.stub(platformIDs: ["apple": "t2"], title: "Banana", artist: "D", genre: "Rock")
+            ArchivedTrack.stub(platformIDs: ["apple": "t1"], title: "Apple", artist: "B", genres: ["Pop"]),
+            ArchivedTrack.stub(platformIDs: ["apple": "t2"], title: "Banana", artist: "D", genres: ["Rock"])
         ]
 
         var state = ArchiveSearchFeature.State()
